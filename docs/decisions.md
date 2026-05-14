@@ -40,6 +40,20 @@ The point: future-you (and Bissan) will ask "why did we do it this way?" and the
 
 **Reason:** Within-ISO sub-regions share weather and dispatch constraints, giving meaningful hourly correlation. Cross-continental correlations are weaker and harder to motivate.
 
+## Decision 4 — Data source: Electricity Maps academic-access bulk CSVs
+
+**Date:** 14 May 2026
+**Choice:** Electricity Maps academic-access bulk CSV downloads, lifecycle hourly carbon intensity, 2021–2025, three California sub-zones (US-CAL-CISO, US-CAL-BANC, US-CAL-LDWP).
+**Alternative considered:** Pulling each balancing authority's data directly from EIA/CAISO/LADWP and computing carbon intensity from EPA emission factors.
+**Why Electricity Maps:** Sub-zonal US data is available at academic tier (58 US balancing authorities, Tier A quality, 2017–present). Already engineered to high standard with consistent lifecycle methodology across zones. Rebuilding from raw generation + EPA factors would be ~2 weeks of engineering for no methodological gain and worse cross-zone comparability.
+
+## Decision 5 — California geography confirmed empirically
+
+**Date:** 14 May 2026
+**Choice:** Three California sub-zones (CISO, BANC, LDWP) confirmed as Phase 1 scope.
+**Evidence:** Pairwise correlations on 5-year hourly panel (n=43,824) sit in 0.43–0.77 band — strong enough for spatial structure to exist, weak enough for joint modelling to be non-trivial vs independent marginals. Asymmetric structure (CISO–LDWP at 0.755, BANC pairs at 0.43–0.59) is non-degenerate. See `correlation_findings.md`.
+**NY/Boston pair:** Deferred to Phase 2 publication extension.
+
 ---
 
 ## Template for new entries
