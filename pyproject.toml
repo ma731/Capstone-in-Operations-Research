@@ -1,0 +1,61 @@
+[project]
+name = "carbon-dro-capstone"
+version = "0.1.0"
+description = "Spatially-correlated DRO scheduling for carbon-aware data centers"
+authors = [
+    { name = "Marco Ortiz Togashi" }
+]
+requires-python = ">=3.10"
+readme = "README.md"
+
+dependencies = [
+    # Core scientific stack
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "scipy>=1.13",
+    "pyarrow>=15.0",          # for parquet I/O
+    # Optimization
+    "cvxpy>=1.5",
+    "gurobipy>=11.0",          # requires academic license; falls back to free solvers
+    # Data access
+    "requests>=2.32",
+    "python-dotenv>=1.0",
+    # Plotting
+    "matplotlib>=3.8",
+    "seaborn>=0.13",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "jupyter>=1.0",
+    "ipykernel>=6.29",
+    "ruff>=0.5",               # linter + formatter
+    "mypy>=1.10",
+]
+# Phase 2 extras (install when needed)
+phase2 = [
+    "vinecopulib>=0.6",
+    "statsmodels>=0.14",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]  # line length handled by formatter
