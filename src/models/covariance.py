@@ -320,6 +320,50 @@ def block_diagonal_by_region(cov: np.ndarray, R: int, T: int) -> np.ndarray:
     return out
 
 
+def per_region_temporal_shuffle(
+    panel: np.ndarray,
+    rng: Optional[np.random.Generator] = None,
+) -> np.ndarray:
+    """Permute days independently within each region.
+
+    This is the sample-level analogue of block_diagonal_by_region at the
+    covariance level: applied to a panel of N daily samples, the resulting
+    panel's empirical covariance approaches the block-diagonal-by-region
+    covariance of the original in expectation as N grows. Per-coordinate
+    sample means are preserved exactly (the permutation only reorders rows
+    within each region's slice), and each region's within-region temporal
+    autocorrelation is preserved exactly (the T-vector for each day stays
+    intact). Cross-region day alignment is destroyed: day i of region 0 is
+    no longer matched to day i of region 1.
+
+    Used by the Algorithm 2a degeneracy demo (shuffled-marginals invariance)
+    and the Algorithm 2b shuffled-marginals sensitivity experiment.
+
+    Args:
+        panel: (N, R, T) daily panel.
+        rng: numpy Generator; pass an explicit seeded Generator for
+            reproducibility. Defaults to a fresh default_rng() per call.
+
+    Returns:
+        (N, R, T) shuffled panel; each region's data is independently
+        permuted across days. Original panel is not mutated.
+
+    Raises:
+        ValueError: if panel is not 3-D.
+    """
+    panel = np.asarray(panel)
+    if panel.ndim != 3:
+        raise ValueError(f"Expected 3-D (N, R, T) array, got shape {panel.shape}")
+    if rng is None:
+        rng = np.random.default_rng()
+    N, R, T = panel.shape
+    result = np.empty_like(panel)
+    for r in range(R):
+        perm = rng.permutation(N)
+        result[:, r, :] = panel[perm, r, :]
+    return result
+
+
 # ---------- Diagnostics ----------
 
 def condition_number(cov: np.ndarray) -> float:

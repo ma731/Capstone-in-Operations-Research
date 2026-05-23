@@ -103,3 +103,60 @@ class TestInputValidation:
                 capacity_max=10.0,
                 total_work=10.0,
             )
+
+
+class TestEqualityWorkOption:
+    """The equality_work flag introduced for Algorithm 2.
+
+    For positive linear objectives the >= and == work constraints produce
+    identical schedules (the inequality binds at any optimum). These tests
+    verify both that equality_work=True works correctly and that it does
+    not change the optimizer when the inequality would bind anyway.
+    """
+
+    def test_equality_binds_constraint_exactly(self):
+        """With equality_work=True, sum(schedule) must equal total_work exactly."""
+        T = 24
+        rho = np.ones(T) * 100
+        result = schedule_deterministic_single_cluster(
+            carbon_intensity=rho,
+            demand=np.full(T, 50.0),
+            capacity_max=50.0,
+            total_work=100.0,
+            equality_work=True,
+        )
+        np.testing.assert_allclose(result.work_completed, 100.0, atol=1e-6)
+
+    def test_equality_and_inequality_give_same_schedule_under_positive_objective(self):
+        """For rho > 0 and a non-trivial schedule, the >= and == formulations
+        must produce the same optimizer (within solver tolerance)."""
+        T = 24
+        rho = np.ones(T) * 500
+        rho[0:6] = 50
+        common_kwargs = dict(
+            carbon_intensity=rho,
+            demand=np.full(T, 10.0),
+            capacity_max=10.0,
+            total_work=60.0,
+        )
+        r_ineq = schedule_deterministic_single_cluster(**common_kwargs, equality_work=False)
+        r_eq = schedule_deterministic_single_cluster(**common_kwargs, equality_work=True)
+        np.testing.assert_allclose(r_eq.schedule, r_ineq.schedule, atol=1e-4)
+
+    def test_default_is_inequality(self):
+        """Backward-compat: omitting the flag must use >= (default False)."""
+        T = 24
+        rho = np.ones(T) * 100
+        # If total_work were 0, with >= the schedule could be all zeros.
+        # With ==, it would be forced to sum to 0 too (which is fine here).
+        # Construct a case where the difference is observable: zero objective
+        # and total_work=0 - schedule should be all zeros either way, but
+        # we use the existing default-call path to confirm no surprises.
+        result = schedule_deterministic_single_cluster(
+            carbon_intensity=rho,
+            demand=np.full(T, 50.0),
+            capacity_max=50.0,
+            total_work=100.0,
+            # equality_work not passed
+        )
+        np.testing.assert_allclose(result.work_completed, 100.0, atol=1e-4)

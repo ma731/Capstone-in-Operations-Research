@@ -26,6 +26,7 @@ from src.models.covariance import (
     daily_panel_to_matrix,
     estimate_mean_and_covariance,
     flatten_space_time,
+    per_region_temporal_shuffle,
     regularize_covariance,
     unflatten_space_time,
 )
@@ -169,6 +170,69 @@ class TestBlockDiagonalByRegion:
             block_diagonal_by_region(cov, R=R, T=T),
             expected,
         )
+
+
+class TestPerRegionTemporalShuffle:
+    """The sample-level shuffle that destroys cross-region day alignment."""
+
+    def test_preserves_each_region_marginal_mean_exactly(self):
+        """Means computed across N days, per (r, t), must be exactly preserved
+        because each region is permuted (reordered) rather than resampled."""
+        rng = np.random.default_rng(0)
+        panel = rng.normal(size=(50, 4, 24))
+        shuf_rng = np.random.default_rng(1)
+        shuf = per_region_temporal_shuffle(panel, rng=shuf_rng)
+        np.testing.assert_allclose(shuf.mean(axis=0), panel.mean(axis=0))
+
+    def test_within_region_temporal_structure_preserved(self):
+        """For each region, the set of T-vectors across days is preserved (a
+        permutation of the original set). Check via sorted comparison."""
+        rng = np.random.default_rng(2)
+        panel = rng.normal(size=(20, 3, 5))
+        shuf = per_region_temporal_shuffle(panel, rng=np.random.default_rng(3))
+
+        for r in range(panel.shape[1]):
+            # Each region's set of daily T-vectors must be the same set
+            orig_rows = sorted(map(tuple, panel[:, r, :]))
+            shuf_rows = sorted(map(tuple, shuf[:, r, :]))
+            assert orig_rows == shuf_rows
+
+    def test_destroys_cross_region_alignment(self):
+        """If region 0 has values 1,2,3,...,N at hour 0 over the panel and
+        region 1 has 1,2,3,...,N at hour 0 too (perfectly aligned by day),
+        post-shuffle the day-by-day alignment must be broken in expectation."""
+        N = 1000
+        panel = np.zeros((N, 2, 1))
+        panel[:, 0, 0] = np.arange(N, dtype=float)
+        panel[:, 1, 0] = np.arange(N, dtype=float)
+        # Pre-shuffle: identical across regions on every day; correlation = 1.0
+        pre_corr = np.corrcoef(panel[:, 0, 0], panel[:, 1, 0])[0, 1]
+        assert pre_corr > 0.999
+
+        shuf = per_region_temporal_shuffle(panel, rng=np.random.default_rng(4))
+        post_corr = np.corrcoef(shuf[:, 0, 0], shuf[:, 1, 0])[0, 1]
+        # After shuffling region 1's days independently, day-by-day correlation
+        # should be near zero (a random permutation of 1..N against itself
+        # has expected correlation 0, SE = 1/sqrt(N-1) ~= 0.032)
+        assert abs(post_corr) < 0.15, f"post-shuffle correlation = {post_corr:.3f}"
+
+    def test_deterministic_with_seed(self):
+        """Same Generator state must produce the same shuffle."""
+        panel = np.random.default_rng(5).normal(size=(30, 4, 24))
+        shuf_a = per_region_temporal_shuffle(panel, rng=np.random.default_rng(99))
+        shuf_b = per_region_temporal_shuffle(panel, rng=np.random.default_rng(99))
+        np.testing.assert_array_equal(shuf_a, shuf_b)
+
+    def test_does_not_mutate_input(self):
+        rng = np.random.default_rng(6)
+        panel = rng.normal(size=(10, 2, 5))
+        snapshot = panel.copy()
+        _ = per_region_temporal_shuffle(panel, rng=np.random.default_rng(7))
+        np.testing.assert_array_equal(panel, snapshot)
+
+    def test_rejects_non_3d(self):
+        with pytest.raises(ValueError, match="3-D"):
+            per_region_temporal_shuffle(np.zeros((10, 4)))
 
 
 # =============================================================================
