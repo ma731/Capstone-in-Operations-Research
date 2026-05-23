@@ -30,6 +30,7 @@ def schedule_deterministic_single_cluster(
     capacity_max: float,            # C_max in MW
     total_work: float,              # S_total in MWh
     solver: Optional[str] = None,
+    equality_work: bool = False,
 ) -> ScheduleResult:
     """Solve Algorithm 1.
 
@@ -40,6 +41,14 @@ def schedule_deterministic_single_cluster(
         total_work: Total compute work to complete over the horizon, MWh.
         solver: Optional cvxpy solver name (e.g., 'GUROBI', 'ECOS', 'CLARABEL').
                 If None, cvxpy picks a default.
+        equality_work: If True, use sum_t x_t == total_work; otherwise the
+                default sum_t x_t >= total_work. For positive linear objectives
+                with rho >= 0 the two are mathematically equivalent (the
+                constraint binds at any optimum), but equality is the right
+                semantic for robust formulations (Algorithm 2) where a
+                ρ-dependent objective could in principle make over-completion
+                attractive as a risk hedge. Default False to preserve
+                backward compatibility with existing callers and tests.
 
     Returns:
         ScheduleResult with the optimal hourly compute schedule.
@@ -62,8 +71,11 @@ def schedule_deterministic_single_cluster(
     ceiling = np.minimum(s, capacity_max)
 
     objective = cp.Minimize(rho @ x)
+    work_constraint = (
+        cp.sum(x) == total_work if equality_work else cp.sum(x) >= total_work
+    )
     constraints = [
-        cp.sum(x) >= total_work,
+        work_constraint,
         x <= ceiling,
     ]
 
@@ -86,7 +98,7 @@ def schedule_deterministic_single_cluster(
 def _demo():
     """Quick smoke test: solve a synthetic 24-hour problem and print results."""
     T = 24
-    # Sinusoidal carbon — peak at hour 18, trough at hour 6 (solar-rich daytime)
+    # Sinusoidal carbon: peak at hour 18, trough at hour 6 (solar-rich daytime)
     rho = 300 + 150 * np.sin((np.arange(T) - 6) * np.pi / 12)
     rho = np.clip(rho, 50, None)
 
