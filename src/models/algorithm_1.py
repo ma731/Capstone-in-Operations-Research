@@ -123,3 +123,138 @@ def _demo():
 
 if __name__ == "__main__":
     _demo()
+
+
+# ===========================================================================
+# v11 ADDITION: multi-region coupled deterministic baseline ("new Algorithm 1")
+# ---------------------------------------------------------------------------
+# This is ADDED alongside the single-cluster baseline above, not a replacement.
+# The single-cluster `schedule_deterministic_single_cluster` is retained: its
+# 1-D interface is depended on by tests/test_algorithm_1.py and Algorithm 2a.
+#
+# The coupled baseline is the deterministic counterpart of Algorithm 2b with
+# the three operational components (aggregate cap, flexible/inflexible split,
+# ramp). It is exactly solve_mahalanobis_dro at epsilon=0 over the same
+# feasible set, and exists as a standalone so the "new baseline" can be solved
+# and tested without constructing a covariance factor L. The triviality proof
+# for WHY the original baseline needed this is in progress_note_v11 Section 2.
+# ===========================================================================
+
+from dataclasses import dataclass as _dataclass  # noqa: E402
+
+
+@_dataclass
+class CoupledScheduleResult:
+    """Output of the multi-region coupled baseline."""
+
+    schedule: np.ndarray          # (R, T) MW
+    total_carbon: float           # sum_{r,t} rho_{r,t} x_{r,t} (gCO2)
+    work_completed: np.ndarray    # (R,) MWh per region
+    solver_status: str
+    binding: Optional[dict] = None
+
+
+def schedule_deterministic_coupled(
+    carbon_intensity: np.ndarray,   # (R, T) gCO2/kWh
+    workloads: np.ndarray,          # (R,) MWh per region
+    ceiling: np.ndarray,            # (R, T) MW per-cell ceiling
+    p_max: Optional[float] = None,        # C1: aggregate per-hour cap
+    alpha: Optional[np.ndarray] = None,   # C2: (R,) inflexible fraction in [0,1]
+    intraday_shape: Optional[np.ndarray] = None,  # C2: (R,T) rows sum to 1; None => uniform
+    ramp: Optional[np.ndarray] = None,    # C3: (R,) ramp limit Delta MW/h
+    solver: Optional[str] = None,
+) -> CoupledScheduleResult:
+    """Solve the new (coupled) deterministic baseline.
+
+    Disabling all three components (p_max=None, alpha=None, ramp=None) recovers
+    a per-region-decoupled LP whose optimum equals the greedy sort -- the
+    triviality the redesign fixes. With any component active the program is
+    genuinely coupled and a solver is required.
+    """
+    rho = np.asarray(carbon_intensity, dtype=float)
+    R, T = rho.shape
+    W = np.asarray(workloads, dtype=float).reshape(R)
+    ceil_arr = np.asarray(ceiling, dtype=float)
+    if ceil_arr.shape != (R, T):
+        raise ValueError(f"ceiling must be (R, T) = ({R}, {T}), got {ceil_arr.shape}")
+    if (rho < 0).any():
+        raise ValueError("carbon_intensity must be non-negative")
+
+    x = cp.Variable((R, T), nonneg=True)
+    constraints = [x <= ceil_arr]
+
+    if alpha is not None:
+        alpha_arr = np.asarray(alpha, dtype=float).reshape(R)
+        if ((alpha_arr < 0) | (alpha_arr > 1)).any():
+            raise ValueError("alpha must lie in [0, 1]")
+        p_shape = np.full((R, T), 1.0 / T) if intraday_shape is None \
+            else np.asarray(intraday_shape, dtype=float)
+        if p_shape.shape != (R, T):
+            raise ValueError(f"intraday_shape must be (R, T) = ({R}, {T})")
+        inflex_base = (alpha_arr * W)[:, None] * p_shape
+        x_flex = cp.Variable((R, T), nonneg=True)
+        constraints += [x == inflex_base + x_flex]
+        for r in range(R):
+            constraints += [cp.sum(x_flex[r, :]) == (1.0 - alpha_arr[r]) * W[r]]
+    else:
+        inflex_base = None
+        for r in range(R):
+            constraints += [cp.sum(x[r, :]) == W[r]]
+
+    if p_max is not None:
+        for t in range(T):
+            constraints += [cp.sum(x[:, t]) <= p_max]
+
+    if ramp is not None:
+        ramp_arr = np.asarray(ramp, dtype=float).reshape(R)
+        for r in range(R):
+            for t in range(1, T):
+                constraints += [cp.abs(x[r, t] - x[r, t - 1]) <= ramp_arr[r]]
+
+    problem = cp.Problem(cp.Minimize(cp.sum(cp.multiply(rho, x))), constraints)
+    problem.solve(solver=solver)
+    if problem.status not in ("optimal", "optimal_inaccurate"):
+        raise RuntimeError(f"Solver returned status {problem.status}")
+
+    x_val = np.asarray(x.value, dtype=float)
+    binding = {}
+    if p_max is not None:
+        agg = x_val.sum(axis=0)
+        binding["cap_tight_hours"] = int(np.sum(np.abs(agg - p_max) < 1e-3))
+    if ramp is not None:
+        ramp_arr = np.asarray(ramp, dtype=float).reshape(R)
+        binding["ramp_tight_transitions"] = sum(
+            1 for r in range(R) for t in range(1, T)
+            if abs(abs(x_val[r, t] - x_val[r, t - 1]) - ramp_arr[r]) < 1e-3
+        )
+    if inflex_base is not None:
+        binding["inflex_base"] = inflex_base
+
+    return CoupledScheduleResult(
+        schedule=x_val,
+        total_carbon=float(np.sum(rho * x_val)),
+        work_completed=x_val.sum(axis=1),
+        solver_status=problem.status,
+        binding=binding,
+    )
+
+
+def greedy_sort_schedule_multiregion(
+    carbon_intensity: np.ndarray, workloads: np.ndarray, ceiling: np.ndarray,
+) -> np.ndarray:
+    """Per-region greedy sort (cleanest hours first). The closed-form optimum
+    of the components-OFF coupled baseline; used to prove C1/C2."""
+    rho = np.asarray(carbon_intensity, dtype=float)
+    R, T = rho.shape
+    W = np.asarray(workloads, dtype=float).reshape(R)
+    ceil_arr = np.asarray(ceiling, dtype=float)
+    x = np.zeros((R, T))
+    for r in range(R):
+        remaining = W[r]
+        for t in np.argsort(rho[r]):
+            fill = min(ceil_arr[r, t], remaining)
+            x[r, t] = fill
+            remaining -= fill
+            if remaining <= 1e-12:
+                break
+    return x
