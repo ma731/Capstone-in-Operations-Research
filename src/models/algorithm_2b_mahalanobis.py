@@ -145,6 +145,11 @@ def solve_mahalanobis_dro(
     region_order: Sequence[str] = REGION_ORDER,
     solver: Optional[str] = None,
     n_samples: Optional[int] = None,
+    # --- v11 operational components (all default None = original behavior) ---
+    p_max: Optional[float] = None,            # C1: aggregate per-hour cap sum_r x_{r,t} <= p_max
+    alpha: Optional[np.ndarray] = None,       # C2: per-region inflexible fraction in [0,1]
+    intraday_shape: Optional[np.ndarray] = None,  # C2: (R,T) shape p, rows sum to 1; None => uniform
+    ramp: Optional[np.ndarray] = None,        # C3: (R,) per-region ramp limit Delta, MW/h
 ) -> MahalanobisDROResult:
     """Solve Algorithm 2b: Mahalanobis-Wasserstein DRO.
 
@@ -260,8 +265,41 @@ def solve_mahalanobis_dro(
 
     constraints = [
         x <= ceiling,
-        cp.sum(x, axis=1) == workloads,
     ]
+
+    # --- C2: flexible/inflexible split (replaces the plain work equality) ---
+    # When alpha is None, fall back to the original equality sum_t x_{r,t}=W_r.
+    if alpha is not None:
+        alpha_arr = np.asarray(alpha, dtype=float).reshape(R)
+        if ((alpha_arr < 0) | (alpha_arr > 1)).any():
+            raise ValueError("alpha must lie in [0, 1]")
+        if intraday_shape is None:
+            p_shape = np.full((R, T), 1.0 / T)
+        else:
+            p_shape = np.asarray(intraday_shape, dtype=float)
+            if p_shape.shape != (R, T):
+                raise ValueError(f"intraday_shape must be (R, T) = ({R}, {T})")
+            if not np.allclose(p_shape.sum(axis=1), 1.0, atol=1e-8):
+                raise ValueError("intraday_shape rows must each sum to 1")
+        inflex_base = (alpha_arr * workloads)[:, None] * p_shape   # (R, T)
+        x_flex = cp.Variable((R, T), nonneg=True)
+        constraints += [x == inflex_base + x_flex]
+        for r in range(R):
+            constraints += [cp.sum(x_flex[r, :]) == (1.0 - alpha_arr[r]) * workloads[r]]
+    else:
+        constraints += [cp.sum(x, axis=1) == workloads]
+
+    # --- C1: aggregate per-hour power cap -----------------------------------
+    if p_max is not None:
+        for t in range(T):
+            constraints += [cp.sum(x[:, t]) <= p_max]
+
+    # --- C3: inter-hour ramping limit ---------------------------------------
+    if ramp is not None:
+        ramp_arr = np.asarray(ramp, dtype=float).reshape(R)
+        for r in range(R):
+            for t in range(1, T):
+                constraints += [cp.abs(x[r, t] - x[r, t - 1]) <= ramp_arr[r]]
 
     problem = cp.Problem(objective, constraints)
     chosen_solver = _select_solver(solver)
