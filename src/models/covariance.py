@@ -387,3 +387,33 @@ def condition_number(cov: np.ndarray) -> float:
     if min_eig <= 0:
         return float("inf")
     return max_eig / min_eig
+
+
+# ---------- Ledoit-Wolf shrinkage estimation (v11 pre-registered test) ----------
+# Statistical shrinkage, distinct from regularize_covariance (which adds a tiny
+# numerical ridge for invertibility only). Ledoit-Wolf returns the asymptotically
+# optimal convex combination (1-rho)*S + rho*F of the sample covariance S with a
+# scaled-identity target F, with rho chosen to minimize expected quadratic loss.
+# Motivated by the p~n regime (here p = R*T = 96, n ~ 1450 training days): the
+# sample covariance is noisy and ill-conditioned, and its noisy off-diagonal
+# cross-region blocks are exactly what failed to generalize in the ridge run.
+#
+# Reference: Ledoit, O. and Wolf, M. (2004). A well-conditioned estimator for
+# large-dimensional covariance matrices. J. Multivariate Analysis 88(2):365-411.
+
+def shrink_covariance_ledoit_wolf(samples: np.ndarray) -> tuple[np.ndarray, float]:
+    """Ledoit-Wolf shrinkage covariance from an (N, D) sample matrix.
+
+    Returns (Sigma_shrunk, shrinkage_intensity). The intensity rho in [0, 1] is
+    reported so the experiment can log how much shrinkage was applied (rho near 0
+    => sample covariance trusted; rho near 1 => heavily shrunk toward identity).
+
+    Unlike regularize_covariance, the output is already well-conditioned and PD,
+    so it can be passed straight to cholesky_factor without an added ridge.
+    """
+    from sklearn.covariance import LedoitWolf
+    samples = np.asarray(samples, dtype=float)
+    if samples.ndim != 2:
+        raise ValueError(f"Expected 2-D (N, D) array, got shape {samples.shape}")
+    lw = LedoitWolf(assume_centered=False).fit(samples)
+    return np.asarray(lw.covariance_, dtype=float), float(lw.shrinkage_)
