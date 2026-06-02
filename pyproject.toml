@@ -17,6 +17,7 @@ dependencies = [
     # Optimization
     "cvxpy>=1.5",
     "gurobipy>=11.0",          # requires academic license; falls back to free solvers
+    "scikit-learn>=1.4",       # Ledoit-Wolf shrinkage covariance (robustness line)
     # Data access
     "requests>=2.32",
     "python-dotenv>=1.0",
