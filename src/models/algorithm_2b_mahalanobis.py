@@ -150,6 +150,13 @@ def solve_mahalanobis_dro(
     alpha: Optional[np.ndarray] = None,       # C2: per-region inflexible fraction in [0,1]
     intraday_shape: Optional[np.ndarray] = None,  # C2: (R,T) shape p, rows sum to 1; None => uniform
     ramp: Optional[np.ndarray] = None,        # C3: (R,) per-region ramp limit Delta, MW/h
+    # --- Task A operational components (all default None/off = original behavior) ---
+    deferral_windows: Optional[Sequence[tuple[int, int, float]]] = None,  # 3a
+    temperature: Optional[np.ndarray] = None,  # 3b: (R,T) thermal field, deg C
+    pue0: float = 1.10,                        # 3b: floor PUE
+    kappa: float = 0.015,                      # 3b: PUE slope per deg C above t_set
+    t_set: float = 20.0,                       # 3b: economizer set-point, deg C
+    bar_P: Optional[object] = None,            # 3b: effective-power ceiling (scalar or (R,T))
 ) -> MahalanobisDROResult:
     """Solve Algorithm 2b: Mahalanobis-Wasserstein DRO.
 
@@ -269,6 +276,8 @@ def solve_mahalanobis_dro(
 
     # --- C2: flexible/inflexible split (replaces the plain work equality) ---
     # When alpha is None, fall back to the original equality sum_t x_{r,t}=W_r.
+    x_flex = None
+    alpha_arr = None
     if alpha is not None:
         alpha_arr = np.asarray(alpha, dtype=float).reshape(R)
         if ((alpha_arr < 0) | (alpha_arr > 1)).any():
@@ -300,6 +309,46 @@ def solve_mahalanobis_dro(
         for r in range(R):
             for t in range(1, T):
                 constraints += [cp.abs(x[r, t] - x[r, t - 1]) <= ramp_arr[r]]
+
+    # --- 3a: windowed-demand (deferral-deadline) constraint -----------------
+    # For each region r and each window (t1, t2, gamma):
+    #     sum_{t in [t1, t2]} x_flex[r, t] >= gamma * (1 - alpha_r) * W_r
+    # An AGGREGATE bound on deferral: a fraction gamma of the region's
+    # FLEXIBLE work must be served within the window [t1, t2] (a deferral
+    # deadline). It is explicitly NOT a per-job SLA. The flexible portion is
+    # only well-defined under the C2 split, so this requires alpha.
+    if deferral_windows is not None:
+        if x_flex is None:
+            raise ValueError(
+                "deferral_windows requires the flexible/inflexible split "
+                "(pass alpha); the window bounds the flexible work x_flex."
+            )
+        for (t1, t2, gamma) in deferral_windows:
+            if not (0 <= t1 <= t2 < T):
+                raise ValueError(
+                    f"deferral window ({t1}, {t2}) out of range [0, {T - 1}]"
+                )
+            if not (0.0 <= gamma <= 1.0):
+                raise ValueError(f"deferral gamma must lie in [0, 1], got {gamma}")
+            for r in range(R):
+                flex_r = (1.0 - alpha_arr[r]) * workloads[r]
+                constraints += [
+                    cp.sum(x_flex[r, t1:t2 + 1]) >= gamma * flex_r
+                ]
+
+    # --- 3b: temperature-coupled thermal (PUE) constraint -------------------
+    # Effective power = PUE(T_{r,t}) * x_{r,t} with the hockey-stick model
+    #     PUE(T) = pue0 + kappa * max(T - t_set, 0),
+    # bounded per cell by bar_P. Temperature is data, so PUE is a constant
+    # matrix and the constraint is linear (program stays an SOCP/LP).
+    if temperature is not None:
+        if bar_P is None:
+            raise ValueError("temperature given but bar_P (effective-power ceiling) is None")
+        temp_arr = np.asarray(temperature, dtype=float)
+        if temp_arr.shape != (R, T):
+            raise ValueError(f"temperature must be (R, T) = ({R}, {T}), got {temp_arr.shape}")
+        pue = pue0 + kappa * np.maximum(temp_arr - t_set, 0.0)   # (R, T) constant
+        constraints += [cp.multiply(pue, x) <= bar_P]
 
     problem = cp.Problem(objective, constraints)
     chosen_solver = _select_solver(solver)

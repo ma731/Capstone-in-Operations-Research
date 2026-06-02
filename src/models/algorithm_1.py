@@ -162,6 +162,13 @@ def schedule_deterministic_coupled(
     alpha: Optional[np.ndarray] = None,   # C2: (R,) inflexible fraction in [0,1]
     intraday_shape: Optional[np.ndarray] = None,  # C2: (R,T) rows sum to 1; None => uniform
     ramp: Optional[np.ndarray] = None,    # C3: (R,) ramp limit Delta MW/h
+    # --- Task A components (default None/off) ---
+    deferral_windows: Optional[list] = None,   # 3a: list of (t1, t2, gamma)
+    temperature: Optional[np.ndarray] = None,  # 3b: (R,T) thermal field, deg C
+    pue0: float = 1.10,                        # 3b
+    kappa: float = 0.015,                      # 3b
+    t_set: float = 20.0,                       # 3b
+    bar_P: Optional[object] = None,            # 3b: effective-power ceiling (scalar or (R,T))
     solver: Optional[str] = None,
 ) -> CoupledScheduleResult:
     """Solve the new (coupled) deterministic baseline.
@@ -183,6 +190,8 @@ def schedule_deterministic_coupled(
     x = cp.Variable((R, T), nonneg=True)
     constraints = [x <= ceil_arr]
 
+    x_flex = None
+    alpha_arr = None
     if alpha is not None:
         alpha_arr = np.asarray(alpha, dtype=float).reshape(R)
         if ((alpha_arr < 0) | (alpha_arr > 1)).any():
@@ -211,6 +220,32 @@ def schedule_deterministic_coupled(
             for t in range(1, T):
                 constraints += [cp.abs(x[r, t] - x[r, t - 1]) <= ramp_arr[r]]
 
+    # 3a: windowed-demand (deferral-deadline) on the flexible work.
+    if deferral_windows is not None:
+        if x_flex is None:
+            raise ValueError(
+                "deferral_windows requires the flex split (pass alpha)."
+            )
+        for (t1, t2, gamma) in deferral_windows:
+            if not (0 <= t1 <= t2 < T):
+                raise ValueError(f"deferral window ({t1},{t2}) out of range [0,{T-1}]")
+            if not (0.0 <= gamma <= 1.0):
+                raise ValueError(f"deferral gamma must lie in [0,1], got {gamma}")
+            for r in range(R):
+                flex_r = (1.0 - alpha_arr[r]) * W[r]
+                constraints += [cp.sum(x_flex[r, t1:t2 + 1]) >= gamma * flex_r]
+
+    # 3b: temperature-coupled thermal (PUE) effective-power cap.
+    pue = None
+    if temperature is not None:
+        if bar_P is None:
+            raise ValueError("temperature given but bar_P is None")
+        temp_arr = np.asarray(temperature, dtype=float)
+        if temp_arr.shape != (R, T):
+            raise ValueError(f"temperature must be (R, T) = ({R}, {T})")
+        pue = pue0 + kappa * np.maximum(temp_arr - t_set, 0.0)
+        constraints += [cp.multiply(pue, x) <= bar_P]
+
     problem = cp.Problem(cp.Minimize(cp.sum(cp.multiply(rho, x))), constraints)
     problem.solve(solver=solver)
     if problem.status not in ("optimal", "optimal_inaccurate"):
@@ -227,6 +262,25 @@ def schedule_deterministic_coupled(
             1 for r in range(R) for t in range(1, T)
             if abs(abs(x_val[r, t] - x_val[r, t - 1]) - ramp_arr[r]) < 1e-3
         )
+    if deferral_windows is not None and x_flex is not None:
+        xf = np.asarray(x_flex.value, dtype=float)
+        tight = []
+        for (t1, t2, gamma) in deferral_windows:
+            for r in range(R):
+                flex_r = (1.0 - alpha_arr[r]) * W[r]
+                served = xf[r, t1:t2 + 1].sum()
+                req = gamma * flex_r
+                # margin: how much served work exceeds the window requirement
+                tight.append((r, t1, t2, float(served - req)))
+        binding["deferral_margins"] = tight
+        binding["deferral_tight_windows"] = sum(
+            1 for (_, _, _, m) in tight if m < 1e-3
+        )
+    if pue is not None:
+        eff = pue * x_val
+        bar = np.asarray(bar_P, dtype=float)
+        binding["thermal_tight_cells"] = int(np.sum(np.abs(eff - bar) < 1e-3))
+        binding["thermal_min_margin"] = float(np.min(bar - eff))
     if inflex_base is not None:
         binding["inflex_base"] = inflex_base
 
