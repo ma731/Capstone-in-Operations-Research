@@ -55,7 +55,73 @@ from src.models.covariance import (
     daily_panel_to_matrix,
     estimate_mean_and_covariance,
     regularize_covariance,
+    shrink_covariance_ledoit_wolf,
 )
+
+# Estimation-path flag, set from --shrinkage in main(). Module-level so
+# fit_sigma_and_cholesky can read it without threading it through every caller.
+USE_SHRINKAGE = False
+_LW_INTENSITIES: list[float] = []   # records Ledoit-Wolf rho values when shrinkage is on
+
+# Residualization flag, set from --residualize in main(). "none" | "seasonal" | "ar1".
+# When active, the COVARIANCE is estimated from forecast residuals (the
+# unpredictable part), while rho_bar (the scheduling mean field) and the scored
+# per-day emissions stay on RAW carbon intensity. This isolates the pre-registered
+# question: does cross-region correlation of the forecast ERRORS change the robust
+# schedule, where correlation of raw levels did not? Baselines (seasonal-naive,
+# AR(1)) are grounded in the carbon-intensity forecasting literature: Maji et al.
+# CarbonCast (BuildSys '22) and DACF (e-Energy '22); the residual/forecast-error is
+# where spatial uncertainty lives per Li, Liu & Ding (arXiv:2407.02390).
+RESIDUALIZE = "none"
+
+
+def fit_residual_baseline(panel: np.ndarray, dates, method: str) -> dict:
+    """Fit a per-cell forecast baseline on TRAINING data. Returns fit stats.
+
+    seasonal: month x (region,hour) conditional means.
+    ar1     : per (region,hour) AR(1) coefficients (c, phi) across the day series.
+    """
+    N, R, T = panel.shape
+    if method == "seasonal":
+        months = np.array([d.month for d in dates])
+        means = {}
+        for m in range(1, 13):
+            sel = months == m
+            if sel.any():
+                means[m] = panel[sel].mean(axis=0)        # (R,T)
+        global_mean = panel.mean(axis=0)                  # fallback for absent months
+        return {"method": "seasonal", "means": means, "global_mean": global_mean}
+    elif method == "ar1":
+        c = np.zeros((R, T))
+        phi = np.zeros((R, T))
+        cell_mean = panel.mean(axis=0)
+        for r in range(R):
+            for t in range(T):
+                y = panel[1:, r, t]
+                x = panel[:-1, r, t]
+                # OLS of y on [1, x]
+                A = np.vstack([np.ones_like(x), x]).T
+                coef, *_ = np.linalg.lstsq(A, y, rcond=None)
+                c[r, t], phi[r, t] = float(coef[0]), float(coef[1])
+        return {"method": "ar1", "c": c, "phi": phi, "cell_mean": cell_mean}
+    raise ValueError(f"unknown residualization method: {method}")
+
+
+def apply_residual_baseline(panel: np.ndarray, dates, stats: dict) -> np.ndarray:
+    """Apply a fitted baseline to produce residuals = actual - forecast."""
+    N, R, T = panel.shape
+    resid = np.empty_like(panel)
+    if stats["method"] == "seasonal":
+        months = np.array([d.month for d in dates])
+        for i in range(N):
+            m = months[i]
+            mean = stats["means"].get(m, stats["global_mean"])
+            resid[i] = panel[i] - mean
+    elif stats["method"] == "ar1":
+        c, phi, cell_mean = stats["c"], stats["phi"], stats["cell_mean"]
+        resid[0] = panel[0] - cell_mean              # first day: no lag available
+        resid[1:] = panel[1:] - (c[None, :, :] + phi[None, :, :] * panel[:-1])
+    return resid
 
 # ----------------------------------------------------------------------
 # Configuration (locked at commit time; do not edit after committing
@@ -177,13 +243,28 @@ def fit_sigma_and_cholesky(
     If shuffle_to_block_diagonal is True, replaces the cross-region blocks
     of Sigma_hat with zeros before regularization+Cholesky, producing
     Sigma_hat^shuf.
+
+    Estimation path is controlled by USE_SHRINKAGE (set from --shrinkage):
+      - False (default): sample covariance + scale-adaptive ridge (original).
+      - True: Ledoit-Wolf shrinkage estimator (already well-conditioned).
+    The shuffle (block-diagonalization) is applied AFTER estimation in both
+    paths, so the joint-vs-shuf manipulation is identical across estimators.
     """
     samples = daily_panel_to_matrix(panel)              # (N, R*T)
-    _, sigma_hat = estimate_mean_and_covariance(samples)
     R, T = panel.shape[1], panel.shape[2]
-    if shuffle_to_block_diagonal:
-        sigma_hat = block_diagonal_by_region(sigma_hat, R=R, T=T)
-    sigma_reg = regularize_covariance(sigma_hat, eta=RIDGE_ETA)
+    if USE_SHRINKAGE:
+        sigma_hat, rho = shrink_covariance_ledoit_wolf(samples)
+        _LW_INTENSITIES.append(rho)
+        if shuffle_to_block_diagonal:
+            sigma_hat = block_diagonal_by_region(sigma_hat, R=R, T=T)
+        # LW output is already PD/well-conditioned; a tiny ridge is harmless
+        # and guards the block-diagonal case against a singular zeroed block.
+        sigma_reg = regularize_covariance(sigma_hat, eta=RIDGE_ETA)
+    else:
+        _, sigma_hat = estimate_mean_and_covariance(samples)
+        if shuffle_to_block_diagonal:
+            sigma_hat = block_diagonal_by_region(sigma_hat, R=R, T=T)
+        sigma_reg = regularize_covariance(sigma_hat, eta=RIDGE_ETA)
     L = cholesky_factor(sigma_reg)
     return sigma_reg, L
 
@@ -222,6 +303,7 @@ def cv_select_epsilon(
     shuffle_to_block_diagonal: bool,
     utilization: float,
     alpha: np.ndarray,
+    cov_panel: np.ndarray = None,
 ) -> CVResult:
     """Run blocked time-series CV across EPSILON_GRID; return CVResult.
 
@@ -229,19 +311,26 @@ def cv_select_epsilon(
     solve A2b at each epsilon, evaluate per-day emissions on the
     validation portion, compute the validation CVaR.  Across folds,
     average the validation CVaRs per epsilon.  Pick epsilon* = argmin.
+
+    cov_panel: optional panel (same fold-aligned ordering as train_panel) used
+    ONLY for covariance estimation. When residualization is active this is the
+    residualized panel; rho_bar and emissions always use the RAW train_panel.
+    Defaults to train_panel (identical to original behavior).
     """
+    if cov_panel is None:
+        cov_panel = train_panel
     folds = blocked_fold_indices(len(train_panel), N_CV_FOLDS)
     cvar_by_eps_by_fold: dict[float, list[float]] = {e: [] for e in EPSILON_GRID}
 
     for fold_idx, (fit_idx, val_idx) in enumerate(folds):
         fit_panel = train_panel[fit_idx]
         val_panel = train_panel[val_idx]
-        rho_bar_fit = fit_panel.mean(axis=0)
-        _, L_fit = fit_sigma_and_cholesky(fit_panel, shuffle_to_block_diagonal)
+        rho_bar_fit = fit_panel.mean(axis=0)                  # RAW mean field
+        _, L_fit = fit_sigma_and_cholesky(cov_panel[fit_idx], shuffle_to_block_diagonal)
 
         for eps in EPSILON_GRID:
             x_star = schedule_for(rho_bar_fit, L_fit, workloads, ceiling, eps, alpha)
-            val_em = per_day_emissions(x_star, val_panel)
+            val_em = per_day_emissions(x_star, val_panel)     # RAW emissions
             cvar_by_eps_by_fold[eps].append(cvar_upper_tail(val_em))
 
     cv_mean = {e: float(np.mean(v)) for e, v in cvar_by_eps_by_fold.items()}
@@ -268,12 +357,20 @@ def evaluate_on_test(
     epsilon_star: float,
     utilization: float,
     alpha: np.ndarray,
+    train_cov_panel: np.ndarray = None,
 ) -> TestResult:
-    """Fit Sigma_hat on full training, solve A2b at epsilon*, evaluate on test."""
-    rho_bar = train_panel.mean(axis=0)
-    _, L = fit_sigma_and_cholesky(train_panel, shuffle_to_block_diagonal)
+    """Fit Sigma_hat on full training, solve A2b at epsilon*, evaluate on test.
+
+    train_cov_panel: optional residualized training panel used ONLY for
+    covariance; rho_bar and scored emissions use the RAW panels. Defaults to
+    train_panel (original behavior).
+    """
+    if train_cov_panel is None:
+        train_cov_panel = train_panel
+    rho_bar = train_panel.mean(axis=0)                        # RAW mean field
+    _, L = fit_sigma_and_cholesky(train_cov_panel, shuffle_to_block_diagonal)
     schedule = schedule_for(rho_bar, L, workloads, ceiling, epsilon_star, alpha)
-    test_em = per_day_emissions(schedule, test_panel)
+    test_em = per_day_emissions(schedule, test_panel)         # RAW emissions
     return TestResult(
         utilization=utilization,
         sigma_label="shuf" if shuffle_to_block_diagonal else "joint",
@@ -375,8 +472,33 @@ def main():
         default=RESULTS_DIR,
         help=f"Output directory (default {RESULTS_DIR})",
     )
+    parser.add_argument(
+        "--shrinkage",
+        action="store_true",
+        help="Use Ledoit-Wolf shrinkage covariance instead of sample+ridge. "
+        "Pre-registered test: does shrinkage widen the joint-vs-shuffled CVaR "
+        "separation in CV? Run with --dry-run to keep the 2025 test set untouched.",
+    )
+    parser.add_argument(
+        "--residualize",
+        choices=("none", "seasonal", "ar1"),
+        default="none",
+        help="Estimate the covariance from forecast RESIDUALS instead of raw "
+        "carbon intensity (rho_bar and scored emissions stay raw). Pre-registered "
+        "test: does cross-region correlation of forecast errors change the schedule "
+        "where raw-level correlation did not? Agreement rule: an effect counts only "
+        "if BOTH 'seasonal' and 'ar1' agree in direction. Run with --dry-run.",
+    )
     args = parser.parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
+
+    global USE_SHRINKAGE, RESIDUALIZE
+    USE_SHRINKAGE = args.shrinkage
+    RESIDUALIZE = args.residualize
+    if USE_SHRINKAGE:
+        print("ESTIMATION: Ledoit-Wolf shrinkage covariance (Ledoit & Wolf 2004).")
+    else:
+        print("ESTIMATION: sample covariance + scale-adaptive ridge (original).")
 
     # --- Data load ---------------------------------------------------------
     print("Loading 4-zone panel ...")
@@ -396,6 +518,22 @@ def main():
     print(f"  test  (year  {TEST_YEAR})      : N={len(test_panel)} days")
     if args.dry_run:
         print("  --dry-run set: test panel will NOT be touched.")
+
+    # --- Residualization (covariance input only; rho_bar/emissions stay raw) ---
+    # Baseline is FIT ON TRAINING ONLY and applied to both train and test, so the
+    # test set is never used to fit the forecast. (Within-train CV folds share the
+    # baseline, a mild leakage that shifts the level identically for the joint and
+    # shuffled arms and therefore cannot create a joint-vs-shuffled difference.)
+    if RESIDUALIZE != "none":
+        print(f"COVARIANCE INPUT: {RESIDUALIZE} residuals "
+              f"(rho_bar and emissions remain RAW).")
+        stats = fit_residual_baseline(train_panel, train_dates, RESIDUALIZE)
+        train_cov_panel = apply_residual_baseline(train_panel, train_dates, stats)
+        test_cov_panel = apply_residual_baseline(test_panel, test_dates, stats)
+    else:
+        print("COVARIANCE INPUT: raw carbon intensity.")
+        train_cov_panel = train_panel
+        test_cov_panel = test_panel
 
     R, T = panel.shape[1], panel.shape[2]
     assert T == T_HOURS, f"Expected T={T_HOURS}, got {T}"
@@ -420,6 +558,7 @@ def main():
                 shuffle_to_block_diagonal=shuf,
                 utilization=a,          # repurposed: carries alpha
                 alpha=alpha_vec,
+                cov_panel=train_cov_panel,
             )
             cv_results.append(cv)
             print(
@@ -437,6 +576,12 @@ def main():
         )
 
     if args.dry_run:
+        if USE_SHRINKAGE and _LW_INTENSITIES:
+            import statistics
+            print(f"\nLedoit-Wolf shrinkage intensity rho: "
+                  f"mean={statistics.mean(_LW_INTENSITIES):.4f}, "
+                  f"min={min(_LW_INTENSITIES):.4f}, max={max(_LW_INTENSITIES):.4f} "
+                  f"(0=sample cov trusted, 1=full shrink to identity)")
         print("\n--dry-run complete; not evaluating on test set. Exit.")
         return 0
 
@@ -457,6 +602,7 @@ def main():
                 epsilon_star=eps_star,
                 utilization=a,          # repurposed: carries alpha
                 alpha=alpha_vec,
+                train_cov_panel=train_cov_panel,
             )
             test_results.append(tr)
 
