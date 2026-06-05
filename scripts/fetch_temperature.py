@@ -42,27 +42,63 @@ from src.data.temperature import (
     load_temperature_wide,
     temperature_summary,
 )
-from src.models.covariance import REGION_ORDER, build_daily_panel
+from src.models.covariance import (
+    DEFAULT_TZ,
+    DEFAULT_TZ_IBERIA,
+    REGION_ORDER,
+    REGION_ORDER_IBERIA,
+    build_daily_panel,
+)
+
+# Region sets. Each: zones, common clock, and a tz spot-check spec (a zone +
+# the UTC hours that map to local 15:00 / 05:00 on a hot summer day). The US
+# set reproduces Task A's Verification Gate 1; the Iberian set is Gate B2.
+REGION_SETS = {
+    "us": {
+        "zones": REGION_ORDER,
+        "tz": DEFAULT_TZ,
+        "spot_zone": "US-CAL-LDWP",
+        "spot_label": "Los Angeles",
+        # LA in July = PDT (UTC-7): local 15:00 = 22:00 UTC, 05:00 = 12:00 UTC.
+        "hot_utc": "2024-07-15 22:00",
+        "cool_utc": "2024-07-15 12:00",
+        "gate": "1",
+    },
+    "iberia": {
+        "zones": REGION_ORDER_IBERIA,
+        "tz": DEFAULT_TZ_IBERIA,
+        "spot_zone": "ES",
+        "spot_label": "Madrid",
+        # Madrid in July = CEST (UTC+2): local 15:00 = 13:00 UTC, 05:00 = 03:00 UTC.
+        # (Spot-check ES, where the Madrid common clock is exact. PT is WET, one
+        # hour behind, so PT's panel hours are offset +1h -- documented, not a bug.)
+        "hot_utc": "2024-07-15 13:00",
+        "cool_utc": "2024-07-15 03:00",
+        "gate": "B2",
+    },
+}
 
 
-def _verify(temp_wide: pd.DataFrame) -> int:
-    """Verification Gate 1. Returns 0 on success, non-zero on failure."""
+def _verify(temp_wide: pd.DataFrame, rs: dict) -> int:
+    """Verification Gate (US Gate 1 / Iberia Gate B2). Returns 0 on success."""
+    zones = list(rs["zones"])
+    tz = rs["tz"]
     print("\n" + "=" * 78)
-    print("VERIFICATION GATE 1")
+    print(f"VERIFICATION GATE {rs['gate']}  (region set tz = {tz})")
     print("=" * 78)
 
     ok = True
 
-    # ---- (a) Timezone spot-check on RAW UTC series (LA / LDWP) --------------
-    # LA is UTC-7 in July (PDT). Local 15:00 == 22:00 UTC; local 05:00 == 12:00 UTC.
-    la = temp_wide["US-CAL-LDWP"]
-    hot_utc = pd.Timestamp("2024-07-15 22:00", tz="UTC")   # 15:00 PDT
-    cool_utc = pd.Timestamp("2024-07-15 12:00", tz="UTC")  # 05:00 PDT
-    hot_val = float(la.loc[hot_utc])
-    cool_val = float(la.loc[cool_utc])
-    print("\n[tz spot-check: Los Angeles, 2024-07-15]")
-    print(f"  local 15:00 (22:00 UTC) temperature = {hot_val:5.1f} C  (expect HOT)")
-    print(f"  local 05:00 (12:00 UTC) temperature = {cool_val:5.1f} C  (expect COOL)")
+    # ---- (a) Timezone spot-check on RAW UTC series -------------------------
+    zname = rs["spot_zone"]
+    series = temp_wide[zname]
+    hot_utc = pd.Timestamp(rs["hot_utc"], tz="UTC")
+    cool_utc = pd.Timestamp(rs["cool_utc"], tz="UTC")
+    hot_val = float(series.loc[hot_utc])
+    cool_val = float(series.loc[cool_utc])
+    print(f"\n[tz spot-check: {rs['spot_label']}, 2024-07-15]")
+    print(f"  local 15:00 ({hot_utc:%H:%M} UTC) temperature = {hot_val:5.1f} C  (expect HOT)")
+    print(f"  local 05:00 ({cool_utc:%H:%M} UTC) temperature = {cool_val:5.1f} C  (expect COOL)")
     if not (hot_val > cool_val and hot_val > 25.0):
         print("  FAIL: afternoon not hotter than pre-dawn (or not hot enough)")
         ok = False
@@ -71,10 +107,11 @@ def _verify(temp_wide: pd.DataFrame) -> int:
 
     # ---- (b) Shape + date + region alignment vs carbon panel ---------------
     print("\n[shape alignment vs carbon panel]")
-    carbon_long = load_all_zones(list(REGION_ORDER))
-    carbon_wide = to_wide(carbon_long)
-    carbon_panel, carbon_dates = build_daily_panel(carbon_wide)
-    temp_panel, temp_dates = align_temperature_to_panel(temp_wide, carbon_wide)
+    carbon_wide = to_wide(load_all_zones(zones))
+    carbon_panel, carbon_dates = build_daily_panel(carbon_wide, region_order=zones, tz=tz)
+    temp_panel, temp_dates = align_temperature_to_panel(
+        temp_wide, carbon_wide, region_order=zones, tz=tz
+    )
     print(f"  carbon panel shape      : {carbon_panel.shape}")
     print(f"  temperature panel shape : {temp_panel.shape}")
     same_shape = carbon_panel.shape == temp_panel.shape
@@ -85,56 +122,58 @@ def _verify(temp_wide: pd.DataFrame) -> int:
         print("  FAIL: temperature panel does not match carbon panel grid")
         ok = False
     else:
-        print("  PASS: identical (N, R, T), identical dates, REGION_ORDER preserved")
+        print("  PASS: identical (N, R, T), identical dates, region order preserved")
 
     # ---- (c) Panel-level tz confirmation -----------------------------------
-    # In the LA-local panel, hour index t == local hour. Average across all
-    # summer days: local mid-afternoon (t=15) must exceed pre-dawn (t=5).
-    r_la = list(REGION_ORDER).index("US-CAL-LDWP")
+    r_spot = zones.index(zname)
     months = np.array([d.month for d in temp_dates])
     summer = np.isin(months, [6, 7, 8])
-    afternoon = temp_panel[summer, r_la, 15].mean()
-    predawn = temp_panel[summer, r_la, 5].mean()
-    print("\n[panel-level tz: LA summer mean by local hour]")
+    afternoon = temp_panel[summer, r_spot, 15].mean()
+    predawn = temp_panel[summer, r_spot, 5].mean()
+    print(f"\n[panel-level tz: {rs['spot_label']} summer mean by local hour]")
     print(f"  t=15 (local 15:00) mean = {afternoon:5.1f} C")
     print(f"  t=05 (local 05:00) mean = {predawn:5.1f} C")
     if not (afternoon > predawn):
-        print("  FAIL: panel hour indexing not LA-local")
+        print("  FAIL: panel hour indexing not local")
         ok = False
     else:
-        print("  PASS: panel hour axis is LA-local (afternoon > pre-dawn)")
+        print("  PASS: panel hour axis is local (afternoon > pre-dawn)")
 
     # ---- (d) Per-zone summary stats ----------------------------------------
     print("\n[per-zone temperature summary]")
-    summ = temperature_summary(temp_panel, temp_wide, carbon_wide)
+    summ = temperature_summary(temp_panel, temp_wide, carbon_wide, region_order=zones)
     print(summ.to_string(index=False, float_format=lambda x: f"{x:.2f}"))
 
     print("\n" + "=" * 78)
-    print("GATE 1 RESULT:", "PASS" if ok else "FAIL")
+    print(f"GATE {rs['gate']} RESULT:", "PASS" if ok else "FAIL")
     print("=" * 78)
     return 0 if ok else 1
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--region-set", choices=("us", "iberia"), default="us",
+                    help="Which zone set to fetch (default us = Task A).")
     ap.add_argument("--force", action="store_true", help="Re-pull even if cached.")
-    ap.add_argument("--verify", action="store_true", help="Run Verification Gate 1.")
+    ap.add_argument("--verify", action="store_true", help="Run the verification gate.")
     ap.add_argument("--start", default=DEFAULT_START)
     ap.add_argument("--end", default=DEFAULT_END)
     ap.add_argument("--cache-dir", default=str(DEFAULT_TEMP_DIR))
     args = ap.parse_args()
+    rs = REGION_SETS[args.region_set]
+    zones = list(rs["zones"])
 
-    print("Fetching 2 m temperature from Open-Meteo archive (UTC grid) ...")
-    for z, (lat, lon, label) in STATION_COORDS.items():
+    print(f"Fetching 2 m temperature from Open-Meteo archive (UTC grid) "
+          f"-- region set '{args.region_set}' ...")
+    for z in zones:
+        lat, lon, label = STATION_COORDS[z]
         print(f"  {z:12s} -> {label:24s} ({lat:.4f}, {lon:.4f})")
-    fetch_all_zones(REGION_ORDER, args.start, args.end, args.cache_dir, args.force)
+    fetch_all_zones(zones, args.start, args.end, args.cache_dir, args.force)
     print(f"Cached under {args.cache_dir}")
 
     if args.verify:
-        temp_wide = load_temperature_wide(
-            REGION_ORDER, args.start, args.end, args.cache_dir
-        )
-        return _verify(temp_wide)
+        temp_wide = load_temperature_wide(zones, args.start, args.end, args.cache_dir)
+        return _verify(temp_wide, rs)
     return 0
 
 
