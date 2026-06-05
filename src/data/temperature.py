@@ -58,11 +58,22 @@ DEFAULT_TEMP_DIR = PROJECT_ROOT / "data" / "raw" / "temperature"
 ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
 
 # One representative load-center point per zone: (latitude, longitude, label).
+# Two region sets share this dict (keys are disjoint): the Task A US zones and
+# the Task B Iberian zones. Consumers pass the relevant zone list explicitly.
 STATION_COORDS: dict[str, tuple[float, float, str]] = {
+    # --- Task A (US, California/Nevada) ---
     "US-CAL-CISO": (36.7378, -119.7871, "Fresno / Central Valley"),
     "US-CAL-BANC": (38.5816, -121.4944, "Sacramento"),
     "US-CAL-LDWP": (34.0522, -118.2437, "Los Angeles"),
     "US-NW-NEVP": (36.1716, -115.1391, "Las Vegas"),
+    # --- Task B (Iberia + France) ---
+    # ES/PT: national load centres (Madrid, Lisbon). FR: France is large and
+    # spatially heterogeneous; Paris (Ile-de-France) is the dominant load centre
+    # and the load-weighted single-point choice (multi-station noted as a
+    # refinement, not implemented -- same fidelity rationale as Task A).
+    "ES": (40.4168, -3.7038, "Madrid"),
+    "PT": (38.7223, -9.1393, "Lisbon"),
+    "FR": (48.8566, 2.3522, "Paris"),
 }
 
 # Default pull window. End is inclusive in the Open-Meteo API; we request the
