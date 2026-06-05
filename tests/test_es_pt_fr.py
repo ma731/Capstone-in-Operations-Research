@@ -3,7 +3,7 @@
 The constraint LOGIC is already covered by tests/test_constraints_taskA.py
 (which itself runs R=3). These tests pin the Task B-specific surface: the
 Iberian region constant, the European clock, and that the full constraint stack
-solves end-to-end with R=3 and region_order=REGION_ORDER_IBERIA, D=R*T=72.
+solves end-to-end with R=3 and region_order=REGION_ORDER_ES_PT_FR, D=R*T=72.
 """
 import numpy as np
 
@@ -11,14 +11,14 @@ from src.data.temperature import STATION_COORDS
 from src.models.algorithm_1 import schedule_deterministic_coupled
 from src.models.algorithm_2b_mahalanobis import solve_mahalanobis_dro
 from src.models.covariance import (
-    DEFAULT_TZ_IBERIA,
+    DEFAULT_TZ_ES_PT_FR,
     REGION_ORDER,
-    REGION_ORDER_IBERIA,
+    REGION_ORDER_ES_PT_FR,
     block_diagonal_by_region,
 )
 
 R, T = 3, 24
-RO = REGION_ORDER_IBERIA
+RO = REGION_ORDER_ES_PT_FR
 RHO = np.tile(np.linspace(200, 100, T), (R, 1)) + np.array([[0], [5], [-5]])
 CEIL = np.full((R, T), 50.0)
 W = np.full(R, 0.6 * 50.0 * T)
@@ -30,12 +30,12 @@ DEADLINE = [(0, 7, 0.20)]
 L_ID = np.linalg.cholesky(np.eye(R * T) * 100.0)
 
 
-def test_iberia_region_constant_is_three_and_distinct():
-    assert REGION_ORDER_IBERIA == ("ES", "PT", "FR")
-    assert len(REGION_ORDER_IBERIA) == 3
-    assert set(REGION_ORDER_IBERIA).isdisjoint(set(REGION_ORDER))  # US untouched
-    assert DEFAULT_TZ_IBERIA == "Europe/Madrid"
-    for z in REGION_ORDER_IBERIA:
+def test_es_pt_fr_region_constant_is_three_and_distinct():
+    assert REGION_ORDER_ES_PT_FR == ("ES", "PT", "FR")
+    assert len(REGION_ORDER_ES_PT_FR) == 3
+    assert set(REGION_ORDER_ES_PT_FR).isdisjoint(set(REGION_ORDER))  # US untouched
+    assert DEFAULT_TZ_ES_PT_FR == "Europe/Madrid"
+    for z in REGION_ORDER_ES_PT_FR:
         assert z in STATION_COORDS                      # temp coords present
 
 
@@ -51,7 +51,7 @@ def test_block_diagonal_R3_dim72():
     assert np.allclose(shuf[0:T, T:2 * T], 0.0)
 
 
-def test_iberia_full_stack_solves_R3():
+def test_es_pt_fr_full_stack_solves_R3():
     """All locked constraints (split+ramp+deadline+thermal, no cap) solve with
     R=3 and the Iberian region order; A1(eps=0) == A2b(eps=0)."""
     a1 = schedule_deterministic_coupled(
@@ -71,7 +71,7 @@ def test_iberia_full_stack_solves_R3():
     assert abs(a1.total_carbon - a2b.mean_carbon_value) < 1e-1
 
 
-def test_iberia_dro_moves_with_real_covariance_R3():
+def test_es_pt_fr_dro_moves_with_real_covariance_R3():
     """With a non-trivial joint L the DRO reallocates as epsilon grows (R=3)."""
     rng = np.random.default_rng(1)
     A = rng.normal(size=(R * T, R * T))

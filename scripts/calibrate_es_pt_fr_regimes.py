@@ -1,4 +1,4 @@
-"""Calibration probe for the IBERIAN (ES-PT-FR) constraint regimes.
+"""Calibration probe for the ES_PT_FRN (ES-PT-FR) constraint regimes.
 
 Task B counterpart of scripts/calibrate_taskA_regimes.py. The constraint LOGIC
 is locked (Task A); only the binding PARAMETERS are re-calibrated to Iberian
@@ -10,7 +10,7 @@ summers, PT (Lisbon) milder Atlantic, FR (Paris) cool and nuclear-dominated
 (carbon ~50 vs ES/PT ~160). So thermal will bite mainly in ES summer; the
 California bar_P=57 is NOT reused.
 
-Run: python -m scripts.calibrate_iberia_regimes
+Run: python -m scripts.calibrate_es_pt_fr_regimes
 """
 from __future__ import annotations
 
@@ -25,8 +25,8 @@ from src.data.temperature import (
 from src.models.algorithm_1 import schedule_deterministic_coupled
 from src.models.algorithm_2b_mahalanobis import solve_mahalanobis_dro
 from src.models.covariance import (
-    DEFAULT_TZ_IBERIA,
-    REGION_ORDER_IBERIA,
+    DEFAULT_TZ_ES_PT_FR,
+    REGION_ORDER_ES_PT_FR,
     build_daily_panel,
     cholesky_factor,
     daily_panel_to_matrix,
@@ -44,12 +44,12 @@ PUE0, KAPPA, T_SET = 1.10, 0.015, 20.0   # same PUE shape; bar_P re-calibrated
 
 
 def main() -> int:
-    zones = list(REGION_ORDER_IBERIA)
+    zones = list(REGION_ORDER_ES_PT_FR)
     carbon_wide = to_wide(load_all_zones(zones))
-    panel, dates = build_daily_panel(carbon_wide, region_order=zones, tz=DEFAULT_TZ_IBERIA)
+    panel, dates = build_daily_panel(carbon_wide, region_order=zones, tz=DEFAULT_TZ_ES_PT_FR)
     temp_panel, temp_dates = align_temperature_to_panel(
         load_temperature_wide(zones), carbon_wide,
-        region_order=zones, tz=DEFAULT_TZ_IBERIA,
+        region_order=zones, tz=DEFAULT_TZ_ES_PT_FR,
     )
     assert dates.equals(temp_dates)
 

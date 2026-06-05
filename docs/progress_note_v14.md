@@ -95,7 +95,7 @@ co-movement). This sharpens the headline: **even with an ES–PT correlation of
 block-diagonal one.** High empirical correlation does not translate into
 exploitable DRO value — the very point the shuffled-marginals test was built to
 isolate. (Regenerate via `python -m src.analysis.stratified_correlations
---region-set iberia`.)
+--region-set es_pt_fr`.)
 
 **Calibration / Goldilocks (Gate B3):** all 9 regime×alpha cells *loose-OK* —
 constraints active (R2: ramp 12–15/69, thermal 16–19/72, deadline 1–2/3) but the
@@ -168,16 +168,16 @@ residual-space agreement on a positive spatial effect.
 
 ## 6. Repo state
 
-- Branch `taskB-iberia` off merged `main` (Task A at 353fe46). Config
+- Branch `taskB-es_pt_fr` off merged `main` (Task A at 353fe46). Config
   commit-locked at `180e2a9` before the 2025 test set was touched; dry-run gate
   passed first.
-- Parameterization (additive; US/Task A untouched): `REGION_ORDER_IBERIA` +
-  `DEFAULT_TZ_IBERIA` in covariance.py; ES/PT/FR coords in temperature.py;
+- Parameterization (additive; US/Task A untouched): `REGION_ORDER_ES_PT_FR` +
+  `DEFAULT_TZ_ES_PT_FR` in covariance.py; ES/PT/FR coords in temperature.py;
   `--region-set` in fetch_temperature.py.
-- New scripts: `run_shuffled_marginals_iberia_experiment.py`,
-  `calibrate_iberia_regimes.py`, `report_binding_margins_iberia.py`.
-- New tests: `tests/test_iberia.py` (4). Suite: **145 passed** (141 Task A + 4).
-- Results: `results/iberia_regimes_2026-06-05*.csv/.pkl` (main + 4 robustness ×
+- New scripts: `run_shuffled_marginals_es_pt_fr_experiment.py`,
+  `calibrate_es_pt_fr_regimes.py`, `report_binding_margins_es_pt_fr.py`.
+- New tests: `tests/test_es_pt_fr.py` (4). Suite: **145 passed** (141 Task A + 4).
+- Results: `results/es_pt_fr_regimes_2026-06-05*.csv/.pkl` (main + 4 robustness ×
   {R1,R2}). Cached temperature: `data/raw/temperature/openmeteo_{ES,PT,FR}_*.csv`.
 
 ---

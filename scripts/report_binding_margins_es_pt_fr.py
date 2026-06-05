@@ -1,11 +1,11 @@
-"""Binding-margin report per regime for IBERIA (Gate B4 support).
+"""Binding-margin report per regime for ES_PT_FR (Gate B4 support).
 
 Task B counterpart of scripts/report_binding_margins_taskA.py. Reconstructs the
 deterministic (epsilon=0) schedule on the full Iberian training data per
 regime x alpha and reports binding margins + a Goldilocks 'can the DRO move'
 probe. Reads training data + locked config only; never touches the test set.
 
-Run: python -m scripts.report_binding_margins_iberia
+Run: python -m scripts.report_binding_margins_es_pt_fr
 """
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ from src.models.covariance import (
     estimate_mean_and_covariance,
     regularize_covariance,
 )
-from scripts.run_shuffled_marginals_iberia_experiment import (
+from scripts.run_shuffled_marginals_es_pt_fr_experiment import (
     ALPHA_LEVELS,
     BAR_P,
     CEILING_PER_CELL_MW,
@@ -62,7 +62,7 @@ def main() -> int:
     L = cholesky_factor(regularize_covariance(S))
 
     print("=" * 92)
-    print("IBERIA BINDING-MARGIN REPORT (eps=0 schedule on full training data)")
+    print("ES_PT_FR BINDING-MARGIN REPORT (eps=0 schedule on full training data)")
     print(f"Cap DROPPED. ramp tights / {R*(T-1)}, thermal tights / {R*T}. tz={TZ}, t_set={T_SET}")
     print("=" * 92)
     print(f"{'regime':14s} {'alpha':>5s} {'ramp_tight':>10s} {'therm_tight':>11s} "

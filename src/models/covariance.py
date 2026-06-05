@@ -48,7 +48,7 @@ T_HOURS = 24  # one scheduling horizon = one local day
 # every consumer must pass region_order/tz EXPLICITLY -- do not inherit the US
 # defaults. The math engine is already parameterized (build_daily_panel,
 # algorithm_2a/2b take region_order and validate len==R).
-REGION_ORDER_IBERIA: tuple[str, ...] = (
+REGION_ORDER_ES_PT_FR: tuple[str, ...] = (
     "ES",   # Spain
     "PT",   # Portugal
     "FR",   # France
@@ -59,7 +59,7 @@ REGION_ORDER_IBERIA: tuple[str, ...] = (
 # from PT's true wall-clock. This is a deliberate common-reference-clock choice
 # (mirrors Task A using one LA clock for all US zones); it is stated explicitly
 # here, in build_daily_panel callers, and in the Task B docs. Do not silence it.
-DEFAULT_TZ_IBERIA = "Europe/Madrid"
+DEFAULT_TZ_ES_PT_FR = "Europe/Madrid"
 
 
 # ---------- Flattening conventions ----------

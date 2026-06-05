@@ -1,4 +1,4 @@
-"""Task B: shuffled-marginals DRO experiment for IBERIA (ES-PT-FR).
+"""Task B: shuffled-marginals DRO experiment for ES_PT_FR (ES-PT-FR).
 
 Second region case. The constraint set, the DRO method (Algorithm 2b
 Mahalanobis-Wasserstein SOCP), the three-regime design, the metric
@@ -26,7 +26,7 @@ point of this second case.
 Pre-registration (same as Task A): lock via git commit before the test run;
 --dry-run reports CV epsilon* without touching 2025; real run reads 2025 once.
 
-Outputs: results/iberia_regimes_<UTC-date>.csv / .pkl
+Outputs: results/es_pt_fr_regimes_<UTC-date>.csv / .pkl
 Reference: progress note v14; Task B brief.
 """
 from __future__ import annotations
@@ -49,8 +49,8 @@ from src.data.temperature import (
 )
 from src.models.algorithm_2b_mahalanobis import solve_mahalanobis_dro
 from src.models.covariance import (
-    DEFAULT_TZ_IBERIA,
-    REGION_ORDER_IBERIA,
+    DEFAULT_TZ_ES_PT_FR,
+    REGION_ORDER_ES_PT_FR,
     block_diagonal_by_region,
     build_daily_panel,
     cholesky_factor,
@@ -63,8 +63,8 @@ from src.models.covariance import (
 # ======================================================================
 # LOCKED CONFIGURATION (do not edit after committing, before the test run)
 # ======================================================================
-REGION_ORDER = REGION_ORDER_IBERIA          # (ES, PT, FR) -- R=3
-TZ = DEFAULT_TZ_IBERIA                       # Europe/Madrid common clock
+REGION_ORDER = REGION_ORDER_ES_PT_FR          # (ES, PT, FR) -- R=3
+TZ = DEFAULT_TZ_ES_PT_FR                       # Europe/Madrid common clock
 UTILIZATION_FIXED = 0.80
 ALPHA_LEVELS = (0.30, 0.50, 0.75)
 EPSILON_GRID = (0.0, 0.1, 1.0, 10.0, 100.0, 1000.0)
@@ -288,7 +288,7 @@ def main() -> int:
     RESIDUALIZE = args.residualize
     regimes = REGIME_ORDER if args.regime == "all" else (args.regime,)
 
-    print("IBERIA (ES-PT-FR) | ESTIMATION:",
+    print("ES_PT_FR (ES-PT-FR) | ESTIMATION:",
           "Ledoit-Wolf shrinkage" if USE_SHRINKAGE else "sample covariance + ridge",
           "| residualize:", RESIDUALIZE)
     print(f"CAP: DROPPED. Common clock: {TZ} (PT is WET, +1h shifted). Regimes:", regimes)
@@ -376,7 +376,7 @@ def main() -> int:
             })
 
     print("\n" + "=" * 96)
-    print("IBERIA SENSITIVITY TABLE -- spatial gap (shuf - joint) CVaR_0.95, by regime x alpha")
+    print("ES_PT_FR SENSITIVITY TABLE -- spatial gap (shuf - joint) CVaR_0.95, by regime x alpha")
     print("Positive gap = joint beats shuf. 'detectable' = bootstrap CI excludes 0.")
     print("=" * 96)
     df = pd.DataFrame(rows)
@@ -391,8 +391,8 @@ def main() -> int:
     if args.regime != "all":
         suffix += f"_{args.regime}"
     stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
-    csv_path = args.out_dir / f"iberia_regimes_{stamp}{suffix}.csv"
-    pkl_path = args.out_dir / f"iberia_regimes_{stamp}{suffix}.pkl"
+    csv_path = args.out_dir / f"es_pt_fr_regimes_{stamp}{suffix}.csv"
+    pkl_path = args.out_dir / f"es_pt_fr_regimes_{stamp}{suffix}.pkl"
     df.to_csv(csv_path, index=False)
     with pkl_path.open("wb") as f:
         pickle.dump({

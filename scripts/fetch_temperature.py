@@ -44,9 +44,9 @@ from src.data.temperature import (
 )
 from src.models.covariance import (
     DEFAULT_TZ,
-    DEFAULT_TZ_IBERIA,
+    DEFAULT_TZ_ES_PT_FR,
     REGION_ORDER,
-    REGION_ORDER_IBERIA,
+    REGION_ORDER_ES_PT_FR,
     build_daily_panel,
 )
 
@@ -64,9 +64,9 @@ REGION_SETS = {
         "cool_utc": "2024-07-15 12:00",
         "gate": "1",
     },
-    "iberia": {
-        "zones": REGION_ORDER_IBERIA,
-        "tz": DEFAULT_TZ_IBERIA,
+    "es_pt_fr": {
+        "zones": REGION_ORDER_ES_PT_FR,
+        "tz": DEFAULT_TZ_ES_PT_FR,
         "spot_zone": "ES",
         "spot_label": "Madrid",
         # Madrid in July = CEST (UTC+2): local 15:00 = 13:00 UTC, 05:00 = 03:00 UTC.
@@ -152,7 +152,7 @@ def _verify(temp_wide: pd.DataFrame, rs: dict) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--region-set", choices=("us", "iberia"), default="us",
+    ap.add_argument("--region-set", choices=("us", "es_pt_fr"), default="us",
                     help="Which zone set to fetch (default us = Task A).")
     ap.add_argument("--force", action="store_true", help="Re-pull even if cached.")
     ap.add_argument("--verify", action="store_true", help="Run the verification gate.")

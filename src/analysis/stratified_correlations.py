@@ -124,7 +124,7 @@ REGION_SETS = {
         "tz": "America/Los_Angeles", "strip_prefix": "US-CAL-",
         "clock": "local Pacific time",
     },
-    "iberia": {
+    "es_pt_fr": {
         "zones": ["ES", "PT", "FR"],
         "tz": "Europe/Madrid", "strip_prefix": "",
         "clock": "local CET/CEST (PT is WET, +1h)",
