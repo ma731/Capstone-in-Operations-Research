@@ -115,33 +115,54 @@ def _pivot_for_display(long_df: pd.DataFrame, strip_prefix: str = "US-CAL-") -> 
     return pivot
 
 
+# Region-set config for the CLI demo. The correlation functions themselves are
+# region-agnostic (pairs are built dynamically from the wide columns); only the
+# zone list, local tz, and display prefix differ between the two cases.
+REGION_SETS = {
+    "us": {
+        "zones": ["US-CAL-CISO", "US-CAL-BANC", "US-CAL-LDWP"],
+        "tz": "America/Los_Angeles", "strip_prefix": "US-CAL-",
+        "clock": "local Pacific time",
+    },
+    "iberia": {
+        "zones": ["ES", "PT", "FR"],
+        "tz": "Europe/Madrid", "strip_prefix": "",
+        "clock": "local CET/CEST (PT is WET, +1h)",
+    },
+}
+
+
 if __name__ == "__main__":
-    # CLI: load the standard CA panel and print all three stratifications.
+    import argparse
+
     from src.data.electricitymaps import load_all_zones, to_wide
 
-    zones = ["US-CAL-CISO", "US-CAL-BANC", "US-CAL-LDWP"]
-    long_df = load_all_zones(zones)
-    wide = to_wide(long_df)
+    ap = argparse.ArgumentParser(description="Stratified carbon-intensity correlations.")
+    ap.add_argument("--region-set", choices=tuple(REGION_SETS), default="us")
+    args = ap.parse_args()
+    cfg = REGION_SETS[args.region_set]
+    tz, prefix = cfg["tz"], cfg["strip_prefix"]
 
-    print(f"Wide panel: {len(wide):,} hourly observations across {wide.shape[1]} zones")
+    wide = to_wide(load_all_zones(cfg["zones"]))
+    print(f"[{args.region_set}] Wide panel: {len(wide):,} hourly observations "
+          f"across {wide.shape[1]} zones")
     print(f"Time range: {wide.index.min()} to {wide.index.max()} (UTC)\n")
 
     print("=" * 72)
-    print("CORRELATIONS BY HOUR OF DAY (local Pacific time)")
+    print(f"CORRELATIONS BY HOUR OF DAY ({cfg['clock']})")
     print("=" * 72)
-    h = _pivot_for_display(correlations_by_hour(wide))
-    print(h.round(3))
+    print(_pivot_for_display(correlations_by_hour(wide, tz), prefix).round(3))
 
     print()
     print("=" * 72)
     print("CORRELATIONS BY SEASON  (DJF/MAM/JJA/SON = winter/spring/summer/fall)")
     print("=" * 72)
-    s = _pivot_for_display(correlations_by_season(wide))
-    print(s.reindex(["DJF", "MAM", "JJA", "SON"]).round(3))
+    print(_pivot_for_display(correlations_by_season(wide, tz), prefix)
+          .reindex(["DJF", "MAM", "JJA", "SON"]).round(3))
 
     print()
     print("=" * 72)
     print("CORRELATIONS BY DAY TYPE")
     print("=" * 72)
-    w = _pivot_for_display(correlations_by_weekday(wide))
-    print(w.reindex(["weekday", "weekend"]).round(3))
+    print(_pivot_for_display(correlations_by_weekday(wide, tz), prefix)
+          .reindex(["weekday", "weekend"]).round(3))
