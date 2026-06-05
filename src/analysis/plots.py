@@ -33,6 +33,34 @@ PAIR_COLORS = {
     "CISO-LDWP": "#009E73",  # green
 }
 PAIR_ORDER = ["BANC-CISO", "BANC-LDWP", "CISO-LDWP"]
+
+# Task B (Iberia ES-PT-FR). Pairs are alphabetised the same way _pairs_long
+# builds them (ES-FR, ES-PT, FR-PT in column order ES,PT,FR -> i<j gives
+# ES-PT, ES-FR, PT-FR). No "US-CAL-" prefix to strip.
+PAIR_COLORS_IBERIA = {
+    "ES-PT": "#0072B2",  # blue  (the tightly-coupled MIBEL pair)
+    "ES-FR": "#E69F00",  # orange
+    "PT-FR": "#009E73",  # green
+}
+PAIR_ORDER_IBERIA = ["ES-PT", "ES-FR", "PT-FR"]
+
+# Region-set display config: (zones, pair_order, pair_colors, strip_prefix,
+# tz, clock_label, region_label).
+REGION_SETS = {
+    "us": {
+        "zones": ["US-CAL-CISO", "US-CAL-BANC", "US-CAL-LDWP"],
+        "pair_order": PAIR_ORDER, "pair_colors": PAIR_COLORS,
+        "strip_prefix": "US-CAL-", "tz": "America/Los_Angeles",
+        "clock_label": "local Pacific time", "region_label": "California sub-zones",
+    },
+    "iberia": {
+        "zones": ["ES", "PT", "FR"],
+        "pair_order": PAIR_ORDER_IBERIA, "pair_colors": PAIR_COLORS_IBERIA,
+        "strip_prefix": "", "tz": "Europe/Madrid",
+        "clock_label": "local CET/CEST (PT is WET, +1h)", "region_label": "Iberia + France",
+        "stem_suffix": "_iberia",  # so Iberian figures do not overwrite the CA ones
+    },
+}
 SEASON_ORDER = ["DJF", "MAM", "JJA", "SON"]
 SEASON_LABELS = {
     "DJF": "Winter\n(DJF)",
@@ -44,9 +72,12 @@ SEASON_LABELS = {
 FIGDIR = Path("figures")
 
 
-def _strip_prefix(pair: str) -> str:
-    """Drop the 'US-CAL-' prefix from a pair label for compact display."""
-    return pair.replace("US-CAL-", "")
+def _strip_prefix(pair: str, prefix: str = "US-CAL-") -> str:
+    """Drop a zone-id prefix from a pair label for compact display.
+
+    Default 'US-CAL-' for the California figures; pass '' for Iberia (no prefix).
+    """
+    return pair.replace(prefix, "") if prefix else pair
 
 
 def _save(fig, stem: str, save_dir: Path) -> list[Path]:
@@ -60,10 +91,12 @@ def _save(fig, stem: str, save_dir: Path) -> list[Path]:
     return paths
 
 
-def plot_correlation_by_hour(wide_df, save_dir: Path = FIGDIR) -> list[Path]:
+def plot_correlation_by_hour(wide_df, save_dir: Path = FIGDIR,
+                             rs: dict | None = None) -> list[Path]:
     """Line plot of pairwise correlation as a function of local hour-of-day."""
-    long = correlations_by_hour(wide_df)
-    long = long.assign(pair=long["pair"].map(_strip_prefix))
+    rs = rs or REGION_SETS["us"]
+    long = correlations_by_hour(wide_df, tz=rs["tz"])
+    long = long.assign(pair=long["pair"].map(lambda p: _strip_prefix(p, rs["strip_prefix"])))
 
     fig, ax = plt.subplots(figsize=(8.0, 5.0))
 
@@ -72,16 +105,16 @@ def plot_correlation_by_hour(wide_df, save_dir: Path = FIGDIR) -> list[Path]:
     ax.text(11, 0.04, "solar window", ha="center", va="bottom",
             fontsize=9, color="#806000", style="italic")
 
-    for pair in PAIR_ORDER:
+    for pair in rs["pair_order"]:
         g = long[long["pair"] == pair].sort_values("stratum")
         ax.plot(g["stratum"], g["correlation"],
                 marker="o", markersize=4, linewidth=2,
-                color=PAIR_COLORS[pair], label=pair)
+                color=rs["pair_colors"][pair], label=pair)
 
-    ax.set_xlabel("Hour of day (local Pacific time)")
+    ax.set_xlabel(f"Hour of day ({rs['clock_label']})")
     ax.set_ylabel("Pairwise Pearson correlation")
     ax.set_title("Carbon intensity correlation by hour of day\n"
-                 "California sub-zones, 2021\u20132025")
+                 f"{rs['region_label']}, 2021\u20132025")
     ax.set_xticks(range(0, 24, 2))
     ax.set_xlim(-0.5, 23.5)
     ax.set_ylim(0, 1)
@@ -89,35 +122,38 @@ def plot_correlation_by_hour(wide_df, save_dir: Path = FIGDIR) -> list[Path]:
     ax.legend(title="Zone pair", frameon=False)
     fig.tight_layout()
 
-    paths = _save(fig, "correlation_by_hour", save_dir)
+    paths = _save(fig, "correlation_by_hour" + rs.get("stem_suffix", ""), save_dir)
     plt.close(fig)
     return paths
 
 
-def plot_correlation_by_season(wide_df, save_dir: Path = FIGDIR) -> list[Path]:
+def plot_correlation_by_season(wide_df, save_dir: Path = FIGDIR,
+                               rs: dict | None = None) -> list[Path]:
     """Grouped bar chart of pairwise correlation by meteorological season."""
-    long = correlations_by_season(wide_df)
-    long = long.assign(pair=long["pair"].map(_strip_prefix))
+    rs = rs or REGION_SETS["us"]
+    long = correlations_by_season(wide_df, tz=rs["tz"])
+    long = long.assign(pair=long["pair"].map(lambda p: _strip_prefix(p, rs["strip_prefix"])))
 
     fig, ax = plt.subplots(figsize=(8.0, 5.0))
 
-    n_pairs = len(PAIR_ORDER)
+    pair_order = rs["pair_order"]
+    n_pairs = len(pair_order)
     bar_w = 0.8 / n_pairs
     x = np.arange(len(SEASON_ORDER))
 
-    for i, pair in enumerate(PAIR_ORDER):
+    for i, pair in enumerate(pair_order):
         vals = []
         for s in SEASON_ORDER:
             row = long[(long["pair"] == pair) & (long["stratum"] == s)]
             vals.append(float(row["correlation"].iloc[0]) if len(row) else np.nan)
         offset = (i - (n_pairs - 1) / 2) * bar_w
         ax.bar(x + offset, vals, width=bar_w,
-               color=PAIR_COLORS[pair], label=pair)
+               color=rs["pair_colors"][pair], label=pair)
 
     ax.set_xlabel("Meteorological season")
     ax.set_ylabel("Pairwise Pearson correlation")
     ax.set_title("Carbon intensity correlation by season\n"
-                 "California sub-zones, 2021\u20132025")
+                 f"{rs['region_label']}, 2021\u20132025")
     ax.set_xticks(x)
     ax.set_xticklabels([SEASON_LABELS[s] for s in SEASON_ORDER])
     ax.set_ylim(0, 1)
@@ -126,18 +162,24 @@ def plot_correlation_by_season(wide_df, save_dir: Path = FIGDIR) -> list[Path]:
               loc="center left", bbox_to_anchor=(1.02, 0.5))
     fig.tight_layout()
 
-    paths = _save(fig, "correlation_by_season", save_dir)
+    paths = _save(fig, "correlation_by_season" + rs.get("stem_suffix", ""), save_dir)
     plt.close(fig)
     return paths
 
 
 if __name__ == "__main__":
+    import argparse
+
     from src.data.electricitymaps import load_all_zones, to_wide
 
-    zones = ["US-CAL-CISO", "US-CAL-BANC", "US-CAL-LDWP"]
-    wide = to_wide(load_all_zones(zones))
+    ap = argparse.ArgumentParser(description="Generate correlation figures.")
+    ap.add_argument("--region-set", choices=tuple(REGION_SETS), default="us")
+    args = ap.parse_args()
+    rs = REGION_SETS[args.region_set]
 
-    print(f"Loaded {len(wide):,} hourly observations across {wide.shape[1]} zones.")
+    wide = to_wide(load_all_zones(rs["zones"]))
+    print(f"[{args.region_set}] Loaded {len(wide):,} hourly observations "
+          f"across {wide.shape[1]} zones.")
     for fn in (plot_correlation_by_hour, plot_correlation_by_season):
-        for p in fn(wide):
+        for p in fn(wide, rs=rs):
             print(f"  wrote {p}")
