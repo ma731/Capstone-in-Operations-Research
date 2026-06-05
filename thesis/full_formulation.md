@@ -1,9 +1,20 @@
-# Full formulation — revised feasible set (Task A)
+# Full formulation — revised feasible set (Task A) + two-region study (Task B)
 
 *Supersedes the v11/v12 formulation. The DRO method (Algorithm 2b,
 Mahalanobis–Wasserstein SOCP) is **unchanged**; only the feasible set X is
 revised: the aggregate power cap is dropped, and two constraints are added
 (windowed-demand deadline and temperature-coupled thermal/PUE).*
+
+> **Two region sets (R is parameterized).** The same formulation is applied to
+> two independent grids: **California/Nevada** (Task A, R=4: US-CAL-CISO,
+> US-CAL-BANC, US-CAL-LDWP, US-NW-NEVP, clock America/Los_Angeles) and
+> **Iberia + France** (Task B, R=3: ES, PT, FR, clock Europe/Madrid). Everything
+> below is written for general R; D = R·T (96 for CA, 72 for Iberia). The
+> region set, the common reference clock, and the climate-dependent constraint
+> parameters (notably the thermal economizer set-point t_set) are the only
+> differences. Both yield a **replicated null** (see `docs/progress_note_v13.md`,
+> `docs/progress_note_v14.md`). For Iberia, PT is WET (one hour behind the
+> Madrid common clock) — a stated common-reference-clock choice.
 
 ## Notation
 
