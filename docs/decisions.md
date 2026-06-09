@@ -92,6 +92,53 @@ tighter-regime sensitivity point — then multi-station averaging is worth it.
 
 ---
 
+## Decision 8 — Variable carbon-coupled capacity ceiling (Task C, 3c)
+
+**Date:** 2026-06-09
+**Choice:** For Task C, replace the flat per-cell ceiling with a CFE-driven one:
+`x_bar_{r,t} = x_min + (x_max - x_min) * CFE_{r,t} / 100`, where `CFE` is the
+training-mean carbon-free-energy fraction (Electricity Maps `cfe_pct`). Adapted
+from Wijayawardana & Chien (SoCC '25), "Scheduling Cloud VMs on Variable Capacity
+Datacenters."
+**Alternatives considered:** (a) keep the flat ceiling (no capacity channel);
+(b) drive capacity off `RE%` (renewables only) instead of `CFE%`; (c) make
+capacity STOCHASTIC.
+**Reason:** CFE% is the truer "clean capacity available" signal — RE% excludes
+the nuclear/hydro baseload that dominates Ontario. Treated as DATA (training-mean
+field, exactly like the 3b thermal field) so the program stays an SOCP and the
+carbon-only-stochastic scope (Decision 2) is preserved. Thesis motivation: CFE is
+spatially correlated through shared weather, so a CFE-driven ceiling makes
+CAPACITY co-vary across regions — a second spatial channel beyond the carbon-cost
+coupling in Sigma_hat, and the mechanism by which Task C might break the A/B null.
+**Rejected stochastic capacity:** would change the ambiguity set to
+(rho, capacity) and collide with the joint-uncertainty teammate's scope. Not
+without Bissan's sign-off.
+**Revisit if / open:** `x_min, x_max` are NOT yet calibrated — they need the same
+loosely-binding "Goldilocks" check on training data as the other parameters
+(extend `calibrate_*_regimes.py`). Demo defaults `x_min=42, x_max=65` are
+provisional (chosen only for feasibility: every cell ≥ 42 ≥ the 40 MW/h average
+need). Reconcile the exact functional form against the SoCC'25 paper.
+
+## Decision 9 — Carbon-budget constraint (Task C, 3d)
+
+**Date:** 2026-06-09
+**Choice:** Optional cap on NOMINAL carbon `sum_{r,t} rho_bar_{r,t} x_{r,t} <= B`,
+added to both `schedule_deterministic_coupled` and `solve_mahalanobis_dro`
+(`carbon_budget` kwarg, default `None` = off). Adapted from the ZCCloud
+carbon-budget framing.
+**Alternatives considered:** (a) robust budget `mean + eps*penalty <= B`;
+(b) penalize carbon in the objective rather than constrain it.
+**Reason:** A nominal-carbon cap is the standard, SOCP-preserving choice and a
+clean operational constraint. SEMANTICS to note: in the pure-min deterministic
+baseline the objective already minimizes carbon, so a budget is slack-or-
+infeasible there (no-op above the achievable minimum); it only meaningfully BINDS
+in the DRO, where robustness (large eps) inflates nominal carbon above the
+deterministic minimum and the budget caps that trade-off. Verified in
+`tests/test_carbon_budget.py`.
+**Revisit if / open:** `B` is not yet calibrated; set it as a loose multiple
+(e.g. 1.05x) of a reference schedule's carbon during the Goldilocks pass.
+Consider the robust-budget variant if Bissan wants the cap on worst-case carbon.
+
 ## Template for new entries
 
 ## YYYY-MM-DD — One-line decision summary
