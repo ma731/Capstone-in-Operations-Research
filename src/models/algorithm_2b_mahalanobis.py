@@ -157,6 +157,7 @@ def solve_mahalanobis_dro(
     kappa: float = 0.015,                      # 3b: PUE slope per deg C above t_set
     t_set: float = 20.0,                       # 3b: economizer set-point, deg C
     bar_P: Optional[object] = None,            # 3b: effective-power ceiling (scalar or (R,T))
+    carbon_budget: Optional[float] = None,     # 3d: cap on nominal carbon <rho_bar, x>
 ) -> MahalanobisDROResult:
     """Solve Algorithm 2b: Mahalanobis-Wasserstein DRO.
 
@@ -349,6 +350,15 @@ def solve_mahalanobis_dro(
             raise ValueError(f"temperature must be (R, T) = ({R}, {T}), got {temp_arr.shape}")
         pue = pue0 + kappa * np.maximum(temp_arr - t_set, 0.0)   # (R, T) constant
         constraints += [cp.multiply(pue, x) <= bar_P]
+
+    # --- 3d: carbon budget --------------------------------------------------
+    # Cap the NOMINAL carbon <rho_bar, x> <= B. rho_bar is data, so this is a
+    # single linear constraint; the program stays an SOCP. (The budget is on the
+    # mean field, not the robust value -- a deterministic operational cap.)
+    if carbon_budget is not None:
+        if carbon_budget < 0:
+            raise ValueError(f"carbon_budget must be non-negative, got {carbon_budget}")
+        constraints += [cp.sum(cp.multiply(rho_bar, x)) <= carbon_budget]
 
     problem = cp.Problem(objective, constraints)
     chosen_solver = _select_solver(solver)

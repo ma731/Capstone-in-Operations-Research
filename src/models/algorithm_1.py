@@ -169,6 +169,7 @@ def schedule_deterministic_coupled(
     kappa: float = 0.015,                      # 3b
     t_set: float = 20.0,                       # 3b
     bar_P: Optional[object] = None,            # 3b: effective-power ceiling (scalar or (R,T))
+    carbon_budget: Optional[float] = None,     # 3d: cap on nominal carbon <rho, x>
     solver: Optional[str] = None,
 ) -> CoupledScheduleResult:
     """Solve the new (coupled) deterministic baseline.
@@ -246,6 +247,13 @@ def schedule_deterministic_coupled(
         pue = pue0 + kappa * np.maximum(temp_arr - t_set, 0.0)
         constraints += [cp.multiply(pue, x) <= bar_P]
 
+    # 3d: carbon budget -- cap nominal carbon <rho, x> <= B. rho is data, so this
+    # is a single linear constraint and the program stays an LP.
+    if carbon_budget is not None:
+        if carbon_budget < 0:
+            raise ValueError(f"carbon_budget must be non-negative, got {carbon_budget}")
+        constraints += [cp.sum(cp.multiply(rho, x)) <= carbon_budget]
+
     problem = cp.Problem(cp.Minimize(cp.sum(cp.multiply(rho, x))), constraints)
     problem.solve(solver=solver)
     if problem.status not in ("optimal", "optimal_inaccurate"):
@@ -281,6 +289,10 @@ def schedule_deterministic_coupled(
         bar = np.asarray(bar_P, dtype=float)
         binding["thermal_tight_cells"] = int(np.sum(np.abs(eff - bar) < 1e-3))
         binding["thermal_min_margin"] = float(np.min(bar - eff))
+    if carbon_budget is not None:
+        used = float(np.sum(rho * x_val))
+        binding["carbon_used"] = used
+        binding["carbon_budget_margin"] = float(carbon_budget - used)
     if inflex_base is not None:
         binding["inflex_base"] = inflex_base
 

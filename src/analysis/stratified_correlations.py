@@ -129,6 +129,18 @@ REGION_SETS = {
         "tz": "Europe/Madrid", "strip_prefix": "",
         "clock": "local CET/CEST (PT is WET, +1h)",
     },
+    # --- Task C cases (Bissan: validate the DRO correlation assumption on the
+    # interconnected US / US+Canada grid, where she expects strong correlation) ---
+    "us_west": {  # CA + NV + Phoenix (Bissan's suggested western expansion)
+        "zones": ["US-CAL-CISO", "US-CAL-BANC", "US-CAL-LDWP", "US-NW-NEVP", "US-SW-AZPS"],
+        "tz": "America/Los_Angeles", "strip_prefix": "US-",
+        "clock": "local Pacific time",
+    },
+    "taskc": {  # Ontario + Eastern-Interconnection belt (the US+Canada case)
+        "zones": ["CA-ON", "US-NY-NYIS", "US-MIDW-MISO", "US-MIDA-PJM"],
+        "tz": "America/Toronto", "strip_prefix": "",
+        "clock": "local Eastern (America/Toronto)",
+    },
 }
 
 

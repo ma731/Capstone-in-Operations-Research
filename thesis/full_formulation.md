@@ -127,3 +127,42 @@ set is not frozen. See `scripts/calibrate_taskA_regimes.py`.
 | PUE hockey-stick | `src/data/temperature.py::pue_from_temperature` |
 | thermal field $T^{\mathrm{air}}$ | `src/data/temperature.py::temperature_field` |
 | regimes + locked config | `scripts/run_shuffled_marginals_taskA_experiment.py` |
+
+## Task C additions (Ontario + Eastern-Interconnection belt)
+
+Task C is a THIRD region set (`CA-ON, US-NY-NYIS, US-MIDW-MISO, US-MIDA-PJM`;
+clock `America/Toronto`), chosen for high *residual* (weather-front-driven)
+cross-correlation — the structure Tasks A/B lacked. It AUGMENTS the feasible set
+$\mathcal X$ with two constraints adapted from Wijayawardana & Chien (SoCC '25),
+"Scheduling Cloud VMs on Variable Capacity Datacenters." Tasks A/B and their
+replicated null are on the UNAUGMENTED $\mathcal X$ above and are untouched.
+
+**Variable carbon-coupled capacity (3c, NEW).** The flat ceiling $\bar x$ is
+replaced by a CFE-driven one:
+$$\bar x_{r,t} = x_{\min} + (x_{\max}-x_{\min})\cdot \frac{\mathrm{CFE}_{r,t}}{100},$$
+where $\mathrm{CFE}_{r,t}$ is the **training-mean carbon-free-energy fraction**
+(Electricity Maps `cfe_pct`). CFE is data — a fixed feasible-set parameter, like
+the 3b thermal field, never re-estimated per fold and never read from the test
+set — so $\bar x$ is a constant matrix and the per-cell ceiling (C0) stays linear.
+Mechanistic point: CFE is spatially correlated through shared weather, so the
+ceiling **co-varies across regions** — a SECOND spatial channel on top of the
+carbon-cost coupling that enters through the off-diagonal blocks of $\hat\Sigma$.
+
+**Carbon budget (3d, NEW).** An optional cap on nominal carbon:
+$$\sum_{r,t} \bar\rho_{r,t}\,x_{r,t} \;\le\; B. \tag{3d}$$
+$\bar\rho$ is data, so (3d) is a single linear constraint and the program stays an
+SOCP. It is slack-or-infeasible in the pure-min baseline (the objective already
+minimizes carbon); it binds only in the DRO, where the robustness term can push
+nominal carbon above the deterministic minimum.
+
+Both are additive (default off) and leave the A2b SOCP structure intact. Capacity
+is treated as DATA, never as a second stochastic vector (preserves the
+carbon-only ambiguity-set scope, Decision 2). Calibration of $(x_{\min}, x_{\max},
+B)$ to the loosely-binding "Goldilocks" regime is pending (see `docs/decisions.md`
+Decisions 8–9).
+
+| object | code |
+|---|---|
+| CFE field + panel | `src/data/capacity.py::{build_cfe_panel, cfe_field}` |
+| CFE → ceiling mapping (3c) | `src/data/capacity.py::capacity_from_cfe` |
+| carbon budget (3d) | `carbon_budget=` kwarg in `algorithm_1` / `algorithm_2b` |
