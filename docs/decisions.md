@@ -113,11 +113,17 @@ coupling in Sigma_hat, and the mechanism by which Task C might break the A/B nul
 **Rejected stochastic capacity:** would change the ambiguity set to
 (rho, capacity) and collide with the joint-uncertainty teammate's scope. Not
 without Bissan's sign-off.
-**Revisit if / open:** `x_min, x_max` are NOT yet calibrated — they need the same
-loosely-binding "Goldilocks" check on training data as the other parameters
-(extend `calibrate_*_regimes.py`). Demo defaults `x_min=42, x_max=65` are
-provisional (chosen only for feasibility: every cell ≥ 42 ≥ the 40 MW/h average
-need). Reconcile the exact functional form against the SoCC'25 paper.
+**Calibration (CLOSED, 2026-06-11):** `x_min, x_max` calibrated to the loosely-
+binding "Goldilocks" regime on TRAINING data via `scripts/calibrate_capacity.py`,
+which sweeps candidate bounds and reports the R2-schedule binding fraction, mean
+slack, and per-region capacity margin (no test-set peek — CFE field + schedule on
+train years only). Selected **`x_min=50, x_max=75`**: a single pair that is
+Goldilocks across all three cases (us_west bind 0.33 / slack 35% / margin 41%;
+taskc 0.37 / 37% / 47%; us_hetero 0.28 / 39% / 51%) — the constraint is active
+(~1/3 of cells at the ceiling) but the schedule keeps real freedom and the problem
+stays feasible with headroom. Supersedes the provisional `(42, 65)`, which pinned
+~50% of cells (too tight). Functional form reconciled against SoCC'25 §2.1
+(constant carbon budget → capacity falls as carbon intensity rises).
 
 ## Decision 9 — Carbon-budget constraint (Task C, 3d)
 

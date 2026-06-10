@@ -84,9 +84,12 @@ P_MAX = None
 RAMP_PER_REGION = 15.0
 DEADLINE_WINDOW = (0, 7)
 DEADLINE_GAMMA = 0.20
-# 3c variable capacity (R2): PROVISIONAL bounds (pending Goldilocks calibration).
-CAP_MIN = 42.0
-CAP_MAX = 65.0
+# 3c variable capacity (R2): Goldilocks-calibrated on TRAINING data via
+# scripts/calibrate_capacity.py (loosely binding: bind_frac ~0.28-0.37, positive
+# slack + capacity margin across all three cases). Supersedes the provisional
+# (42, 65). See docs/decisions.md Decision 8.
+CAP_MIN = 50.0
+CAP_MAX = 75.0
 
 REGIMES = {
     "R3_reference": dict(deadline=False, varcap=False),
