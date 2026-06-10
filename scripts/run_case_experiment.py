@@ -76,8 +76,10 @@ BOOTSTRAP_SEED = 20260524
 CVAR_ALPHA = 0.95
 CEILING_PER_CELL_MW = 50.0
 T_HOURS = 24
-TRAIN_YEARS = (2021, 2022, 2023, 2024)
+TRAIN_YEARS = (2021, 2022, 2023, 2024)  # overridden by --test-year (walk-forward)
 TEST_YEAR = 2025
+
+EPSILON_GRID_FINE = (0.0, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0, 300.0, 1000.0)
 RIDGE_ETA = 1e-5
 
 P_MAX = None
@@ -339,14 +341,24 @@ def main() -> int:
                          "scheduling (eval stays on real emissions). 'level' = equal "
                          "time-average per region; 'flat' = constant mean (covariance-"
                          "only world).")
+    ap.add_argument("--test-year", type=int, default=2025,
+                    help="Walk-forward: train on 2021..(year-1), test on this year.")
+    ap.add_argument("--eps-grid", choices=("standard", "fine"), default="standard",
+                    help="'fine' = log-denser epsilon grid (for ablation runs where "
+                         "eps* is unstable on the standard grid).")
     ap.add_argument("--out-dir", type=Path, default=RESULTS_DIR)
     args = ap.parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
     global USE_SHRINKAGE, RESIDUALIZE, ABLATE_MEAN, _VARCAP_CEILING, REGION_ORDER, TZ
+    global TRAIN_YEARS, TEST_YEAR, EPSILON_GRID
     USE_SHRINKAGE = args.shrinkage
     RESIDUALIZE = args.residualize
     ABLATE_MEAN = args.ablate_mean
+    TEST_YEAR = args.test_year
+    TRAIN_YEARS = tuple(range(2021, TEST_YEAR))
+    if args.eps_grid == "fine":
+        EPSILON_GRID = EPSILON_GRID_FINE
     regimes = REGIME_ORDER if args.regime == "all" else (args.regime,)
 
     cfg = REGION_SETS[args.region_set]
@@ -455,9 +467,13 @@ def main() -> int:
         suffix += f"_{RESIDUALIZE}"
     if ABLATE_MEAN != "none":
         suffix += f"_ablate-{ABLATE_MEAN}"
+    if args.eps_grid == "fine":
+        suffix += "_finegrid"
+    if TEST_YEAR != 2025:
+        suffix += f"_ty{TEST_YEAR}"
     if args.regime != "all":
         suffix += f"_{args.regime}"
-    stamp = dt.datetime.utcnow().strftime("%Y-%m-%d")
+    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
     base = f"{args.region_set}_regimes_{stamp}{suffix}"
     csv_path = args.out_dir / f"{base}.csv"
     pkl_path = args.out_dir / f"{base}.pkl"
