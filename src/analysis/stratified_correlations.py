@@ -141,6 +141,16 @@ REGION_SETS = {
         "tz": "America/Toronto", "strip_prefix": "",
         "clock": "local Eastern (America/Toronto)",
     },
+    # Heterogeneous cross-regime set: solar (CISO), wind (ERCO), hydro (BPAT).
+    # Deliberately different physical drivers -> expect LOW/heterogeneous
+    # correlation. The adversarial best-case test for spatial DRO value:
+    # diversification needs uncorrelated regions, so if value appears anywhere
+    # it should appear here. Spans 3 time zones -> align/residualize in UTC.
+    "us_hetero": {
+        "zones": ["US-CAL-CISO", "US-TEX-ERCO", "US-NW-BPAT"],
+        "tz": "UTC", "strip_prefix": "US-",
+        "clock": "UTC (cross-interconnect set spans Pacific/Central)",
+    },
 }
 
 
