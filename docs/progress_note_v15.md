@@ -21,6 +21,11 @@ covariance changes out-of-sample CVaR₀.₉₅ by a negligible amount in every 
 regime, and α level. This now includes a case **engineered to give
 diversification value** and it still gives none.
 
+A **mean-ablation** experiment (§5b) makes the mechanism *causal*, not merely
+asserted: when the mean field is neutralized, the joint covariance produces a
+material, detectable advantage over the shuffled one — so the spatial signal is real
+and exploitable, just **dominated by the mean** in the actual problem.
+
 The tail diagnostic sharpens the *why*: the dependence in real carbon data is
 **non-elliptical** (upper-tail-independent and radially asymmetric — regions go
 clean together more than dirty together). A covariance / Mahalanobis–Wasserstein
@@ -117,6 +122,40 @@ Selected residual tail-dependence (q = 0.95):
    exploit, fitting the joint covariance only adds estimation noise.
 4. **The exploitable-looking structure is in the tails, and it's non-elliptical**
    (§4) — invisible to a covariance-based ambiguity set by construction.
+
+---
+
+## 5b. Mean-ablation — a *controlled* test of the mechanism
+
+§5 claims the mean field dominates and the covariance is second-order. We test that
+claim causally with `--ablate-mean`: the mean ρ̄ used for **scheduling** is
+neutralized, while **evaluation stays on the real carbon panel** (real emissions).
+Two levels: `level` equalizes each region's time-average to the global mean (keeps
+the hour-of-day shape); `flat` sets a constant mean everywhere, so the term
+⟨ρ̄,x⟩ is constant under fixed demand and the schedule is driven **purely** by the
+ε·‖Lᵀx‖₂ covariance penalty — a *covariance-only world*.
+
+| Case | baseline gap | `level` gap | `flat` gap (covariance-only) |
+|------|--------------|-------------|------------------------------|
+| us_west | ~0, none detectable | ~0, none | ε*→0; −0.04 … +0.004 (still ~0) |
+| taskc | ~0, sign-flips | ~0, sign-flips | **+0.14 … +0.41, all 9 detectable** |
+| us_hetero | negative | negative | **+0.39 … +1.46, all 9 detectable** |
+
+**Interpretation.** Equalizing the *level* changes nothing — the diurnal mean shape
+still dominates. But in the *covariance-only* world the joint covariance produces a
+**material, fully detectable** advantage over the shuffled/block-diagonal one
+(taskc up to +0.41%, us_hetero up to +1.46%), and CV no longer collapses to a single
+ε* (joint and shuf select very different radii). So the spatial covariance **does**
+carry genuine, exploitable information — it is simply **swamped by the mean** in the
+real problem. This converts the null from an assertion ("covariance doesn't matter")
+into a demonstrated *ordering*: **the mean field dominates the schedule so completely
+that a real and exploitable second-moment signal contributes negligibly.** (us_west
+is the instructive exception: its strong *common-mode* positive correlation offers
+little even in isolation — diversification needs heterogeneity, not co-movement.)
+
+*Caveat:* the `flat` schedule deliberately ignores the real mean, so its absolute
+CVaR is worse than baseline — this is a mechanism probe (does the covariance carry
+*any* exploitable signal once the mean is removed?), not an achievable-value claim.
 
 ---
 
