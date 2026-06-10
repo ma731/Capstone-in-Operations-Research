@@ -1,5 +1,8 @@
 """Shuffled-marginals sensitivity experiment for the Mahalanobis-Wasserstein DRO.
 
+DEPRECATED (kept as the locked Task A artifact): for new runs use
+scripts/run_case_experiment.py --region-set {us_west,taskc,us_hetero}.
+
 Tests the central Phase 1 empirical question of progress note v9 Section 4.3:
 does the joint covariance Sigma_hat^joint produce a lower out-of-sample
 CVaR_0.95 than the block-diagonal Sigma_hat^shuf when both are paired with

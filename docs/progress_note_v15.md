@@ -21,7 +21,7 @@ covariance changes out-of-sample CVaR₀.₉₅ by a negligible amount in every 
 regime, and α level. This now includes a case **engineered to give
 diversification value** and it still gives none.
 
-A **mean-ablation** experiment (§5b) makes the mechanism *causal*, not merely
+A **mean-ablation** experiment (§6) makes the mechanism *causal*, not merely
 asserted: when the mean field is neutralized, the joint covariance produces a
 material, detectable advantage over the shuffled one — so the spatial signal is real
 and exploitable, just **dominated by the mean** in the actual problem.
@@ -125,7 +125,7 @@ Selected residual tail-dependence (q = 0.95):
 
 ---
 
-## 5b. Mean-ablation — a *controlled* test of the mechanism
+## 6. Mean-ablation — the causal demonstration (headline experiment)
 
 §5 claims the mean field dominates and the covariance is second-order. We test that
 claim causally with `--ablate-mean`: the mean ρ̄ used for **scheduling** is
@@ -154,12 +154,19 @@ is the instructive exception: its strong *common-mode* positive correlation offe
 little even in isolation — diversification needs heterogeneity, not co-movement.)
 
 *Caveat:* the `flat` schedule deliberately ignores the real mean, so its absolute
-CVaR is worse than baseline — this is a mechanism probe (does the covariance carry
-*any* exploitable signal once the mean is removed?), not an achievable-value claim.
+CVaR is worse than baseline — by **+1.6–3.8% (us_hetero), +1.9–4.1% (us_west), and
+−0.1–0.2% (taskc)** — i.e. the covariance-only gain (≤1.46%) never repays the cost
+of discarding the mean. This is a mechanism probe (does the covariance carry *any*
+exploitable signal once the mean is removed?), not an achievable-value claim.
+
+*ε-grid note:* under `flat` the CV-selected ε\* is unstable on the standard
+6-point grid (joint/shuf pick radii orders of magnitude apart); a log-denser
+11-point grid (`--eps-grid fine`) is used to confirm the flat-ablation gaps are
+not grid artifacts (results `*_finegrid.csv`).
 
 ---
 
-## 6. Robustness battery
+## 7. Robustness battery
 
 Each case re-run with `--residualize seasonal`, `--residualize ar1`, and
 `--shrinkage` (Ledoit–Wolf). A spatial effect only counts if it is positive AND
@@ -175,9 +182,33 @@ disagree by orders of magnitude across estimators (e.g. taskc R3/α0.30: seasona
 `us_hetero` every detectable cell is **negative** (joint covariance hurts). This is
 the confirmed, robustness-checked version of the null across all three cases.
 
+**Multiple-testing correction (Benjamini–Hochberg).** Because we test 144
+non-ablation cells (case × regime × α × estimator), some bootstrap CIs exclude zero
+by chance. Recomputing bootstrap p-values per cell and applying BH at q = 0.05
+across all cells (`scripts/bh_correction.py`): the largest *positive* gap that
+survives correction is **0.179%** — the AR(1) taskc cell already rejected by the
+seasonal∧AR(1) agreement rule. With N ≈ 362 test days, gaps this small are
+statistically resolvable but economically negligible; nothing material survives
+both BH and the agreement rule. Walk-forward check (train→2023, test 2024;
+`--test-year 2024`) confirms the null is not a 2025 artifact (results
+`*_ty2024.csv`).
+
 ---
 
-## 7. Phase 2 hook
+## 8. Practical recommendation
+
+For carbon-aware data-center scheduling under a covariance-based robust model:
+**use a per-region marginal scheduler.** Modelling cross-region carbon dependence
+adds estimation burden and (in the heterogeneous case) measurable noise, for no
+robust benefit — the regional *mean* carbon profiles capture essentially all the
+schedulable value. Spatial dependence modelling should be reserved for (i)
+decision structures that can act on it (inter-region transfer — see
+`docs/proposal_transfer_channel.md`) and (ii) dependence models that can represent
+its actual non-elliptical shape (Phase 2).
+
+---
+
+## 9. Phase 2 hook
 
 The Phase 1 null is not a dead end — it is a *specification result*. Second-moment
 spatial dependence carries no robust value, and the genuine dependence structure is
@@ -189,7 +220,7 @@ Mahalanobis–Wasserstein ground metric can express.
 
 ---
 
-## 8. Caveats
+## 10. Caveats
 
 - Carbon intensity is the only stochastic object; load is deterministic (clean
   scope split from the joint-uncertainty teammate).
