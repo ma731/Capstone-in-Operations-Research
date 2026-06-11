@@ -67,3 +67,11 @@ results/
 figures/*.png
 figures/*.pdf
 !figures/.gitkeep
+
+# LaTeX build artifacts
+thesis/*.aux
+thesis/*.log
+thesis/*.out
+thesis/*.toc
+thesis/*.bbl
+thesis/*.blg
