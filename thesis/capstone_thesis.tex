@@ -271,27 +271,54 @@ cross-region dependence can alter the schedule. The experiment manipulates exact
 these blocks.
 
 \subsection{Feasible set and constraint regimes}\label{sec:constraints}
-All constraints are linear, preserving the SOCP class. \textbf{C0} per-cell
-capacity $0\le x_{r,t}\le\bar x_{r,t}$ ($\bar x=50$ MW unless variable).
-\textbf{C2} flexible/inflexible split: a fraction $\alpha_r$ of daily work $W_r$
-follows a fixed intraday shape; the remainder is flexible
-($\alpha\in\{0.30,0.50,0.75\}$; utilization fixed at $80\%$, $W_r=960$ MWh).
-\textbf{C3} ramp $\lvert x_{r,t}-x_{r,t-1}\rvert\le15$ MW/h. \textbf{3a} deferral
-deadline: at least $\gamma=0.20$ of flexible work clears in hours $[0,7]$.
-\textbf{3b} thermal/PUE ceiling (temperature-dependent, climate cases only).
-\textbf{3c} carbon-coupled variable capacity, adapted from
-Wijayawardana and Chien~\citep{wijayawardana2025}: the ceiling becomes
-$\bar x_{r,t}=x_{\min}+(x_{\max}-x_{\min})\,\mathrm{CFE}_{r,t}/100$, where CFE is
-the training-mean carbon-free-energy share --- capacity falls as the grid gets
-dirtier. Bounds $(x_{\min},x_{\max})=(50,75)$ were calibrated on training data to a
-loosely binding (``Goldilocks'') regime: the constraint binds on $28$--$37\%$ of
-region-hours, with positive slack and capacity margin, so it shapes the schedule
-without freezing it. \textbf{3d} an optional carbon budget
-$\sum_{r,t}\bar\rho_{r,t}x_{r,t}\le B$.
+The feasible set $\mathcal{X}$ collects the linear constraints below; introducing an
+auxiliary flexible-load variable $x^{\mathrm f}\in\R^{R\times T}_{\ge0}$, the
+scheduler solves \eqref{eq:obj} over
+\begin{subequations}\label{eq:feasible}
+\begin{align}
+&0\le x_{r,t}\le\bar x_{r,t}, && \forall r,t
+  &&\text{(C0: capacity)}\\[2pt]
+&x_{r,t}=\alpha_r W_r\,p_{r,t}+x^{\mathrm f}_{r,t}, && \forall r,t
+  &&\text{(C2: flex/inflex split)}\\[2pt]
+&\textstyle\sum_{t} x^{\mathrm f}_{r,t}=(1-\alpha_r)\,W_r, && \forall r
+  &&\text{(C2: work conservation)}\\[2pt]
+&\lvert x_{r,t}-x_{r,t-1}\rvert\le\Delta_r, && \forall r,t
+  &&\text{(C3: ramp)}\\[2pt]
+&\textstyle\sum_{t\in\mathcal W} x^{\mathrm f}_{r,t}\ge\gamma\,(1-\alpha_r)\,W_r,
+  && \forall r &&\text{(3a: deferral deadline)}\\[2pt]
+&\pi_{r,t}\,x_{r,t}\le\bar P, && \forall r,t
+  &&\text{(3b: thermal/PUE)}\\[2pt]
+&\textstyle\sum_{r,t}\bar\rho_{r,t}\,x_{r,t}\le B
+  && &&\text{(3d: carbon budget)}
+\end{align}
+\end{subequations}
+where $W_r$ is region $r$'s daily work (utilization fixed at $80\%$, $W_r=960$ MWh);
+$\alpha_r\in\{0.30,0.50,0.75\}$ is the inflexible fraction following the fixed
+intraday shape $p_{r,t}$ ($\sum_t p_{r,t}=1$); $\Delta_r=15$ MW/h is the ramp limit;
+$\mathcal W=[0,7]$ and $\gamma=0.20$ set the deferral deadline; and
+$\pi_{r,t}=\mathrm{PUE}_0+\kappa\max(\mathcal T_{r,t}-\mathcal T_{\mathrm{set}},0)$
+is the temperature-coupled power-usage multiplier (data, hence a constant per cell),
+capped at effective power $\bar P$. Every constraint is linear, so $\mathcal X$ is
+polyhedral and the program \eqref{eq:obj} remains an SOCP.
+
+The capacity ceiling is constant ($\bar x_{r,t}=50$ MW) except under constraint
+\textbf{3c}, the carbon-coupled variable capacity adapted from Wijayawardana and
+Chien~\citep{wijayawardana2025}, which replaces it with
+\begin{equation}
+\bar x_{r,t}=x_{\min}+(x_{\max}-x_{\min})\,\mathrm{CFE}_{r,t}/100,
+\label{eq:varcap}
+\end{equation}
+where $\mathrm{CFE}_{r,t}$ is the training-mean carbon-free-energy share --- capacity
+falls as the grid gets dirtier. The bounds $(x_{\min},x_{\max})=(50,75)$ were
+calibrated on training data to a loosely binding (``Goldilocks'') regime: the
+constraint binds on $28$--$37\%$ of region-hours, leaving positive slack and capacity
+margin, so it shapes the schedule without freezing it.
 
 Three nested regimes report results as a function of operational tightness:
-\textbf{R3} (reference): C0+C2+C3; \textbf{R1} (lean): R3+3a; \textbf{R2}: R1+3b
-(climate cases) or R1+3c (interconnection cases).
+\textbf{R3} (reference) imposes C0\,+\,C2\,+\,C3; \textbf{R1} (lean) adds the deferral
+deadline 3a; and \textbf{R2} adds the thermal ceiling 3b (climate cases) or the
+variable-capacity ceiling 3c (interconnection cases). The carbon budget 3d is
+available but inactive in the reported regimes.
 
 \subsection{The falsification test: shuffled marginals}\label{sec:test}
 The scheduler is fitted twice, with covariances differing in exactly one respect:
@@ -304,14 +331,24 @@ The scheduler is fitted twice, with covariances differing in exactly one respect
 \label{eq:shuf}
 \end{equation}
 preserving every region's marginal distribution and within-region autocorrelation
-while destroying only cross-region dependence. The \emph{spatial gap}
+while destroying only cross-region dependence. Each fitted schedule $x$ is evaluated
+by the out-of-sample conditional value-at-risk of daily emissions
+$e_i=\langle\rho_i,x\rangle$ realized on test day $i$. We use the
+Rockafellar--Uryasev form \citep{rockafellar2000}
+\begin{equation}
+\CVaR_{\beta}(e)=\min_{\tau\in\R}\;\Big\{\tau+\tfrac{1}{1-\beta}\,
+\E\big[(e-\tau)_+\big]\Big\},
+\qquad\beta=0.95,
+\label{eq:cvar}
+\end{equation}
+estimated as the empirical mean of the worst $5\%$ of test days. The \emph{spatial
+gap} is the difference between the two arms,
 \begin{equation}
 \mathrm{gap}=\CVaR_{0.95}\big(e^{\mathrm{shuf}}\big)-
 \CVaR_{0.95}\big(e^{\mathrm{joint}}\big),
-\qquad e_i=\langle\rho_i,x\rangle\ \text{on test day } i,
 \label{eq:gap}
 \end{equation}
-is positive when the joint covariance helps. The test is a falsification: it is
+positive when the joint covariance helps. The test is a falsification: it is
 built to detect a spatial benefit if one exists, so a null is informative.
 Algorithm~\ref{alg:protocol} summarizes the full protocol.
 
