@@ -431,12 +431,31 @@ three $\alpha$-levels), CV-selected $\varepsilon^\star$, single test read on 202
 The gap never exceeds a few tenths of one percent of test
 $\CVaR_{0.95}$ in either direction, and where the bootstrap calls a cell
 ``detectable'' the signs flip across adjacent $\alpha$-levels --- the signature of
-solver-path artifacts rather than exploitable structure. The two earlier panels
-agree: California/Nevada gaps lie in $[-0.012,+0.058]\%$ and Iberia--France in
-$[-0.016,+0.321]\%$, with the single $0.32\%$ cell not sign-stable across
-residual estimators. Cross-validation selects $\varepsilon^\star=1$ in 26 of 27
-cells, so both arms are genuinely robustified --- the null is not an artifact of
-the DRO being switched off.
+solver-path artifacts rather than exploitable structure. The California/Nevada
+panel agrees (gaps in $[-0.012,+0.058]\%$, DRO active throughout).
+
+Crucially, this is a null of the \emph{strong} kind. In all three pre-registered
+cases cross-validation \emph{chooses} a non-trivial ambiguity radius:
+$\varepsilon^\star=1$ in every one of the 27 cells for \texttt{taskc} and
+\texttt{us\_hetero}, and in 25 of 27 for \texttt{us\_west}. The DRO is therefore
+genuinely engaged --- it is paying for robustness, not collapsing to the nominal
+problem --- and the two arms still coincide. A null in which CV had selected
+$\varepsilon^\star=0$ would be uninformative (robustification switched off, so the
+arms must match by construction); here the robustification is demonstrably on and
+the spatial covariance still buys nothing. This is the first regime in the project
+where the DRO is consistently active, which is precisely what makes the null
+informative rather than vacuous.
+
+The Iberia--France panel is the instructive contrast and the project's historical
+starting point. There the residual correlation is near zero, and CV does not even
+consistently engage the DRO: $\varepsilon^\star$ flickers between $0$, $0.1$, $1$
+and $10$ across cells, collapsing to $0$ in several. This is itself consistent with
+the thesis --- where there is no cross-region structure, the machinery sees nothing
+worth robustifying --- but it makes the Iberian null the \emph{weak} kind. We
+therefore retain it only as low-correlation, real-grid external validity, and rest
+the central claim on the US/Canada cases where the DRO is unambiguously on. The
+engineered \texttt{us\_hetero} portfolio supplies the strong zero-correlation null
+($\varepsilon^\star=1$ throughout, still no value) that Iberia cannot.
 
 \begin{table}[t]
 \centering\small
@@ -692,6 +711,11 @@ seasonal and AR(1) residualization, Benjamini--Hochberg correction over 144 cell
 walk-forward validation to 2024, and a log-denser $\varepsilon$ grid
 (Sections~\ref{sec:res-gap}--\ref{sec:res-robust}). In the most
 diversification-friendly case the joint covariance is mildly counterproductive.
+Critically, this is an \emph{active} null: cross-validation selects a non-trivial
+ambiguity radius ($\varepsilon^\star=1$) in nearly every cell of the US/Canada
+cases, so the DRO is genuinely robustifying and the spatial covariance still adds
+nothing --- a stronger result than a null in which the robustification had
+collapsed to the nominal problem.
 
 \textbf{RQ3 --- Why?} Two complementary mechanisms. A mean-ablation experiment
 proves the covariance signal is real and worth up to $1.46\%$ of tail emissions in
