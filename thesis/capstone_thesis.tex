@@ -166,13 +166,14 @@ limitations. Section~\ref{sec:conclusion} concludes and outlines future work.
 
 \subsection{Carbon-aware computing}
 Carbon-aware scheduling exploits temporal and spatial variation in grid carbon
-intensity. \citet{radovanovic2022} describe Google's production system, which
+intensity. In production at Google, Radovanovi\'c et
+al.~\citep{radovanovic2022} describe a system which
 computes day-ahead ``virtual capacity curves'' that throttle flexible compute during
 high-carbon hours; measured impact on latency-sensitive workloads is negligible
-while load shifts measurably toward cleaner hours. \citet{wiesner2021} analyse the
+while load shifts measurably toward cleaner hours. Wiesner et al.~\citep{wiesner2021} analyse the
 potential of temporal shifting across regions and workloads, finding the benefit
 depends strongly on the grid's marginal mix and the workload's flexibility.
-\citet{wijayawardana2025} study cloud-VM scheduling on datacenters whose capacity
+Wijayawardana and Chien~\citep{wijayawardana2025} study cloud-VM scheduling on datacenters whose capacity
 varies with grid conditions --- including carbon-coupled capacity, where a constant
 carbon budget forces capacity to fall as intensity rises --- and document the
 goodput cost of capacity variation for long-running jobs. This systems literature
@@ -188,7 +189,7 @@ data-driven choice, with tractable finite-dimensional reformulations
 Wasserstein DRO with a Mahalanobis ground metric reduces to a mean term plus a
 covariance-weighted regularizer --- an interpretable ``mean plus
 $\varepsilon\,\sqrt{x^\top\Sigma x}$'' objective solvable as a second-order cone
-program (SOCP) \citep{blanchet2019}. \citet{hall2024} apply Wasserstein DRO to
+program (SOCP) \citep{blanchet2019}. Hall et al.~\citep{hall2024} apply Wasserstein DRO to
 carbon-aware data-center scheduling with virtual capacity curves, treating each
 region's carbon intensity as the uncertain quantity and demonstrating robustness
 gains over sample-average approximation. The risk functional we target,
@@ -279,7 +280,7 @@ follows a fixed intraday shape; the remainder is flexible
 deadline: at least $\gamma=0.20$ of flexible work clears in hours $[0,7]$.
 \textbf{3b} thermal/PUE ceiling (temperature-dependent, climate cases only).
 \textbf{3c} carbon-coupled variable capacity, adapted from
-\citet{wijayawardana2025}: the ceiling becomes
+Wijayawardana and Chien~\citep{wijayawardana2025}: the ceiling becomes
 $\bar x_{r,t}=x_{\min}+(x_{\max}-x_{\min})\,\mathrm{CFE}_{r,t}/100$, where CFE is
 the training-mean carbon-free-energy share --- capacity falls as the grid gets
 dirtier. Bounds $(x_{\min},x_{\max})=(50,75)$ were calibrated on training data to a
@@ -378,9 +379,9 @@ constant under fixed demand --- a covariance-only world in which any joint-vs-sh
 difference is attributable purely to the spatial blocks.
 
 \paragraph{Tail dependence (RQ3, structural).} For each region pair we estimate
-upper/lower tail-dependence coefficients
+the upper and lower tail-dependence coefficients
 $\chiU(q)=\Pr(U>q,V>q)/(1-q)$ and $\chiL(p)=\Pr(U<p,V<p)/p$ on rank
-pseudo-observations of residual intensity, and compare $\chiU$ at $q=0.95$ with the
+pseudo-observations of residual intensity, comparing $\chiU$ at $q=0.95$ with the
 Gaussian-copula value at the matched correlation. Since the Gaussian copula ---
 the dependence family a covariance ball can represent --- is asymptotically
 tail-independent \citep{embrechts2002}, a positive empirical excess would be
@@ -820,13 +821,15 @@ cross-validation only. The 3c capacity bounds $(x_{\min},x_{\max})=(50,75)$ were
 Goldilocks-calibrated on training data alone (bind fraction $0.28$--$0.37$).
 
 \paragraph{Reproducing the experiments.} Every result regenerates with
-\texttt{python -m scripts.run\_case\_experiment --region-set <case> [flags]}, where
-\texttt{<case>}~$\in$ \{\texttt{us\_west}, \texttt{taskc}, \texttt{us\_hetero}\}
-and flags select estimator (\texttt{--shrinkage}, \texttt{--residualize}),
-mean-ablation (\texttt{--ablate-mean}), walk-forward (\texttt{--test-year}), or
-grid density (\texttt{--eps-grid}). Snapshot file names follow
-\texttt{<case>\_regimes\_<date>[\_<variant>].csv}; the
-\texttt{results\_snapshots/README.md} maps each to its source command.
+\begin{center}
+\texttt{python -m scripts.run\_case\_experiment --region-set <case> [flags]}
+\end{center}
+where \texttt{<case>} is one of \texttt{us\_west}, \texttt{taskc},
+\texttt{us\_hetero}, and flags select the estimator (\texttt{--shrinkage},
+\texttt{--residualize}), mean-ablation (\texttt{--ablate-mean}), walk-forward
+(\texttt{--test-year}), or grid density (\texttt{--eps-grid}). Snapshot files are
+named \texttt{<case>\_regimes\_<date>[\_<variant>].csv}, and the snapshot
+\texttt{README} maps each to its source command.
 Table~\ref{tab:snapmap} maps each results subsection to its archived table.
 
 \begin{table}[h]
@@ -850,7 +853,8 @@ Section & Result & Archived source\\
 \end{tabular}
 \end{table}
 
-\section{Annex A: Individual Contribution Statement}\label{app:ics}
+\section*{Annex A: Individual Contribution Statement}\label{app:ics}
+\addcontentsline{toc}{section}{Annex A: Individual Contribution Statement}
 
 This Research Capstone was completed individually by \textbf{Marco Ortiz Togashi}
 under the supervision of Prof.\ Bissan Ghaddar. As sole author, I am responsible
