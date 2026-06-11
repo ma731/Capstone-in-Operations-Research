@@ -38,7 +38,7 @@
 {\Large\bfseries Does Spatial Correlation of Carbon Intensity Improve\par
 Distributionally Robust Carbon-Aware Data-Center Scheduling?\par}
 \vspace{0.5cm}
-{\large A Three-Grid Falsification Study with a Causal Mechanism\par}
+{\large A Multi-Grid Falsification Study with a Causal Mechanism\par}
 \vspace{2.2cm}
 {\large\bfseries Marco Ortiz Togashi\par}
 \vspace{0.3cm}
@@ -138,11 +138,12 @@ The thesis makes four contributions. (i)~\emph{A falsification design}: a
 shuffled-marginals test that isolates exactly the value of spatial covariance,
 evaluated out-of-sample under pre-registration discipline (commit-locked
 configurations, dry-run gates, single test-set read). (ii)~\emph{A replicated
-empirical null across the dependence spectrum}: five region sets --- two where
-correlation collapses to the diurnal cycle (California; Iberia--France), two
-interconnected US/Canada sets where strong correlation survives de-seasonalization
-(US West; Ontario--Eastern belt), and one engineered near-uncorrelated
-solar/wind/hydro portfolio --- all yield spatial gaps below $0.4\%$ of $\CVaR$,
+empirical null across the dependence spectrum}: five region sets --- three
+interconnected sets where strong correlation survives de-seasonalization
+(California/Nevada; US West; Ontario--Eastern belt), one European set where
+residual correlation collapses to the diurnal cycle (Iberia--France), and one
+engineered near-uncorrelated solar/wind/hydro portfolio --- all yield spatial gaps
+below $0.4\%$ of $\CVaR$,
 robust to estimator choice, multiple-testing correction, and walk-forward
 validation. (iii)~\emph{A causal mechanism}: a mean-ablation experiment showing the
 covariance signal is real but dominated by the mean field, and a tail-dependence
@@ -629,6 +630,19 @@ vs.\ $0.17$). Elliptical copulas force $\chiL=\chiU$, so this is structure a
 Mahalanobis--Wasserstein ball is geometrically incapable of representing --- the
 covariance is not merely masked (Section~\ref{sec:res-ablation}); for the part of
 the dependence that varies, it is also the \emph{wrong object}.
+Figure~\ref{fig:tails} shows the asymmetry for the Ontario--Eastern belt.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.72\textwidth]{../figures/tail_dependence_taskc.pdf}
+\caption{Upper-tail dependence $\chiU(q)$ for the Ontario--Eastern belt region
+pairs (solid) against the Gaussian-copula benchmark at the matched correlation
+(dashed). The empirical curves sit at or below the benchmark as $q\to1$: in the
+dirtiest hours the regions decouple, so there is no exploitable upper-tail
+co-movement for a richer ambiguity set to capture. The complementary radial
+asymmetry ($\chiL>\chiU$) is quantified in Table~\ref{tab:tails}.}
+\label{fig:tails}
+\end{figure}
 
 \begin{table}[t]
 \centering\small
