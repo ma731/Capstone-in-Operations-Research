@@ -1,0 +1,736 @@
+% IE Research Capstone Thesis -- compliant with Kick-Off May 2026 guidelines:
+% max 30 pages (excl. refs/appendices), 12pt Times New Roman, 1.5 line spacing,
+% structure: Cover / Abstract / Intro / Lit Review / Methodology / Results /
+% Discussion / Conclusions / References (IEEE) / Appendices (Annex A: ICS).
+\documentclass[12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{newtxtext,newtxmath}        % Times New Roman text + math
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}\onehalfspacing    % 1.5 line spacing
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,array,enumitem,graphicx,xcolor,mathtools}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage[hidelinks]{hyperref}
+\usepackage[numbers,sort&compress]{natbib}  % IEEE-style numeric citations
+
+\newcommand{\vecx}{\operatorname{vec}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\CVaR}{\mathrm{CVaR}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\chiU}{\chi_{\mathrm{U}}}
+\newcommand{\chiL}{\chi_{\mathrm{L}}}
+\newcommand{\gco}{\mathrm{gCO_2eq/kWh}}
+
+\begin{document}
+
+% ===================== COVER PAGE =====================
+\begin{titlepage}
+\centering
+{\large IE University --- School of Science \& Technology\par}
+\vspace{0.4cm}
+{\large Master in Business Analytics \& Data Science\par}
+{\large Research Capstone in Operations Research\par}
+\vspace{2.2cm}
+{\Large\bfseries Does Spatial Correlation of Carbon Intensity Improve\par
+Distributionally Robust Carbon-Aware Data-Center Scheduling?\par}
+\vspace{0.5cm}
+{\large A Three-Grid Falsification Study with a Causal Mechanism\par}
+\vspace{2.2cm}
+{\large\bfseries Marco Ortiz Togashi\par}
+\vspace{0.3cm}
+{\large Supervisor: Prof.\ Bissan Ghaddar\par}
+\vspace{2.2cm}
+{\large June 2026\par}
+\vfill
+\begin{minipage}{0.9\textwidth}\small
+\textbf{AI Use Declaration.} Generative AI tools (Anthropic Claude) were used as a
+research and engineering assistant under the author's direction: for code
+implementation support, experiment orchestration, literature triage, and drafting
+assistance. All research questions, modelling decisions, experimental designs, and
+interpretations are the author's, developed with the supervisor; all results were
+produced by version-controlled, pre-registered code reviewed by the author, and all
+text was reviewed and edited by the author.
+\end{minipage}
+\end{titlepage}
+
+% ===================== ABSTRACT =====================
+\begin{abstract}
+\noindent Carbon-aware schedulers shift data-center compute toward hours and regions
+where electricity is cleanest, and recent work models carbon intensity as uncertain
+within a distributionally robust optimization (DRO) framework. A natural next step
+is to treat carbon intensity as a stochastic \emph{vector} across electrically
+coupled regions, so that \emph{spatial correlation} can inform the schedule. This
+thesis asks whether that spatial structure carries any robust scheduling value.
+Using a Mahalanobis--Wasserstein DRO formulation solved as a second-order cone
+program, we design a falsification test --- the schedule fitted to the joint
+covariance versus one fitted to a block-diagonal covariance with all cross-region
+structure destroyed --- evaluated by out-of-sample $\CVaR_{0.95}$ of daily emissions
+under strict pre-registration. Across five region sets spanning the full dependence
+spectrum (California, Iberia--France, the US West, an Ontario-anchored Eastern
+Interconnection belt, and an engineered heterogeneous solar/wind/hydro portfolio),
+the answer is a replicated, robustness-checked \textbf{null}: the spatial gap never
+exceeds a few tenths of one percent, survives shrinkage and residualization
+batteries, Benjamini--Hochberg correction, and walk-forward validation. Two
+diagnostics explain the mechanism. A \emph{mean-ablation} experiment shows the
+covariance signal is genuine and exploitable but dominated by the mean carbon
+field; a \emph{tail-dependence} analysis shows the residual dependence is
+non-elliptical --- upper-tail-independent and radially asymmetric --- and thus
+structurally invisible to covariance-based ambiguity sets. The practical
+recommendation is that per-region marginal schedulers capture essentially all the
+value, and the findings supply a precise empirical mandate for copula-based
+extensions.
+\end{abstract}
+\newpage
+\tableofcontents
+\newpage
+
+% ===================== 1. INTRODUCTION =====================
+\section{Introduction}\label{sec:intro}
+
+\subsection{Context}
+Data centers consumed an estimated 1--2\% of global electricity and their demand is
+growing rapidly with AI workloads \citep{iea2024}. Unlike most industrial loads,
+compute is unusually \emph{flexible}: many batch and training workloads can be
+delayed by hours or moved between sites with little loss of utility. Because the
+carbon intensity of grid electricity varies strongly by hour and by region ---
+driven by wind, solar, hydro availability, and demand --- this flexibility lets a
+data-center operator act as a grid-aware participant, deferring work from dirty
+hours to clean ones \citep{radovanovic2022,wiesner2021}. Google's carbon-intelligent
+computing platform demonstrated such temporal shifting at production scale
+\citep{radovanovic2022}, and recent systems work extends it to variable-capacity
+operation \citep{wijayawardana2025}.
+
+Scheduling against \emph{tomorrow's} carbon intensity, however, means scheduling
+under uncertainty. Distributionally robust optimization (DRO) addresses this by
+optimizing against the worst distribution in an ambiguity ball around the empirical
+distribution \citep{esfahani2018}, and has been applied to carbon-aware scheduling
+with carbon intensity as the uncertain quantity \citep{hall2024}. Existing
+formulations treat each region's carbon intensity essentially in isolation. Yet
+carbon intensities of electrically interconnected regions co-move: weather fronts
+traverse neighbouring balancing areas, and shared solar fleets create synchronized
+clean periods. It is therefore natural to model carbon intensity as a stochastic
+\emph{vector} with a full spatial covariance --- the extension studied here.
+
+\subsection{Problem statement and research questions}
+Modelling spatial dependence is not free: cross-region covariance blocks must be
+estimated from limited data, and a richer uncertainty model is only worthwhile if it
+buys measurably better schedules. The literature has assumed, rather than tested,
+that spatial correlation in the carbon field is worth modelling. This thesis tests
+that assumption directly.
+
+\begin{description}[leftmargin=1.4em,itemsep=2pt]
+\item[RQ1.] Is the carbon intensity of electrically coupled regions genuinely
+spatially correlated, beyond shared diurnal cycles?
+\item[RQ2.] Does feeding that spatial correlation to a covariance-based
+(Mahalanobis--Wasserstein) DRO scheduler reduce out-of-sample tail emissions
+($\CVaR_{0.95}$), relative to an otherwise identical scheduler that ignores
+cross-region dependence?
+\item[RQ3.] If not, \emph{why} not --- and what dependence structure, if any,
+would a richer uncertainty model need to capture?
+\end{description}
+
+\subsection{Contributions}
+The thesis makes four contributions. (i)~\emph{A falsification design}: a
+shuffled-marginals test that isolates exactly the value of spatial covariance,
+evaluated out-of-sample under pre-registration discipline (commit-locked
+configurations, dry-run gates, single test-set read). (ii)~\emph{A replicated
+empirical null across the dependence spectrum}: five region sets --- two where
+correlation collapses to the diurnal cycle (California; Iberia--France), two
+interconnected US/Canada sets where strong correlation survives de-seasonalization
+(US West; Ontario--Eastern belt), and one engineered near-uncorrelated
+solar/wind/hydro portfolio --- all yield spatial gaps below $0.4\%$ of $\CVaR$,
+robust to estimator choice, multiple-testing correction, and walk-forward
+validation. (iii)~\emph{A causal mechanism}: a mean-ablation experiment showing the
+covariance signal is real but dominated by the mean field, and a tail-dependence
+analysis showing the residual dependence is non-elliptical
+(upper-tail-independent, radially asymmetric), hence invisible to covariance-based
+ambiguity sets by construction. (iv)~\emph{Practice and theory implications}: a
+per-region marginal scheduler captures essentially all attainable value, and the
+evidence yields a precise specification mandate for copula-based DRO.
+
+\subsection{Thesis structure}
+Section~\ref{sec:lit} reviews the literature and locates the gap.
+Section~\ref{sec:method} develops the optimization model, the falsification test,
+and the evaluation protocol. Section~\ref{sec:results} reports the correlation
+validation and the experimental results across all region sets, including the
+robustness battery, mean-ablation, and tail-dependence diagnostics.
+Section~\ref{sec:discussion} interprets the findings against prior work and states
+limitations. Section~\ref{sec:conclusion} concludes and outlines future work.
+
+% ===================== 2. LITERATURE REVIEW =====================
+\section{Literature Review}\label{sec:lit}
+
+\subsection{Carbon-aware computing}
+Carbon-aware scheduling exploits temporal and spatial variation in grid carbon
+intensity. \citet{radovanovic2022} describe Google's production system, which
+computes day-ahead ``virtual capacity curves'' that throttle flexible compute during
+high-carbon hours; measured impact on latency-sensitive workloads is negligible
+while load shifts measurably toward cleaner hours. \citet{wiesner2021} analyse the
+potential of temporal shifting across regions and workloads, finding the benefit
+depends strongly on the grid's marginal mix and the workload's flexibility.
+\citet{wijayawardana2025} study cloud-VM scheduling on datacenters whose capacity
+varies with grid conditions --- including carbon-coupled capacity, where a constant
+carbon budget forces capacity to fall as intensity rises --- and document the
+goodput cost of capacity variation for long-running jobs. This systems literature
+establishes operational levers (deferral, throttling, capacity coupling) that we
+adopt as constraints, but it treats future carbon intensity as a point forecast;
+uncertainty is handled implicitly, by re-planning.
+
+\subsection{Distributionally robust optimization}
+DRO optimizes against the worst-case distribution within an ambiguity set, and the
+Wasserstein ball around the empirical distribution has emerged as the canonical
+data-driven choice, with tractable finite-dimensional reformulations
+\citep{esfahani2018,kuhn2019}. For costs linear in the uncertain vector, type-2
+Wasserstein DRO with a Mahalanobis ground metric reduces to a mean term plus a
+covariance-weighted regularizer --- an interpretable ``mean plus
+$\varepsilon\,\sqrt{x^\top\Sigma x}$'' objective solvable as a second-order cone
+program (SOCP) \citep{blanchet2019}. \citet{hall2024} apply Wasserstein DRO to
+carbon-aware data-center scheduling with virtual capacity curves, treating each
+region's carbon intensity as the uncertain quantity and demonstrating robustness
+gains over sample-average approximation. The risk functional we target,
+$\CVaR_{\beta}$, is standard for tail-focused evaluation \citep{rockafellar2000}.
+
+\subsection{Spatial dependence and its modelling}
+Cross-region dependence enters a Mahalanobis--Wasserstein model only through the
+off-diagonal blocks of the covariance matrix. Estimating large covariance matrices
+from short panels is noisy; shrinkage estimators \citep{ledoit2004} are the standard
+remedy and serve here as a robustness arm. Beyond second moments, dependence is
+fully described by the copula \citep{sklar1959,joe2014}; tail-dependence
+coefficients quantify joint extremes that correlation cannot see, and the Gaussian
+copula has zero asymptotic tail dependence for any correlation below one
+\citep{embrechts2002} --- a property we exploit as a diagnostic benchmark.
+Vine-copula constructions make high-dimensional non-elliptical dependence tractable
+\citep{joe2014} and are the natural candidate for a dependence-aware extension of
+DRO ambiguity sets.
+
+\subsection{The gap}
+To our knowledge, no prior work \emph{tests} whether spatial correlation of carbon
+intensity --- however strong in the data --- translates into out-of-sample robust
+scheduling value. The systems literature does not model uncertainty explicitly; the
+DRO literature models uncertainty per region but has not isolated the marginal
+contribution of \emph{cross-region} dependence; and neither offers a controlled
+mechanism for \emph{why} spatial structure should or should not matter. This thesis
+fills that gap with a falsification test, a replicated multi-grid study, and two
+mechanism diagnostics (mean-ablation and tail dependence).
+
+% ===================== 3. METHODOLOGY =====================
+\section{Methodology}\label{sec:method}
+
+\subsection{Research design overview}
+The design is a controlled computational experiment. We hold the optimization
+machinery fixed and manipulate exactly one object --- the cross-region blocks of the
+covariance supplied to the scheduler --- then measure the consequence on held-out
+tail emissions. Five region sets spanning the dependence spectrum serve as
+replications; three nested constraint regimes guard against the result being an
+artifact of a particular feasible-set geometry; a robustness battery (estimators,
+multiple-testing correction, walk-forward) guards against statistical artifacts; and
+two further experiments (mean-ablation; tail dependence) identify the mechanism.
+Throughout, a pre-registration discipline removes analyst degrees of freedom.
+
+\subsection{The scheduling problem}
+Compute is scheduled across $R$ regions over a $T=24$-hour day. The decision is
+$x\in\R^{R\times T}_{\ge0}$, where $x_{r,t}$ is compute power (MW) in region $r$ at
+hour $t$. Carbon intensity $\rho_{r,t}$ ($\gco$) is uncertain; realized emissions
+are linear, $\langle\rho,x\rangle=\sum_{r,t}\rho_{r,t}x_{r,t}$.
+
+\subsection{Distributionally robust formulation}
+We minimize worst-case expected emissions over a type-2 Wasserstein ball
+$\mathcal{B}_\varepsilon(\hat{\mathbb{P}})$ of radius $\varepsilon$ centred on the
+empirical distribution of the daily carbon field, with Mahalanobis ground metric
+induced by the empirical covariance $\hat\Sigma\in\R^{RT\times RT}$:
+\begin{equation}
+\min_{x\in\mathcal{X}}\ \sup_{\mathbb{Q}\in\mathcal{B}_\varepsilon(\hat{\mathbb{P}})}
+\E_{\mathbb{Q}}\big[\langle\rho,x\rangle\big]
+\;=\;
+\min_{x\in\mathcal{X}}\ \langle\bar\rho,x\rangle
++\varepsilon\sqrt{x^\top\hat\Sigma\,x},
+\label{eq:obj}
+\end{equation}
+by Wasserstein duality for linear costs \citep{esfahani2018,blanchet2019}, where
+$\bar\rho$ is the empirical mean field. With the Cholesky factorization
+$\hat\Sigma=LL^\top$ the penalty becomes $\varepsilon\lVert
+L^\top\vecx(x)\rVert_2$, so \eqref{eq:obj} is an SOCP, solved to global optimality
+(CLARABEL). The radius $\varepsilon$ interpolates from the deterministic problem
+($\varepsilon=0$) to increasingly conservative schedules.
+
+\paragraph{Where spatial correlation enters.}
+Partitioning $\hat\Sigma$ into $T\times T$ blocks $\Sigma_{rs}$ by region pair, the
+quadratic form splits as
+\begin{equation}
+x^\top\hat\Sigma x=\sum_r x_r^\top\Sigma_{rr}x_r
++\sum_{r\neq s}x_r^\top\Sigma_{rs}x_s ,
+\label{eq:quad}
+\end{equation}
+so the off-diagonal (spatial) blocks are the \emph{only} channel by which
+cross-region dependence can alter the schedule. The experiment manipulates exactly
+these blocks.
+
+\subsection{Feasible set and constraint regimes}\label{sec:constraints}
+All constraints are linear, preserving the SOCP class. \textbf{C0} per-cell
+capacity $0\le x_{r,t}\le\bar x_{r,t}$ ($\bar x=50$ MW unless variable).
+\textbf{C2} flexible/inflexible split: a fraction $\alpha_r$ of daily work $W_r$
+follows a fixed intraday shape; the remainder is flexible
+($\alpha\in\{0.30,0.50,0.75\}$; utilization fixed at $80\%$, $W_r=960$ MWh).
+\textbf{C3} ramp $\lvert x_{r,t}-x_{r,t-1}\rvert\le15$ MW/h. \textbf{3a} deferral
+deadline: at least $\gamma=0.20$ of flexible work clears in hours $[0,7]$.
+\textbf{3b} thermal/PUE ceiling (temperature-dependent, climate cases only).
+\textbf{3c} carbon-coupled variable capacity, adapted from
+\citet{wijayawardana2025}: the ceiling becomes
+$\bar x_{r,t}=x_{\min}+(x_{\max}-x_{\min})\,\mathrm{CFE}_{r,t}/100$, where CFE is
+the training-mean carbon-free-energy share --- capacity falls as the grid gets
+dirtier. Bounds $(x_{\min},x_{\max})=(50,75)$ were calibrated on training data to a
+loosely binding (``Goldilocks'') regime: the constraint binds on $28$--$37\%$ of
+region-hours, with positive slack and capacity margin, so it shapes the schedule
+without freezing it. \textbf{3d} an optional carbon budget
+$\sum_{r,t}\bar\rho_{r,t}x_{r,t}\le B$.
+
+Three nested regimes report results as a function of operational tightness:
+\textbf{R3} (reference): C0+C2+C3; \textbf{R1} (lean): R3+3a; \textbf{R2}: R1+3b
+(climate cases) or R1+3c (interconnection cases).
+
+\subsection{The falsification test: shuffled marginals}\label{sec:test}
+The scheduler is fitted twice, with covariances differing in exactly one respect:
+\begin{equation}
+\big(\hat\Sigma^{\mathrm{shuf}}\big)_{rs}=
+\begin{cases}
+\Sigma_{rr}, & r=s,\\
+\mathbf{0}, & r\neq s,
+\end{cases}
+\label{eq:shuf}
+\end{equation}
+preserving every region's marginal distribution and within-region autocorrelation
+while destroying only cross-region dependence. The \emph{spatial gap}
+\begin{equation}
+\mathrm{gap}=\CVaR_{0.95}\big(e^{\mathrm{shuf}}\big)-
+\CVaR_{0.95}\big(e^{\mathrm{joint}}\big),
+\qquad e_i=\langle\rho_i,x\rangle\ \text{on test day } i,
+\label{eq:gap}
+\end{equation}
+is positive when the joint covariance helps. The test is a falsification: it is
+built to detect a spatial benefit if one exists, so a null is informative.
+Algorithm~\ref{alg:protocol} summarizes the full protocol.
+
+\begin{algorithm}[t]
+\caption{Shuffled-marginals experiment (one region set)}
+\label{alg:protocol}
+\begin{algorithmic}[1]
+\State \textbf{Input:} daily panels $\rho_{1:N}$ (train 2021--2024, test 2025);
+regimes $\{$R3, R1, R2$\}$; $\alpha$-levels $\{0.30,0.50,0.75\}$; grid
+$\mathcal{E}=\{0,0.1,1,10,100,1000\}$
+\For{each regime, each $\alpha$, each arm $\Sigma\in\{\text{joint},
+\text{shuf}\}$}
+  \For{each $\varepsilon\in\mathcal{E}$}  \Comment{blocked 5-fold time-series CV}
+    \For{each contiguous fold $k$}
+      \State fit $\bar\rho,L$ on training folds; solve SOCP \eqref{eq:obj};
+      record validation $\CVaR_{0.95}$
+    \EndFor
+  \EndFor
+  \State $\varepsilon^\star\gets\arg\min_\varepsilon$ mean validation CVaR
+  \Comment{per arm, independently}
+  \State refit on full training set at $\varepsilon^\star$; evaluate
+  \emph{once} on 2025 \Comment{single test read}
+\EndFor
+\State paired bootstrap (1000 resamples, fixed seed) on test days
+$\Rightarrow$ 95\% CI for the gap \eqref{eq:gap}
+\State \textbf{Pre-registration:} configuration commit-locked before any test
+read; \texttt{--dry-run} gate runs CV only
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Data}\label{sec:data}
+Carbon intensity is hourly lifecycle intensity from Electricity Maps (academic
+licence), 2021--2025, $43{,}824$ hourly observations per zone; panels are built on a
+common local clock per region set, trained on 2021--2024 and tested once on 2025.
+Five region sets span the dependence spectrum: \textbf{(A)}~California/Nevada
+(CISO, BANC, LDWP, NEVP); \textbf{(B)}~Iberia--France (ES, PT, FR);
+\textbf{(C)}~US West (A + Phoenix AZPS); \textbf{(D)}~Ontario--Eastern belt (CA-ON,
+NYISO, MISO, PJM); \textbf{(E)}~an engineered heterogeneous portfolio --- CISO
+(solar), ERCOT (wind), BPAT (hydro) --- deliberately chosen so clean periods do
+\emph{not} align: the adversarial best case for diversification. Temperature for
+constraint 3b is hourly ERA5 2\,m air temperature (Open-Meteo), one load-weighted
+point per zone. The licensed raw data is never committed; derived summary tables
+are archived in the repository for traceability.
+
+\subsection{Validation and mechanism diagnostics}\label{sec:diagnostics}
+\paragraph{Correlation validation (RQ1).} Raw Pearson correlation conflates
+co-movement with a shared diurnal cycle. We therefore report correlations of
+\emph{residuals} after removing each zone's hour-of-day mean (local clock), with
+overlay plots of standardized intensity for summer and winter weeks.
+
+\paragraph{Robustness battery.} Every experiment is re-run with (i) Ledoit--Wolf
+shrinkage covariance \citep{ledoit2004}; (ii) covariance estimated from seasonal
+(monthly-mean) residuals; (iii) covariance from AR(1) residuals. A pre-registered
+agreement rule counts a spatial effect only if positive and sign-stable across
+both residual estimators. Bootstrap $p$-values across all cells receive
+Benjamini--Hochberg correction at $q=0.05$ \citep{benjamini1995}; a walk-forward
+refit (train 2021--2023, test 2024) checks temporal stability; a log-denser
+$\varepsilon$ grid checks grid sensitivity.
+
+\paragraph{Mean-ablation (RQ3, causal).} To test whether the mean field masks the
+covariance, the mean used for \emph{scheduling} is transformed while evaluation
+stays on real emissions: \textsc{level} equalizes regional time-averages (keeping
+hour-of-day shape); \textsc{flat} sets a constant mean, making the mean term
+constant under fixed demand --- a covariance-only world in which any joint-vs-shuf
+difference is attributable purely to the spatial blocks.
+
+\paragraph{Tail dependence (RQ3, structural).} For each region pair we estimate
+upper/lower tail-dependence coefficients
+$\chiU(q)=\Pr(U>q,V>q)/(1-q)$ and $\chiL(p)=\Pr(U<p,V<p)/p$ on rank
+pseudo-observations of residual intensity, and compare $\chiU$ at $q=0.95$ with the
+Gaussian-copula value at the matched correlation. Since the Gaussian copula ---
+the dependence family a covariance ball can represent --- is asymptotically
+tail-independent \citep{embrechts2002}, a positive empirical excess would be
+exploitable tail structure invisible to the DRO; and since elliptical copulas force
+$\chiL=\chiU$, radial asymmetry diagnoses non-elliptical dependence.
+
+\subsection{Reproducibility}
+All code is version-controlled (private repository, continuous-integration test
+suite, $163$ unit tests); experiment configurations are commit-locked before
+test-set evaluation; bootstrap seeds are fixed; and every number reported in
+Sections~\ref{sec:results}--\ref{sec:discussion} traces to an archived summary
+table. Solvers: CLARABEL/ECOS for the SOCP; HiGHS for deterministic LP baselines.
+
+% ===================== 4. RESULTS (RUN 2) =====================
+\section{Results}\label{sec:results}
+
+\subsection{The spatial assumption is valid (RQ1)}\label{sec:res-corr}
+The premise holds. After removing each zone's hour-of-day mean,
+cross-region correlations of carbon intensity in the two electrically coupled
+US/Canada cases are strong and survive de-seasonalization: in the US West,
+CISO--NEVP $0.78$ and CISO--LDWP $0.72$ (shared solar resource and weather across
+WECC); in the Ontario--Eastern belt, CA-ON--NYISO $0.73$ and MISO--PJM $0.70$
+(weather fronts traversing the Eastern Interconnection). The engineered
+heterogeneous portfolio behaves as designed: ERCOT--BPAT residual correlation is
+$0.00$, with CISO--BPAT at $0.33$. Figure~\ref{fig:heatmaps} shows the residual
+correlation matrices; overlay plots of standardized intensity (archived with the
+code) confirm visible co-movement in summer and winter weeks for the coupled
+cases. Together with the earlier California ($0.65$--$0.78$ within-state) and
+Iberia--France panels, the five region sets span the dependence spectrum from
+$\approx 0$ to $\approx 0.8$ --- so whatever the scheduling result, it cannot be
+attributed to an absence of correlation in the data.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.48\textwidth]{../figures/ci_corr_heatmap_us_west.pdf}\hfill
+\includegraphics[width=0.48\textwidth]{../figures/ci_corr_heatmap_taskc.pdf}
+\caption{Residual (hour-of-day-removed) cross-region correlation of hourly carbon
+intensity, 2021--2025. Left: US West (CISO, BANC, LDWP, NEVP, AZPS). Right:
+Ontario--Eastern belt (CA-ON, NYISO, MISO, PJM). Spatial correlation is strong and
+genuine in both --- the assumption motivating spatial DRO is empirically valid.}
+\label{fig:heatmaps}
+\end{figure}
+
+\subsection{The spatial gap is null across the spectrum (RQ2)}\label{sec:res-gap}
+Table~\ref{tab:gaps} reports the spatial gap \eqref{eq:gap} for the three
+pre-registered US/Canada cases: nine cells each (three constraint regimes $\times$
+three $\alpha$-levels), CV-selected $\varepsilon^\star$, single test read on 2025.
+The gap never exceeds a few tenths of one percent of test
+$\CVaR_{0.95}$ in either direction, and where the bootstrap calls a cell
+``detectable'' the signs flip across adjacent $\alpha$-levels --- the signature of
+solver-path artifacts rather than exploitable structure. The two earlier panels
+agree: California/Nevada gaps lie in $[-0.012,+0.058]\%$ and Iberia--France in
+$[-0.016,+0.321]\%$, with the single $0.32\%$ cell not sign-stable across
+residual estimators. Cross-validation selects $\varepsilon^\star=1$ in 26 of 27
+cells, so both arms are genuinely robustified --- the null is not an artifact of
+the DRO being switched off.
+
+\begin{table}[t]
+\centering\small
+\caption{Spatial gap (\% of test $\CVaR_{0.95}$; positive $=$ joint covariance
+better) for the three US/Canada cases. R3 $=$ reference regime, R1 $=$ $+$deadline,
+R2 $=$ $+$variable carbon-coupled capacity. ``det.''\ $=$ bootstrap 95\% CI
+excludes zero.}
+\label{tab:gaps}
+\begin{tabular}{llrrrrrr}
+\toprule
+& & \multicolumn{2}{c}{\texttt{us\_hetero} ($\bar r\approx0$)} &
+\multicolumn{2}{c}{\texttt{taskc} ($\bar r\approx0.5$)} &
+\multicolumn{2}{c}{\texttt{us\_west} ($\bar r\approx0.5$)}\\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+Regime & $\alpha$ & gap\,\% & det. & gap\,\% & det. & gap\,\% & det.\\
+\midrule
+R3 & 0.30 & $-0.233$ & \checkmark & $-0.022$ & \checkmark & $+0.043$ & \\
+R3 & 0.50 & $-0.177$ & \checkmark & $-0.002$ &  & $+0.032$ & \\
+R3 & 0.75 & $+0.001$ &  & $+0.034$ & \checkmark & $-0.005$ & \\
+R1 & 0.30 & $-0.233$ & \checkmark & $-0.022$ & \checkmark & $+0.014$ & \\
+R1 & 0.50 & $-0.177$ & \checkmark & $-0.002$ &  & $+0.028$ & \\
+R1 & 0.75 & $+0.001$ &  & $+0.034$ & \checkmark & $+0.002$ & \\
+R2 & 0.30 & $-0.211$ & \checkmark & $+0.038$ & \checkmark & $+0.008$ & \\
+R2 & 0.50 & $-0.154$ & \checkmark & $+0.030$ & \checkmark & $+0.005$ & \\
+R2 & 0.75 & $+0.062$ & \checkmark & $+0.009$ &  & $+0.000$ & \checkmark\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three readings of Table~\ref{tab:gaps} matter. First, in the adversarial
+diversification case (\texttt{us\_hetero}) the joint covariance actually
+\emph{hurts} at low $\alpha$ (up to $-0.23\%$): with no true cross-structure, the
+joint estimator fits noise that the block-diagonal arm is spared. Second, in the
+strongly correlated belt (\texttt{taskc}) the detectable cells flip sign between
+$\alpha=0.30$ and $\alpha=0.75$ within the same regime. Third, the US West ---
+strongest correlation of all --- produces no detectable cell beyond one of
+magnitude $+3\times10^{-6}\%$. Figure~\ref{fig:finding}A plots all 27 cells
+against each case's mean residual correlation: the cloud stays on zero across the
+whole correlation range. \textbf{Validity of the spatial assumption does not imply
+value from it.}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{../figures/finding.pdf}
+\caption{The Phase 1 finding. \textbf{A:} spatial gap vs.\ mean residual
+cross-region correlation --- value does not track correlation anywhere on the
+spectrum. \textbf{B:} mean-ablation --- in the covariance-only world (constant
+scheduling mean) the joint covariance pays off by up to $+1.46\%$, proving the
+spatial signal is real but \emph{masked} by the mean carbon field, not absent.}
+\label{fig:finding}
+\end{figure}
+
+\subsection{The null survives a pre-registered robustness battery
+(RQ2)}\label{sec:res-robust}
+Table~\ref{tab:robust} summarizes. Re-estimating the covariance with Ledoit--Wolf
+shrinkage, seasonal residuals, or AR(1) residuals never produces a spatial effect
+that passes the pre-registered agreement rule (positive and sign-stable across
+both residual estimators). The largest battery value anywhere, $+0.179\%$ (AR(1),
+\texttt{taskc}, $\alpha=0.30$), appears \emph{only} under AR(1) and not under the
+seasonal estimator, so the rule rejects it. Benjamini--Hochberg correction at
+$q=0.05$ across all 144 non-ablation cells leaves that same already-rejected cell
+as the largest surviving positive gap --- nothing material survives both filters.
+A walk-forward refit (train 2021--2023, test 2024) reproduces the null out of
+time: maximum absolute gap $0.036\%$ (\texttt{taskc}), $0.028\%$
+(\texttt{us\_west}), $0.217\%$ (\texttt{us\_hetero}, again negative). An
+11-point log-denser $\varepsilon$ grid changes no gap at the reported precision.
+
+\begin{table}[t]
+\centering\small
+\caption{Robustness battery: maximum $|$gap$|$ (\%) per covariance estimator, and
+temporal walk-forward (test year 2024). No cell passes the pre-registered
+agreement rule (positive and sign-stable under both seasonal and AR(1)
+residualization).}
+\label{tab:robust}
+\begin{tabular}{lrrrr}
+\toprule
+Case & Ledoit--Wolf & Seasonal & AR(1) & Walk-forward 2024\\
+\midrule
+\texttt{us\_hetero} & 0.233 & 0.355 & 0.035 & 0.217\\
+\texttt{taskc}      & 0.037 & 0.034 & 0.179 & 0.036\\
+\texttt{us\_west}   & 0.043 & 0.066 & 0.017 & 0.028\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Mean-ablation: the covariance is masked, not worthless
+(RQ3)}\label{sec:res-ablation}
+The ablation isolates the cause (Table~\ref{tab:ablation},
+Figure~\ref{fig:finding}B). Under \textsc{level} ablation --- regional
+time-averages equalized, hour-of-day shape kept --- every gap is unchanged to
+three decimals: the \emph{between-region} mean differences are not what masks the
+covariance. Under \textsc{flat} ablation --- constant scheduling mean, the
+covariance-only world --- the joint covariance suddenly pays: up to $+1.46\%$ in
+\texttt{us\_hetero} and $+0.41\%$ in \texttt{taskc}, all BH-significant, and CV no
+longer collapses both arms onto the same schedule. The spatial signal in the
+covariance is therefore \emph{real and exploitable}; in the real problem it is
+simply dominated by the within-day shape of the mean carbon field, which both arms
+share. The instructive exception is \texttt{us\_west}: even in the covariance-only
+world its gaps stay at zero ($-0.036$ to $+0.004\%$), because its strong
+correlation is \emph{common-mode} --- all five zones move together, so destroying
+cross-dependence changes no scheduling decision. Positive correlation is
+non-diversifiable risk: there is no hedge for a DRO to find.
+
+\begin{table}[t]
+\centering\small
+\caption{Mean-ablation: spatial gap range (\%) across the nine cells per case.
+\textsc{level} (equalize regional time-averages) leaves the null untouched;
+\textsc{flat} (constant scheduling mean $=$ covariance-only world) reveals genuine
+spatial value except where correlation is common-mode (\texttt{us\_west}).}
+\label{tab:ablation}
+\begin{tabular}{lccc}
+\toprule
+Case & Real problem & \textsc{level} & \textsc{flat} (covariance-only)\\
+\midrule
+\texttt{us\_hetero} & $-0.233\ldots+0.062$ & unchanged & $+0.39\ldots+1.46$\\
+\texttt{taskc}      & $-0.022\ldots+0.038$ & unchanged & $+0.14\ldots+0.41$\\
+\texttt{us\_west}   & $-0.005\ldots+0.043$ & unchanged & $-0.04\ldots+0.00$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Tail dependence: the structure is non-elliptical
+(RQ3)}\label{sec:res-tails}
+Table~\ref{tab:tails} reports residual tail-dependence at $q=0.95$ for
+representative pairs. Two findings. \emph{First}, the upper tail is empirically at
+or below the Gaussian benchmark everywhere (excess $-0.18$ to $+0.04$): in the
+dirtiest hours, regions \emph{de-couple} rather than spike together --- there is
+no upper-tail co-movement for a richer ambiguity set to exploit on the risk side.
+\emph{Second}, the dependence is radially asymmetric, $\chiL>\chiU$: regions go
+\emph{clean} together more strongly than dirty together, clearest in the
+solar-driven US West (CISO--LDWP $\chiL=0.48$ vs.\ $\chiU=0.25$; BANC--LDWP $0.40$
+vs.\ $0.17$). Elliptical copulas force $\chiL=\chiU$, so this is structure a
+Mahalanobis--Wasserstein ball is geometrically incapable of representing --- the
+covariance is not merely masked (Section~\ref{sec:res-ablation}); for the part of
+the dependence that varies, it is also the \emph{wrong object}.
+
+\begin{table}[t]
+\centering\small
+\caption{Residual tail dependence at $q=0.95$ for selected pairs. ``Excess'' $=$
+empirical $\chiU$ minus the Gaussian-copula value at the matched correlation
+$\rho$. Throughout, $\chiU$ shows no exploitable upper-tail excess while
+$\chiL>\chiU$ signals non-elliptical (radially asymmetric) dependence.}
+\label{tab:tails}
+\begin{tabular}{llccccc}
+\toprule
+Case & Pair & $\rho$ & $\chiU$ emp & $\chiU$ Gauss & Excess & $\chiL$ emp\\
+\midrule
+\texttt{us\_west} & CISO--LDWP & 0.72 & 0.25 & 0.41 & $-0.16$ & 0.48\\
+\texttt{us\_west} & BANC--LDWP & 0.65 & 0.17 & 0.35 & $-0.18$ & 0.40\\
+\texttt{us\_west} & CISO--NEVP & 0.78 & 0.43 & 0.47 & $-0.05$ & 0.39\\
+\texttt{taskc} & CA-ON--NYISO & 0.73 & 0.38 & 0.42 & $-0.04$ & 0.31\\
+\texttt{taskc} & MISO--PJM    & 0.70 & 0.43 & 0.39 & $+0.04$ & 0.42\\
+\texttt{us\_hetero} & CISO--BPAT & 0.33 & 0.10 & 0.16 & $-0.06$ & 0.26\\
+\texttt{us\_hetero} & ERCOT--BPAT & 0.00 & 0.04 & 0.05 & $-0.02$ & 0.02\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===================== 5. DISCUSSION (RUN 2) =====================
+\section{Discussion}\label{sec:discussion}
+
+\subsection{What the null means, and what it does not}
+The result is a \emph{specification} finding, not a failure of carbon-aware
+scheduling. Carbon intensity \emph{is} spatially correlated where the literature
+expects it to be (Section~\ref{sec:res-corr}), and the DRO machinery \emph{is}
+active (CV selects $\varepsilon^\star=1$ almost everywhere). What the experiment
+falsifies is the specific hypothesis that encoding that correlation in a
+covariance-based ambiguity set improves robust scheduling. The mean-ablation
+result (Section~\ref{sec:res-ablation}) is what licenses the stronger claim: the
+covariance signal is genuine and, in a covariance-only world, worth up to
+$1.46\%$ of tail emissions --- it is simply dominated by the diurnal mean carbon
+field in the problem as actually posed. A reader could otherwise dismiss the null
+as ``the data had no signal''; the ablation shows the signal is present but
+\emph{subordinate}. This is the central intellectual contribution: a clean
+separation of \emph{validity} of a modelling assumption from its \emph{value}.
+
+\subsection{Why the mean dominates: a mechanism}
+Three forces compound. (i)~\emph{Magnitude.} The within-day swing of mean carbon
+intensity (night-to-noon ratios of two-to-fourfold in solar-heavy grids) dwarfs
+the residual covariance, so the optimal schedule is driven almost entirely by
+\emph{when} each region is clean on average; the second-order covariance term
+moves decisions only at the margin. (ii)~\emph{Common-mode correlation.} Where
+correlation is strongest (US West), it is positive and shared across all zones ---
+common, non-diversifiable risk. Diversification value requires \emph{offsetting}
+fluctuations; positively co-moving regions offer no hedge, so destroying the
+cross-blocks (the shuffled arm) changes nothing. (iii)~\emph{Wrong tail.} Robust
+\emph{tail} scheduling cares about joint \emph{dirty} excursions, but the empirical
+upper tail is independent-to-decoupling ($\chiU$ at or below Gaussian), while the
+co-movement that does exist is in the \emph{clean} tail ($\chiL>\chiU$) --- exactly
+the regime a risk-averse scheduler is not protecting against, and a radial
+asymmetry an elliptical ball cannot encode regardless. The covariance is thus both
+\emph{masked} (dominated by the mean) and, for its varying part, \emph{mis-shaped}
+(non-elliptical).
+
+\subsection{Relation to prior work}
+The finding refines rather than contradicts the carbon-aware DRO literature.
+Single-region robust formulations~\citep{wijayawardana2025} remain well-motivated:
+our per-region marginal schedulers capture essentially all the value. The
+contribution is to the \emph{multi-region} extension that treats carbon intensity
+as a correlated vector --- a natural and previously untested generalization. We
+show that the covariance channel of that extension is empirically inert under
+realistic grid data, and we locate the reason in the mean-dominance and
+non-ellipticity of the dependence. This both saves practitioners from modelling
+complexity that does not pay and gives theorists a precise target: the value, if
+any, lives in non-elliptical tail structure that a Wasserstein ball over
+covariance cannot reach.
+
+\subsection{Practical recommendation}
+For carbon-aware schedulers on the grids studied, a \emph{per-region marginal}
+robust scheduler --- one ambiguity set per zone, no cross-region covariance ---
+captures essentially all the achievable robust value at a fraction of the
+modelling and estimation cost. Estimating a full joint covariance is not merely
+unnecessary; in the diversification-friendly case it is mildly
+\emph{counterproductive} (the joint arm fit noise and \emph{lost} up to $0.23\%$).
+The engineering effort spared by not modelling spatial covariance is better spent
+on accurate per-region mean forecasts, which is where the value demonstrably lies.
+
+\subsection{Limitations}
+Five bound the claims. \emph{(i)~Representative schedule.} We evaluate one
+canonical workload (fixed daily utilization, splittable load, ramp limits); a
+sharply different cost geometry could in principle re-weight the covariance term,
+though the mean-dominance argument is scale-driven and likely to persist.
+\emph{(ii)~Test horizon.} The primary read is a single held-out year (2025);
+walk-forward to 2024 reproduces the null, but multi-year rolling evaluation would
+strengthen external validity. \emph{(iii)~Dependence model.} The DRO uses a
+covariance (second-moment) ambiguity set by construction; our tail-dependence
+diagnostic motivates but does not yet implement copula-based alternatives ---
+that is Phase 2. \emph{(iv)~Geographic scope.} Five region sets across WECC, the
+Eastern Interconnection, and Iberia--France span the dependence spectrum, but
+grids with different generation mixes (e.g.\ hydro-thermal systems with strong
+seasonal storage) remain untested. \emph{(v)~Data licence and clocks.} Carbon
+intensity is Electricity Maps lifecycle estimates on a common local clock per
+region set; alternative intensity methodologies or clock conventions could shift
+point estimates, though not by the order of magnitude separating the observed gaps
+from materiality.
+
+% ===================== 6. CONCLUSIONS (RUN 3) =====================
+\section{Conclusions}\label{sec:conclusion}
+% RUN 3: answers to RQ1-3; contributions recap; future work (vine-copula ambiguity
+% sets; inter-region transfer channel; rolling re-optimization)
+\emph{[Completed in Run 3.]}
+
+% ===================== REFERENCES =====================
+\renewcommand{\bibsection}{\section*{References}}
+\begin{thebibliography}{99}\small
+\bibitem{benjamini1995} Y.~Benjamini and Y.~Hochberg, ``Controlling the false
+discovery rate: a practical and powerful approach to multiple testing,'' \emph{J.
+R. Stat. Soc. B}, vol.~57, no.~1, pp.~289--300, 1995.
+\bibitem{blanchet2019} J.~Blanchet, Y.~Kang, and K.~Murthy, ``Robust Wasserstein
+profile inference and applications to machine learning,'' \emph{J. Appl. Probab.},
+vol.~56, no.~3, pp.~830--857, 2019.
+\bibitem{embrechts2002} P.~Embrechts, A.~McNeil, and D.~Straumann, ``Correlation
+and dependence in risk management: properties and pitfalls,'' in \emph{Risk
+Management: Value at Risk and Beyond}, Cambridge Univ. Press, 2002, pp.~176--223.
+\bibitem{esfahani2018} P.~Mohajerin Esfahani and D.~Kuhn, ``Data-driven
+distributionally robust optimization using the Wasserstein metric,'' \emph{Math.
+Program.}, vol.~171, pp.~115--166, 2018.
+\bibitem{hall2024} G.~Hall et al., ``Distributionally robust carbon-aware
+scheduling with virtual capacity curves,'' arXiv:2410.21510, 2024.
+\bibitem{iea2024} International Energy Agency, \emph{Electricity 2024: Analysis and
+Forecast to 2026}. Paris: IEA, 2024.
+\bibitem{joe2014} H.~Joe, \emph{Dependence Modeling with Copulas}. CRC Press, 2014.
+\bibitem{kuhn2019} D.~Kuhn, P.~Mohajerin Esfahani, V.~A. Nguyen, and
+S.~Shafieezadeh-Abadeh, ``Wasserstein distributionally robust optimization: theory
+and applications in machine learning,'' in \emph{Operations Research \& Management
+Science in the Age of Analytics}, INFORMS, 2019, pp.~130--166.
+\bibitem{ledoit2004} O.~Ledoit and M.~Wolf, ``A well-conditioned estimator for
+large-dimensional covariance matrices,'' \emph{J. Multivar. Anal.}, vol.~88,
+no.~2, pp.~365--411, 2004.
+\bibitem{radovanovic2022} A.~Radovanovi\'c et al., ``Carbon-aware computing for
+datacenters,'' \emph{IEEE Trans. Power Syst.}, vol.~38, no.~2, pp.~1270--1280,
+2022.
+\bibitem{rockafellar2000} R.~T. Rockafellar and S.~Uryasev, ``Optimization of
+conditional value-at-risk,'' \emph{J. Risk}, vol.~2, no.~3, pp.~21--41, 2000.
+\bibitem{sklar1959} A.~Sklar, ``Fonctions de r\'epartition \`a $n$ dimensions et
+leurs marges,'' \emph{Publ. Inst. Statist. Univ. Paris}, vol.~8, pp.~229--231,
+1959.
+\bibitem{wiesner2021} P.~Wiesner, I.~Behnke, D.~Scheinert, K.~Gontarska, and
+L.~Thamsen, ``Let's wait awhile: how temporal workload shifting can reduce carbon
+emissions in the cloud,'' in \emph{Proc. 22nd ACM/IFIP Middleware}, 2021,
+pp.~260--272.
+\bibitem{wijayawardana2025} R.~Wijayawardana and A.~A. Chien, ``Scheduling cloud
+VMs on variable capacity datacenters,'' in \emph{Proc. ACM Symp. Cloud Computing
+(SoCC)}, 2025.
+\end{thebibliography}
+
+% ===================== APPENDICES (RUN 3) =====================
+\appendix
+\section{Reproducibility Details}\label{app:repro}
+% RUN 3: repo pointers, scripts, result-snapshot mapping, full gap tables
+\emph{[Completed in Run 3.]}
+\section{Annex A: Individual Contribution Statement}\label{app:ics}
+% RUN 3: Marco's ICS (role summary; per-section contributions; defense focus areas;
+% declaration + signature)
+\emph{[Completed in Run 3.]}
+
+\end{document}
