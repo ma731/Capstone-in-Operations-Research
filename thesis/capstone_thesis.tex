@@ -69,10 +69,11 @@ Using a Mahalanobis--Wasserstein DRO formulation solved as a second-order cone
 program, we design a falsification test --- the schedule fitted to the joint
 covariance versus one fitted to a block-diagonal covariance with all cross-region
 structure destroyed --- evaluated by out-of-sample $\CVaR_{0.95}$ of daily emissions
-under strict pre-registration. Across five region sets spanning the full dependence
-spectrum (California, Iberia--France, the US West, an Ontario-anchored Eastern
-Interconnection belt, and an engineered heterogeneous solar/wind/hydro portfolio),
-the answer is a replicated, robustness-checked \textbf{null}: the spatial gap never
+under strict pre-registration. Across three primary US/Canada grids spanning the
+dependence spectrum --- the US West (California, Nevada, Phoenix), an
+Ontario-anchored Eastern Interconnection belt, and an engineered heterogeneous
+solar/wind/hydro portfolio --- corroborated by an Iberia--France panel as a
+low-correlation anchor, the answer is a replicated, robustness-checked \textbf{null}: the spatial gap never
 exceeds a few tenths of one percent, survives shrinkage and residualization
 batteries, Benjamini--Hochberg correction, and walk-forward validation. Two
 diagnostics explain the mechanism. A \emph{mean-ablation} experiment shows the
@@ -138,12 +139,12 @@ The thesis makes four contributions. (i)~\emph{A falsification design}: a
 shuffled-marginals test that isolates exactly the value of spatial covariance,
 evaluated out-of-sample under pre-registration discipline (commit-locked
 configurations, dry-run gates, single test-set read). (ii)~\emph{A replicated
-empirical null across the dependence spectrum}: five region sets --- three
-interconnected sets where strong correlation survives de-seasonalization
-(California/Nevada; US West; Ontario--Eastern belt), one European set where
-residual correlation collapses to the diurnal cycle (Iberia--France), and one
-engineered near-uncorrelated solar/wind/hydro portfolio --- all yield spatial gaps
-below $0.4\%$ of $\CVaR$,
+empirical null across the dependence spectrum}: three primary US/Canada region sets
+--- two interconnected grids where strong correlation survives de-seasonalization
+(the US West --- California, Nevada, Phoenix; and an Ontario--Eastern belt) and one
+engineered near-uncorrelated solar/wind/hydro portfolio --- corroborated by an
+Iberia--France panel where residual correlation collapses to the diurnal cycle, all
+yielding spatial gaps below $0.4\%$ of $\CVaR$,
 robust to estimator choice, multiple-testing correction, and walk-forward
 validation. (iii)~\emph{A causal mechanism}: a mean-ablation experiment showing the
 covariance signal is real but dominated by the mean field, and a tail-dependence
@@ -226,8 +227,9 @@ mechanism diagnostics (mean-ablation and tail dependence).
 The design is a controlled computational experiment. We hold the optimization
 machinery fixed and manipulate exactly one object --- the cross-region blocks of the
 covariance supplied to the scheduler --- then measure the consequence on held-out
-tail emissions. Five region sets spanning the dependence spectrum serve as
-replications; three nested constraint regimes guard against the result being an
+tail emissions. Three primary region sets spanning the dependence spectrum (with two
+earlier panels corroborating) serve as replications; three nested constraint regimes
+guard against the result being an
 artifact of a particular feasible-set geometry; a robustness battery (estimators,
 multiple-testing correction, walk-forward) guards against statistical artifacts; and
 two further experiments (mean-ablation; tail dependence) identify the mechanism.
@@ -384,12 +386,15 @@ read; \texttt{--dry-run} gate runs CV only
 Carbon intensity is hourly lifecycle intensity from Electricity Maps (academic
 licence), 2021--2025, $43{,}824$ hourly observations per zone; panels are built on a
 common local clock per region set, trained on 2021--2024 and tested once on 2025.
-Five region sets span the dependence spectrum: \textbf{(A)}~California/Nevada
-(CISO, BANC, LDWP, NEVP); \textbf{(B)}~Iberia--France (ES, PT, FR);
-\textbf{(C)}~US West (A + Phoenix AZPS); \textbf{(D)}~Ontario--Eastern belt (CA-ON,
-NYISO, MISO, PJM); \textbf{(E)}~an engineered heterogeneous portfolio --- CISO
+Three primary US/Canada region sets span the dependence spectrum:
+\textbf{(1)}~the \emph{US West} --- California, Nevada and Phoenix (CISO, BANC,
+LDWP, NEVP, AZPS); \textbf{(2)}~an \emph{Ontario--Eastern belt} (CA-ON, NYISO,
+MISO, PJM); and \textbf{(3)}~an \emph{engineered heterogeneous portfolio} --- CISO
 (solar), ERCOT (wind), BPAT (hydro) --- deliberately chosen so clean periods do
-\emph{not} align: the adversarial best case for diversification. Temperature for
+\emph{not} align: the adversarial best case for diversification. Two earlier panels
+corroborate: an \emph{Iberia--France} European set (ES, PT, FR), where residual
+correlation collapses to the diurnal cycle, and the California/Nevada subset of the
+US West before Phoenix was added at the supervisor's request. Temperature for
 constraint 3b is hourly ERA5 2\,m air temperature (Open-Meteo), one load-weighted
 point per zone. The licensed raw data is never committed; derived summary tables
 are archived in the repository for traceability.
@@ -447,10 +452,10 @@ heterogeneous portfolio behaves as designed: ERCOT--BPAT residual correlation is
 $0.00$, with CISO--BPAT at $0.33$. Figure~\ref{fig:heatmaps} shows the residual
 correlation matrices; overlay plots of standardized intensity (archived with the
 code) confirm visible co-movement in summer and winter weeks for the coupled
-cases. Together with the earlier California ($0.65$--$0.78$ within-state) and
-Iberia--France panels, the five region sets span the dependence spectrum from
-$\approx 0$ to $\approx 0.8$ --- so whatever the scheduling result, it cannot be
-attributed to an absence of correlation in the data.
+cases. Together with the corroborating panels --- the California/Nevada subset
+($0.65$--$0.78$ within-state) and Iberia--France --- the cases span the dependence
+spectrum from $\approx 0$ to $\approx 0.8$, so whatever the scheduling result, it
+cannot be attributed to an absence of correlation in the data.
 
 \begin{figure}[t]
 \centering
@@ -735,8 +740,8 @@ walk-forward to 2024 reproduces the null, but multi-year rolling evaluation woul
 strengthen external validity. \emph{(iii)~Dependence model.} The DRO uses a
 covariance (second-moment) ambiguity set by construction; our tail-dependence
 diagnostic motivates but does not yet implement copula-based alternatives ---
-that is Phase 2. \emph{(iv)~Geographic scope.} Five region sets across WECC, the
-Eastern Interconnection, and Iberia--France span the dependence spectrum, but
+that is Phase 2. \emph{(iv)~Geographic scope.} The region sets span WECC, the
+Eastern Interconnection, and Iberia--France across the dependence spectrum, but
 grids with different generation mixes (e.g.\ hydro-thermal systems with strong
 seasonal storage) remain untested. \emph{(v)~Data licence and clocks.} Carbon
 intensity is Electricity Maps lifecycle estimates on a common local clock per
@@ -756,8 +761,9 @@ DRO is empirically sound; the engineered heterogeneous portfolio confirms the
 diagnostic resolves genuine near-zero dependence ($0.00$) when it is present.
 
 \textbf{RQ2 --- Does encoding that correlation in a covariance-based ambiguity set
-improve robust scheduling?} No. Across five region sets spanning the dependence
-spectrum, the out-of-sample $\CVaR_{0.95}$ spatial gap never exceeds a few tenths
+improve robust scheduling?} No. Across three primary region sets spanning the
+dependence spectrum (and two corroborating panels), the out-of-sample
+$\CVaR_{0.95}$ spatial gap never exceeds a few tenths
 of one percent and is not sign-stable; the null survives Ledoit--Wolf shrinkage,
 seasonal and AR(1) residualization, Benjamini--Hochberg correction over 144 cells,
 walk-forward validation to 2024, and a log-denser $\varepsilon$ grid
@@ -783,7 +789,7 @@ This thesis contributes: (1)~a pre-registered falsification methodology
 (shuffled-marginals) that cleanly separates the \emph{validity} of a spatial
 modelling assumption from its \emph{value}, transferable to any
 correlated-uncertainty DRO; (2)~a replicated, robustness-checked null on whether
-spatial covariance improves carbon-aware DRO scheduling, across five real grids;
+spatial covariance improves carbon-aware DRO scheduling, across multiple real grids;
 (3)~a causal mechanism --- mean-dominance plus non-elliptical tail structure ---
 that explains the null rather than merely reporting it; and (4)~a fully
 reproducible, version-controlled, CI-tested experimental pipeline with archived
@@ -919,7 +925,7 @@ protocol that separates assumption validity from value.
 model and its SOCP reformulation, the constraint regimes (including the variable
 carbon-coupled capacity constraint adapted from the SoCC'25 formulation), and the
 mean-ablation and tail-dependence diagnostics.
-\item \textbf{Data and implementation.} Assembled the five-grid carbon-intensity
+\item \textbf{Data and implementation.} Assembled the multi-grid carbon-intensity
 and temperature panels, implemented the full experimental pipeline, the robustness
 battery, the Benjamini--Hochberg correction, and the figures, under
 version control with a continuous-integration test suite.
