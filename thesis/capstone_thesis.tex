@@ -675,9 +675,58 @@ from materiality.
 
 % ===================== 6. CONCLUSIONS (RUN 3) =====================
 \section{Conclusions}\label{sec:conclusion}
-% RUN 3: answers to RQ1-3; contributions recap; future work (vine-copula ambiguity
-% sets; inter-region transfer channel; rolling re-optimization)
-\emph{[Completed in Run 3.]}
+
+\subsection{Answers to the research questions}
+\textbf{RQ1 --- Is carbon intensity spatially correlated in coupled grids?}
+Yes. After removing the shared diurnal cycle, residual cross-region correlations
+reach $0.78$ in the US West and $0.73$ in the Ontario-anchored Eastern belt and
+survive de-seasonalization (Section~\ref{sec:res-corr}). The premise of spatial
+DRO is empirically sound; the engineered heterogeneous portfolio confirms the
+diagnostic resolves genuine near-zero dependence ($0.00$) when it is present.
+
+\textbf{RQ2 --- Does encoding that correlation in a covariance-based ambiguity set
+improve robust scheduling?} No. Across five region sets spanning the dependence
+spectrum, the out-of-sample $\CVaR_{0.95}$ spatial gap never exceeds a few tenths
+of one percent and is not sign-stable; the null survives Ledoit--Wolf shrinkage,
+seasonal and AR(1) residualization, Benjamini--Hochberg correction over 144 cells,
+walk-forward validation to 2024, and a log-denser $\varepsilon$ grid
+(Sections~\ref{sec:res-gap}--\ref{sec:res-robust}). In the most
+diversification-friendly case the joint covariance is mildly counterproductive.
+
+\textbf{RQ3 --- Why?} Two complementary mechanisms. A mean-ablation experiment
+proves the covariance signal is real and worth up to $1.46\%$ of tail emissions in
+a covariance-only world, but is dominated by the diurnal mean carbon field in the
+problem as posed (Section~\ref{sec:res-ablation}). A tail-dependence analysis shows
+the residual dependence is non-elliptical --- upper-tail-independent and radially
+asymmetric ($\chiL>\chiU$) --- and therefore structurally invisible to a
+covariance ball even where it does vary (Section~\ref{sec:res-tails}). The
+covariance is both \emph{masked} and \emph{mis-shaped}.
+
+\subsection{Contributions}
+This thesis contributes: (1)~a pre-registered falsification methodology
+(shuffled-marginals) that cleanly separates the \emph{validity} of a spatial
+modelling assumption from its \emph{value}, transferable to any
+correlated-uncertainty DRO; (2)~a replicated, robustness-checked null on whether
+spatial covariance improves carbon-aware DRO scheduling, across five real grids;
+(3)~a causal mechanism --- mean-dominance plus non-elliptical tail structure ---
+that explains the null rather than merely reporting it; and (4)~a fully
+reproducible, version-controlled, CI-tested experimental pipeline with archived
+license-safe summary tables for every reported number.
+
+\subsection{Future work}
+The diagnostics point precisely at Phase 2. First, \emph{copula-based ambiguity
+sets}: the radial asymmetry ($\chiL>\chiU$) is exactly the structure a
+vine-copula or asymmetric-dependence ambiguity set can encode and a Wasserstein
+ball over covariance cannot --- the natural test of whether \emph{any} spatial
+value is recoverable once the model can see the right object. Second, an
+\emph{inter-region transfer channel}: allowing load to physically migrate between
+zones ($f_{r\to s,t}$) converts spatial structure from a passive hedge into an
+active decision lever and remains an SOCP; this overlaps a collaborator's scope and
+awaits supervisor sign-off. Third, \emph{rolling re-optimization} over multiple
+test years to convert the single-read result into a multi-year operational
+evaluation. The Phase 1 null is thus not a dead end but a sharpened mandate: it
+tells the next phase exactly where the value cannot be, and exactly which modelling
+object to reach for next.
 
 % ===================== REFERENCES =====================
 \renewcommand{\bibsection}{\section*{References}}
@@ -726,11 +775,89 @@ VMs on variable capacity datacenters,'' in \emph{Proc. ACM Symp. Cloud Computing
 % ===================== APPENDICES (RUN 3) =====================
 \appendix
 \section{Reproducibility Details}\label{app:repro}
-% RUN 3: repo pointers, scripts, result-snapshot mapping, full gap tables
-\emph{[Completed in Run 3.]}
+
+\paragraph{Repository and environment.} All code lives in a private,
+version-controlled repository with a continuous-integration suite ($163$ unit
+tests; the Electricity-Maps integration test is excluded from CI as it requires
+licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL/ECOS
+for the second-order cone program and HiGHS for deterministic LP baselines. The
+licensed raw carbon-intensity data is never committed; only derived aggregate
+summary tables (CV-selected $\varepsilon$, test CVaR, spatial gaps, bootstrap CIs,
+BH $p$-values) are archived, so the non-redistribution academic licence is
+respected while every reported number remains traceable.
+
+\paragraph{Pre-registration protocol.} Each experiment follows commit-lock
+$\rightarrow$ dry-run $\rightarrow$ single test read. The full configuration
+(utilization $0.80$; $\alpha\in\{0.30,0.50,0.75\}$; $\varepsilon$ grid
+$\{0,0.1,1,10,100,1000\}$; $5$-fold blocked time-series CV; $1000$ bootstrap
+resamples at a fixed seed; $\CVaR$ level $0.95$; train 2021--2024, test 2025) is
+committed before any test-set evaluation, and a \texttt{--dry-run} gate runs
+cross-validation only. The 3c capacity bounds $(x_{\min},x_{\max})=(50,75)$ were
+Goldilocks-calibrated on training data alone (bind fraction $0.28$--$0.37$).
+
+\paragraph{Reproducing the experiments.} Every result regenerates with
+\texttt{python -m scripts.run\_case\_experiment --region-set <case> [flags]}, where
+\texttt{<case>}~$\in$ \{\texttt{us\_west}, \texttt{taskc}, \texttt{us\_hetero}\}
+and flags select estimator (\texttt{--shrinkage}, \texttt{--residualize}),
+mean-ablation (\texttt{--ablate-mean}), walk-forward (\texttt{--test-year}), or
+grid density (\texttt{--eps-grid}). Snapshot file names follow
+\texttt{<case>\_regimes\_<date>[\_<variant>].csv}; the
+\texttt{results\_snapshots/README.md} maps each to its source command.
+Table~\ref{tab:snapmap} maps each results subsection to its archived table.
+
+\begin{table}[h]
+\centering\small
+\caption{Mapping of reported results to archived summary tables.}
+\label{tab:snapmap}
+\begin{tabular}{lll}
+\toprule
+Section & Result & Archived source\\
+\midrule
+\ref{sec:res-gap} & Spatial gaps (Table~\ref{tab:gaps}) &
+\texttt{\{case\}\_regimes\_2026-06-10.csv}\\
+\ref{sec:res-robust} & Robustness (Table~\ref{tab:robust}) &
+\texttt{\{case\}\_..\_\{lw,seasonal,ar1,ty2024\}.csv}\\
+\ref{sec:res-robust} & BH correction & \texttt{bh\_correction.csv}\\
+\ref{sec:res-ablation} & Mean-ablation (Table~\ref{tab:ablation}) &
+\texttt{\{case\}\_..\_ablate-\{level,flat\}.csv}\\
+\ref{sec:res-corr},\ref{sec:res-tails} & CA/Iberia panels &
+\texttt{taskA\_..\,, es\_pt\_fr\_..\,csv}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Annex A: Individual Contribution Statement}\label{app:ics}
-% RUN 3: Marco's ICS (role summary; per-section contributions; defense focus areas;
-% declaration + signature)
-\emph{[Completed in Run 3.]}
+
+This Research Capstone was completed individually by \textbf{Marco Ortiz Togashi}
+under the supervision of Prof.\ Bissan Ghaddar. As sole author, I am responsible
+for all components of the work:
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+\item \textbf{Research design.} Formulated the three research questions, designed
+the shuffled-marginals falsification test, and specified the pre-registration
+protocol that separates assumption validity from value.
+\item \textbf{Modelling.} Specified the Mahalanobis--Wasserstein DRO scheduling
+model and its SOCP reformulation, the constraint regimes (including the variable
+carbon-coupled capacity constraint adapted from the SoCC'25 formulation), and the
+mean-ablation and tail-dependence diagnostics.
+\item \textbf{Data and implementation.} Assembled the five-grid carbon-intensity
+and temperature panels, implemented the full experimental pipeline, the robustness
+battery, the Benjamini--Hochberg correction, and the figures, under
+version control with a continuous-integration test suite.
+\item \textbf{Analysis and writing.} Produced and interpreted all results,
+established the causal mechanism, and wrote the manuscript in full.
+\end{itemize}
+
+Generative AI tools were used as a coding and drafting assistant under my
+direction, as declared on the cover page; all research questions, modelling
+decisions, experimental designs, interpretations, and final text are my own. The
+inter-region transfer-channel proposal noted as future work overlaps a
+collaborator's scope and is identified as such, pending supervisor coordination.
+
+\vspace{1.2cm}
+\noindent\begin{tabular}{@{}p{6cm}p{6cm}@{}}
+\hrulefill & \hrulefill\\
+Marco Ortiz Togashi & Date\\
+\end{tabular}
 
 \end{document}
