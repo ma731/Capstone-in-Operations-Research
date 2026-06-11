@@ -1,5 +1,8 @@
 """Task C: shuffled-marginals DRO experiment (Ontario + Eastern-Interconnection belt).
 
+DEPRECATED (kept as the locked, pre-registered Task C artifact): for new runs use
+scripts/run_case_experiment.py --region-set taskc (same machinery, parameterized).
+
 A THIRD region set, run through the SAME locked machinery as Tasks A/B (Algorithm
 2b Mahalanobis-Wasserstein SOCP, blocked 5-fold CV to select epsilon, 1000-bootstrap
 CI on the spatial gap, CVaR_0.95 metric). The point of Task C: unlike CA/Iberia,

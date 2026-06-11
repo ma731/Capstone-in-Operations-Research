@@ -76,17 +76,22 @@ BOOTSTRAP_SEED = 20260524
 CVAR_ALPHA = 0.95
 CEILING_PER_CELL_MW = 50.0
 T_HOURS = 24
-TRAIN_YEARS = (2021, 2022, 2023, 2024)
+TRAIN_YEARS = (2021, 2022, 2023, 2024)  # overridden by --test-year (walk-forward)
 TEST_YEAR = 2025
+
+EPSILON_GRID_FINE = (0.0, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0, 300.0, 1000.0)
 RIDGE_ETA = 1e-5
 
 P_MAX = None
 RAMP_PER_REGION = 15.0
 DEADLINE_WINDOW = (0, 7)
 DEADLINE_GAMMA = 0.20
-# 3c variable capacity (R2): PROVISIONAL bounds (pending Goldilocks calibration).
-CAP_MIN = 42.0
-CAP_MAX = 65.0
+# 3c variable capacity (R2): Goldilocks-calibrated on TRAINING data via
+# scripts/calibrate_capacity.py (loosely binding: bind_frac ~0.28-0.37, positive
+# slack + capacity margin across all three cases). Supersedes the provisional
+# (42, 65). See docs/decisions.md Decision 8.
+CAP_MIN = 50.0
+CAP_MAX = 75.0
 
 REGIMES = {
     "R3_reference": dict(deadline=False, varcap=False),
@@ -104,7 +109,36 @@ TZ: str = "UTC"
 USE_SHRINKAGE = False
 _LW_INTENSITIES: list[float] = []
 RESIDUALIZE = "none"
+ABLATE_MEAN = "none"  # none | level | flat (mean-ablation experiment)
 _VARCAP_CEILING: np.ndarray | None = None
+
+
+def ablate_mean(rho_bar: np.ndarray) -> np.ndarray:
+    """Transform the mean field used for SCHEDULING (not evaluation).
+
+    Mean-ablation experiment: the Phase 1 null claims the mean field dominates and
+    the covariance is 2nd-order. Remove the mean's separable cross-region dominance
+    and check whether the joint-vs-shuffled covariance effect then appears.
+
+      none  : return rho_bar unchanged (locked Phase 1 behavior).
+      level : equalize each region's time-average to the global mean, keeping each
+              region's hour-of-day shape -> regions are equally clean ON AVERAGE,
+              differing only in timing + co-movement.
+      flat  : constant global mean everywhere -> the mean term <rho_bar, x> is
+              constant (demand is fixed), so the schedule is driven PURELY by the
+              eps*||L^T x|| penalty == a covariance-only world.
+
+    Evaluation always uses the REAL carbon panel, so CVaR reflects real emissions.
+    """
+    if ABLATE_MEAN == "none":
+        return rho_bar
+    global_mean = float(rho_bar.mean())
+    if ABLATE_MEAN == "flat":
+        return np.full_like(rho_bar, global_mean)
+    if ABLATE_MEAN == "level":
+        region_mean = rho_bar.mean(axis=1, keepdims=True)  # (R, 1)
+        return rho_bar - region_mean + global_mean
+    raise ValueError(f"unknown ablate-mean mode: {ABLATE_MEAN}")
 
 
 # ----------------------------------------------------------------------
@@ -243,7 +277,7 @@ def cv_select_epsilon(train_panel, workloads, shuffle, alpha_val, regime_key, co
     by_eps = {e: [] for e in EPSILON_GRID}
     alpha_vec = np.full(train_panel.shape[1], alpha_val)
     for fit_idx, val_idx in folds:
-        rho_bar_fit = train_panel[fit_idx].mean(axis=0)
+        rho_bar_fit = ablate_mean(train_panel[fit_idx].mean(axis=0))
         _, L_fit = fit_sigma_and_cholesky(cov_panel[fit_idx], shuffle)
         for eps in EPSILON_GRID:
             x = schedule_for(rho_bar_fit, L_fit, workloads, eps, alpha_vec, regime_key)
@@ -262,7 +296,7 @@ def cv_select_epsilon(train_panel, workloads, shuffle, alpha_val, regime_key, co
 
 def evaluate_on_test(train_panel, test_panel, workloads, shuffle,
                      eps_star, alpha_val, regime_key, train_cov_panel):
-    rho_bar = train_panel.mean(axis=0)
+    rho_bar = ablate_mean(train_panel.mean(axis=0))
     _, L = fit_sigma_and_cholesky(train_cov_panel, shuffle)
     alpha_vec = np.full(train_panel.shape[1], alpha_val)
     x = schedule_for(rho_bar, L, workloads, eps_star, alpha_vec, regime_key)
@@ -302,13 +336,29 @@ def main() -> int:
     ap.add_argument("--regime", choices=REGIME_ORDER + ("all",), default="all")
     ap.add_argument("--shrinkage", action="store_true")
     ap.add_argument("--residualize", choices=("none", "seasonal", "ar1"), default="none")
+    ap.add_argument("--ablate-mean", choices=("none", "level", "flat"), default="none",
+                    help="Mean-ablation experiment: equalize regional means used for "
+                         "scheduling (eval stays on real emissions). 'level' = equal "
+                         "time-average per region; 'flat' = constant mean (covariance-"
+                         "only world).")
+    ap.add_argument("--test-year", type=int, default=2025,
+                    help="Walk-forward: train on 2021..(year-1), test on this year.")
+    ap.add_argument("--eps-grid", choices=("standard", "fine"), default="standard",
+                    help="'fine' = log-denser epsilon grid (for ablation runs where "
+                         "eps* is unstable on the standard grid).")
     ap.add_argument("--out-dir", type=Path, default=RESULTS_DIR)
     args = ap.parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
-    global USE_SHRINKAGE, RESIDUALIZE, _VARCAP_CEILING, REGION_ORDER, TZ
+    global USE_SHRINKAGE, RESIDUALIZE, ABLATE_MEAN, _VARCAP_CEILING, REGION_ORDER, TZ
+    global TRAIN_YEARS, TEST_YEAR, EPSILON_GRID
     USE_SHRINKAGE = args.shrinkage
     RESIDUALIZE = args.residualize
+    ABLATE_MEAN = args.ablate_mean
+    TEST_YEAR = args.test_year
+    TRAIN_YEARS = tuple(range(2021, TEST_YEAR))
+    if args.eps_grid == "fine":
+        EPSILON_GRID = EPSILON_GRID_FINE
     regimes = REGIME_ORDER if args.regime == "all" else (args.regime,)
 
     cfg = REGION_SETS[args.region_set]
@@ -318,7 +368,8 @@ def main() -> int:
 
     print(f"REGION SET [{args.region_set}]:", REGION_ORDER, "| clock", TZ)
     print("ESTIMATION:", "Ledoit-Wolf shrinkage" if USE_SHRINKAGE
-          else "sample covariance + ridge", "| residualize:", RESIDUALIZE)
+          else "sample covariance + ridge", "| residualize:", RESIDUALIZE,
+          "| ablate-mean:", ABLATE_MEAN)
     print("Regimes:", regimes, "| R2 uses 3c variable capacity (CFE-driven)")
 
     # --- Data: carbon panel + CFE panel (for the 3c ceiling) --------------
@@ -414,9 +465,15 @@ def main() -> int:
         suffix += "_lw"
     if RESIDUALIZE != "none":
         suffix += f"_{RESIDUALIZE}"
+    if ABLATE_MEAN != "none":
+        suffix += f"_ablate-{ABLATE_MEAN}"
+    if args.eps_grid == "fine":
+        suffix += "_finegrid"
+    if TEST_YEAR != 2025:
+        suffix += f"_ty{TEST_YEAR}"
     if args.regime != "all":
         suffix += f"_{args.regime}"
-    stamp = dt.datetime.utcnow().strftime("%Y-%m-%d")
+    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
     base = f"{args.region_set}_regimes_{stamp}{suffix}"
     csv_path = args.out_dir / f"{base}.csv"
     pkl_path = args.out_dir / f"{base}.pkl"
