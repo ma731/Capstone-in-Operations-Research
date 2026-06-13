@@ -145,6 +145,36 @@ deterministic minimum and the budget caps that trade-off. Verified in
 (e.g. 1.05x) of a reference schedule's carbon during the Goldilocks pass.
 Consider the robust-budget variant if Bissan wants the cap on worst-case carbon.
 
+## 2026-06-13 — Phase 2: copula schedulers (independence / Gaussian / Clayton)
+
+**Decision:** Generalize the shuffled-marginals falsification from the covariance
+ball to the full copula via **copula-coupled empirical resampling** + a CVaR-SAA
+LP scheduler. Three nested dependence models — independence (the Phase 1 "shuf"
+arm), Gaussian (elliptical), and exchangeable Clayton (lower-tail, λ_L=2^(-1/θ),
+fit by Kendall τ) — each generate S=1000 scenarios that feed a Rockafellar–Uryasev
+CVaR LP over the *same* feasible set X. New code: `src/models/feasible_set.py`
+(shared X), `src/models/cvar_saa.py`, `src/models/copula_scenarios.py`,
+`scripts/run_copula_experiment.py`, `scripts/plot_copula.py`,
+`tests/test_phase2_copula.py` (5 tests incl. feasible-set equivalence to Phase 1).
+
+**Alternatives considered:** (a) full copula-ambiguity Wasserstein DRO
+(Fan–Ji–Lejeune) — too heavy for the timeline, left as future work; (b)
+pyvinecopulib R-vines — extra dependency, and exchangeable Clayton already isolates
+the lower-tail hypothesis with numpy-only Marshall–Olkin sampling; (c) parametric
+marginals — rejected in favor of empirical day-pool resampling (no marginal
+misspecification, mirrors Phase 1 exactly).
+
+**Reason:** Forecloses the "you used the wrong dependence object" objection to the
+Phase 1 null. Result: the null is **total** — max |gap vs independence| = 0.13%
+(us_hetero), none sign-stable; Clayton edges Gaussian only in the heterogeneous
+case (+0.07%), confirming the copula captures the asymmetry but it is immaterial.
+Formalized by the mean-dominance Proposition (CVaR translation invariance splits
+the copula-independent mean term from the residual tail; the mean-ablation measures
+the copula's leverage Λ directly). Snapshots: `*_copula_2026-06-13.csv`.
+
+**Revisit if:** Bissan wants the full copula-ambiguity DRO, or the transfer channel
+(the one route the mean-dominance bound does *not* close).
+
 ## Template for new entries
 
 ## YYYY-MM-DD — One-line decision summary
