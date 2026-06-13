@@ -267,9 +267,15 @@ induced by the empirical covariance $\hat\Sigma\in\R^{RT\times RT}$:
 by Wasserstein duality for linear costs \citep{esfahani2018,blanchet2019}, where
 $\bar\rho$ is the empirical mean field. With the Cholesky factorization
 $\hat\Sigma=LL^\top$ the penalty becomes $\varepsilon\lVert
-L^\top\vecx(x)\rVert_2$, so \eqref{eq:obj} is an SOCP, solved to global optimality
-(CLARABEL). The radius $\varepsilon$ interpolates from the deterministic problem
-($\varepsilon=0$) to increasingly conservative schedules.
+L^\top\vecx(x)\rVert_2$. Introducing an epigraph variable $t$, \eqref{eq:obj} is the
+second-order cone program
+\begin{equation}
+\min_{x\in\mathcal X,\,t\ge0}\ \langle\bar\rho,x\rangle+\varepsilon\,t
+\quad\text{s.t.}\quad \big\lVert L^\top\vecx(x)\big\rVert_2\le t,
+\label{eq:socp}
+\end{equation}
+solved to global optimality (CLARABEL). The radius $\varepsilon$ interpolates from
+the deterministic LP ($\varepsilon=0$) to increasingly conservative schedules.
 
 \paragraph{Where spatial correlation enters.}
 Partitioning $\hat\Sigma$ into $T\times T$ blocks $\Sigma_{rs}$ by region pair, the
@@ -513,6 +519,19 @@ immaterial.
 empirical asymmetry, cannot recover material value; Section~\ref{sec:res-copula}
 confirms it.
 
+\paragraph{Computational considerations.} Each instance is small: the decision
+vector has $RT\le 5\times24=120$ entries and the feasible set adds $O(RT)$ linear
+constraints, so the SOCP \eqref{eq:socp} solves in $0.19$--$0.26$\,s and the
+CVaR-SAA LP \eqref{eq:saacvar} --- which appends $S=1000$ epigraph variables and
+constraints --- in $0.9$--$1.3$\,s (median over five repetitions, CLARABEL/HiGHS,
+commodity laptop). The cost is in the \emph{number} of instances, not their size:
+one region-set experiment solves $3\text{ regimes}\times3\,\alpha\times2\text{
+arms}\times(6\,\varepsilon\times5\text{ folds}+1\text{ test read})=558$ SOCPs, and
+the full Phase 1 battery (region sets $\times$ \{sample, Ledoit--Wolf, seasonal,
+AR(1), two ablations, walk-forward, fine grid\}) is on the order of $10^4$ SOCP
+solves; Phase 2 adds $3\times3\times3\times4=108$ CVaR-SAA LPs. Total wall-clock for
+the entire study is under two hours on one core, so reproduction is cheap.
+
 \subsection{Reproducibility}
 All code is version-controlled (private repository, continuous-integration test
 suite, $168$ unit tests, including a feasible-set equivalence test pinning the
@@ -651,6 +670,14 @@ A walk-forward refit (train 2021--2023, test 2024) reproduces the null out of
 time: maximum absolute gap $0.036\%$ (\texttt{taskc}), $0.028\%$
 (\texttt{us\_west}), $0.217\%$ (\texttt{us\_hetero}, again negative). An
 11-point log-denser $\varepsilon$ grid changes no gap at the reported precision.
+Finally, a \emph{constraint-tightness} sensitivity directly probes the most
+plausible route to spatial value: tripling the binding tightness of the ramp limit
+($\Delta_r=5$ instead of $15$ MW/h) shrinks the feasible set so the schedule has far
+less freedom to track the mean field --- yet the null is unmoved, with maximum
+absolute gap $0.028\%$ (\texttt{us\_west}), $0.044\%$ (\texttt{taskc}) and $0.169\%$
+(\texttt{us\_hetero}), all sign-flipping and with $\varepsilon^\star=1$ retained.
+The covariance does not begin to pay even when the mean's pull is mechanically
+curtailed.
 
 \begin{table}[t]
 \centering\small
@@ -904,9 +931,11 @@ on accurate per-region mean forecasts, which is where the value demonstrably lie
 
 \subsection{Limitations}
 Five bound the claims. \emph{(i)~Representative schedule.} We evaluate one
-canonical workload (fixed daily utilization, splittable load, ramp limits); a
-sharply different cost geometry could in principle re-weight the covariance term,
-though the mean-dominance argument is scale-driven and likely to persist.
+canonical workload (fixed daily utilization, splittable load, ramp limits). A
+sharply different cost geometry could in principle re-weight the covariance term;
+the constraint-tightness sensitivity (Section~\ref{sec:res-robust}) addresses the
+most plausible case --- a $3\times$ tighter ramp leaves the null intact --- but a
+qualitatively different objective (e.g.\ hard per-job deadlines) is untested.
 \emph{(ii)~Test horizon.} The primary read is a single held-out year (2025);
 walk-forward to 2024 reproduces the null, but multi-year rolling evaluation would
 strengthen external validity. \emph{(iii)~Dependence model.} The DRO uses a

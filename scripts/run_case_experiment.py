@@ -347,11 +347,16 @@ def main() -> int:
                     help="'fine' = log-denser epsilon grid (for ablation runs where "
                          "eps* is unstable on the standard grid).")
     ap.add_argument("--out-dir", type=Path, default=RESULTS_DIR)
+    ap.add_argument("--ramp-mw", type=float, default=15.0,
+                    help="Per-region ramp limit (MW/h). Tighten (e.g. 5) to shrink "
+                         "the feasible set and test whether the spatial null survives "
+                         "when the schedule has less freedom to track the mean field.")
     args = ap.parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
     global USE_SHRINKAGE, RESIDUALIZE, ABLATE_MEAN, _VARCAP_CEILING, REGION_ORDER, TZ
-    global TRAIN_YEARS, TEST_YEAR, EPSILON_GRID
+    global TRAIN_YEARS, TEST_YEAR, EPSILON_GRID, RAMP_PER_REGION
+    RAMP_PER_REGION = args.ramp_mw
     USE_SHRINKAGE = args.shrinkage
     RESIDUALIZE = args.residualize
     ABLATE_MEAN = args.ablate_mean
@@ -473,6 +478,8 @@ def main() -> int:
         suffix += f"_ty{TEST_YEAR}"
     if args.regime != "all":
         suffix += f"_{args.regime}"
+    if args.ramp_mw != 15.0:
+        suffix += f"_ramp{args.ramp_mw:g}"
     stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
     base = f"{args.region_set}_regimes_{stamp}{suffix}"
     csv_path = args.out_dir / f"{base}.csv"
