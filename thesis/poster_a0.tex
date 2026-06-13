@@ -16,7 +16,7 @@
 \definecolor{sage}{HTML}{4A7C59}
 \definecolor{paper}{HTML}{F7F7F4}
 
-% --- theme: clean academic grid in the thesis palette ---
+%, theme: clean academic grid in the thesis palette ,
 \usetheme{Default}
 \usecolorstyle{Germany}
 \colorlet{titlefgcolor}{white}
@@ -35,11 +35,11 @@
    Robust Carbon-Aware Data-Center Scheduling?\par}
   \vspace{0.5cm}
   {\color{titlefgcolor}\Large
-   A Multi-Grid Falsification Study with a Causal Mechanism --- and a Phase-2 Copula Test\par}
+   A Multi-Grid Falsification Study with a Causal Mechanism, and a Phase-2 Copula Test\par}
   \vspace{0.6cm}
   {\color{titlefgcolor}\large \textbf{Marco Ortiz Togashi}\quad$\cdot$\quad
    Supervisor: Prof.\ Bissan Ghaddar\quad$\cdot$\quad
-   IE University --- Master in Business Analytics \& Data Science\par}
+   IE University, Master in Business Analytics \& Data Science\par}
 }
 \title{Carbon DRO}  % placeholder; the real title is hardcoded in \settitle above
 
@@ -53,7 +53,7 @@
 
 \block{Background \& research questions}{
 Data centers consume 1--2\% of global electricity, and compute is unusually
-\textbf{flexible} --- batch/training jobs can shift in time and across sites.
+\textbf{flexible}, batch/training jobs can shift in time and across sites.
 Carbon intensity varies strongly by hour and region, so a scheduler can defer work
 to cleaner moments. Robust scheduling under \emph{uncertain} carbon intensity uses
 \textbf{distributionally robust optimization (DRO)}. A natural extension treats
@@ -64,7 +64,7 @@ can inform the schedule.
 \textbf{RQ1.} Is carbon intensity of coupled grids genuinely correlated?\\[2pt]
 \textbf{RQ2.} Does feeding that correlation to a covariance-based DRO reduce
 out-of-sample tail emissions ($\mathrm{CVaR}_{0.95}$)?\\[2pt]
-\textbf{RQ3.} If not, \emph{why} --- and what dependence structure would a richer
+\textbf{RQ3.} If not, \emph{why}, and what dependence structure would a richer
 model need?
 }
 }
@@ -76,9 +76,9 @@ A Mahalanobis--Wasserstein DRO, solved as a second-order cone program:
 \min_{x\in\mathcal X,\,t\ge0}\ \langle\bar\rho,x\rangle+\varepsilon\,t
 \quad\text{s.t.}\quad \lVert L^\top\!\mathrm{vec}(x)\rVert_2\le t,\ \ LL^\top=\hat\Sigma .
 \]
-\textbf{Shuffled-marginals test.} Fit the schedule twice --- on the \emph{joint}
+\textbf{Shuffled-marginals test.} Fit the schedule twice, on the \emph{joint}
 covariance vs.\ a \emph{block-diagonal} one with all cross-region structure zeroed
---- and compare out-of-sample $\mathrm{CVaR}_{0.95}$ of daily emissions. The
+, and compare out-of-sample $\mathrm{CVaR}_{0.95}$ of daily emissions. The
 \emph{spatial gap} is positive iff the joint covariance helps.
 \begin{itemize}
 \item Pre-registered: config commit-locked, single 2025 test read.
@@ -88,7 +88,7 @@ covariance vs.\ a \emph{block-diagonal} one with all cross-region structure zero
 \end{itemize}
 }
 
-\block{RQ1 --- the correlation is real}{
+\block{RQ1, the correlation is real}{
 After removing each zone's hour-of-day mean, residual cross-region correlation is
 \textbf{strong and survives de-seasonalization}: US West CISO--NEVP $0.78$;
 Ontario belt CA-ON--NYISO $0.73$.
@@ -104,7 +104,7 @@ valid.}}
 % ===================== COLUMN 2 =====================
 \column{0.34}
 
-\block{RQ2 --- but it adds no robust value}{
+\block{RQ2, but it adds no robust value}{
 Across the dependence spectrum the spatial gap \textbf{never exceeds a few tenths
 of one percent} and is not sign-stable. It survives Ledoit--Wolf shrinkage,
 seasonal/AR(1) residualization, Benjamini--Hochberg correction over 144 cells,
@@ -114,20 +114,20 @@ walk-forward to 2024, and a $3\times$ \textbf{tighter-ramp} sensitivity.
 \includegraphics[width=0.99\linewidth]{../figures/finding.pdf}
 \vspace{0.1cm}
 \innerblock{}{This is an \textbf{active null}: CV selects $\varepsilon^\star=1$ in
-nearly every cell, so the DRO is genuinely robustifying --- and the covariance
+nearly every cell, so the DRO is genuinely robustifying, and the covariance
 \emph{still} buys nothing.}
 }
 
-\block{RQ3 --- the mechanism}{
+\block{RQ3, the mechanism}{
 \textbf{Mean-ablation (causal).} Flatten the mean carbon field and the joint
-covariance suddenly pays --- up to $\mathbf{+1.46\%}$. So the spatial signal is
+covariance suddenly pays, up to $\mathbf{+1.46\%}$. So the spatial signal is
 \textbf{real but masked} by the diurnal mean field, not absent.
 \vspace{0.2cm}
 
 \textbf{Tail dependence (structural).} The residual dependence is
 \textbf{non-elliptical}: regions go \emph{clean} together more than \emph{dirty}
 together ($\chi_L>\chi_U$, upper-tail independent). An elliptical covariance ball
-forces $\chi_L=\chi_U$ --- it is the \emph{wrong object}.
+forces $\chi_L=\chi_U$, it is the \emph{wrong object}.
 \vspace{0.2cm}
 \centering
 \includegraphics[width=0.86\linewidth]{../figures/tail_dependence_taskc.pdf}
@@ -136,7 +136,7 @@ forces $\chi_L=\chi_U$ --- it is the \emph{wrong object}.
 % ===================== COLUMN 3 =====================
 \column{0.33}
 
-\block{Phase 2 --- even the right copula fails}{
+\block{Phase 2, even the right copula fails}{
 We replace the covariance ball with copula schedulers (CVaR sample-average) that
 \emph{can} represent the asymmetry: independence, Gaussian, lower-tail
 \textbf{Clayton}, and the maximal \textbf{comonotone} (upper Fr\'echet $\sup_C$).
@@ -146,7 +146,7 @@ We replace the covariance ball with copula schedulers (CVaR sample-average) that
 \includegraphics[width=0.99\linewidth]{../figures/copula_result.pdf}
 \vspace{0.1cm}
 \innerblock{}{Even the \emph{maximal} copula caps the gain at
-$\Lambda\approx\mathbf{0.18\%}$ --- the null is \textbf{total}.}
+$\Lambda\approx\mathbf{0.18\%}$, the null is \textbf{total}.}
 }
 
 \block{A mean-dominance bound}{
@@ -160,20 +160,20 @@ $\big|\mathrm{OPT}(\Sigma)-\mathrm{OPT}(\Sigma^{\mathrm{shuf}})\big|\le
 vanishing as $\varepsilon\to0$ or $\Sigma^{\mathrm{off}}\to0$.}
 \vspace{0.15cm}
 The tight ceiling is \emph{measured} by the comonotone arm
-($\Lambda\!\approx\!0.18\%$) --- an order below the mean-driven value.
+($\Lambda\!\approx\!0.18\%$), an order below the mean-driven value.
 }
 
 \block{Conclusions \& future work}{
 \begin{itemize}
 \item Spatial correlation of carbon intensity is \textbf{real but adds no robust
-scheduling value} --- anywhere on the spectrum, for \emph{any} passive dependence
+scheduling value}, anywhere on the spectrum, for \emph{any} passive dependence
 model.
 \item The binding constraint is the \textbf{mean field}, not the shape of the
 dependence (mean-dominance bound $+$ comonotone ceiling).
 \item \textbf{Recommendation:} per-region marginal schedulers capture essentially
 all the value at a fraction of the cost.
 \item \textbf{Next:} spatial value, if any, requires an \emph{active} inter-region
-transfer channel $f_{r\to s,t}$ --- the one route the bound does not close.
+transfer channel $f_{r\to s,t}$, the one route the bound does not close.
 \end{itemize}
 \vspace{0.2cm}
 \small Reproducible pipeline: 169 unit tests, pre-registered configs, license-safe

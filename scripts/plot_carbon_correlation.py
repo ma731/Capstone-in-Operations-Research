@@ -39,18 +39,28 @@ def _save(fig, stem: str) -> list[Path]:
     return out
 
 
-def _heatmap(ax, corr: pd.DataFrame, title: str):
+def _short(name: str) -> str:
+    """Compact zone label: 'US-CAL-CISO' -> 'CISO', 'CA-ON' -> 'CA-ON'."""
+    parts = name.split("-")
+    return parts[-1] if name.startswith("US-") else name
+
+
+def _heatmap(ax, corr: pd.DataFrame, title: str, show_y: bool = True):
+    labels = [_short(c) for c in corr.columns]
     im = ax.imshow(corr.values, vmin=0, vmax=1, cmap="viridis")
     ax.set_xticks(range(len(corr)))
-    ax.set_xticklabels(corr.columns, rotation=45, ha="right", fontsize=8)
+    ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=9)
     ax.set_yticks(range(len(corr)))
-    ax.set_yticklabels(corr.index, fontsize=8)
+    if show_y:
+        ax.set_yticklabels(labels, fontsize=9)
+    else:
+        ax.set_yticklabels([])
     for i in range(len(corr)):
         for j in range(len(corr)):
             v = corr.values[i, j]
             ax.text(j, i, f"{v:.2f}", ha="center", va="center",
-                    color="white" if v < 0.6 else "black", fontsize=8)
-    ax.set_title(title, fontsize=10)
+                    color="white" if v < 0.6 else "black", fontsize=9)
+    ax.set_title(title, fontsize=11)
     return im
 
 
@@ -71,12 +81,13 @@ def main() -> None:
     resid = loc.groupby(loc.index.hour).transform(lambda s: s - s.mean()).corr()
 
     # --- Figure 1: correlation heatmaps (raw vs residual) ---
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.6))
-    _heatmap(axes[0], raw, "Raw hourly CI correlation")
-    im = _heatmap(axes[1], resid, "Residual (hour-of-day mean removed)")
-    fig.colorbar(im, ax=axes, shrink=0.85, label="Pearson r")
-    fig.suptitle(f"Carbon-intensity spatial correlation - {args.region_set} (2021-2025)",
-                 fontsize=12)
+    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.8))
+    _heatmap(axes[0], raw, "Raw hourly correlation", show_y=True)
+    im = _heatmap(axes[1], resid, "Residual (hour-of-day mean removed)", show_y=False)
+    fig.subplots_adjust(wspace=0.12)
+    cbar = fig.colorbar(im, ax=axes, shrink=0.85, label="Pearson $r$", pad=0.02)
+    fig.suptitle(f"Cross-region carbon-intensity correlation: {args.region_set} "
+                 f"(2021–2025)", fontsize=13)
     for p in _save(fig, f"ci_corr_heatmap_{args.region_set}"):
         print(f"  wrote {p}")
     plt.close(fig)

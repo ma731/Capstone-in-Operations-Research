@@ -33,7 +33,7 @@
 % ===================== COVER PAGE =====================
 \begin{titlepage}
 \centering
-{\large IE University --- School of Science \& Technology\par}
+{\large IE University, School of Science \& Technology\par}
 \vspace{0.4cm}
 {\large Master in Business Analytics \& Data Science\par}
 {\large Research Capstone in Operations Research\par}
@@ -68,10 +68,10 @@ distributionally robust optimization (DRO) framework. A natural extension treats
 carbon intensity as a stochastic \emph{vector} across coupled regions, so that
 \emph{spatial correlation} can inform the schedule. This thesis asks whether that
 spatial structure carries any robust scheduling value. Using a Mahalanobis--Wasserstein
-DRO solved as a second-order cone program, we design a falsification test --- the
-schedule fitted to the joint covariance versus one fitted to a block-diagonal
-covariance with cross-region structure destroyed --- evaluated by out-of-sample
-conditional value-at-risk ($\CVaR_{0.95}$) of daily emissions under
+DRO solved as a second-order cone program, we design a falsification test that
+compares the schedule fitted to the joint covariance against one fitted to a
+block-diagonal covariance with cross-region structure destroyed, scored by
+out-of-sample conditional value-at-risk ($\CVaR_{0.95}$) of daily emissions under
 pre-registration. Across three US/Canada grids spanning the dependence spectrum
 (the US West, an Ontario-anchored Eastern Interconnection belt, and an engineered
 solar/wind/hydro portfolio), with an Iberia--France low-correlation anchor, the
@@ -80,8 +80,8 @@ one percent and survives shrinkage, residualization, Benjamini--Hochberg correct
 walk-forward validation, and a tighter-ramp sensitivity. Two diagnostics give the
 mechanism: a \emph{mean-ablation} shows the covariance signal is genuine but
 dominated by the mean field, and a \emph{tail-dependence} analysis shows the
-residual dependence is non-elliptical --- radially asymmetric and upper-tail
-independent --- hence invisible to covariance-based ambiguity sets. A second phase
+residual dependence is non-elliptical, radially asymmetric and upper-tail
+independent, hence invisible to covariance-based ambiguity sets. A second phase
 forecloses the ``wrong object'' objection: Gaussian, lower-tail Clayton, and the
 maximal (comonotone) copula all leave the null intact, and an a-priori bound caps
 the achievable gain. The recommendation is that per-region marginal schedulers
@@ -100,8 +100,7 @@ Data centers consumed an estimated 1--2\% of global electricity and their demand
 growing rapidly with AI workloads \citep{iea2024}. Unlike most industrial loads,
 compute is unusually \emph{flexible}: many batch and training workloads can be
 delayed by hours or moved between sites with little loss of utility. Because the
-carbon intensity of grid electricity varies strongly by hour and by region ---
-driven by wind, solar, hydro availability, and demand --- this flexibility lets a
+carbon intensity of grid electricity varies strongly by hour and by region, driven by wind, solar, hydro availability, and demand, this flexibility lets a
 data-center operator act as a grid-aware participant, deferring work from dirty
 hours to clean ones \citep{radovanovic2022,wiesner2021}. Google's carbon-intelligent
 computing platform demonstrated such temporal shifting at production scale
@@ -117,7 +116,7 @@ formulations treat each region's carbon intensity essentially in isolation. Yet
 carbon intensities of electrically interconnected regions co-move: weather fronts
 traverse neighbouring balancing areas, and shared solar fleets create synchronized
 clean periods. It is therefore natural to model carbon intensity as a stochastic
-\emph{vector} with a full spatial covariance --- the extension studied here.
+\emph{vector} with a full spatial covariance, the extension studied here.
 
 \subsection{Problem statement and research questions}
 Modelling spatial dependence is not free: cross-region covariance blocks must be
@@ -133,7 +132,7 @@ spatially correlated, beyond shared diurnal cycles?
 (Mahalanobis--Wasserstein) DRO scheduler reduce out-of-sample tail emissions
 ($\CVaR_{0.95}$), relative to an otherwise identical scheduler that ignores
 cross-region dependence?
-\item[RQ3.] If not, \emph{why} not --- and what dependence structure, if any,
+\item[RQ3.] If not, \emph{why} not, and what dependence structure, if any,
 would a richer uncertainty model need to capture?
 \end{description}
 
@@ -142,10 +141,9 @@ The thesis makes four contributions. (i)~\emph{A falsification design}: a
 shuffled-marginals test that isolates exactly the value of spatial covariance,
 evaluated out-of-sample under pre-registration discipline (commit-locked
 configurations, dry-run gates, single test-set read). (ii)~\emph{A replicated
-empirical null across the dependence spectrum}: three primary US/Canada region sets
---- two interconnected grids where strong correlation survives de-seasonalization
-(the US West --- California, Nevada, Phoenix; and an Ontario--Eastern belt) and one
-engineered near-uncorrelated solar/wind/hydro portfolio --- corroborated by an
+empirical null across the dependence spectrum}: three primary US/Canada region sets, two interconnected grids where strong correlation survives de-seasonalization
+(the US West (California, Nevada, Phoenix; and an Ontario--Eastern belt) and one
+engineered near-uncorrelated solar/wind/hydro portfolio) corroborated by an
 Iberia--France panel where residual correlation collapses to the diurnal cycle, all
 yielding spatial gaps below $0.4\%$ of $\CVaR$,
 robust to estimator choice, multiple-testing correction, and walk-forward
@@ -180,8 +178,8 @@ while load shifts measurably toward cleaner hours. Wiesner et al.~\citep{wiesner
 potential of temporal shifting across regions and workloads, finding the benefit
 depends strongly on the grid's marginal mix and the workload's flexibility.
 Wijayawardana and Chien~\citep{wijayawardana2025} study cloud-VM scheduling on datacenters whose capacity
-varies with grid conditions --- including carbon-coupled capacity, where a constant
-carbon budget forces capacity to fall as intensity rises --- and document the
+varies with grid conditions (including carbon-coupled capacity, where a constant
+carbon budget forces capacity to fall as intensity rises) and document the
 goodput cost of capacity variation for long-running jobs. This systems literature
 establishes operational levers (deferral, throttling, capacity coupling) that we
 adopt as constraints, but it treats future carbon intensity as a point forecast;
@@ -193,7 +191,7 @@ Wasserstein ball around the empirical distribution has emerged as the canonical
 data-driven choice, with tractable finite-dimensional reformulations
 \citep{esfahani2018,kuhn2019}. For costs linear in the uncertain vector, type-2
 Wasserstein DRO with a Mahalanobis ground metric reduces to a mean term plus a
-covariance-weighted regularizer --- an interpretable ``mean plus
+covariance-weighted regularizer, an interpretable ``mean plus
 $\varepsilon\,\sqrt{x^\top\Sigma x}$'' objective solvable as a second-order cone
 program (SOCP) \citep{blanchet2019}. Hall et al.~\citep{hall2024} apply Wasserstein DRO to
 carbon-aware data-center scheduling with virtual capacity curves, treating each
@@ -213,14 +211,14 @@ remedy and serve here as a robustness arm. Beyond second moments, dependence is
 fully described by the copula \citep{sklar1959,joe2014}; tail-dependence
 coefficients quantify joint extremes that correlation cannot see, and the Gaussian
 copula has zero asymptotic tail dependence for any correlation below one
-\citep{embrechts2002} --- a property we exploit as a diagnostic benchmark.
+\citep{embrechts2002}, a property we exploit as a diagnostic benchmark.
 Vine-copula constructions make high-dimensional non-elliptical dependence tractable
 \citep{joe2014} and are the natural candidate for a dependence-aware extension of
 DRO ambiguity sets.
 
 \subsection{The gap}
 To our knowledge, no prior work \emph{tests} whether spatial correlation of carbon
-intensity --- however strong in the data --- translates into out-of-sample robust
+intensity (however strong in the data) translates into out-of-sample robust
 scheduling value. The systems literature does not model uncertainty explicitly; the
 DRO literature models uncertainty per region but has not isolated the marginal
 contribution of \emph{cross-region} dependence; and neither offers a controlled
@@ -233,8 +231,8 @@ mechanism diagnostics (mean-ablation and tail dependence).
 
 \subsection{Research design overview}
 The design is a controlled computational experiment. We hold the optimization
-machinery fixed and manipulate exactly one object --- the cross-region blocks of the
-covariance supplied to the scheduler --- then measure the consequence on held-out
+machinery fixed and manipulate exactly one object (the cross-region blocks of the
+covariance supplied to the scheduler) then measure the consequence on held-out
 tail emissions. Three primary region sets spanning the dependence spectrum (with two
 earlier panels corroborating) serve as replications; three nested constraint regimes
 guard against the result being an
@@ -280,7 +278,7 @@ Partitioning $\hat\Sigma$ into $T\times T$ blocks $\Sigma_{rs}$ by region pair, 
 quadratic form splits as
 \begin{equation}
 x^\top\hat\Sigma x=\sum_r x_r^\top\Sigma_{rr}x_r
-+\sum_{r\neq s}x_r^\top\Sigma_{rs}x_s ,
++\sum_{r\neq s}x_r^\top\Sigma_{rs}x_s,
 \label{eq:quad}
 \end{equation}
 so the off-diagonal (spatial) blocks are the \emph{only} channel by which
@@ -329,7 +327,7 @@ Chien~\citep{wijayawardana2025}, which replaces it with
 \bar x_{r,t}=x_{\min}+(x_{\max}-x_{\min})\,\mathrm{CFE}_{r,t}/100,
 \label{eq:varcap}
 \end{equation}
-where $\mathrm{CFE}_{r,t}$ is the training-mean carbon-free-energy share --- capacity
+where $\mathrm{CFE}_{r,t}$ is the training-mean carbon-free-energy share, capacity
 falls as the grid gets dirtier. The bounds $(x_{\min},x_{\max})=(50,75)$ were
 calibrated on training data to a loosely binding (``Goldilocks'') regime: the
 constraint binds on $28$--$37\%$ of region-hours, leaving positive slack and capacity
@@ -405,10 +403,10 @@ Carbon intensity is hourly lifecycle intensity from Electricity Maps (academic
 licence), 2021--2025, $43{,}824$ hourly observations per zone; panels are built on a
 common local clock per region set, trained on 2021--2024 and tested once on 2025.
 Three primary US/Canada region sets span the dependence spectrum:
-\textbf{(1)}~the \emph{US West} --- California, Nevada and Phoenix (CISO, BANC,
+\textbf{(1)}~the \emph{US West}, California, Nevada and Phoenix (CISO, BANC,
 LDWP, NEVP, AZPS); \textbf{(2)}~an \emph{Ontario--Eastern belt} (CA-ON, NYISO,
-MISO, PJM); and \textbf{(3)}~an \emph{engineered heterogeneous portfolio} --- CISO
-(solar), ERCOT (wind), BPAT (hydro) --- deliberately chosen so clean periods do
+MISO, PJM); and \textbf{(3)}~an \emph{engineered heterogeneous portfolio} (CISO
+(solar), ERCOT (wind), BPAT (hydro)) deliberately chosen so clean periods do
 \emph{not} align: the adversarial best case for diversification. Two earlier panels
 corroborate: an \emph{Iberia--France} European set (ES, PT, FR), where residual
 correlation collapses to the diurnal cycle, and the California/Nevada subset of the
@@ -436,15 +434,14 @@ $\varepsilon$ grid checks grid sensitivity.
 covariance, the mean used for \emph{scheduling} is transformed while evaluation
 stays on real emissions: \textsc{level} equalizes regional time-averages (keeping
 hour-of-day shape); \textsc{flat} sets a constant mean, making the mean term
-constant under fixed demand --- a covariance-only world in which any joint-vs-shuf
+constant under fixed demand, a covariance-only world in which any joint-vs-shuf
 difference is attributable purely to the spatial blocks.
 
 \paragraph{Tail dependence (RQ3, structural).} For each region pair we estimate
 the upper and lower tail-dependence coefficients
 $\chiU(q)=\Pr(U>q,V>q)/(1-q)$ and $\chiL(p)=\Pr(U<p,V<p)/p$ on rank
 pseudo-observations of residual intensity, comparing $\chiU$ at $q=0.95$ with the
-Gaussian-copula value at the matched correlation. Since the Gaussian copula ---
-the dependence family a covariance ball can represent --- is asymptotically
+Gaussian-copula value at the matched correlation. Since the Gaussian copula, the dependence family a covariance ball can represent, is asymptotically
 tail-independent \citep{embrechts2002}, a positive empirical excess would be
 exploitable tail structure invisible to the DRO; and since elliptical copulas force
 $\chiL=\chiU$, radial asymmetry diagnoses non-elliptical dependence.
@@ -453,7 +450,7 @@ $\chiL=\chiU$, radial asymmetry diagnoses non-elliptical dependence.
 bound}\label{sec:method-copula}
 The covariance test answers whether \emph{elliptical} dependence helps. Because the
 tail diagnostic flags \emph{non-elliptical} structure ($\chiL>\chiU$), a covariance
-ball cannot by construction represent it --- so a natural objection to the Phase 1
+ball cannot by construction represent it, so a natural objection to the Phase 1
 null is ``you used the wrong dependence object.'' Phase 2 forecloses that objection
 by replacing the covariance ball with copula models that \emph{can} represent the
 structure, and re-running the same falsification.
@@ -466,12 +463,12 @@ $u\in[0,1]^R$ and, for each region, selecting the training day whose daily-mean
 intensity has rank $u_r$ (low rank $=$ clean day), then taking that day's full
 profile. The copula thus governs \emph{only} the cross-region coupling, exactly as
 the shuffled covariance did. Three nested models span the dependence hierarchy:
-\textbf{(i)}~the \emph{independence} copula (regions decoupled --- the Phase 1
+\textbf{(i)}~the \emph{independence} copula (regions decoupled, the Phase 1
 shuffled arm); \textbf{(ii)}~the \emph{Gaussian} copula at the empirical
-rank-correlation (elliptical --- what the covariance ball can see); and
+rank-correlation (elliptical, what the covariance ball can see); and
 \textbf{(iii)}~an exchangeable \emph{Clayton} copula, with lower-tail dependence
 $\lambda_L=2^{-1/\theta}$ and zero upper-tail dependence \citep{joe2014}, fitted by
-matching mean pairwise Kendall's $\tau$ ($\theta=2\tau/(1-\tau)$) --- the object
+matching mean pairwise Kendall's $\tau$ ($\theta=2\tau/(1-\tau)$), the object
 built for the $\chiL>\chiU$ finding. Clayton is sampled by Marshall--Olkin frailty;
 no parametric marginal model is introduced. The exchangeable Clayton imposes a
 single $\theta$ and so cannot reproduce the \emph{pair-level} heterogeneity of the
@@ -549,15 +546,15 @@ Section~\ref{sec:res-copula} realizes the supremum over copulas and caps the
 achievable gain at $\Lambda\approx0.18\%$ of $\CVaR_{0.95}$, and the mean-ablation
 of Section~\ref{sec:res-ablation} recovers the same order independently. Both
 measurements are an order of magnitude below the schedule's mean-driven value;
-hence the mean field pins the schedule and the dependence model --- elliptical or
-not --- is immaterial. The prediction that even Clayton cannot recover material
+hence the mean field pins the schedule and the dependence model, elliptical or
+not, is immaterial. The prediction that even Clayton cannot recover material
 value is confirmed in Section~\ref{sec:res-copula}.
 
 \paragraph{Computational considerations.} Each instance is small: the decision
 vector has $RT\le 5\times24=120$ entries and the feasible set adds $O(RT)$ linear
 constraints, so the SOCP \eqref{eq:socp} solves in $0.19$--$0.26$\,s and the
-CVaR-SAA LP \eqref{eq:saacvar} --- which appends $S=1000$ epigraph variables and
-constraints --- in $0.9$--$1.3$\,s (median over five repetitions, CLARABEL/HiGHS,
+CVaR-SAA LP \eqref{eq:saacvar}, which appends $S=1000$ epigraph variables and
+constraints, in $0.9$--$1.3$\,s (median over five repetitions, CLARABEL/HiGHS,
 commodity laptop). The cost is in the \emph{number} of instances, not their size:
 one region-set experiment solves $3\text{ regimes}\times3\,\alpha\times2\text{
 arms}\times(6\,\varepsilon\times5\text{ folds}+1\text{ test read})=558$ SOCPs, and
@@ -590,8 +587,8 @@ heterogeneous portfolio behaves as designed: ERCOT--BPAT residual correlation is
 $0.00$, with CISO--BPAT at $0.33$. Figure~\ref{fig:heatmaps} shows the residual
 correlation matrices; overlay plots of standardized intensity (archived with the
 code) confirm visible co-movement in summer and winter weeks for the coupled
-cases. Together with the corroborating panels --- the California/Nevada subset
-($0.65$--$0.78$ within-state) and Iberia--France --- the cases span the dependence
+cases. Together with the corroborating panels, the California/Nevada subset
+($0.65$--$0.78$ within-state) and Iberia--France, the cases span the dependence
 spectrum from $\approx 0$ to $\approx 0.8$, so whatever the scheduling result, it
 cannot be attributed to an absence of correlation in the data.
 
@@ -602,7 +599,7 @@ cannot be attributed to an absence of correlation in the data.
 \caption{Residual (hour-of-day-removed) cross-region correlation of hourly carbon
 intensity, 2021--2025. Left: US West (CISO, BANC, LDWP, NEVP, AZPS). Right:
 Ontario--Eastern belt (CA-ON, NYISO, MISO, PJM). Spatial correlation is strong and
-genuine in both --- the assumption motivating spatial DRO is empirically valid.}
+genuine in both, the assumption motivating spatial DRO is empirically valid.}
 \label{fig:heatmaps}
 \end{figure}
 
@@ -612,8 +609,8 @@ pre-registered US/Canada cases: nine cells each (three constraint regimes $\time
 three $\alpha$-levels), CV-selected $\varepsilon^\star$, single test read on 2025.
 The gap never exceeds a few tenths of one percent of test
 $\CVaR_{0.95}$ in either direction. Where the bootstrap calls a cell
-``detectable'' the effect is genuine but economically negligible --- on the order
-of a few hundred $\gco$ out of a $\CVaR$ of $1.5\times10^6$ --- and, decisively, its
+``detectable'' the effect is genuine but economically negligible (on the order
+of a few hundred $\gco$ out of a $\CVaR$ of $1.5\times10^6$) and, decisively, its
 \emph{sign} flips across adjacent $\alpha$-levels within the same regime. A
 consistently exploitable spatial structure would not reverse direction under a
 change of the flexible-load fraction; these reversals are the signature of
@@ -627,8 +624,8 @@ Crucially, this is a null of the \emph{strong} kind. In all three pre-registered
 cases cross-validation \emph{chooses} a non-trivial ambiguity radius:
 $\varepsilon^\star=1$ in every one of the 27 cells for \texttt{taskc} and
 \texttt{us\_hetero}, and in 25 of 27 for \texttt{us\_west}. The DRO is therefore
-genuinely engaged --- it is paying for robustness, not collapsing to the nominal
-problem --- and the two arms still coincide. A null in which CV had selected
+genuinely engaged (it is paying for robustness, not collapsing to the nominal
+problem) and the two arms still coincide. A null in which CV had selected
 $\varepsilon^\star=0$ would be uninformative (robustification switched off, so the
 arms must match by construction); here the robustification is demonstrably on and
 the spatial covariance still buys nothing. This is the first regime in the project
@@ -639,8 +636,8 @@ The Iberia--France panel is the instructive contrast and the project's historica
 starting point. There the residual correlation is near zero, and CV does not even
 consistently engage the DRO: $\varepsilon^\star$ flickers between $0$, $0.1$, $1$
 and $10$ across cells, collapsing to $0$ in several. This is itself consistent with
-the thesis --- where there is no cross-region structure, the machinery sees nothing
-worth robustifying --- but it makes the Iberian null the \emph{weak} kind. We
+the thesis (where there is no cross-region structure, the machinery sees nothing
+worth robustifying) but it makes the Iberian null the \emph{weak} kind. We
 therefore retain it only as low-correlation, real-grid external validity, and rest
 the central claim on the US/Canada cases where the DRO is unambiguously on. The
 engineered \texttt{us\_hetero} portfolio supplies the strong zero-correlation null
@@ -679,8 +676,7 @@ diversification case (\texttt{us\_hetero}) the joint covariance actually
 \emph{hurts} at low $\alpha$ (up to $-0.23\%$): with no true cross-structure, the
 joint estimator fits noise that the block-diagonal arm is spared. Second, in the
 strongly correlated belt (\texttt{taskc}) the detectable cells flip sign between
-$\alpha=0.30$ and $\alpha=0.75$ within the same regime. Third, the US West ---
-strongest correlation of all --- produces no detectable cell beyond one of
+$\alpha=0.30$ and $\alpha=0.75$ within the same regime. Third, the US West (strongest correlation of all) produces no detectable cell beyond one of
 magnitude $+3\times10^{-6}\%$. Figure~\ref{fig:finding}A plots all 27 cells
 against each case's mean residual correlation: the cloud stays on zero across the
 whole correlation range. \textbf{Validity of the spatial assumption does not imply
@@ -690,8 +686,8 @@ value from it.}
 \centering
 \includegraphics[width=\textwidth]{../figures/finding.pdf}
 \caption{The Phase 1 finding. \textbf{A:} spatial gap vs.\ mean residual
-cross-region correlation --- value does not track correlation anywhere on the
-spectrum. \textbf{B:} mean-ablation --- in the covariance-only world (constant
+cross-region correlation (value does not track correlation anywhere on the
+spectrum. \textbf{B:} mean-ablation) in the covariance-only world (constant
 scheduling mean) the joint covariance pays off by up to $+1.46\%$, proving the
 spatial signal is real but \emph{masked} by the mean carbon field, not absent.}
 \label{fig:finding}
@@ -708,8 +704,7 @@ seasonal estimator, so the rule rejects it. Benjamini--Hochberg correction at
 $q=0.05$ across all 144 non-ablation cells (the $3\text{ cases}\times3\text{
 regimes}\times3\,\alpha=27$ base cells $\times$ the four covariance estimators
 \{sample, Ledoit--Wolf, seasonal, AR(1)\}, plus the two corroborating panels' cells)
-leaves that same already-rejected cell as the largest surviving positive gap ---
-nothing material survives both filters.
+leaves that same already-rejected cell as the largest surviving positive gap, nothing material survives both filters.
 A walk-forward refit (train 2021--2023, test 2024) reproduces the null out of
 time: maximum absolute gap $0.036\%$ (\texttt{taskc}), $0.028\%$
 (\texttt{us\_west}), $0.217\%$ (\texttt{us\_hetero}, again negative). An
@@ -717,7 +712,7 @@ time: maximum absolute gap $0.036\%$ (\texttt{taskc}), $0.028\%$
 Finally, a \emph{constraint-tightness} sensitivity directly probes the most
 plausible route to spatial value: tripling the binding tightness of the ramp limit
 ($\Delta_r=5$ instead of $15$ MW/h) shrinks the feasible set so the schedule has far
-less freedom to track the mean field --- yet the null is unmoved, with maximum
+less freedom to track the mean field, yet the null is unmoved, with maximum
 absolute gap $0.028\%$ (\texttt{us\_west}), $0.044\%$ (\texttt{taskc}) and $0.169\%$
 (\texttt{us\_hetero}), all sign-flipping and with $\varepsilon^\star=1$ retained.
 The covariance does not begin to pay even when the mean's pull is mechanically
@@ -744,18 +739,18 @@ Case & Ledoit--Wolf & Seasonal & AR(1) & Walk-forward 2024\\
 \subsection{Mean-ablation: the covariance is masked, not worthless
 (RQ3)}\label{sec:res-ablation}
 The ablation isolates the cause (Table~\ref{tab:ablation},
-Figure~\ref{fig:finding}B). Under \textsc{level} ablation --- regional
-time-averages equalized, hour-of-day shape kept --- every gap is unchanged to
+Figure~\ref{fig:finding}B). Under \textsc{level} ablation (regional
+time-averages equalized, hour-of-day shape kept) every gap is unchanged to
 three decimals: the \emph{between-region} mean differences are not what masks the
-covariance. Under \textsc{flat} ablation --- constant scheduling mean, the
-covariance-only world --- the joint covariance suddenly pays: up to $+1.46\%$ in
+covariance. Under \textsc{flat} ablation (constant scheduling mean, the
+covariance-only world) the joint covariance suddenly pays: up to $+1.46\%$ in
 \texttt{us\_hetero} and $+0.41\%$ in \texttt{taskc}, all BH-significant, and CV no
 longer collapses both arms onto the same schedule. The spatial signal in the
 covariance is therefore \emph{real and exploitable}; in the real problem it is
 simply dominated by the within-day shape of the mean carbon field, which both arms
 share. The instructive exception is \texttt{us\_west}: even in the covariance-only
 world its gaps stay at zero ($-0.036$ to $+0.004\%$), because its strong
-correlation is \emph{common-mode} --- all five zones move together, so destroying
+correlation is \emph{common-mode}, all five zones move together, so destroying
 cross-dependence changes no scheduling decision. Positive correlation is
 non-diversifiable risk: there is no hedge for a DRO to find.
 
@@ -782,13 +777,13 @@ Case & Real problem & \textsc{level} & \textsc{flat} (covariance-only)\\
 Table~\ref{tab:tails} reports residual tail-dependence at $q=0.95$ for
 representative pairs. Two findings. \emph{First}, the upper tail is empirically at
 or below the Gaussian benchmark everywhere (excess $-0.18$ to $+0.04$): in the
-dirtiest hours, regions \emph{de-couple} rather than spike together --- there is
+dirtiest hours, regions \emph{de-couple} rather than spike together, there is
 no upper-tail co-movement for a richer ambiguity set to exploit on the risk side.
 \emph{Second}, the dependence is radially asymmetric, $\chiL>\chiU$: regions go
 \emph{clean} together more strongly than dirty together, clearest in the
 solar-driven US West (CISO--LDWP $\chiL=0.48$ vs.\ $\chiU=0.25$; BANC--LDWP $0.40$
 vs.\ $0.17$). Elliptical copulas force $\chiL=\chiU$, so this is structure a
-Mahalanobis--Wasserstein ball is geometrically incapable of representing --- the
+Mahalanobis--Wasserstein ball is geometrically incapable of representing, the
 covariance is not merely masked (Section~\ref{sec:res-ablation}); for the part of
 the dependence that varies, it is also the \emph{wrong object}.
 Figure~\ref{fig:tails} shows the asymmetry for the Ontario--Eastern belt.
@@ -832,7 +827,7 @@ Case & Pair & $\rho$ & $\chiU$ emp & $\chiU$ Gauss & Excess & $\chiL$ emp\\
 If the covariance ball failed only because it is elliptical, a copula that encodes
 the empirical $\chiL>\chiU$ asymmetry should recover value. It does not.
 Figure~\ref{fig:copuladens} confirms the Clayton copula fitted to each grid behaves
-as intended --- its samples pile into the joint-clean corner ($\chiL=0.70$ vs.\
+as intended, its samples pile into the joint-clean corner ($\chiL=0.70$ vs.\
 $\chiU=0.26$ for CISO--BANC), exactly the structure the symmetric Gaussian copula
 ($\chiL\approx\chiU\approx0.46$) and any covariance ball cannot represent. Yet when
 each dependence model is used to schedule and evaluated out-of-sample on 2025
@@ -848,10 +843,10 @@ Section~\ref{sec:method-copula}. This is the most any copula can buy. In the two
 weakly- or heterogeneously-coupled grids it too returns nothing sign-stable
 ($\le0.11\%$, not detectable). In the genuinely positively-coupled belt
 (\texttt{taskc}, $\bar\tau=0.31$) it does produce a sign-stable, fully-detectable
-gain --- but of only $+0.10$ to $+0.18\%$ across all nine cells. This is the key
+gain, but of only $+0.10$ to $+0.18\%$ across all nine cells. This is the key
 number: the comonotone arm \emph{measures} the copula ceiling directly, and even
 perfect knowledge of the dependence caps the achievable gain at
-$\Lambda\approx0.18\%$ of $\CVaR_{0.95}$ --- immaterial, and an order of magnitude
+$\Lambda\approx0.18\%$ of $\CVaR_{0.95}$, immaterial, and an order of magnitude
 below the schedule's mean-driven value. Crucially this measurement is
 \emph{independent} of the mean-ablation, so it pins $\Lambda$ without circularity:
 no copula, not even the maximal one, recovers material value.
@@ -872,7 +867,7 @@ elliptical models force to zero.}
 \caption{Phase 2 copula results. Gap $=$ reduction in out-of-sample
 $\CVaR_{0.95}$ versus the independence baseline (\%; positive $=$ the copula helps),
 reported as the maximum \emph{positive} gain over the nine cells. The
-\emph{comonotone} arm is the upper Fr\'echet bound (perfect rank coupling) --- the
+\emph{comonotone} arm is the upper Fr\'echet bound (perfect rank coupling), the
 supremum over all copulas, hence the empirical ceiling $\Lambda$ on copula value.
 $\theta$ is the fitted Clayton parameter; ``stable'' flags a sign-stable,
 bootstrap-detectable gain across all nine cells.}
@@ -898,7 +893,7 @@ comonotone ceiling $\Lambda$ caps at $0.18\%$, and only in the coupled belt
 (\texttt{taskc}); the fitted copulas do not even reach it. \textbf{B:} the mean
 Clayton$-$Gaussian increment by grid; positive where dependence is heterogeneous
 (\texttt{us\_hetero}, $+0.07\%$), confirming the copula \emph{does} capture the
-asymmetry --- but an order of magnitude too small to matter, as
+asymmetry, but an order of magnitude too small to matter, as
 Proposition~\ref{prop:meandom} predicts.}
 \label{fig:copularesult}
 \end{figure}
@@ -907,7 +902,7 @@ One positive signal is worth stating precisely: the Clayton$-$Gaussian increment
 consistently positive in the heterogeneous case (\texttt{us\_hetero}, mean
 $+0.07\%$) and negligible or negative where correlation is common-mode. The
 asymmetric copula therefore \emph{does} extract something the elliptical one cannot,
-in the expected direction --- but at a magnitude an order below materiality. This is
+in the expected direction, but at a magnitude an order below materiality. This is
 the empirical face of Proposition~\ref{prop:meandom}: the copula's leverage
 $\Lambda$ is real but dominated by the mean field. Phase 2 thus converts the Phase 1
 null from ``covariance is the wrong object'' into the stronger ``\emph{no} dependence
@@ -926,7 +921,7 @@ falsifies is the specific hypothesis that encoding that correlation in a
 covariance-based ambiguity set improves robust scheduling. The mean-ablation
 result (Section~\ref{sec:res-ablation}) is what licenses the stronger claim: the
 covariance signal is genuine and, in a covariance-only world, worth up to
-$1.46\%$ of tail emissions --- it is simply dominated by the diurnal mean carbon
+$1.46\%$ of tail emissions; it is simply dominated by the diurnal mean carbon
 field in the problem as actually posed. A reader could otherwise dismiss the null
 as ``the data had no signal''; the ablation shows the signal is present but
 \emph{subordinate}. This is the central intellectual contribution: a clean
@@ -938,13 +933,13 @@ intensity (night-to-noon ratios of two-to-fourfold in solar-heavy grids) dwarfs
 the residual covariance, so the optimal schedule is driven almost entirely by
 \emph{when} each region is clean on average; the second-order covariance term
 moves decisions only at the margin. (ii)~\emph{Common-mode correlation.} Where
-correlation is strongest (US West), it is positive and shared across all zones ---
+correlation is strongest (US West), it is positive and shared across all zones:
 common, non-diversifiable risk. Diversification value requires \emph{offsetting}
 fluctuations; positively co-moving regions offer no hedge, so destroying the
 cross-blocks (the shuffled arm) changes nothing. (iii)~\emph{Wrong tail.} Robust
 \emph{tail} scheduling cares about joint \emph{dirty} excursions, but the empirical
 upper tail is independent-to-decoupling ($\chiU$ at or below Gaussian), while the
-co-movement that does exist is in the \emph{clean} tail ($\chiL>\chiU$) --- exactly
+co-movement that does exist is in the \emph{clean} tail ($\chiL>\chiU$), exactly
 the regime a risk-averse scheduler is not protecting against, and a radial
 asymmetry an elliptical ball cannot encode regardless. The covariance is thus both
 \emph{masked} (dominated by the mean) and, for its varying part, \emph{mis-shaped}
@@ -955,7 +950,7 @@ The finding refines rather than contradicts the carbon-aware DRO literature.
 Single-region robust formulations~\citep{wijayawardana2025} remain well-motivated:
 our per-region marginal schedulers capture essentially all the value. The
 contribution is to the \emph{multi-region} extension that treats carbon intensity
-as a correlated vector --- a natural and previously untested generalization. We
+as a correlated vector, a natural and previously untested generalization. We
 show that the covariance channel of that extension is empirically inert under
 realistic grid data, and we locate the reason in the mean-dominance and
 non-ellipticity of the dependence. This both saves practitioners from modelling
@@ -965,8 +960,7 @@ covariance cannot reach.
 
 \subsection{Practical recommendation}
 For carbon-aware schedulers on the grids studied, a \emph{per-region marginal}
-robust scheduler --- one ambiguity set per zone, no cross-region covariance ---
-captures essentially all the achievable robust value at a fraction of the
+robust scheduler, one ambiguity set per zone, no cross-region covariance, captures essentially all the achievable robust value at a fraction of the
 modelling and estimation cost. Estimating a full joint covariance is not merely
 unnecessary; in the diversification-friendly case it is mildly
 \emph{counterproductive} (the joint arm fit noise and \emph{lost} up to $0.23\%$).
@@ -978,7 +972,7 @@ Five bound the claims. \emph{(i)~Representative schedule.} We evaluate one
 canonical workload (fixed daily utilization, splittable load, ramp limits). A
 sharply different cost geometry could in principle re-weight the covariance term;
 the constraint-tightness sensitivity (Section~\ref{sec:res-robust}) addresses the
-most plausible case --- a $3\times$ tighter ramp leaves the null intact --- but a
+most plausible case, a $3\times$ tighter ramp leaves the null intact, but a
 qualitatively different objective (e.g.\ hard per-job deadlines) is untested.
 \emph{(ii)~Test horizon.} The primary read is a single held-out year (2025);
 walk-forward to 2024 reproduces the null, but multi-year rolling evaluation would
@@ -999,14 +993,14 @@ from materiality.
 \section{Conclusions}\label{sec:conclusion}
 
 \subsection{Answers to the research questions}
-\textbf{RQ1 --- Is carbon intensity spatially correlated in coupled grids?}
+\textbf{RQ1, Is carbon intensity spatially correlated in coupled grids?}
 Yes. After removing the shared diurnal cycle, residual cross-region correlations
 reach $0.78$ in the US West and $0.73$ in the Ontario-anchored Eastern belt and
 survive de-seasonalization (Section~\ref{sec:res-corr}). The premise of spatial
 DRO is empirically sound; the engineered heterogeneous portfolio confirms the
 diagnostic resolves genuine near-zero dependence ($0.00$) when it is present.
 
-\textbf{RQ2 --- Does encoding that correlation in a covariance-based ambiguity set
+\textbf{RQ2, Does encoding that correlation in a covariance-based ambiguity set
 improve robust scheduling?} No. Across three primary region sets spanning the
 dependence spectrum (and two corroborating panels), the out-of-sample
 $\CVaR_{0.95}$ spatial gap never exceeds a few tenths
@@ -1018,21 +1012,20 @@ diversification-friendly case the joint covariance is mildly counterproductive.
 Critically, this is an \emph{active} null: cross-validation selects a non-trivial
 ambiguity radius ($\varepsilon^\star=1$) in nearly every cell of the US/Canada
 cases, so the DRO is genuinely robustifying and the spatial covariance still adds
-nothing --- a stronger result than a null in which the robustification had
+nothing, a stronger result than a null in which the robustification had
 collapsed to the nominal problem.
 
-\textbf{RQ3 --- Why?} Two complementary mechanisms. A mean-ablation experiment
+\textbf{RQ3, Why?} Two complementary mechanisms. A mean-ablation experiment
 proves the covariance signal is real and worth up to $1.46\%$ of tail emissions in
 a covariance-only world, but is dominated by the diurnal mean carbon field in the
 problem as posed (Section~\ref{sec:res-ablation}). A tail-dependence analysis shows
-the residual dependence is non-elliptical --- upper-tail-independent and radially
-asymmetric ($\chiL>\chiU$) --- and therefore structurally invisible to a
+the residual dependence is non-elliptical, upper-tail-independent and radially
+asymmetric ($\chiL>\chiU$), and therefore structurally invisible to a
 covariance ball even where it does vary (Section~\ref{sec:res-tails}). The
 covariance is both \emph{masked} and \emph{mis-shaped}. Phase 2 settles which
 mechanism binds: replacing the covariance ball with a Clayton copula built for the
 $\chiL>\chiU$ asymmetry still recovers no material value
-(Section~\ref{sec:res-copula}), and Proposition~\ref{prop:meandom} explains why ---
-CVaR's translation invariance makes the dependence model second-order to the mean
+(Section~\ref{sec:res-copula}), and Proposition~\ref{prop:meandom} explains why, CVaR's translation invariance makes the dependence model second-order to the mean
 field. The limit is not the shape of the dependence object; it is mean-dominance.
 
 \subsection{Contributions}
@@ -1043,15 +1036,15 @@ transferable to any correlated-uncertainty DRO; (2)~a replicated,
 robustness-checked null on whether spatial dependence improves carbon-aware DRO
 scheduling, holding across multiple real grids \emph{and} across the dependence
 hierarchy from covariance ball to elliptical and lower-tail copulas;
-(3)~a causal mechanism --- formalized as a mean-dominance bound
-(Proposition~\ref{prop:meandom}) and demonstrated by mean-ablation --- that
+(3)~a causal mechanism (formalized as a mean-dominance bound
+(Proposition~\ref{prop:meandom}) and demonstrated by mean-ablation) that
 explains the null rather than merely reporting it; and (4)~a fully reproducible,
 version-controlled, CI-tested pipeline (168 tests) with archived license-safe
 summary tables for every reported number.
 
 \subsection{Future work}
-Phase 2 closed the most immediate question --- whether a copula that sees the
-asymmetry recovers value (it does not) --- and in doing so sharpened the remaining
+Phase 2 closed the most immediate question (whether a copula that sees the
+asymmetry recovers value (it does not)) and in doing so sharpened the remaining
 agenda. First, a \emph{copula-ambiguity Wasserstein DRO} in the Fan--Ji--Lejeune
 sense \citep{fan2024}, which robustifies the dependence structure itself rather than
 sampling from a single fitted copula; Proposition~\ref{prop:meandom} predicts the
@@ -1164,7 +1157,7 @@ Section & Result & Archived source\\
 \ref{sec:res-ablation} & Mean-ablation (Table~\ref{tab:ablation}) &
 \texttt{\{case\}\_..\_ablate-\{level,flat\}.csv}\\
 \ref{sec:res-corr},\ref{sec:res-tails} & CA/Iberia panels &
-\texttt{taskA\_..\,, es\_pt\_fr\_..\,csv}\\
+\texttt{taskA\_..\, es\_pt\_fr\_..\,csv}\\
 \bottomrule
 \end{tabular}
 \end{table}
