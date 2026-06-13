@@ -542,12 +542,12 @@ magnitude smaller), but it isolates the controlling quantities: the spatial gap 
 governed by $\varepsilon$ and the cross-region block norm, and is structurally
 forced to zero in the no-robustification and no-cross-structure limits. The
 \emph{tight} ceiling is measured, not bounded: the comonotone arm of
-Section~\ref{sec:res-copula} realizes the supremum over copulas and caps the
-achievable gain at $\Lambda\approx0.18\%$ of $\CVaR_{0.95}$, and the mean-ablation
-of Section~\ref{sec:res-ablation} recovers the same order independently. Both
-measurements are an order of magnitude below the schedule's mean-driven value;
-hence the mean field pins the schedule and the dependence model, elliptical or
-not, is immaterial. The prediction that even Clayton cannot recover material
+Section~\ref{sec:res-copula} realizes the supremum over copulas, and across scenario
+seeds its gain is centred on zero with $|\Lambda|\lesssim0.1\%$ of $\CVaR_{0.95}$, at
+the sampling-noise floor. The mean-ablation of Section~\ref{sec:res-ablation}
+bounds the same quantity from a second, independent angle. Both put $\Lambda$ an
+order of magnitude below the schedule's mean-driven value; hence the mean field pins
+the schedule and the dependence model, elliptical or not, is immaterial. The prediction that even Clayton cannot recover material
 value is confirmed in Section~\ref{sec:res-copula}.
 
 \paragraph{Computational considerations.} Each instance is small: the decision
@@ -601,6 +601,22 @@ intensity, 2021--2025. Left: US West (CISO, BANC, LDWP, NEVP, AZPS). Right:
 Ontario--Eastern belt (CA-ON, NYISO, MISO, PJM). Spatial correlation is strong and
 genuine in both, the assumption motivating spatial DRO is empirically valid.}
 \label{fig:heatmaps}
+\end{figure}
+
+Figure~\ref{fig:map} places the three grids geographically and draws each
+within-grid residual correlation as a weighted edge. The picture matches the
+physics: the US West forms one tightly-coupled WECC cluster, the Ontario--Eastern
+belt another along the Eastern Interconnection, while the engineered portfolio
+spans the continent with thin (near-zero) edges by construction.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{../figures/correlation_map.pdf}
+\caption{The three grids and their residual correlation network. Nodes are
+Electricity Maps zones at their geographic centroids; edge weight is the
+de-seasonalized cross-region correlation. Tight clusters (US West, Ontario--Eastern
+belt) contrast with the deliberately diversified engineered portfolio.}
+\label{fig:map}
 \end{figure}
 
 \subsection{The spatial gap is null across the spectrum (RQ2)}\label{sec:res-gap}
@@ -884,15 +900,16 @@ as in Phase 1.
 To test the \emph{actual} worst case we add the comonotone (upper-Fr\'echet) arm:
 perfect rank coupling, which maximizes the CVaR of a sum of positively-associated
 risks and therefore realizes the supremum $\sup_C$ in the leverage $\Lambda$ of
-Section~\ref{sec:method-copula}. This is the most any copula can buy. In the two
-weakly- or heterogeneously-coupled grids it too returns nothing sign-stable
-($\le0.11\%$, not detectable). In the genuinely positively-coupled belt
-(\texttt{taskc}, $\bar\tau=0.31$) it does produce a sign-stable, fully-detectable
-gain, but of only $+0.10$ to $+0.18\%$ across all nine cells. This is the key
-number: the comonotone arm \emph{measures} the copula ceiling directly, and even
-perfect knowledge of the dependence caps the achievable gain at
-$\Lambda\approx0.18\%$ of $\CVaR_{0.95}$, immaterial, and an order of magnitude
-below the schedule's mean-driven value. Crucially this measurement is
+Section~\ref{sec:method-copula}. This is the most any copula can buy. At the locked
+scenario seed its largest single-cell gain is $+0.18\%$ (\texttt{taskc}), and a
+naive day-bootstrap would call several \texttt{taskc} cells ``detectable.'' That
+detectability is illusory, however: the bootstrap resamples test days but not the
+\emph{scenario draw}, and re-running the comonotone arm across five scenario seeds
+shows the gap is sampling noise, ranging from $-0.08\%$ to $+0.10\%$ and centred on
+zero (mean $+0.01\%$; Appendix~\ref{app:repro}, Figure~\ref{fig:converge}). The
+honest reading is therefore the stronger one: even the maximal copula's leverage
+$\Lambda$ sits at the scenario-sampling \emph{noise floor}, $|\Lambda|\lesssim0.1\%$
+of $\CVaR_{0.95}$ and statistically indistinguishable from zero. This measurement is
 \emph{independent} of the mean-ablation, so it pins $\Lambda$ without circularity:
 no copula, not even the maximal one, recovers material value.
 
@@ -911,20 +928,20 @@ elliptical models force to zero.}
 \centering\small
 \caption{Phase 2 copula results. Gap $=$ reduction in out-of-sample
 $\CVaR_{0.95}$ versus the independence baseline (\%; positive $=$ the copula helps),
-reported as the maximum \emph{positive} gain over the nine cells. The
-\emph{comonotone} arm is the upper Fr\'echet bound (perfect rank coupling), the
-supremum over all copulas, hence the empirical ceiling $\Lambda$ on copula value.
-$\theta$ is the fitted Clayton parameter; ``stable'' flags a sign-stable,
-bootstrap-detectable gain across all nine cells.}
+the maximum \emph{positive} gain over the nine cells at the locked scenario seed.
+The \emph{comonotone} arm is the upper Fr\'echet bound (perfect rank coupling), the
+supremum over all copulas, hence the empirical ceiling $\Lambda$. The final column
+reports the comonotone gap re-evaluated over five scenario seeds: in every case it
+is centred on zero and sampling-noise dominated, so no gain is stable or material.}
 \label{tab:copula}
-\begin{tabular}{lccccccc}
+\begin{tabular}{lcccccc}
 \toprule
 Case & $\bar\tau$ & $\theta$ & gain$_{\text{Gauss}}$ & gain$_{\text{Clay}}$ &
-gain$_{\text{comon}}$ & $\Lambda$ stable? & material?\\
+gain$_{\text{comon}}$ & comon.\ over 5 seeds\\
 \midrule
-\texttt{us\_west}   & 0.47 & 1.77 & 0.066 & 0.038 & 0.089 & no & no\\
-\texttt{taskc}      & 0.31 & 0.90 & 0.158 & 0.014 & 0.182 & \textbf{yes (9/9)} & no\\
-\texttt{us\_hetero} & 0.20 & 0.50 & 0.069 & 0.127 & 0.114 & no & no\\
+\texttt{us\_west}   & 0.47 & 1.77 & 0.066 & 0.038 & 0.089 & $\approx0$, noise\\
+\texttt{taskc}      & 0.31 & 0.90 & 0.158 & 0.014 & 0.182 & $[-0.08,+0.10]$, mean $+0.01$\\
+\texttt{us\_hetero} & 0.20 & 0.50 & 0.069 & 0.127 & 0.114 & $\approx0$, noise\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -932,14 +949,14 @@ gain$_{\text{comon}}$ & $\Lambda$ stable? & material?\\
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{../figures/copula_result.pdf}
-\caption{Phase 2 result. \textbf{A:} maximum positive gain versus independence for
-the Gaussian, Clayton, and comonotone (upper-Fr\'echet $\sup_C$) arms. The
-comonotone ceiling $\Lambda$ caps at $0.18\%$, and only in the coupled belt
-(\texttt{taskc}); the fitted copulas do not even reach it. \textbf{B:} the mean
-Clayton$-$Gaussian increment by grid; positive where dependence is heterogeneous
-(\texttt{us\_hetero}, $+0.07\%$), confirming the copula \emph{does} capture the
-asymmetry, but an order of magnitude too small to matter, as
-Proposition~\ref{prop:meandom} predicts.}
+\caption{Phase 2 result (single locked scenario seed). \textbf{A:} maximum positive
+gain versus independence for the Gaussian, Clayton, and comonotone (upper-Fr\'echet
+$\sup_C$) arms. The largest single-seed comonotone gain is $0.18\%$ (\texttt{taskc});
+re-evaluated over scenario seeds it is sampling noise centred on zero
+(Figure~\ref{fig:converge}). \textbf{B:} the mean Clayton$-$Gaussian increment by
+grid; positive where dependence is heterogeneous (\texttt{us\_hetero}, $+0.07\%$),
+confirming the copula \emph{does} capture the asymmetry, but an order of magnitude
+too small to matter, as Proposition~\ref{prop:meandom} predicts.}
 \label{fig:copularesult}
 \end{figure}
 
@@ -949,10 +966,23 @@ $+0.07\%$) and negligible or negative where correlation is common-mode. The
 asymmetric copula therefore \emph{does} extract something the elliptical one cannot,
 in the expected direction, but at a magnitude an order below materiality. This is
 the empirical face of Proposition~\ref{prop:meandom}: the copula's leverage
-$\Lambda$ is real but dominated by the mean field. Phase 2 thus converts the Phase 1
-null from ``covariance is the wrong object'' into the stronger ``\emph{no} dependence
-model recovers value here, because the binding constraint is the mean field, not the
-shape of the dependence.''
+$\Lambda$ is real but dominated by the mean field. The clearest statement of the
+result is out of sample (Figure~\ref{fig:scentail}): the distributions of real 2025
+daily emissions under the independence, Clayton, and comonotone schedules lie on top
+of one another, with $\CVaR_{0.95}$ values agreeing to the third significant figure.
+Phase 2 thus converts the Phase 1 null from ``covariance is the wrong object'' into
+the stronger ``\emph{no} dependence model recovers value here, because the binding
+constraint is the mean field, not the shape of the dependence.''
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.82\textwidth]{../figures/scenario_tail.pdf}
+\caption{Out of sample the copula schedulers are interchangeable
+(\texttt{taskc}). Distribution of real 2025 daily emissions under the schedule
+fitted to independence, Clayton, and comonotone scenarios; the dotted lines mark
+each $\CVaR_{0.95}$. All three coincide.}
+\label{fig:scentail}
+\end{figure}
 
 % ===================== 5. DISCUSSION (RUN 2) =====================
 \section{Discussion}\label{sec:discussion}
@@ -1154,6 +1184,24 @@ VMs on variable capacity datacenters,'' in \emph{Proc. ACM Symp. Cloud Computing
 % ===================== APPENDICES (RUN 3) =====================
 \appendix
 \section{Reproducibility Details}\label{app:repro}
+
+\paragraph{Scenario-count stability and the comonotone noise floor.}
+Figure~\ref{fig:converge} re-evaluates the comonotone (upper-Fr\'echet) gap on
+\texttt{taskc} over five scenario seeds and a range of scenario counts $S$. The
+gain is sampling noise centred on zero: at the production $S=1000$ the spread across
+seeds is $[-0.08,+0.10]\%$ with mean $+0.01\%$, and it narrows with $S$. This is the
+basis for treating the single-seed $+0.18\%$ of Section~\ref{sec:res-copula} as
+immaterial rather than a real effect, and it confirms $S=1000$ is sufficient.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.7\textwidth]{../figures/scenario_convergence.pdf}
+\caption{The comonotone gap is scenario-sampling noise. Mean (line) and range over
+five seeds (band) of the comonotone-vs-independence $\CVaR_{0.95}$ gap on
+\texttt{taskc}, against the scenario count $S$. The band straddles zero and narrows
+with $S$; the $\pm0.1\%$ materiality band is shaded.}
+\label{fig:converge}
+\end{figure}
 
 \paragraph{Repository and environment.} All code lives in a private,
 version-controlled repository with a continuous-integration suite ($168$ unit

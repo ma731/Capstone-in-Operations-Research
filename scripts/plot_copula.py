@@ -110,14 +110,14 @@ def fig_phase2_result():
         axA.text(i, c + 0.004, f"{c:.2f}", ha="center", fontsize=7.5)
         axA.text(i + w, m + 0.004, f"{m:.2f}", ha="center", fontsize=7.5)
     axA.text(2.35, 0.065, "no-value band\n($<0.1\\%$)", color="0.4", fontsize=7.5, ha="right")
-    axA.annotate("even the maximal copula\ncaps at $\\Lambda\\approx0.18\\%$",
-                 xy=(1.27, 0.182), xytext=(0.55, 0.24), fontsize=7.5, color=GOLD,
+    axA.annotate("max single-seed gain $0.18\\%$;\nsampling noise across seeds",
+                 xy=(1.27, 0.182), xytext=(0.45, 0.24), fontsize=7.5, color=GOLD,
                  arrowprops=dict(arrowstyle="->", color=GOLD, lw=0.9))
     axA.set_xticks(x)
     axA.set_xticklabels([LABEL[c] for c in CASES], fontsize=8)
     axA.set_ylabel("max gain vs independence  $\\mathrm{CVaR}_{0.95}$  [%]")
-    axA.set_title("A. The copula ceiling $\\Lambda$ is small\n"
-                  "(upper-Fréchet $\\sup_C$ caps at 0.18%, only in coupled taskc)", fontsize=10)
+    axA.set_title("A. The copula ceiling $\\Lambda$ is at the noise floor\n"
+                  "(upper-Fréchet $\\sup_C$: max single-seed gain 0.18%, $\\approx0$ over seeds)", fontsize=10)
     axA.legend(frameon=False, fontsize=7.8, loc="upper left")
     axA.grid(alpha=0.3, axis="y", lw=0.5)
 
