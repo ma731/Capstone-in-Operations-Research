@@ -6,10 +6,12 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{amsthm}                      % before newtxmath to avoid \openbox clash
+\let\openbox\relax
 \usepackage{newtxtext,newtxmath}        % Times New Roman text + math
 \usepackage[margin=1in]{geometry}
 \usepackage{setspace}\onehalfspacing    % 1.5 line spacing
-\usepackage{amsmath,amssymb}
 \usepackage{booktabs,array,enumitem,graphicx,xcolor,mathtools}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
@@ -488,36 +490,62 @@ the reported copula gaps are $\CVaR(\text{indep})-\CVaR(\text{Gaussian})$,
 $\CVaR(\text{indep})-\CVaR(\text{Clayton})$, and the asymmetry increment
 $\CVaR(\text{Gaussian})-\CVaR(\text{Clayton})$, each with a paired day-bootstrap CI.
 
-\paragraph{Why the dependence model is second-order: a bound.} A structural reason
-to expect Phase 2 to reproduce the null follows from the translation invariance of
-CVaR. Writing the carbon field as mean plus zero-mean residual,
-$\rho=\bar\rho+\xi$, daily emissions decompose as $\langle\rho,x\rangle=
-\langle\bar\rho,x\rangle+\langle\xi,x\rangle$, and since $\langle\bar\rho,x\rangle$
-is deterministic,
+\paragraph{Why the dependence model is second-order.} Two facts make the
+dependence model second-order to the mean field. The first is a decomposition: by
+the translation invariance of CVaR, writing the carbon field as mean plus zero-mean
+residual $\rho=\bar\rho+\xi$ and noting $\langle\bar\rho,x\rangle$ is deterministic,
 \begin{equation}
 \CVaR_\beta\!\big(\langle\rho,x\rangle\big)=
-\underbrace{\langle\bar\rho,x\rangle}_{\text{copula-independent}}+\;
-\CVaR_\beta\!\big(\langle\xi,x\rangle\big).
+\underbrace{\langle\bar\rho,x\rangle}_{\text{dependence-independent}}+\;
+\CVaR_\beta\!\big(\langle\xi,x\rangle\big),
 \label{eq:meandom}
 \end{equation}
-The dependence model affects \emph{only} the residual term, and only through its
-cross-region aggregation; its total leverage is bounded by the comonotone--diversified
-spread $\Lambda(x)=\sup_{C}\CVaR_\beta(\langle\xi,x\rangle)-\inf_{C}
-\CVaR_\beta(\langle\xi,x\rangle)$ over copulas $C$.
+so for a \emph{fixed} schedule the dependence model moves only the residual term.
+The second is an a-priori bound on how far it can move the \emph{optimal} value.
 
-\begin{proposition}[Mean-dominance]\label{prop:meandom}
-For any two dependence models, the optimal out-of-sample $\CVaR_{0.95}$ differs by
-at most $\Lambda(x^\star)$. The mean-ablation of Section~\ref{sec:res-ablation}
-measures $\Lambda$ directly: it is the gap recovered when the mean term is removed.
-Empirically $\Lambda$ is at most a few tenths of one percent of the mean term with
-the mean present, rising to $\approx1.5\%$ only under flat ablation; hence the mean
-field pins the schedule and the dependence model --- elliptical or not --- is
-immaterial.
+\begin{proposition}[Spatial gap control, SOCP]\label{prop:meandom}
+Let $\mathrm{OPT}(\Sigma)$ be the optimal value of the SOCP \eqref{eq:socp} for a
+covariance $\Sigma$, and let $\Sigma^{\mathrm{shuf}}$ be its block-diagonal
+(cross-region-zeroed) counterpart with $\Sigma^{\mathrm{off}}=\Sigma-
+\Sigma^{\mathrm{shuf}}$. Then the spatial gap obeys
+\begin{equation}
+\big|\mathrm{OPT}(\Sigma)-\mathrm{OPT}(\Sigma^{\mathrm{shuf}})\big|\ \le\
+\varepsilon\,\Big(\max_{x\in\mathcal X}\lVert x\rVert_2\Big)\,
+\big\lVert\Sigma^{\mathrm{off}}\big\rVert_2^{1/2},
+\label{eq:propbound}
+\end{equation}
+which vanishes as $\varepsilon\to0$ (no robustification) or
+$\Sigma^{\mathrm{off}}\to0$ (no cross-region structure).
 \end{proposition}
 
-\noindent The proposition predicts that even Clayton, the correct object for the
-empirical asymmetry, cannot recover material value; Section~\ref{sec:res-copula}
-confirms it.
+\begin{proof}
+The two programs share the feasible set $\mathcal X$ and differ only in the conic
+penalty. For fixed $x$, using $|\sqrt a-\sqrt b|\le\sqrt{|a-b|}$ and the Rayleigh
+bound $|x^\top\Sigma^{\mathrm{off}}x|\le\lVert\Sigma^{\mathrm{off}}\rVert_2\lVert
+x\rVert_2^2$,
+\[
+\big|\varepsilon\sqrt{x^\top\Sigma x}-\varepsilon\sqrt{x^\top\Sigma^{\mathrm{shuf}}x}\big|
+\le\varepsilon\sqrt{|x^\top\Sigma^{\mathrm{off}}x|}
+\le\varepsilon\lVert x\rVert_2\lVert\Sigma^{\mathrm{off}}\rVert_2^{1/2}.
+\]
+Two objectives that differ pointwise by at most $\delta$ over a common feasible set
+have optimal values differing by at most $\delta$; taking the max over $\mathcal X$
+gives \eqref{eq:propbound}.
+\end{proof}
+
+\noindent The bound is conservative (on our data its right-hand side is
+$\approx10$--$16\%$ of the mean term, while realized gaps are two orders of
+magnitude smaller), but it isolates the controlling quantities: the spatial gap is
+governed by $\varepsilon$ and the cross-region block norm, and is structurally
+forced to zero in the no-robustification and no-cross-structure limits. The
+\emph{tight} ceiling is measured, not bounded: the comonotone arm of
+Section~\ref{sec:res-copula} realizes the supremum over copulas and caps the
+achievable gain at $\Lambda\approx0.18\%$ of $\CVaR_{0.95}$, and the mean-ablation
+of Section~\ref{sec:res-ablation} recovers the same order independently. Both
+measurements are an order of magnitude below the schedule's mean-driven value;
+hence the mean field pins the schedule and the dependence model --- elliptical or
+not --- is immaterial. The prediction that even Clayton cannot recover material
+value is confirmed in Section~\ref{sec:res-copula}.
 
 \paragraph{Computational considerations.} Each instance is small: the decision
 vector has $RT\le 5\times24=120$ entries and the feasible set adds $O(RT)$ linear
