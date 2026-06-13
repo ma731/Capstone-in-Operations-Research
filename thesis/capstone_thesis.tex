@@ -630,7 +630,22 @@ $\varepsilon^\star=0$ would be uninformative (robustification switched off, so t
 arms must match by construction); here the robustification is demonstrably on and
 the spatial covariance still buys nothing. This is the first regime in the project
 where the DRO is consistently active, which is precisely what makes the null
-informative rather than vacuous.
+informative rather than vacuous. Figure~\ref{fig:cvcurve} shows the cross-validation
+curves directly: validation $\CVaR_{0.95}$ dips to an interior minimum at a
+non-trivial $\varepsilon^\star$ before rising as over-conservatism sets in, and the
+joint and shuffled curves lie on top of one another.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{../figures/cv_curve.pdf}
+\caption{The DRO genuinely engages. Blocked 5-fold cross-validation
+$\CVaR_{0.95}$ (relative to the nominal $\varepsilon=0$ problem) against the
+Wasserstein radius $\varepsilon$, for the joint (solid) and shuffled (dashed)
+covariances. Cross-validation selects an interior $\varepsilon^\star$ (circled),
+not $\varepsilon=0$, so the robustification is on; the two curves coincide, so the
+spatial covariance changes nothing. Large $\varepsilon$ is over-conservative.}
+\label{fig:cvcurve}
+\end{figure}
 
 The Iberia--France panel is the instructive contrast and the project's historical
 starting point. There the residual correlation is near zero, and CV does not even
