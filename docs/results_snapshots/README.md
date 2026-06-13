@@ -21,6 +21,12 @@ academic license does not apply.
   `lw` = Ledoit-Wolf shrinkage; `ablate-level`/`ablate-flat` = mean-ablation;
   `finegrid` = denser epsilon grid; `ty2024` = walk-forward (test year 2024).
 - `bh_correction.csv` = Benjamini-Hochberg over all gap cells.
+- `<case>_copula_<date>.csv` = **Phase 2** copula schedulers. Columns:
+  `regime, alpha, cvar_indep, cvar_gauss, cvar_clayton, clayton_theta, kendall_tau,
+  gap_gauss_pct, gap_clayton_pct, gap_clayton_vs_gauss_pct, detectable_*`. Gap =
+  reduction in out-of-sample CVaR_0.95 vs the independence baseline (positive = the
+  structured copula helps). Regenerate with
+  `.venv\Scripts\python -m scripts.run_copula_experiment --region-set <case>`.
 
 Columns: `regime, alpha, eps*_joint, eps*_shuf, joint_CVaR, shuf_CVaR, gap_pct,
 gap_ci_lo, gap_ci_hi, detectable`. Positive gap = joint covariance beats shuffled.
