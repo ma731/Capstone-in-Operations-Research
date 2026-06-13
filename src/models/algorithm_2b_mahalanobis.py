@@ -77,6 +77,7 @@ import cvxpy as cp
 import numpy as np
 
 from src.models.covariance import REGION_ORDER
+from src.models.feasible_set import build_feasible_constraints
 
 
 @dataclass
@@ -271,94 +272,18 @@ def solve_mahalanobis_dro(
     penalty_term = epsilon * cp.norm(L.T @ x_vec, 2)
     objective = cp.Minimize(mean_term + penalty_term)
 
-    constraints = [
-        x <= ceiling,
-    ]
+    # Feasible set X (C0 capacity, C2 split + work, C1 cap, C3 ramp, 3a deadline,
+    # 3b thermal/PUE, 3d budget) is built by the shared module so Phase 1 and the
+    # Phase 2 CVaR scheduler optimize over an identical region (pinned by
+    # tests/test_phase2_copula.py::test_feasible_set_matches_phase1).
+    constraints, _ = build_feasible_constraints(
+        x, workloads, ceiling,
+        p_max=p_max, alpha=alpha, intraday_shape=intraday_shape, ramp=ramp,
+        deferral_windows=deferral_windows, temperature=temperature,
+        pue0=pue0, kappa=kappa, t_set=t_set, bar_P=bar_P,
+        carbon_budget=carbon_budget, rho_bar=rho_bar,
+    )
 
-    # --- C2: flexible/inflexible split (replaces the plain work equality) ---
-    # When alpha is None, fall back to the original equality sum_t x_{r,t}=W_r.
-    x_flex = None
-    alpha_arr = None
-    if alpha is not None:
-        alpha_arr = np.asarray(alpha, dtype=float).reshape(R)
-        if ((alpha_arr < 0) | (alpha_arr > 1)).any():
-            raise ValueError("alpha must lie in [0, 1]")
-        if intraday_shape is None:
-            p_shape = np.full((R, T), 1.0 / T)
-        else:
-            p_shape = np.asarray(intraday_shape, dtype=float)
-            if p_shape.shape != (R, T):
-                raise ValueError(f"intraday_shape must be (R, T) = ({R}, {T})")
-            if not np.allclose(p_shape.sum(axis=1), 1.0, atol=1e-8):
-                raise ValueError("intraday_shape rows must each sum to 1")
-        inflex_base = (alpha_arr * workloads)[:, None] * p_shape   # (R, T)
-        x_flex = cp.Variable((R, T), nonneg=True)
-        constraints += [x == inflex_base + x_flex]
-        for r in range(R):
-            constraints += [cp.sum(x_flex[r, :]) == (1.0 - alpha_arr[r]) * workloads[r]]
-    else:
-        constraints += [cp.sum(x, axis=1) == workloads]
-
-    # --- C1: aggregate per-hour power cap -----------------------------------
-    if p_max is not None:
-        for t in range(T):
-            constraints += [cp.sum(x[:, t]) <= p_max]
-
-    # --- C3: inter-hour ramping limit ---------------------------------------
-    if ramp is not None:
-        ramp_arr = np.asarray(ramp, dtype=float).reshape(R)
-        for r in range(R):
-            for t in range(1, T):
-                constraints += [cp.abs(x[r, t] - x[r, t - 1]) <= ramp_arr[r]]
-
-    # --- 3a: windowed-demand (deferral-deadline) constraint -----------------
-    # For each region r and each window (t1, t2, gamma):
-    #     sum_{t in [t1, t2]} x_flex[r, t] >= gamma * (1 - alpha_r) * W_r
-    # An AGGREGATE bound on deferral: a fraction gamma of the region's
-    # FLEXIBLE work must be served within the window [t1, t2] (a deferral
-    # deadline). It is explicitly NOT a per-job SLA. The flexible portion is
-    # only well-defined under the C2 split, so this requires alpha.
-    if deferral_windows is not None:
-        if x_flex is None:
-            raise ValueError(
-                "deferral_windows requires the flexible/inflexible split "
-                "(pass alpha); the window bounds the flexible work x_flex."
-            )
-        for (t1, t2, gamma) in deferral_windows:
-            if not (0 <= t1 <= t2 < T):
-                raise ValueError(
-                    f"deferral window ({t1}, {t2}) out of range [0, {T - 1}]"
-                )
-            if not (0.0 <= gamma <= 1.0):
-                raise ValueError(f"deferral gamma must lie in [0, 1], got {gamma}")
-            for r in range(R):
-                flex_r = (1.0 - alpha_arr[r]) * workloads[r]
-                constraints += [
-                    cp.sum(x_flex[r, t1:t2 + 1]) >= gamma * flex_r
-                ]
-
-    # --- 3b: temperature-coupled thermal (PUE) constraint -------------------
-    # Effective power = PUE(T_{r,t}) * x_{r,t} with the hockey-stick model
-    #     PUE(T) = pue0 + kappa * max(T - t_set, 0),
-    # bounded per cell by bar_P. Temperature is data, so PUE is a constant
-    # matrix and the constraint is linear (program stays an SOCP/LP).
-    if temperature is not None:
-        if bar_P is None:
-            raise ValueError("temperature given but bar_P (effective-power ceiling) is None")
-        temp_arr = np.asarray(temperature, dtype=float)
-        if temp_arr.shape != (R, T):
-            raise ValueError(f"temperature must be (R, T) = ({R}, {T}), got {temp_arr.shape}")
-        pue = pue0 + kappa * np.maximum(temp_arr - t_set, 0.0)   # (R, T) constant
-        constraints += [cp.multiply(pue, x) <= bar_P]
-
-    # --- 3d: carbon budget --------------------------------------------------
-    # Cap the NOMINAL carbon <rho_bar, x> <= B. rho_bar is data, so this is a
-    # single linear constraint; the program stays an SOCP. (The budget is on the
-    # mean field, not the robust value -- a deterministic operational cap.)
-    if carbon_budget is not None:
-        if carbon_budget < 0:
-            raise ValueError(f"carbon_budget must be non-negative, got {carbon_budget}")
-        constraints += [cp.sum(cp.multiply(rho_bar, x)) <= carbon_budget]
 
     problem = cp.Problem(objective, constraints)
     chosen_solver = _select_solver(solver)

@@ -50,6 +50,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from src.analysis.metrics import cvar_upper_tail, per_day_emissions
 from src.analysis.stratified_correlations import REGION_SETS
 from src.data.capacity import build_cfe_panel, capacity_from_cfe, cfe_field
 from src.data.electricitymaps import load_all_zones, to_wide
@@ -144,17 +145,6 @@ def ablate_mean(rho_bar: np.ndarray) -> np.ndarray:
 # ----------------------------------------------------------------------
 # Metrics / CV (identical to Task C)
 # ----------------------------------------------------------------------
-
-def cvar_upper_tail(values: np.ndarray, alpha: float = CVAR_ALPHA) -> float:
-    values = np.asarray(values, dtype=float)
-    n = len(values)
-    n_tail = max(1, int(np.ceil(n * (1.0 - alpha))))
-    return float(np.sort(values)[::-1][:n_tail].mean())
-
-
-def per_day_emissions(schedule: np.ndarray, panel: np.ndarray) -> np.ndarray:
-    return np.einsum("rt,nrt->n", schedule, panel)
-
 
 def blocked_fold_indices(n: int, k: int) -> list[tuple[np.ndarray, np.ndarray]]:
     boundaries = np.linspace(0, n, k + 1, dtype=int)

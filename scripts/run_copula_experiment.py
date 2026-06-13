@@ -34,6 +34,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from src.analysis.metrics import cvar_upper_tail, per_day_emissions
 from src.analysis.stratified_correlations import REGION_SETS
 from src.data.capacity import build_cfe_panel, capacity_from_cfe, cfe_field
 from src.data.electricitymaps import load_all_zones, to_wide
@@ -68,18 +69,7 @@ REGIME_ORDER = ("R3_reference", "R1_lean", "R2_varcap")
 _VARCAP_CEILING: np.ndarray | None = None
 
 
-# ===================== metrics (pure, self-contained) =======================
-def cvar_upper_tail(values: np.ndarray, beta: float = CVAR_BETA) -> float:
-    values = np.asarray(values, dtype=float)
-    n = len(values)
-    n_tail = max(1, int(np.ceil(n * (1.0 - beta))))
-    return float(np.sort(values)[::-1][:n_tail].mean())
-
-
-def per_day_emissions(schedule: np.ndarray, panel: np.ndarray) -> np.ndarray:
-    return np.einsum("rt,nrt->n", schedule, panel)
-
-
+# ===================== metrics: shared in src.analysis.metrics ==============
 def _ceiling_for(regime_key: str, R: int, T: int) -> np.ndarray:
     if REGIMES[regime_key]["varcap"]:
         assert _VARCAP_CEILING is not None
