@@ -1,22 +1,32 @@
-# Proposal — Inter-region transfer channel for the spatial DRO
+# Proposal — Part 3: Spatially-coupled transfer DRO (the new algorithm)
 
-**Author:** Marco (DRO/spatial). **For:** Prof. Bissan Ghaddar. **Date:** 2026-06-11.
+**Author:** Marco (DRO/spatial). **For:** Prof. Bissan Ghaddar.
+**Date:** 2026-06-11, **updated 2026-06-14 (post-Phase-2).**
 **Status:** proposal — needs sign-off (scope overlaps a teammate; see §5).
+
+> **Where this sits.** Part 1 (covariance) and Part 2 (copulas) are *done* and live
+> in the capstone: both are nulls, and the mean-dominance bound explains why no
+> *passive* dependence model can help. This proposal is **Part 3** — the genuinely
+> novel **algorithm** (active inter-region transfer under DRO) and the natural
+> publication follow-on. The capstone itself is **Paper 1** (a negative/measurement
+> result: HotCarbon / e-Energy / SIGEnergy workshop); this is **Paper 2**.
 
 ---
 
 ## 1. One-paragraph summary
 
-Phase 1 found a **replicated null**: across three US/Canada cases spanning the
-full correlation spectrum (strong → near-zero), the spatial covariance of carbon
-intensity adds no robust CVaR scheduling value. This note argues the null may be a
-property of the current **decision structure**, not of the data: in the present
-model each region serves *its own* workload, so there is **no decision that moves
-load toward whichever region is clean**. The covariance can therefore only act
-through the second-order risk penalty. Adding an **inter-region transfer channel**
-(load can be shifted between regions, at a cost / within limits) makes the decision
-itself spatial — and is the single most likely change to make spatial structure
-*pay off*. The result is informative either way, and it is publishable.
+The capstone established a **total null**: across three US/Canada grids spanning the
+full correlation spectrum, *neither* the spatial covariance *nor* a Gaussian/Clayton/
+comonotone copula adds robust CVaR scheduling value, and a mean-dominance bound
+proves no *passive* dependence model can. The null is a property of the **decision
+structure**, not the data: in the present model each region serves *its own*
+workload, so there is **no decision that moves load toward whichever region is
+clean**. The mean field dominates — and it dominates *spatially* too (at each hour
+one region is cleanest on average), a first-order signal the passive ambiguity set
+cannot act on. An **inter-region transfer channel** (load can shift between regions,
+at a cost / within limits) makes the decision itself spatial and is the one route
+left to extracting spatial value. The novel contribution is the *combination*
+**DRO + active transfer**; the result is informative and publishable either way.
 
 ---
 
@@ -36,10 +46,19 @@ dominates the solution (Phase 1 §5). So the optimizer never asks "*where* shoul
 this workload run?" — only "*when*, within its own region". Spatial co-movement of
 carbon is irrelevant to a decision that cannot relocate load.
 
-**Hypothesis.** Give the optimizer the ability to relocate load across regions and
-the *joint* distribution of where/when carbon is low becomes decision-relevant — so
-the joint covariance (and, in Phase 2, the copula) can finally beat the shuffled /
-independent baseline.
+**Hypothesis (refined post-Phase-2).** Give the optimizer the ability to relocate
+load across regions and the *spatial* structure of carbon becomes decision-relevant.
+Note the subtlety the capstone exposed: transfer will help **because it is
+mean-exploiting** (move work to the region with the lowest *mean* carbon right now),
+not because it suddenly makes the *covariance* pay. So the honest research question
+for Part 3 is **not** "does transfer help" (it must) but:
+
+> **Does *robustifying* the transfer (DRO) beat plain *deterministic* transfer?**
+
+The same mean-dominance logic that killed the passive covariance suggests the
+robustness layer may again be second-order — so the interesting, non-obvious result
+is characterizing *when* robust transfer wins: under forecast error, distribution
+shift, or for tail-risk-averse operators. That is the publishable methods question.
 
 ---
 
@@ -72,20 +91,30 @@ Carbon intensity stays the only stochastic object (scope unchanged).
 
 ## 4. Experiment (drops into the existing harness)
 
-Re-run the **same** shuffled-marginals protocol (joint vs block-diagonal `Sigma`,
-blocked 5-fold CV for `eps*`, 1000-bootstrap CVaR_0.95 gap) on all three cases, for
-a few transfer budgets `Phi in {0, small, medium, unbounded}`:
+Two questions, two comparisons, all on the locked pre-registration discipline.
 
-- `Phi = 0` reproduces the Phase 1 null (sanity check).
-- As `Phi` grows, **does the joint-minus-shuffled gap open up?** A widening,
-  sign-stable, robustness-surviving gap = the first genuine spatial value — and a
-  clean headline: *"spatial carbon structure matters once the scheduler can act on
-  it spatially."*
-- If the gap stays at zero even with free transfer, the null is deeper still
-  (the mean field, now over a larger feasible set, still dominates) — also a clean,
-  defensible result.
+**(a) Does transfer unlock spatial value?** Re-run the shuffled-marginals protocol
+(joint vs block-diagonal `Sigma`, blocked 5-fold CV for `eps*`, 1000-bootstrap
+CVaR_0.95 gap) on all three grids for transfer budgets `Phi in {0, small, medium,
+unbounded}`. `Phi=0` reproduces the null (sanity check); as `Phi` grows, watch
+whether the joint-minus-shuffled gap opens up. Expect it to — but via the mean, not
+the covariance, which (b) disentangles.
 
-Expected cost: ~the current battery (a dozen runs); no new data.
+**(b) The real methods question — robust vs deterministic transfer.** Head-to-head,
+out-of-sample on 2025:
+- **Deterministic transfer** (`eps=0`): schedule + transfer on the mean field only.
+- **Robust transfer** (`eps*` by CV): same, with the Wasserstein penalty.
+- Stress both under **forecast error** (perturb/replace `rho_bar` with a lagged or
+  noisy forecast) and report the CVaR_0.95 of *realized* emissions.
+
+A robust-transfer advantage that **grows with forecast error / tail aversion** is
+the headline positive result: *"robustness is worthless for passive spatial
+hedging, but valuable once spatial transfer is an active decision under
+uncertainty."* If robust ≈ deterministic everywhere, that extends the
+mean-dominance story one level further (also clean, also publishable).
+
+Expected cost: ~the current battery scale; no new data (the transfer is a model
+change, carbon intensity stays the only stochastic object).
 
 ---
 
@@ -102,11 +131,20 @@ building, to avoid duplicated work.
 
 ---
 
-## 6. Recommendation
+## 6. Recommendation & status
 
-Run the **mean-ablation experiment first** (cheap, no scope conflict — it proves the
-mean-dominance mechanism by equalizing regional means and checking whether the
-covariance effect then appears). If ablation confirms "the mean masks the
-covariance," that is the precise motivation for the transfer channel: remove the
-mean's separable dominance *by giving the decision a spatial degree of freedom*.
-Then build the transfer channel subject to §5 sign-off.
+The mean-ablation (the cheap mechanism check this doc originally recommended first)
+is **done** and confirmed the mean masks the covariance; Phase 2 then showed even
+copulas cannot recover it. The motivation for the transfer channel is therefore
+established, not hypothetical: passive spatial structure is provably worthless, so
+the decision must be made spatial.
+
+**Next steps:** (1) get Bissan's explicit OK on the §5 boundary with Yaxin's
+deterministic-transfer work; (2) build the transfer variables into `algorithm_2b`
+(a small, SOCP-preserving change — `f >= 0`, the `y = x + inflow - outflow`
+substitution, and a transfer budget/penalty); (3) run experiment (b) — robust vs
+deterministic transfer under forecast error — as the core of Paper 2.
+
+**Publication trajectory.** Paper 1 = the capstone negative result (ready now,
+HotCarbon / e-Energy / SIGEnergy workshop). Paper 2 = this transfer DRO (the novel
+algorithm + the robust-vs-deterministic result), a stronger venue once results land.

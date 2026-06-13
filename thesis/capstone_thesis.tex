@@ -1230,14 +1230,19 @@ served in a zone, $\tilde x_{r,t}=x_{r,t}+\sum_{s}(f_{s\to r,t}-f_{r\to s,t})$, 
 migrate toward whichever region is cleanest at each hour, subject to flow
 conservation, transfer-capacity and (optionally) transmission-loss constraints.
 Minimizing the worst-case $\CVaR$ of $\langle\rho,\tilde x\rangle$ over a Wasserstein
-ball keeps the program an SOCP, but now the cross-region covariance enters the
-\emph{decision}, not merely a passive penalty. This is the genuinely novel
-formulation the present results motivate: the mean-dominance bound
-(Proposition~\ref{prop:meandom}) shows passive dependence modelling cannot help, so
-the only route to spatial value is to make the spatial structure actionable. To our
-knowledge no prior work combines Wasserstein-DRO robustification with active
-inter-region transfer; the channel overlaps a collaborator's deterministic-transfer
-scope and awaits supervisor sign-off. Third, \emph{rolling re-optimization} over multiple
+ball keeps the program an SOCP, but now the spatial structure enters the
+\emph{decision}, not merely a passive penalty. The motivation is precise: the mean
+field dominates (Proposition~\ref{prop:meandom}), and it dominates
+\emph{spatially} too, since at each hour one region is cleanest on average. A
+passive ambiguity set cannot act on that first-order spatial signal; an active
+transfer channel can, which is exactly the value our null leaves on the table. The
+honest open question, and the real content of the next phase, is not whether
+transfer helps (it must, being mean-exploiting) but whether \emph{robustifying} it
+beats plain deterministic transfer, e.g.\ under forecast error or for tail-averse
+operators, since the same mean-dominance logic suggests the robustness layer may
+again be second-order. To our knowledge no prior work combines Wasserstein-DRO
+robustification with active inter-region transfer; the channel overlaps a
+collaborator's deterministic-transfer scope and awaits supervisor sign-off. Third, \emph{rolling re-optimization} over multiple
 test years. The null is thus not a dead end but a sharpened mandate: it shows that
 the value, if any, will not come from a better passive dependence model but from an
 active spatial decision.
