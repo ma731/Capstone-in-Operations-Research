@@ -90,27 +90,35 @@ def fig_phase2_result():
     and Clayton arms across the three cases, with the no-value band."""
     fig, (axA, axB) = plt.subplots(1, 2, figsize=(12.5, 5.0))
     x = np.arange(len(CASES))
-    w = 0.36
-    gauss_means, clay_means, cvg = [], [], []
+    w = 0.27
+    gauss_m, clay_m, como_m, cvg = [], [], [], []
     for c in CASES:
         df = pd.read_csv(RES / f"{c}_copula_{STAMP}.csv")
-        gauss_means.append(df.gap_gauss_pct.abs().max())
-        clay_means.append(df.gap_clayton_pct.abs().max())
+        # max *positive* gain vs independence (best case each copula achieves)
+        gauss_m.append(max(df.gap_gauss_pct.max(), 0.0))
+        clay_m.append(max(df.gap_clayton_pct.max(), 0.0))
+        como_m.append(max(df.gap_comonotone_pct.max(), 0.0))  # upper-Frechet sup_C ceiling
         cvg.append(df.gap_clayton_vs_gauss_pct.mean())
 
-    # Panel A: max |gap| vs independence -- both arms flat against the no-value band
+    # Panel A: max gap vs independence -- fitted arms flat; comonotone = the sup_C ceiling
     axA.axhspan(0, 0.1, color="0.85", alpha=0.7, zorder=0)
-    axA.bar(x - w / 2, gauss_means, w, color=NAVY, label="Gaussian copula")
-    axA.bar(x + w / 2, clay_means, w, color=RUST, label="Clayton copula (lower-tail)")
-    for i, (g, c) in enumerate(zip(gauss_means, clay_means)):
-        axA.text(i - w / 2, g + 0.005, f"{g:.2f}", ha="center", fontsize=8)
-        axA.text(i + w / 2, c + 0.005, f"{c:.2f}", ha="center", fontsize=8)
-    axA.text(2.3, 0.06, "no-value band\n($<0.1\\%$)", color="0.4", fontsize=8, ha="right")
+    axA.bar(x - w, gauss_m, w, color=NAVY, label="Gaussian (elliptical)")
+    axA.bar(x, clay_m, w, color=RUST, label="Clayton (lower-tail)")
+    axA.bar(x + w, como_m, w, color=GOLD, label="comonotone (upper Fréchet $=\\sup_C$)")
+    for i, (g, c, m) in enumerate(zip(gauss_m, clay_m, como_m)):
+        axA.text(i - w, g + 0.004, f"{g:.2f}", ha="center", fontsize=7.5)
+        axA.text(i, c + 0.004, f"{c:.2f}", ha="center", fontsize=7.5)
+        axA.text(i + w, m + 0.004, f"{m:.2f}", ha="center", fontsize=7.5)
+    axA.text(2.35, 0.065, "no-value band\n($<0.1\\%$)", color="0.4", fontsize=7.5, ha="right")
+    axA.annotate("even the maximal copula\ncaps at $\\Lambda\\approx0.18\\%$",
+                 xy=(1.27, 0.182), xytext=(0.55, 0.24), fontsize=7.5, color=GOLD,
+                 arrowprops=dict(arrowstyle="->", color=GOLD, lw=0.9))
     axA.set_xticks(x)
     axA.set_xticklabels([LABEL[c] for c in CASES], fontsize=8)
-    axA.set_ylabel("max $|$gap vs independence$|$  $\\mathrm{CVaR}_{0.95}$  [%]")
-    axA.set_title("A. Neither copula beats independence\n(spatial value still null)", fontsize=10)
-    axA.legend(frameon=False, fontsize=8.5, loc="upper left")
+    axA.set_ylabel("max gain vs independence  $\\mathrm{CVaR}_{0.95}$  [%]")
+    axA.set_title("A. The copula ceiling $\\Lambda$ is small\n"
+                  "(upper-Fréchet $\\sup_C$ caps at 0.18%, only in coupled taskc)", fontsize=10)
+    axA.legend(frameon=False, fontsize=7.8, loc="upper left")
     axA.grid(alpha=0.3, axis="y", lw=0.5)
 
     # Panel B: Clayton minus Gaussian -- the faint asymmetry signal, by case tau

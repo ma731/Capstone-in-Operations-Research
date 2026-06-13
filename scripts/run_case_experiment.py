@@ -50,6 +50,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from src.analysis.metrics import cvar_upper_tail, per_day_emissions
 from src.analysis.stratified_correlations import REGION_SETS
 from src.data.capacity import build_cfe_panel, capacity_from_cfe, cfe_field
 from src.data.electricitymaps import load_all_zones, to_wide
@@ -144,17 +145,6 @@ def ablate_mean(rho_bar: np.ndarray) -> np.ndarray:
 # ----------------------------------------------------------------------
 # Metrics / CV (identical to Task C)
 # ----------------------------------------------------------------------
-
-def cvar_upper_tail(values: np.ndarray, alpha: float = CVAR_ALPHA) -> float:
-    values = np.asarray(values, dtype=float)
-    n = len(values)
-    n_tail = max(1, int(np.ceil(n * (1.0 - alpha))))
-    return float(np.sort(values)[::-1][:n_tail].mean())
-
-
-def per_day_emissions(schedule: np.ndarray, panel: np.ndarray) -> np.ndarray:
-    return np.einsum("rt,nrt->n", schedule, panel)
-
 
 def blocked_fold_indices(n: int, k: int) -> list[tuple[np.ndarray, np.ndarray]]:
     boundaries = np.linspace(0, n, k + 1, dtype=int)
@@ -347,11 +337,16 @@ def main() -> int:
                     help="'fine' = log-denser epsilon grid (for ablation runs where "
                          "eps* is unstable on the standard grid).")
     ap.add_argument("--out-dir", type=Path, default=RESULTS_DIR)
+    ap.add_argument("--ramp-mw", type=float, default=15.0,
+                    help="Per-region ramp limit (MW/h). Tighten (e.g. 5) to shrink "
+                         "the feasible set and test whether the spatial null survives "
+                         "when the schedule has less freedom to track the mean field.")
     args = ap.parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
     global USE_SHRINKAGE, RESIDUALIZE, ABLATE_MEAN, _VARCAP_CEILING, REGION_ORDER, TZ
-    global TRAIN_YEARS, TEST_YEAR, EPSILON_GRID
+    global TRAIN_YEARS, TEST_YEAR, EPSILON_GRID, RAMP_PER_REGION
+    RAMP_PER_REGION = args.ramp_mw
     USE_SHRINKAGE = args.shrinkage
     RESIDUALIZE = args.residualize
     ABLATE_MEAN = args.ablate_mean
@@ -473,6 +468,8 @@ def main() -> int:
         suffix += f"_ty{TEST_YEAR}"
     if args.regime != "all":
         suffix += f"_{args.regime}"
+    if args.ramp_mw != 15.0:
+        suffix += f"_ramp{args.ramp_mw:g}"
     stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
     base = f"{args.region_set}_regimes_{stamp}{suffix}"
     csv_path = args.out_dir / f"{base}.csv"

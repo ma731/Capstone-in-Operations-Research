@@ -6,10 +6,12 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{amsthm}                      % before newtxmath to avoid \openbox clash
+\let\openbox\relax
 \usepackage{newtxtext,newtxmath}        % Times New Roman text + math
 \usepackage[margin=1in]{geometry}
 \usepackage{setspace}\onehalfspacing    % 1.5 line spacing
-\usepackage{amsmath,amssymb}
 \usepackage{booktabs,array,enumitem,graphicx,xcolor,mathtools}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
@@ -60,35 +62,31 @@ text was reviewed and edited by the author.
 
 % ===================== ABSTRACT =====================
 \begin{abstract}
-\noindent Carbon-aware schedulers shift data-center compute toward hours and regions
-where electricity is cleanest, and recent work models carbon intensity as uncertain
-within a distributionally robust optimization (DRO) framework. A natural next step
-is to treat carbon intensity as a stochastic \emph{vector} across electrically
-coupled regions, so that \emph{spatial correlation} can inform the schedule. This
-thesis asks whether that spatial structure carries any robust scheduling value.
-Using a Mahalanobis--Wasserstein DRO formulation solved as a second-order cone
-program, we design a falsification test --- the schedule fitted to the joint
-covariance versus one fitted to a block-diagonal covariance with all cross-region
-structure destroyed --- evaluated by out-of-sample $\CVaR_{0.95}$ of daily emissions
-under strict pre-registration. Across three primary US/Canada grids spanning the
-dependence spectrum --- the US West (California, Nevada, Phoenix), an
-Ontario-anchored Eastern Interconnection belt, and an engineered heterogeneous
-solar/wind/hydro portfolio --- corroborated by an Iberia--France panel as a
-low-correlation anchor, the answer is a replicated, robustness-checked \textbf{null}: the spatial gap never
-exceeds a few tenths of one percent, survives shrinkage and residualization
-batteries, Benjamini--Hochberg correction, and walk-forward validation. Two
-diagnostics explain the mechanism. A \emph{mean-ablation} experiment shows the
-covariance signal is genuine and exploitable but dominated by the mean carbon
-field; a \emph{tail-dependence} analysis shows the residual dependence is
-non-elliptical --- upper-tail-independent and radially asymmetric --- and thus
-structurally invisible to covariance-based ambiguity sets. A second phase
-forecloses the obvious objection by replacing the covariance ball with Gaussian and
-lower-tail (Clayton) copula schedulers that \emph{can} represent the asymmetry: the
-null survives intact, and a mean-dominance bound grounded in the translation
-invariance of CVaR explains why no passive dependence model can help. The practical
-recommendation is that per-region marginal schedulers capture essentially all the
-value; spatial value, if any, must come from an active transfer channel rather than
-a richer dependence model.
+\noindent Carbon-aware schedulers shift data-center compute toward cleaner hours and
+regions, and recent work models carbon intensity as uncertain within a
+distributionally robust optimization (DRO) framework. A natural extension treats
+carbon intensity as a stochastic \emph{vector} across coupled regions, so that
+\emph{spatial correlation} can inform the schedule. This thesis asks whether that
+spatial structure carries any robust scheduling value. Using a Mahalanobis--Wasserstein
+DRO solved as a second-order cone program, we design a falsification test --- the
+schedule fitted to the joint covariance versus one fitted to a block-diagonal
+covariance with cross-region structure destroyed --- evaluated by out-of-sample
+conditional value-at-risk ($\CVaR_{0.95}$) of daily emissions under
+pre-registration. Across three US/Canada grids spanning the dependence spectrum
+(the US West, an Ontario-anchored Eastern Interconnection belt, and an engineered
+solar/wind/hydro portfolio), with an Iberia--France low-correlation anchor, the
+answer is a replicated \textbf{null}: the spatial gap never exceeds a few tenths of
+one percent and survives shrinkage, residualization, Benjamini--Hochberg correction,
+walk-forward validation, and a tighter-ramp sensitivity. Two diagnostics give the
+mechanism: a \emph{mean-ablation} shows the covariance signal is genuine but
+dominated by the mean field, and a \emph{tail-dependence} analysis shows the
+residual dependence is non-elliptical --- radially asymmetric and upper-tail
+independent --- hence invisible to covariance-based ambiguity sets. A second phase
+forecloses the ``wrong object'' objection: Gaussian, lower-tail Clayton, and the
+maximal (comonotone) copula all leave the null intact, and an a-priori bound caps
+the achievable gain. The recommendation is that per-region marginal schedulers
+capture essentially all the value; spatial value, if any, must come from an active
+transfer channel, not a richer dependence model.
 \end{abstract}
 \newpage
 \tableofcontents
@@ -267,9 +265,15 @@ induced by the empirical covariance $\hat\Sigma\in\R^{RT\times RT}$:
 by Wasserstein duality for linear costs \citep{esfahani2018,blanchet2019}, where
 $\bar\rho$ is the empirical mean field. With the Cholesky factorization
 $\hat\Sigma=LL^\top$ the penalty becomes $\varepsilon\lVert
-L^\top\vecx(x)\rVert_2$, so \eqref{eq:obj} is an SOCP, solved to global optimality
-(CLARABEL). The radius $\varepsilon$ interpolates from the deterministic problem
-($\varepsilon=0$) to increasingly conservative schedules.
+L^\top\vecx(x)\rVert_2$. Introducing an epigraph variable $t$, \eqref{eq:obj} is the
+second-order cone program
+\begin{equation}
+\min_{x\in\mathcal X,\,t\ge0}\ \langle\bar\rho,x\rangle+\varepsilon\,t
+\quad\text{s.t.}\quad \big\lVert L^\top\vecx(x)\big\rVert_2\le t,
+\label{eq:socp}
+\end{equation}
+solved to global optimality (CLARABEL). The radius $\varepsilon$ interpolates from
+the deterministic LP ($\varepsilon=0$) to increasingly conservative schedules.
 
 \paragraph{Where spatial correlation enters.}
 Partitioning $\hat\Sigma$ into $T\times T$ blocks $\Sigma_{rs}$ by region pair, the
@@ -292,9 +296,9 @@ scheduler solves \eqref{eq:obj} over
 &0\le x_{r,t}\le\bar x_{r,t}, && \forall r,t
   &&\text{(C0: capacity)}\\[2pt]
 &x_{r,t}=\alpha_r W_r\,p_{r,t}+x^{\mathrm f}_{r,t}, && \forall r,t
-  &&\text{(C2: flex/inflex split)}\\[2pt]
+  &&\text{(C2a: flex/inflex split)}\\[2pt]
 &\textstyle\sum_{t} x^{\mathrm f}_{r,t}=(1-\alpha_r)\,W_r, && \forall r
-  &&\text{(C2: work conservation)}\\[2pt]
+  &&\text{(C2b: work conservation)}\\[2pt]
 &\lvert x_{r,t}-x_{r,t-1}\rvert\le\Delta_r, && \forall r,t
   &&\text{(C3: ramp)}\\[2pt]
 &\textstyle\sum_{t\in\mathcal W} x^{\mathrm f}_{r,t}\ge\gamma\,(1-\alpha_r)\,W_r,
@@ -312,7 +316,11 @@ $\mathcal W=[0,7]$ and $\gamma=0.20$ set the deferral deadline; and
 $\pi_{r,t}=\mathrm{PUE}_0+\kappa\max(\mathcal T_{r,t}-\mathcal T_{\mathrm{set}},0)$
 is the temperature-coupled power-usage multiplier (data, hence a constant per cell),
 capped at effective power $\bar P$. Every constraint is linear, so $\mathcal X$ is
-polyhedral and the program \eqref{eq:obj} remains an SOCP.
+polyhedral and the program \eqref{eq:obj} remains an SOCP. (We follow the source
+labelling: C0--C3 are the base operational constraints and the \textbf{3$\cdot$}
+series is adapted from the SoCC'25 formulation \citep{wijayawardana2025}; a further
+aggregate hourly cap $\sum_r x_{r,t}\le p_{\max}$ is implemented but inactive in the
+reported regimes.)
 
 The capacity ceiling is constant ($\bar x_{r,t}=50$ MW) except under constraint
 \textbf{3c}, the carbon-coupled variable capacity adapted from Wijayawardana and
@@ -465,7 +473,13 @@ rank-correlation (elliptical --- what the covariance ball can see); and
 $\lambda_L=2^{-1/\theta}$ and zero upper-tail dependence \citep{joe2014}, fitted by
 matching mean pairwise Kendall's $\tau$ ($\theta=2\tau/(1-\tau)$) --- the object
 built for the $\chiL>\chiU$ finding. Clayton is sampled by Marshall--Olkin frailty;
-no parametric marginal model is introduced.
+no parametric marginal model is introduced. The exchangeable Clayton imposes a
+single $\theta$ and so cannot reproduce the \emph{pair-level} heterogeneity of the
+tail diagnostic (Table~\ref{tab:tails}); a regular-vine copula with edge-specific
+families would. We do not fit one, for a principled reason: the comonotone arm
+below realizes the supremum over \emph{all} copulas, vines included, so it
+upper-bounds whatever any heterogeneous-dependence model could achieve. If the
+maximal-coupling arm recovers no material value, no vine can.
 
 \paragraph{Copula CVaR scheduler.} For each model we draw $S=1000$ scenarios
 $\{\rho^s\}$ and solve the sample-average CVaR program in Rockafellar--Uryasev form
@@ -482,36 +496,75 @@ the reported copula gaps are $\CVaR(\text{indep})-\CVaR(\text{Gaussian})$,
 $\CVaR(\text{indep})-\CVaR(\text{Clayton})$, and the asymmetry increment
 $\CVaR(\text{Gaussian})-\CVaR(\text{Clayton})$, each with a paired day-bootstrap CI.
 
-\paragraph{Why the dependence model is second-order: a bound.} A structural reason
-to expect Phase 2 to reproduce the null follows from the translation invariance of
-CVaR. Writing the carbon field as mean plus zero-mean residual,
-$\rho=\bar\rho+\xi$, daily emissions decompose as $\langle\rho,x\rangle=
-\langle\bar\rho,x\rangle+\langle\xi,x\rangle$, and since $\langle\bar\rho,x\rangle$
-is deterministic,
+\paragraph{Why the dependence model is second-order.} Two facts make the
+dependence model second-order to the mean field. The first is a decomposition: by
+the translation invariance of CVaR, writing the carbon field as mean plus zero-mean
+residual $\rho=\bar\rho+\xi$ and noting $\langle\bar\rho,x\rangle$ is deterministic,
 \begin{equation}
 \CVaR_\beta\!\big(\langle\rho,x\rangle\big)=
-\underbrace{\langle\bar\rho,x\rangle}_{\text{copula-independent}}+\;
-\CVaR_\beta\!\big(\langle\xi,x\rangle\big).
+\underbrace{\langle\bar\rho,x\rangle}_{\text{dependence-independent}}+\;
+\CVaR_\beta\!\big(\langle\xi,x\rangle\big),
 \label{eq:meandom}
 \end{equation}
-The dependence model affects \emph{only} the residual term, and only through its
-cross-region aggregation; its total leverage is bounded by the comonotone--diversified
-spread $\Lambda(x)=\sup_{C}\CVaR_\beta(\langle\xi,x\rangle)-\inf_{C}
-\CVaR_\beta(\langle\xi,x\rangle)$ over copulas $C$.
+so for a \emph{fixed} schedule the dependence model moves only the residual term.
+The second is an a-priori bound on how far it can move the \emph{optimal} value.
 
-\begin{proposition}[Mean-dominance]\label{prop:meandom}
-For any two dependence models, the optimal out-of-sample $\CVaR_{0.95}$ differs by
-at most $\Lambda(x^\star)$. The mean-ablation of Section~\ref{sec:res-ablation}
-measures $\Lambda$ directly: it is the gap recovered when the mean term is removed.
-Empirically $\Lambda$ is at most a few tenths of one percent of the mean term with
-the mean present, rising to $\approx1.5\%$ only under flat ablation; hence the mean
-field pins the schedule and the dependence model --- elliptical or not --- is
-immaterial.
+\begin{proposition}[Spatial gap control, SOCP]\label{prop:meandom}
+Let $\mathrm{OPT}(\Sigma)$ be the optimal value of the SOCP \eqref{eq:socp} for a
+covariance $\Sigma$, and let $\Sigma^{\mathrm{shuf}}$ be its block-diagonal
+(cross-region-zeroed) counterpart with $\Sigma^{\mathrm{off}}=\Sigma-
+\Sigma^{\mathrm{shuf}}$. Then the spatial gap obeys
+\begin{equation}
+\big|\mathrm{OPT}(\Sigma)-\mathrm{OPT}(\Sigma^{\mathrm{shuf}})\big|\ \le\
+\varepsilon\,\Big(\max_{x\in\mathcal X}\lVert x\rVert_2\Big)\,
+\big\lVert\Sigma^{\mathrm{off}}\big\rVert_2^{1/2},
+\label{eq:propbound}
+\end{equation}
+which vanishes as $\varepsilon\to0$ (no robustification) or
+$\Sigma^{\mathrm{off}}\to0$ (no cross-region structure).
 \end{proposition}
 
-\noindent The proposition predicts that even Clayton, the correct object for the
-empirical asymmetry, cannot recover material value; Section~\ref{sec:res-copula}
-confirms it.
+\begin{proof}
+The two programs share the feasible set $\mathcal X$ and differ only in the conic
+penalty. For fixed $x$, using $|\sqrt a-\sqrt b|\le\sqrt{|a-b|}$ and the Rayleigh
+bound $|x^\top\Sigma^{\mathrm{off}}x|\le\lVert\Sigma^{\mathrm{off}}\rVert_2\lVert
+x\rVert_2^2$,
+\[
+\big|\varepsilon\sqrt{x^\top\Sigma x}-\varepsilon\sqrt{x^\top\Sigma^{\mathrm{shuf}}x}\big|
+\le\varepsilon\sqrt{|x^\top\Sigma^{\mathrm{off}}x|}
+\le\varepsilon\lVert x\rVert_2\lVert\Sigma^{\mathrm{off}}\rVert_2^{1/2}.
+\]
+Two objectives that differ pointwise by at most $\delta$ over a common feasible set
+have optimal values differing by at most $\delta$; taking the max over $\mathcal X$
+gives \eqref{eq:propbound}.
+\end{proof}
+
+\noindent The bound is conservative (on our data its right-hand side is
+$\approx10$--$16\%$ of the mean term, while realized gaps are two orders of
+magnitude smaller), but it isolates the controlling quantities: the spatial gap is
+governed by $\varepsilon$ and the cross-region block norm, and is structurally
+forced to zero in the no-robustification and no-cross-structure limits. The
+\emph{tight} ceiling is measured, not bounded: the comonotone arm of
+Section~\ref{sec:res-copula} realizes the supremum over copulas and caps the
+achievable gain at $\Lambda\approx0.18\%$ of $\CVaR_{0.95}$, and the mean-ablation
+of Section~\ref{sec:res-ablation} recovers the same order independently. Both
+measurements are an order of magnitude below the schedule's mean-driven value;
+hence the mean field pins the schedule and the dependence model --- elliptical or
+not --- is immaterial. The prediction that even Clayton cannot recover material
+value is confirmed in Section~\ref{sec:res-copula}.
+
+\paragraph{Computational considerations.} Each instance is small: the decision
+vector has $RT\le 5\times24=120$ entries and the feasible set adds $O(RT)$ linear
+constraints, so the SOCP \eqref{eq:socp} solves in $0.19$--$0.26$\,s and the
+CVaR-SAA LP \eqref{eq:saacvar} --- which appends $S=1000$ epigraph variables and
+constraints --- in $0.9$--$1.3$\,s (median over five repetitions, CLARABEL/HiGHS,
+commodity laptop). The cost is in the \emph{number} of instances, not their size:
+one region-set experiment solves $3\text{ regimes}\times3\,\alpha\times2\text{
+arms}\times(6\,\varepsilon\times5\text{ folds}+1\text{ test read})=558$ SOCPs, and
+the full Phase 1 battery (region sets $\times$ \{sample, Ledoit--Wolf, seasonal,
+AR(1), two ablations, walk-forward, fine grid\}) is on the order of $10^4$ SOCP
+solves; Phase 2 adds $3\times3\times3\times4=108$ CVaR-SAA LPs. Total wall-clock for
+the entire study is under two hours on one core, so reproduction is cheap.
 
 \subsection{Reproducibility}
 All code is version-controlled (private repository, continuous-integration test
@@ -558,10 +611,17 @@ Table~\ref{tab:gaps} reports the spatial gap \eqref{eq:gap} for the three
 pre-registered US/Canada cases: nine cells each (three constraint regimes $\times$
 three $\alpha$-levels), CV-selected $\varepsilon^\star$, single test read on 2025.
 The gap never exceeds a few tenths of one percent of test
-$\CVaR_{0.95}$ in either direction, and where the bootstrap calls a cell
-``detectable'' the signs flip across adjacent $\alpha$-levels --- the signature of
-solver-path artifacts rather than exploitable structure. The California/Nevada
-panel agrees (gaps in $[-0.012,+0.058]\%$, DRO active throughout).
+$\CVaR_{0.95}$ in either direction. Where the bootstrap calls a cell
+``detectable'' the effect is genuine but economically negligible --- on the order
+of a few hundred $\gco$ out of a $\CVaR$ of $1.5\times10^6$ --- and, decisively, its
+\emph{sign} flips across adjacent $\alpha$-levels within the same regime. A
+consistently exploitable spatial structure would not reverse direction under a
+change of the flexible-load fraction; these reversals are the signature of
+optimization at the boundary of materiality, not of a usable effect. (We confirmed
+the detectable cells are not numerical: re-solving with CLARABEL and SCS reproduces
+the gap to four significant figures, so the sign instability is in the data, not the
+solver.) The California/Nevada panel agrees (gaps in $[-0.012,+0.058]\%$, DRO active
+throughout).
 
 Crucially, this is a null of the \emph{strong} kind. In all three pre-registered
 cases cross-validation \emph{chooses} a non-trivial ambiguity radius:
@@ -645,12 +705,23 @@ that passes the pre-registered agreement rule (positive and sign-stable across
 both residual estimators). The largest battery value anywhere, $+0.179\%$ (AR(1),
 \texttt{taskc}, $\alpha=0.30$), appears \emph{only} under AR(1) and not under the
 seasonal estimator, so the rule rejects it. Benjamini--Hochberg correction at
-$q=0.05$ across all 144 non-ablation cells leaves that same already-rejected cell
-as the largest surviving positive gap --- nothing material survives both filters.
+$q=0.05$ across all 144 non-ablation cells (the $3\text{ cases}\times3\text{
+regimes}\times3\,\alpha=27$ base cells $\times$ the four covariance estimators
+\{sample, Ledoit--Wolf, seasonal, AR(1)\}, plus the two corroborating panels' cells)
+leaves that same already-rejected cell as the largest surviving positive gap ---
+nothing material survives both filters.
 A walk-forward refit (train 2021--2023, test 2024) reproduces the null out of
 time: maximum absolute gap $0.036\%$ (\texttt{taskc}), $0.028\%$
 (\texttt{us\_west}), $0.217\%$ (\texttt{us\_hetero}, again negative). An
 11-point log-denser $\varepsilon$ grid changes no gap at the reported precision.
+Finally, a \emph{constraint-tightness} sensitivity directly probes the most
+plausible route to spatial value: tripling the binding tightness of the ramp limit
+($\Delta_r=5$ instead of $15$ MW/h) shrinks the feasible set so the schedule has far
+less freedom to track the mean field --- yet the null is unmoved, with maximum
+absolute gap $0.028\%$ (\texttt{us\_west}), $0.044\%$ (\texttt{taskc}) and $0.169\%$
+(\texttt{us\_hetero}), all sign-flipping and with $\varepsilon^\star=1$ retained.
+The covariance does not begin to pay even when the mean's pull is mechanically
+curtailed.
 
 \begin{table}[t]
 \centering\small
@@ -765,11 +836,25 @@ as intended --- its samples pile into the joint-clean corner ($\chiL=0.70$ vs.\
 $\chiU=0.26$ for CISO--BANC), exactly the structure the symmetric Gaussian copula
 ($\chiL\approx\chiU\approx0.46$) and any covariance ball cannot represent. Yet when
 each dependence model is used to schedule and evaluated out-of-sample on 2025
-(Table~\ref{tab:copula}, Figure~\ref{fig:copularesult}), no model beats the
-independence baseline by a material, sign-stable margin: the largest absolute
-copula gap anywhere is $0.13\%$ of $\CVaR_{0.95}$ (\texttt{us\_hetero}), with signs
-flipping across $\alpha$ exactly as in Phase 1. The null is now \emph{total} --- it
-holds not just for the covariance ball but for the full copula.
+(Table~\ref{tab:copula}, Figure~\ref{fig:copularesult}), no fitted copula beats the
+independence baseline by a material, sign-stable margin; the Gaussian and Clayton
+gains never exceed $0.16\%$ of $\CVaR_{0.95}$ and flip sign across $\alpha$ exactly
+as in Phase 1.
+
+To test the \emph{actual} worst case we add the comonotone (upper-Fr\'echet) arm:
+perfect rank coupling, which maximizes the CVaR of a sum of positively-associated
+risks and therefore realizes the supremum $\sup_C$ in the leverage $\Lambda$ of
+Section~\ref{sec:method-copula}. This is the most any copula can buy. In the two
+weakly- or heterogeneously-coupled grids it too returns nothing sign-stable
+($\le0.11\%$, not detectable). In the genuinely positively-coupled belt
+(\texttt{taskc}, $\bar\tau=0.31$) it does produce a sign-stable, fully-detectable
+gain --- but of only $+0.10$ to $+0.18\%$ across all nine cells. This is the key
+number: the comonotone arm \emph{measures} the copula ceiling directly, and even
+perfect knowledge of the dependence caps the achievable gain at
+$\Lambda\approx0.18\%$ of $\CVaR_{0.95}$ --- immaterial, and an order of magnitude
+below the schedule's mean-driven value. Crucially this measurement is
+\emph{independent} of the mean-ablation, so it pins $\Lambda$ without circularity:
+no copula, not even the maximal one, recovers material value.
 
 \begin{figure}[t]
 \centering
@@ -785,18 +870,21 @@ elliptical models force to zero.}
 \begin{table}[t]
 \centering\small
 \caption{Phase 2 copula results. Gap $=$ reduction in out-of-sample
-$\CVaR_{0.95}$ versus the independence baseline (\%; positive $=$ the structured
-copula helps); ``Clay$-$Gauss'' is the mean asymmetry increment. No case shows a
-material, sign-stable copula gain. $\theta$ is the fitted Clayton parameter.}
+$\CVaR_{0.95}$ versus the independence baseline (\%; positive $=$ the copula helps),
+reported as the maximum \emph{positive} gain over the nine cells. The
+\emph{comonotone} arm is the upper Fr\'echet bound (perfect rank coupling) --- the
+supremum over all copulas, hence the empirical ceiling $\Lambda$ on copula value.
+$\theta$ is the fitted Clayton parameter; ``stable'' flags a sign-stable,
+bootstrap-detectable gain across all nine cells.}
 \label{tab:copula}
-\begin{tabular}{lcccccc}
+\begin{tabular}{lccccccc}
 \toprule
-Case & $\bar\tau$ & $\theta$ & max$|$gap$_{\text{Gauss}}|$ &
-max$|$gap$_{\text{Clay}}|$ & mean (Clay$-$Gauss) & detectable\\
+Case & $\bar\tau$ & $\theta$ & gain$_{\text{Gauss}}$ & gain$_{\text{Clay}}$ &
+gain$_{\text{comon}}$ & $\Lambda$ stable? & material?\\
 \midrule
-\texttt{us\_west}   & 0.47 & 1.77 & 0.066 & 0.038 & $+0.011$ & none stable\\
-\texttt{taskc}      & 0.31 & 0.90 & 0.158 & 0.083 & $-0.056$ & none stable\\
-\texttt{us\_hetero} & 0.20 & 0.50 & 0.270 & 0.127 & $+0.070$ & none stable\\
+\texttt{us\_west}   & 0.47 & 1.77 & 0.066 & 0.038 & 0.089 & no & no\\
+\texttt{taskc}      & 0.31 & 0.90 & 0.158 & 0.014 & 0.182 & \textbf{yes (9/9)} & no\\
+\texttt{us\_hetero} & 0.20 & 0.50 & 0.069 & 0.127 & 0.114 & no & no\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -804,12 +892,14 @@ max$|$gap$_{\text{Clay}}|$ & mean (Clay$-$Gauss) & detectable\\
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{../figures/copula_result.pdf}
-\caption{Phase 2 result. \textbf{A:} maximum $|$gap$|$ versus independence for the
-Gaussian and Clayton arms --- neither copula materially beats the decoupled
-baseline. \textbf{B:} the mean Clayton$-$Gaussian increment by grid; it is positive
-where dependence is heterogeneous (\texttt{us\_hetero}, $+0.07\%$), confirming the
-copula \emph{does} capture the asymmetry --- but the effect is an order of magnitude
-too small to matter, as Proposition~\ref{prop:meandom} predicts.}
+\caption{Phase 2 result. \textbf{A:} maximum positive gain versus independence for
+the Gaussian, Clayton, and comonotone (upper-Fr\'echet $\sup_C$) arms. The
+comonotone ceiling $\Lambda$ caps at $0.18\%$, and only in the coupled belt
+(\texttt{taskc}); the fitted copulas do not even reach it. \textbf{B:} the mean
+Clayton$-$Gaussian increment by grid; positive where dependence is heterogeneous
+(\texttt{us\_hetero}, $+0.07\%$), confirming the copula \emph{does} capture the
+asymmetry --- but an order of magnitude too small to matter, as
+Proposition~\ref{prop:meandom} predicts.}
 \label{fig:copularesult}
 \end{figure}
 
@@ -885,9 +975,11 @@ on accurate per-region mean forecasts, which is where the value demonstrably lie
 
 \subsection{Limitations}
 Five bound the claims. \emph{(i)~Representative schedule.} We evaluate one
-canonical workload (fixed daily utilization, splittable load, ramp limits); a
-sharply different cost geometry could in principle re-weight the covariance term,
-though the mean-dominance argument is scale-driven and likely to persist.
+canonical workload (fixed daily utilization, splittable load, ramp limits). A
+sharply different cost geometry could in principle re-weight the covariance term;
+the constraint-tightness sensitivity (Section~\ref{sec:res-robust}) addresses the
+most plausible case --- a $3\times$ tighter ramp leaves the null intact --- but a
+qualitatively different objective (e.g.\ hard per-job deadlines) is untested.
 \emph{(ii)~Test horizon.} The primary read is a single held-out year (2025);
 walk-forward to 2024 reproduces the null, but multi-year rolling evaluation would
 strengthen external validity. \emph{(iii)~Dependence model.} The DRO uses a
@@ -1026,7 +1118,7 @@ VMs on variable capacity datacenters,'' in \emph{Proc. ACM Symp. Cloud Computing
 \section{Reproducibility Details}\label{app:repro}
 
 \paragraph{Repository and environment.} All code lives in a private,
-version-controlled repository with a continuous-integration suite ($163$ unit
+version-controlled repository with a continuous-integration suite ($168$ unit
 tests; the Electricity-Maps integration test is excluded from CI as it requires
 licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL/ECOS
 for the second-order cone program and HiGHS for deterministic LP baselines. The
