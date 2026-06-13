@@ -62,35 +62,31 @@ text was reviewed and edited by the author.
 
 % ===================== ABSTRACT =====================
 \begin{abstract}
-\noindent Carbon-aware schedulers shift data-center compute toward hours and regions
-where electricity is cleanest, and recent work models carbon intensity as uncertain
-within a distributionally robust optimization (DRO) framework. A natural next step
-is to treat carbon intensity as a stochastic \emph{vector} across electrically
-coupled regions, so that \emph{spatial correlation} can inform the schedule. This
-thesis asks whether that spatial structure carries any robust scheduling value.
-Using a Mahalanobis--Wasserstein DRO formulation solved as a second-order cone
-program, we design a falsification test --- the schedule fitted to the joint
-covariance versus one fitted to a block-diagonal covariance with all cross-region
-structure destroyed --- evaluated by out-of-sample $\CVaR_{0.95}$ of daily emissions
-under strict pre-registration. Across three primary US/Canada grids spanning the
-dependence spectrum --- the US West (California, Nevada, Phoenix), an
-Ontario-anchored Eastern Interconnection belt, and an engineered heterogeneous
-solar/wind/hydro portfolio --- corroborated by an Iberia--France panel as a
-low-correlation anchor, the answer is a replicated, robustness-checked \textbf{null}: the spatial gap never
-exceeds a few tenths of one percent, survives shrinkage and residualization
-batteries, Benjamini--Hochberg correction, and walk-forward validation. Two
-diagnostics explain the mechanism. A \emph{mean-ablation} experiment shows the
-covariance signal is genuine and exploitable but dominated by the mean carbon
-field; a \emph{tail-dependence} analysis shows the residual dependence is
-non-elliptical --- upper-tail-independent and radially asymmetric --- and thus
-structurally invisible to covariance-based ambiguity sets. A second phase
-forecloses the obvious objection by replacing the covariance ball with Gaussian and
-lower-tail (Clayton) copula schedulers that \emph{can} represent the asymmetry: the
-null survives intact, and a mean-dominance bound grounded in the translation
-invariance of CVaR explains why no passive dependence model can help. The practical
-recommendation is that per-region marginal schedulers capture essentially all the
-value; spatial value, if any, must come from an active transfer channel rather than
-a richer dependence model.
+\noindent Carbon-aware schedulers shift data-center compute toward cleaner hours and
+regions, and recent work models carbon intensity as uncertain within a
+distributionally robust optimization (DRO) framework. A natural extension treats
+carbon intensity as a stochastic \emph{vector} across coupled regions, so that
+\emph{spatial correlation} can inform the schedule. This thesis asks whether that
+spatial structure carries any robust scheduling value. Using a Mahalanobis--Wasserstein
+DRO solved as a second-order cone program, we design a falsification test --- the
+schedule fitted to the joint covariance versus one fitted to a block-diagonal
+covariance with cross-region structure destroyed --- evaluated by out-of-sample
+conditional value-at-risk ($\CVaR_{0.95}$) of daily emissions under
+pre-registration. Across three US/Canada grids spanning the dependence spectrum
+(the US West, an Ontario-anchored Eastern Interconnection belt, and an engineered
+solar/wind/hydro portfolio), with an Iberia--France low-correlation anchor, the
+answer is a replicated \textbf{null}: the spatial gap never exceeds a few tenths of
+one percent and survives shrinkage, residualization, Benjamini--Hochberg correction,
+walk-forward validation, and a tighter-ramp sensitivity. Two diagnostics give the
+mechanism: a \emph{mean-ablation} shows the covariance signal is genuine but
+dominated by the mean field, and a \emph{tail-dependence} analysis shows the
+residual dependence is non-elliptical --- radially asymmetric and upper-tail
+independent --- hence invisible to covariance-based ambiguity sets. A second phase
+forecloses the ``wrong object'' objection: Gaussian, lower-tail Clayton, and the
+maximal (comonotone) copula all leave the null intact, and an a-priori bound caps
+the achievable gain. The recommendation is that per-region marginal schedulers
+capture essentially all the value; spatial value, if any, must come from an active
+transfer channel, not a richer dependence model.
 \end{abstract}
 \newpage
 \tableofcontents
@@ -300,9 +296,9 @@ scheduler solves \eqref{eq:obj} over
 &0\le x_{r,t}\le\bar x_{r,t}, && \forall r,t
   &&\text{(C0: capacity)}\\[2pt]
 &x_{r,t}=\alpha_r W_r\,p_{r,t}+x^{\mathrm f}_{r,t}, && \forall r,t
-  &&\text{(C2: flex/inflex split)}\\[2pt]
+  &&\text{(C2a: flex/inflex split)}\\[2pt]
 &\textstyle\sum_{t} x^{\mathrm f}_{r,t}=(1-\alpha_r)\,W_r, && \forall r
-  &&\text{(C2: work conservation)}\\[2pt]
+  &&\text{(C2b: work conservation)}\\[2pt]
 &\lvert x_{r,t}-x_{r,t-1}\rvert\le\Delta_r, && \forall r,t
   &&\text{(C3: ramp)}\\[2pt]
 &\textstyle\sum_{t\in\mathcal W} x^{\mathrm f}_{r,t}\ge\gamma\,(1-\alpha_r)\,W_r,
@@ -320,7 +316,11 @@ $\mathcal W=[0,7]$ and $\gamma=0.20$ set the deferral deadline; and
 $\pi_{r,t}=\mathrm{PUE}_0+\kappa\max(\mathcal T_{r,t}-\mathcal T_{\mathrm{set}},0)$
 is the temperature-coupled power-usage multiplier (data, hence a constant per cell),
 capped at effective power $\bar P$. Every constraint is linear, so $\mathcal X$ is
-polyhedral and the program \eqref{eq:obj} remains an SOCP.
+polyhedral and the program \eqref{eq:obj} remains an SOCP. (We follow the source
+labelling: C0--C3 are the base operational constraints and the \textbf{3$\cdot$}
+series is adapted from the SoCC'25 formulation \citep{wijayawardana2025}; a further
+aggregate hourly cap $\sum_r x_{r,t}\le p_{\max}$ is implemented but inactive in the
+reported regimes.)
 
 The capacity ceiling is constant ($\bar x_{r,t}=50$ MW) except under constraint
 \textbf{3c}, the carbon-coupled variable capacity adapted from Wijayawardana and
@@ -473,7 +473,13 @@ rank-correlation (elliptical --- what the covariance ball can see); and
 $\lambda_L=2^{-1/\theta}$ and zero upper-tail dependence \citep{joe2014}, fitted by
 matching mean pairwise Kendall's $\tau$ ($\theta=2\tau/(1-\tau)$) --- the object
 built for the $\chiL>\chiU$ finding. Clayton is sampled by Marshall--Olkin frailty;
-no parametric marginal model is introduced.
+no parametric marginal model is introduced. The exchangeable Clayton imposes a
+single $\theta$ and so cannot reproduce the \emph{pair-level} heterogeneity of the
+tail diagnostic (Table~\ref{tab:tails}); a regular-vine copula with edge-specific
+families would. We do not fit one, for a principled reason: the comonotone arm
+below realizes the supremum over \emph{all} copulas, vines included, so it
+upper-bounds whatever any heterogeneous-dependence model could achieve. If the
+maximal-coupling arm recovers no material value, no vine can.
 
 \paragraph{Copula CVaR scheduler.} For each model we draw $S=1000$ scenarios
 $\{\rho^s\}$ and solve the sample-average CVaR program in Rockafellar--Uryasev form
@@ -605,10 +611,17 @@ Table~\ref{tab:gaps} reports the spatial gap \eqref{eq:gap} for the three
 pre-registered US/Canada cases: nine cells each (three constraint regimes $\times$
 three $\alpha$-levels), CV-selected $\varepsilon^\star$, single test read on 2025.
 The gap never exceeds a few tenths of one percent of test
-$\CVaR_{0.95}$ in either direction, and where the bootstrap calls a cell
-``detectable'' the signs flip across adjacent $\alpha$-levels --- the signature of
-solver-path artifacts rather than exploitable structure. The California/Nevada
-panel agrees (gaps in $[-0.012,+0.058]\%$, DRO active throughout).
+$\CVaR_{0.95}$ in either direction. Where the bootstrap calls a cell
+``detectable'' the effect is genuine but economically negligible --- on the order
+of a few hundred $\gco$ out of a $\CVaR$ of $1.5\times10^6$ --- and, decisively, its
+\emph{sign} flips across adjacent $\alpha$-levels within the same regime. A
+consistently exploitable spatial structure would not reverse direction under a
+change of the flexible-load fraction; these reversals are the signature of
+optimization at the boundary of materiality, not of a usable effect. (We confirmed
+the detectable cells are not numerical: re-solving with CLARABEL and SCS reproduces
+the gap to four significant figures, so the sign instability is in the data, not the
+solver.) The California/Nevada panel agrees (gaps in $[-0.012,+0.058]\%$, DRO active
+throughout).
 
 Crucially, this is a null of the \emph{strong} kind. In all three pre-registered
 cases cross-validation \emph{chooses} a non-trivial ambiguity radius:
@@ -692,8 +705,11 @@ that passes the pre-registered agreement rule (positive and sign-stable across
 both residual estimators). The largest battery value anywhere, $+0.179\%$ (AR(1),
 \texttt{taskc}, $\alpha=0.30$), appears \emph{only} under AR(1) and not under the
 seasonal estimator, so the rule rejects it. Benjamini--Hochberg correction at
-$q=0.05$ across all 144 non-ablation cells leaves that same already-rejected cell
-as the largest surviving positive gap --- nothing material survives both filters.
+$q=0.05$ across all 144 non-ablation cells (the $3\text{ cases}\times3\text{
+regimes}\times3\,\alpha=27$ base cells $\times$ the four covariance estimators
+\{sample, Ledoit--Wolf, seasonal, AR(1)\}, plus the two corroborating panels' cells)
+leaves that same already-rejected cell as the largest surviving positive gap ---
+nothing material survives both filters.
 A walk-forward refit (train 2021--2023, test 2024) reproduces the null out of
 time: maximum absolute gap $0.036\%$ (\texttt{taskc}), $0.028\%$
 (\texttt{us\_west}), $0.217\%$ (\texttt{us\_hetero}, again negative). An
