@@ -30,6 +30,13 @@
 \settitle{
   \centering
   \vspace*{0.1cm}
+  % Official IE logo: drop figures/ie_logo.pdf (or .png) and it appears here.
+  \IfFileExists{../figures/ie_logo.pdf}{%
+    {\colorbox{white}{\includegraphics[height=3.2cm]{../figures/ie_logo.pdf}}}\par
+    \vspace{0.5cm}}{%
+    \IfFileExists{../figures/ie_logo.png}{%
+      {\colorbox{white}{\includegraphics[height=3.2cm]{../figures/ie_logo.png}}}\par
+      \vspace{0.5cm}}{}}
   {\color{titlefgcolor}\bfseries\fontsize{44}{52}\selectfont
    Does Spatial Correlation of Carbon Intensity Improve\\[4pt]
    Robust Carbon-Aware Data-Center Scheduling?\par}
