@@ -23,8 +23,8 @@ FIG = Path("figures")
 SNAP = Path("docs/results_snapshots")
 NAVY, GOLD, RUST, SAGE = "#1F3B63", "#E69F00", "#B3402F", "#4A7C59"
 CASES = ("us_west", "taskc", "us_hetero")
-TITLE = {"us_west": "us_west  (CA/NV/AZ)", "taskc": "taskc  (Ontario belt)",
-         "us_hetero": "us_hetero  (solar/wind/hydro)"}
+TITLE = {"us_west": "Western US  (CA/NV/AZ)", "taskc": "Eastern US–Canada  (Ontario belt)",
+         "us_hetero": "Diversified  (solar/wind/hydro)"}
 # arm label -> snapshot filename suffix
 ARMS = [
     ("sample cov.",      "{c}_regimes_2026-06-10.csv"),

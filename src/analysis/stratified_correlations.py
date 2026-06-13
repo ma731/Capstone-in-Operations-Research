@@ -115,6 +115,17 @@ def _pivot_for_display(long_df: pd.DataFrame, strip_prefix: str = "US-CAL-") -> 
     return pivot
 
 
+# Human-readable display names for the region-set keys, used in thesis figures and
+# write-ups. The keys below stay as internal identifiers (CLI args, filenames).
+DISPLAY_NAME = {
+    "us_west": "Western US",
+    "taskc": "Eastern US–Canada",
+    "us_hetero": "Diversified",
+    "es_pt_fr": "Iberia–France",
+    "taskA": "California–Nevada",
+}
+
+
 # Region-set config for the CLI demo. The correlation functions themselves are
 # region-agnostic (pairs are built dynamically from the wide columns); only the
 # zone list, local tz, and display prefix differ between the two cases.

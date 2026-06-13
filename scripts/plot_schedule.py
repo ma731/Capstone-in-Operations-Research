@@ -17,7 +17,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
-from src.analysis.stratified_correlations import REGION_SETS  # noqa: E402
+from src.analysis.stratified_correlations import DISPLAY_NAME, REGION_SETS  # noqa: E402
 from src.data.electricitymaps import load_all_zones, to_wide  # noqa: E402
 from src.models.algorithm_2b_mahalanobis import solve_mahalanobis_dro  # noqa: E402
 from src.models.covariance import (  # noqa: E402
@@ -93,7 +93,7 @@ def main() -> None:
     h2, l2 = axes[0][0].twinx().get_legend_handles_labels()
     axes[0][0].legend(h1, l1, frameon=False, fontsize=7.5, loc="upper right")
     fig.suptitle(f"Joint vs.\\ shuffled-covariance schedules are visually "
-                 f"indistinguishable ({args.region_set}): the spatial null, seen "
+                 f"indistinguishable ({DISPLAY_NAME.get(args.region_set, args.region_set)}): the spatial null, seen "
                  f"directly. Load (bars) tracks the low-carbon hours.", fontsize=11)
     fig.tight_layout(rect=[0, 0, 1, 0.94])
     FIG.mkdir(exist_ok=True)

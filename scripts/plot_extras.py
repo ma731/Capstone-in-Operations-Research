@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 from src.analysis.metrics import cvar_upper_tail, per_day_emissions  # noqa: E402
-from src.analysis.stratified_correlations import REGION_SETS  # noqa: E402
+from src.analysis.stratified_correlations import DISPLAY_NAME, REGION_SETS  # noqa: E402
 from src.analysis.tail_dependence import residualize_hour_of_day  # noqa: E402
 from src.data.electricitymaps import load_all_zones, to_wide  # noqa: E402
 from src.models.copula_scenarios import fit_copula, generate_scenarios  # noqa: E402
@@ -38,7 +38,7 @@ COORD = {
     "US-NW-BPAT": (-121.2, 45.6),
 }
 CASE_COLOR = {"us_west": NAVY, "taskc": RUST, "us_hetero": SAGE}
-CASE_LABEL = {"us_west": "US West (WECC)", "taskc": "Ontario–Eastern belt",
+CASE_LABEL = {"us_west": "Western US (WECC)", "taskc": "Eastern US–Canada",
               "us_hetero": "engineered (solar/wind/hydro)"}
 
 
@@ -112,7 +112,7 @@ def fig_scenario_tail(case="taskc"):
     ax.set_xlabel("real 2025 daily emissions under each fitted schedule  "
                   "[$10^6\\,\\mathrm{gCO_2}$]")
     ax.set_ylabel("density over test days")
-    ax.legend(frameon=False, fontsize=9, title=f"{case}: schedule fitted under")
+    ax.legend(frameon=False, fontsize=9, title=f"{DISPLAY_NAME.get(case, case)}: schedule fitted under")
     ax.set_title("Out of sample the schedules are interchangeable: the three\n"
                  "emission distributions and their $\\mathrm{CVaR}_{0.95}$ (dotted) coincide",
                  fontsize=11)
@@ -163,7 +163,7 @@ def fig_convergence(case="taskc"):
     ax.set_xlabel("number of scenarios $S$")
     ax.set_ylabel("comonotone gap vs independence\n$\\mathrm{CVaR}_{0.95}$  [%]")
     ax.set_title("Even the maximal copula's gain is scenario-sampling noise:\n"
-                 f"across seeds it centers on zero ({case}, $\\pm0.1\\%$ band)",
+                 f"across seeds it centers on zero ({DISPLAY_NAME.get(case, case)}, $\\pm0.1\\%$ band)",
                  fontsize=11)
     ax.legend(frameon=False, fontsize=9, loc="upper right")
     ax.grid(alpha=0.3, lw=0.5)

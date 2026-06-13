@@ -31,7 +31,7 @@ from src.models.covariance import (  # noqa: E402
 FIG = Path("figures")
 NAVY, RUST = "#1F3B63", "#B3402F"
 CASES = ("us_west", "taskc", "us_hetero")
-TITLE = {"us_west": "us_west", "taskc": "taskc", "us_hetero": "us_hetero"}
+TITLE = {"us_west": "Western US", "taskc": "Eastern US–Canada", "us_hetero": "Diversified"}
 EPS = [0.0, 0.1, 1.0, 10.0, 100.0, 1000.0]
 
 

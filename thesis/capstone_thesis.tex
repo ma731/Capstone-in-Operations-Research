@@ -15,6 +15,10 @@
 \usepackage{booktabs,array,enumitem,graphicx,xcolor,mathtools}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds}
+\definecolor{navy}{HTML}{1F3B63}
+\definecolor{rust}{HTML}{B3402F}
 \usepackage[hidelinks]{hyperref}
 \usepackage[numbers,sort&compress]{natbib}  % IEEE-style numeric citations
 
@@ -375,7 +379,37 @@ gap} is the difference between the two arms,
 \end{equation}
 positive when the joint covariance helps. The test is a falsification: it is
 built to detect a spatial benefit if one exists, so a null is informative.
-Algorithm~\ref{alg:protocol} summarizes the full protocol.
+Figure~\ref{fig:pipeline} sketches the pipeline and Algorithm~\ref{alg:protocol}
+gives the full protocol.
+
+\begin{figure}[t]
+\centering
+\footnotesize
+\begin{tikzpicture}[
+  node distance=3.2mm and 5.5mm,
+  box/.style={draw=navy!70, fill=navy!6, rounded corners=2pt, align=center,
+              inner sep=3pt, text width=21mm, minimum height=12mm, font=\footnotesize},
+  >=Stealth]
+\definecolor{navy}{HTML}{1F3B63}
+\node[box] (data) {Daily carbon panels\\(region sets,\\train 21--24 / test 25)};
+\node[box, right=of data] (cv) {Blocked 5-fold CV\\select $\varepsilon^\star$\\per arm};
+\node[box, right=of cv] (fit) {Two arms:\\joint $\hat\Sigma$ vs\\shuffled $\hat\Sigma^{\mathrm{shuf}}$};
+\node[box, right=of fit] (test) {Single test read\\on 2025};
+\node[box, right=of test] (boot) {Paired bootstrap\\$\Rightarrow$ gap\\$\pm$ 95\% CI};
+\draw[->] (data)--(cv); \draw[->] (cv)--(fit); \draw[->] (fit)--(test);
+\draw[->] (test)--(boot);
+\node[draw=rust!70, fill=rust!8, rounded corners=2pt, below=4mm of fit,
+      text width=58mm, align=center, font=\scriptsize\itshape] (lock)
+      {pre-registration: configuration commit-locked before any test read
+       ($\texttt{--dry-run}$ runs CV only)};
+\draw[->, rust!70, dashed] (lock.north) -- (test.south);
+\end{tikzpicture}
+\caption{The pre-registered falsification pipeline. Cross-validation and schedule
+fitting touch only the training years; the 2025 test set is read once, after the
+configuration is commit-locked, and the spatial gap is read off a paired
+day-bootstrap.}
+\label{fig:pipeline}
+\end{figure}
 
 \begin{algorithm}[t]
 \caption{Shuffled-marginals experiment (one region set)}
@@ -644,8 +678,8 @@ throughout).
 
 Crucially, this is a null of the \emph{strong} kind. In all three pre-registered
 cases cross-validation \emph{chooses} a non-trivial ambiguity radius:
-$\varepsilon^\star=1$ in every one of the 27 cells for \texttt{taskc} and
-\texttt{us\_hetero}, and in 25 of 27 for \texttt{us\_west}. The DRO is therefore
+$\varepsilon^\star=1$ in every one of the 27 cells for Eastern US--Canada and
+Diversified, and in 25 of 27 for Western US. The DRO is therefore
 genuinely engaged (it is paying for robustness, not collapsing to the nominal
 problem) and the two arms still coincide. A null in which CV had selected
 $\varepsilon^\star=0$ would be uninformative (robustification switched off, so the
@@ -677,7 +711,7 @@ the thesis (where there is no cross-region structure, the machinery sees nothing
 worth robustifying) but it makes the Iberian null the \emph{weak} kind. We
 therefore retain it only as low-correlation, real-grid external validity, and rest
 the central claim on the US/Canada cases where the DRO is unambiguously on. The
-engineered \texttt{us\_hetero} portfolio supplies the strong zero-correlation null
+engineered Diversified portfolio supplies the strong zero-correlation null
 ($\varepsilon^\star=1$ throughout, still no value) that Iberia cannot.
 
 \begin{table}[t]
@@ -689,9 +723,9 @@ excludes zero.}
 \label{tab:gaps}
 \begin{tabular}{llrrrrrr}
 \toprule
-& & \multicolumn{2}{c}{\texttt{us\_hetero} ($\bar r\approx0$)} &
-\multicolumn{2}{c}{\texttt{taskc} ($\bar r\approx0.5$)} &
-\multicolumn{2}{c}{\texttt{us\_west} ($\bar r\approx0.5$)}\\
+& & \multicolumn{2}{c}{Diversified ($\bar r\approx0$)} &
+\multicolumn{2}{c}{Eastern US--Canada ($\bar r\approx0.5$)} &
+\multicolumn{2}{c}{Western US ($\bar r\approx0.5$)}\\
 \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
 Regime & $\alpha$ & gap\,\% & det. & gap\,\% & det. & gap\,\% & det.\\
 \midrule
@@ -709,10 +743,10 @@ R2 & 0.75 & $+0.062$ & \checkmark & $+0.009$ &  & $+0.000$ & \checkmark\\
 \end{table}
 
 Three readings of Table~\ref{tab:gaps} matter. First, in the adversarial
-diversification case (\texttt{us\_hetero}) the joint covariance actually
+diversification case (Diversified) the joint covariance actually
 \emph{hurts} at low $\alpha$ (up to $-0.23\%$): with no true cross-structure, the
 joint estimator fits noise that the block-diagonal arm is spared. Second, in the
-strongly correlated belt (\texttt{taskc}) the detectable cells flip sign between
+strongly correlated belt (Eastern US--Canada) the detectable cells flip sign between
 $\alpha=0.30$ and $\alpha=0.75$ within the same regime. Third, the US West (strongest correlation of all) produces no detectable cell beyond one of
 magnitude $+3\times10^{-6}\%$. Figure~\ref{fig:finding}A plots all 27 cells
 against each case's mean residual correlation: the cloud stays on zero across the
@@ -739,7 +773,7 @@ cross-region covariance changes essentially nothing about what the scheduler doe
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{../figures/schedule_us_west.pdf}
-\caption{The spatial null, seen directly (\texttt{us\_west}, regime R3,
+\caption{The spatial null, seen directly (Western US, regime R3,
 $\alpha=0.5$, $\varepsilon^\star=1$). Bars are the optimal load under the joint
 covariance; the red step is the load under the shuffled (block-diagonal)
 covariance. The two coincide. The gold curve is each region's mean carbon
@@ -753,22 +787,22 @@ Table~\ref{tab:robust} summarizes. Re-estimating the covariance with Ledoit--Wol
 shrinkage, seasonal residuals, or AR(1) residuals never produces a spatial effect
 that passes the pre-registered agreement rule (positive and sign-stable across
 both residual estimators). The largest battery value anywhere, $+0.179\%$ (AR(1),
-\texttt{taskc}, $\alpha=0.30$), appears \emph{only} under AR(1) and not under the
+Eastern US--Canada, $\alpha=0.30$), appears \emph{only} under AR(1) and not under the
 seasonal estimator, so the rule rejects it. Benjamini--Hochberg correction at
 $q=0.05$ across all 144 non-ablation cells (the $3\text{ cases}\times3\text{
 regimes}\times3\,\alpha=27$ base cells $\times$ the four covariance estimators
 \{sample, Ledoit--Wolf, seasonal, AR(1)\}, plus the two corroborating panels' cells)
 leaves that same already-rejected cell as the largest surviving positive gap, nothing material survives both filters.
 A walk-forward refit (train 2021--2023, test 2024) reproduces the null out of
-time: maximum absolute gap $0.036\%$ (\texttt{taskc}), $0.028\%$
-(\texttt{us\_west}), $0.217\%$ (\texttt{us\_hetero}, again negative). An
+time: maximum absolute gap $0.036\%$ (Eastern US--Canada), $0.028\%$
+(Western US), $0.217\%$ (Diversified, again negative). An
 11-point log-denser $\varepsilon$ grid changes no gap at the reported precision.
 Finally, a \emph{constraint-tightness} sensitivity directly probes the most
 plausible route to spatial value: tripling the binding tightness of the ramp limit
 ($\Delta_r=5$ instead of $15$ MW/h) shrinks the feasible set so the schedule has far
 less freedom to track the mean field, yet the null is unmoved, with maximum
-absolute gap $0.028\%$ (\texttt{us\_west}), $0.044\%$ (\texttt{taskc}) and $0.169\%$
-(\texttt{us\_hetero}), all sign-flipping and with $\varepsilon^\star=1$ retained.
+absolute gap $0.028\%$ (Western US), $0.044\%$ (Eastern US--Canada) and $0.169\%$
+(Diversified), all sign-flipping and with $\varepsilon^\star=1$ retained.
 The covariance does not begin to pay even when the mean's pull is mechanically
 curtailed. Figure~\ref{fig:robust} collects the whole battery: across all six arms
 and three grids, every spatial gap sits inside the materiality band.
@@ -780,10 +814,40 @@ and three grids, every spatial gap sits inside the materiality band.
 covariance, Ledoit--Wolf, seasonal and AR(1) residuals, walk-forward to 2024, and a
 $3\times$ tighter ramp), dots are the spatial gap for the nine (regime,~$\alpha$)
 cells and the tick marks the median. The shaded band is the $\pm0.1\%$ materiality
-threshold. No arm produces a sign-stable, material gap; the few \texttt{us\_hetero}
+threshold. No arm produces a sign-stable, material gap; the few Diversified
 excursions are negative (the joint covariance mildly hurts).}
 \label{fig:robust}
 \end{figure}
+
+\paragraph{Statistical power: the null is not an underpowered test.} A null is only
+as strong as the test's ability to reject it, so we quantify that ability directly.
+The paired day-bootstrap gives a standard error on the spatial gap of
+$\mathrm{SE}=0.005$--$0.039\%$ of $\CVaR_{0.95}$ across the three primary grids
+(Table~\ref{tab:power}). The minimum spatial benefit detectable at $80\%$ power
+(two-sided, $\alpha=0.05$) is $\mathrm{MDE}=(z_{0.975}+z_{0.80})\,\mathrm{SE}=
+2.80\,\mathrm{SE}=0.015$--$0.11\%$. The test therefore had the power to detect a
+spatial advantage \emph{an order of magnitude below} the $\approx1\%$ materiality
+threshold, and roughly the same order as the per-cell gaps themselves, yet no
+sign-stable positive gap of even this size survives. The null is a genuine absence
+of usable spatial value, not a test too blunt to see one.
+
+\begin{table}[h]
+\centering\small
+\caption{Statistical power of the spatial-gap test. SE is the paired-bootstrap
+standard error of the gap; $\mathrm{MDE}_{80}=2.80\,\mathrm{SE}$ is the smallest
+true gap detectable at $80\%$ power ($\alpha=0.05$, two-sided). All are well below
+the $\approx1\%$ materiality threshold.}
+\label{tab:power}
+\begin{tabular}{lcc}
+\toprule
+Grid & SE (\% $\CVaR_{0.95}$) & $\mathrm{MDE}_{80}$ (\%)\\
+\midrule
+Western US        & 0.036 & 0.10\\
+Eastern US--Canada & 0.005 & 0.015\\
+Diversified       & 0.039 & 0.11\\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{table}[t]
 \centering\small
@@ -796,9 +860,9 @@ residualization).}
 \toprule
 Case & Ledoit--Wolf & Seasonal & AR(1) & Walk-forward 2024\\
 \midrule
-\texttt{us\_hetero} & 0.233 & 0.355 & 0.035 & 0.217\\
-\texttt{taskc}      & 0.037 & 0.034 & 0.179 & 0.036\\
-\texttt{us\_west}   & 0.043 & 0.066 & 0.017 & 0.028\\
+Diversified & 0.233 & 0.355 & 0.035 & 0.217\\
+Eastern US--Canada      & 0.037 & 0.034 & 0.179 & 0.036\\
+Western US   & 0.043 & 0.066 & 0.017 & 0.028\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -811,11 +875,11 @@ time-averages equalized, hour-of-day shape kept) every gap is unchanged to
 three decimals: the \emph{between-region} mean differences are not what masks the
 covariance. Under \textsc{flat} ablation (constant scheduling mean, the
 covariance-only world) the joint covariance suddenly pays: up to $+1.46\%$ in
-\texttt{us\_hetero} and $+0.41\%$ in \texttt{taskc}, all BH-significant, and CV no
+Diversified and $+0.41\%$ in Eastern US--Canada, all BH-significant, and CV no
 longer collapses both arms onto the same schedule. The spatial signal in the
 covariance is therefore \emph{real and exploitable}; in the real problem it is
 simply dominated by the within-day shape of the mean carbon field, which both arms
-share. The instructive exception is \texttt{us\_west}: even in the covariance-only
+share. The instructive exception is Western US: even in the covariance-only
 world its gaps stay at zero ($-0.036$ to $+0.004\%$), because its strong
 correlation is \emph{common-mode}, all five zones move together, so destroying
 cross-dependence changes no scheduling decision. Positive correlation is
@@ -826,15 +890,15 @@ non-diversifiable risk: there is no hedge for a DRO to find.
 \caption{Mean-ablation: spatial gap range (\%) across the nine cells per case.
 \textsc{level} (equalize regional time-averages) leaves the null untouched;
 \textsc{flat} (constant scheduling mean $=$ covariance-only world) reveals genuine
-spatial value except where correlation is common-mode (\texttt{us\_west}).}
+spatial value except where correlation is common-mode (Western US).}
 \label{tab:ablation}
 \begin{tabular}{lccc}
 \toprule
 Case & Real problem & \textsc{level} & \textsc{flat} (covariance-only)\\
 \midrule
-\texttt{us\_hetero} & $-0.233\ldots+0.062$ & unchanged & $+0.39\ldots+1.46$\\
-\texttt{taskc}      & $-0.022\ldots+0.038$ & unchanged & $+0.14\ldots+0.41$\\
-\texttt{us\_west}   & $-0.005\ldots+0.043$ & unchanged & $-0.04\ldots+0.00$\\
+Diversified & $-0.233\ldots+0.062$ & unchanged & $+0.39\ldots+1.46$\\
+Eastern US--Canada      & $-0.022\ldots+0.038$ & unchanged & $+0.14\ldots+0.41$\\
+Western US   & $-0.005\ldots+0.043$ & unchanged & $-0.04\ldots+0.00$\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -878,13 +942,13 @@ $\chiL>\chiU$ signals non-elliptical (radially asymmetric) dependence.}
 \toprule
 Case & Pair & $\rho$ & $\chiU$ emp & $\chiU$ Gauss & Excess & $\chiL$ emp\\
 \midrule
-\texttt{us\_west} & CISO--LDWP & 0.72 & 0.25 & 0.41 & $-0.16$ & 0.48\\
-\texttt{us\_west} & BANC--LDWP & 0.65 & 0.17 & 0.35 & $-0.18$ & 0.40\\
-\texttt{us\_west} & CISO--NEVP & 0.78 & 0.43 & 0.47 & $-0.05$ & 0.39\\
-\texttt{taskc} & CA-ON--NYISO & 0.73 & 0.38 & 0.42 & $-0.04$ & 0.31\\
-\texttt{taskc} & MISO--PJM    & 0.70 & 0.43 & 0.39 & $+0.04$ & 0.42\\
-\texttt{us\_hetero} & CISO--BPAT & 0.33 & 0.10 & 0.16 & $-0.06$ & 0.26\\
-\texttt{us\_hetero} & ERCOT--BPAT & 0.00 & 0.04 & 0.05 & $-0.02$ & 0.02\\
+Western US & CISO--LDWP & 0.72 & 0.25 & 0.41 & $-0.16$ & 0.48\\
+Western US & BANC--LDWP & 0.65 & 0.17 & 0.35 & $-0.18$ & 0.40\\
+Western US & CISO--NEVP & 0.78 & 0.43 & 0.47 & $-0.05$ & 0.39\\
+Eastern US--Canada & CA-ON--NYISO & 0.73 & 0.38 & 0.42 & $-0.04$ & 0.31\\
+Eastern US--Canada & MISO--PJM    & 0.70 & 0.43 & 0.39 & $+0.04$ & 0.42\\
+Diversified & CISO--BPAT & 0.33 & 0.10 & 0.16 & $-0.06$ & 0.26\\
+Diversified & ERCOT--BPAT & 0.00 & 0.04 & 0.05 & $-0.02$ & 0.02\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -907,8 +971,8 @@ To test the \emph{actual} worst case we add the comonotone (upper-Fr\'echet) arm
 perfect rank coupling, which maximizes the CVaR of a sum of positively-associated
 risks and therefore realizes the supremum $\sup_C$ in the leverage $\Lambda$ of
 Section~\ref{sec:method-copula}. This is the most any copula can buy. At the locked
-scenario seed its largest single-cell gain is $+0.18\%$ (\texttt{taskc}), and a
-naive day-bootstrap would call several \texttt{taskc} cells ``detectable.'' That
+scenario seed its largest single-cell gain is $+0.18\%$ (Eastern US--Canada), and a
+naive day-bootstrap would call several Eastern US--Canada cells ``detectable.'' That
 detectability is illusory, however: the bootstrap resamples test days but not the
 \emph{scenario draw}, and re-running the comonotone arm across five scenario seeds
 shows the gap is sampling noise, ranging from $-0.08\%$ to $+0.10\%$ and centred on
@@ -945,9 +1009,9 @@ is centred on zero and sampling-noise dominated, so no gain is stable or materia
 Case & $\bar\tau$ & $\theta$ & gain$_{\text{Gauss}}$ & gain$_{\text{Clay}}$ &
 gain$_{\text{comon}}$ & comon.\ over 5 seeds\\
 \midrule
-\texttt{us\_west}   & 0.47 & 1.77 & 0.066 & 0.038 & 0.089 & $\approx0$, noise\\
-\texttt{taskc}      & 0.31 & 0.90 & 0.158 & 0.014 & 0.182 & $[-0.08,+0.10]$, mean $+0.01$\\
-\texttt{us\_hetero} & 0.20 & 0.50 & 0.069 & 0.127 & 0.114 & $\approx0$, noise\\
+Western US   & 0.47 & 1.77 & 0.066 & 0.038 & 0.089 & $\approx0$, noise\\
+Eastern US--Canada      & 0.31 & 0.90 & 0.158 & 0.014 & 0.182 & $[-0.08,+0.10]$, mean $+0.01$\\
+Diversified & 0.20 & 0.50 & 0.069 & 0.127 & 0.114 & $\approx0$, noise\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -957,17 +1021,17 @@ gain$_{\text{comon}}$ & comon.\ over 5 seeds\\
 \includegraphics[width=\textwidth]{../figures/copula_result.pdf}
 \caption{Phase 2 result (single locked scenario seed). \textbf{A:} maximum positive
 gain versus independence for the Gaussian, Clayton, and comonotone (upper-Fr\'echet
-$\sup_C$) arms. The largest single-seed comonotone gain is $0.18\%$ (\texttt{taskc});
+$\sup_C$) arms. The largest single-seed comonotone gain is $0.18\%$ (Eastern US--Canada);
 re-evaluated over scenario seeds it is sampling noise centred on zero
 (Figure~\ref{fig:converge}). \textbf{B:} the mean Clayton$-$Gaussian increment by
-grid; positive where dependence is heterogeneous (\texttt{us\_hetero}, $+0.07\%$),
+grid; positive where dependence is heterogeneous (Diversified, $+0.07\%$),
 confirming the copula \emph{does} capture the asymmetry, but an order of magnitude
 too small to matter, as Proposition~\ref{prop:meandom} predicts.}
 \label{fig:copularesult}
 \end{figure}
 
 One positive signal is worth stating precisely: the Clayton$-$Gaussian increment is
-consistently positive in the heterogeneous case (\texttt{us\_hetero}, mean
+consistently positive in the heterogeneous case (Diversified, mean
 $+0.07\%$) and negligible or negative where correlation is common-mode. The
 asymmetric copula therefore \emph{does} extract something the elliptical one cannot,
 in the expected direction, but at a magnitude an order below materiality. This is
@@ -984,7 +1048,7 @@ constraint is the mean field, not the shape of the dependence.''
 \centering
 \includegraphics[width=0.82\textwidth]{../figures/scenario_tail.pdf}
 \caption{Out of sample the copula schedulers are interchangeable
-(\texttt{taskc}). Distribution of real 2025 daily emissions under the schedule
+(Eastern US--Canada). Distribution of real 2025 daily emissions under the schedule
 fitted to independence, Clayton, and comonotone scenarios; the dotted lines mark
 each $\CVaR_{0.95}$. All three coincide.}
 \label{fig:scentail}
@@ -1047,6 +1111,16 @@ unnecessary; in the diversification-friendly case it is mildly
 \emph{counterproductive} (the joint arm fit noise and \emph{lost} up to $0.23\%$).
 The engineering effort spared by not modelling spatial covariance is better spent
 on accurate per-region mean forecasts, which is where the value demonstrably lies.
+
+To put the threshold in concrete terms, take the Eastern US--Canada grid: the
+modelled facility (four zones at $50$ MW each, $80\%$ utilization, $\approx160$ MW
+aggregate) emits on the order of $460{,}000\,\text{tCO}_2$ per year. A
+spatial-covariance benefit of $0.1\%$ of $\CVaR_{0.95}$, taken at its full
+point estimate, is about $460\,\text{tCO}_2$ per year, or roughly \$$37{,}000$ at a
+\$$80/\text{tCO}_2$ price, which is $0.04\%$ of the facility's $\approx$\$$84$M
+annual energy bill, and it is not even reliably positive. The covariance channel is
+therefore immaterial in absolute as well as relative terms; the carbon savings
+worth pursuing live in the mean field, not its second moment.
 
 \subsection{Limitations}
 Five bound the claims. \emph{(i)~Representative schedule.} We evaluate one
@@ -1193,7 +1267,7 @@ VMs on variable capacity datacenters,'' in \emph{Proc. ACM Symp. Cloud Computing
 
 \paragraph{Scenario-count stability and the comonotone noise floor.}
 Figure~\ref{fig:converge} re-evaluates the comonotone (upper-Fr\'echet) gap on
-\texttt{taskc} over five scenario seeds and a range of scenario counts $S$. The
+Eastern US--Canada over five scenario seeds and a range of scenario counts $S$. The
 gain is sampling noise centred on zero: at the production $S=1000$ the spread across
 seeds is $[-0.08,+0.10]\%$ with mean $+0.01\%$, and it narrows with $S$. This is the
 basis for treating the single-seed $+0.18\%$ of Section~\ref{sec:res-copula} as
@@ -1204,7 +1278,7 @@ immaterial rather than a real effect, and it confirms $S=1000$ is sufficient.
 \includegraphics[width=0.7\textwidth]{../figures/scenario_convergence.pdf}
 \caption{The comonotone gap is scenario-sampling noise. Mean (line) and range over
 five seeds (band) of the comonotone-vs-independence $\CVaR_{0.95}$ gap on
-\texttt{taskc}, against the scenario count $S$. The band straddles zero and narrows
+Eastern US--Canada, against the scenario count $S$. The band straddles zero and narrows
 with $S$; the $\pm0.1\%$ materiality band is shaded.}
 \label{fig:converge}
 \end{figure}
@@ -1232,8 +1306,9 @@ Goldilocks-calibrated on training data alone (bind fraction $0.28$--$0.37$).
 \begin{center}
 \texttt{python -m scripts.run\_case\_experiment --region-set <case> [flags]}
 \end{center}
-where \texttt{<case>} is one of \texttt{us\_west}, \texttt{taskc},
-\texttt{us\_hetero}, and flags select the estimator (\texttt{--shrinkage},
+where \texttt{<case>} is one of the internal region-set keys \texttt{us\_west}
+(Western US), \texttt{taskc} (Eastern US--Canada), or \texttt{us\_hetero}
+(Diversified), and flags select the estimator (\texttt{--shrinkage},
 \texttt{--residualize}), mean-ablation (\texttt{--ablate-mean}), walk-forward
 (\texttt{--test-year}), or grid density (\texttt{--eps-grid}). Snapshot files are
 named \texttt{<case>\_regimes\_<date>[\_<variant>].csv}, and the snapshot

@@ -29,8 +29,8 @@ from src.analysis.tail_dependence import residualize_hour_of_day  # noqa: E402
 from src.data.electricitymaps import load_all_zones, to_wide  # noqa: E402
 
 CASES = ("us_hetero", "taskc", "us_west")
-LABEL = {"us_hetero": "us_hetero\n(solar/wind/hydro)", "taskc": "taskc\n(Ontario+belt)",
-         "us_west": "us_west\n(CA/NV/AZ)"}
+LABEL = {"us_hetero": "Diversified\n(solar/wind/hydro)", "taskc": "Eastern US–Canada\n(Ontario+belt)",
+         "us_west": "Western US\n(CA/NV/AZ)"}
 COLOR = {"us_hetero": "C2", "taskc": "C1", "us_west": "C0"}
 RES = Path("results")
 FIG = Path("figures")
@@ -90,7 +90,7 @@ def main() -> None:
                   "(remove the mean $\\rightarrow$ joint covariance pays off)", fontsize=10)
     axB.legend(frameon=False, fontsize=8, loc="upper right")
     axB.grid(alpha=0.3, axis="y", lw=0.5)
-    axB.annotate("us_west exception:\nstrong common-mode corr,\nno value even isolated",
+    axB.annotate("Western US exception:\nstrong common-mode corr,\nno value even isolated",
                  xy=(2.2, 0.02), xytext=(1.55, 0.9), fontsize=7, color="C0",
                  arrowprops=dict(arrowstyle="->", color="C0", lw=0.8))
 

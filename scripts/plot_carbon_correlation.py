@@ -23,7 +23,7 @@ matplotlib.use("Agg")  # headless-safe
 import matplotlib.pyplot as plt  # noqa: E402
 import pandas as pd  # noqa: E402
 
-from src.analysis.stratified_correlations import REGION_SETS  # noqa: E402
+from src.analysis.stratified_correlations import DISPLAY_NAME, REGION_SETS  # noqa: E402
 from src.data.electricitymaps import load_all_zones, to_wide  # noqa: E402
 
 FIGDIR = Path("figures")
@@ -86,7 +86,7 @@ def main() -> None:
     im = _heatmap(axes[1], resid, "Residual (hour-of-day mean removed)", show_y=False)
     fig.subplots_adjust(wspace=0.12)
     cbar = fig.colorbar(im, ax=axes, shrink=0.85, label="Pearson $r$", pad=0.02)
-    fig.suptitle(f"Cross-region carbon-intensity correlation: {args.region_set} "
+    fig.suptitle(f"Cross-region carbon-intensity correlation: {DISPLAY_NAME.get(args.region_set, args.region_set)} "
                  f"(2021–2025)", fontsize=13)
     for p in _save(fig, f"ci_corr_heatmap_{args.region_set}"):
         print(f"  wrote {p}")
@@ -109,7 +109,7 @@ def main() -> None:
         ax.grid(alpha=0.3, linewidth=0.5)
     axes[0].legend(ncol=len(zones), frameon=False, fontsize=8,
                    loc="upper center", bbox_to_anchor=(0.5, 1.28))
-    fig.suptitle(f"Standardized carbon intensity - {args.region_set} "
+    fig.suptitle(f"Standardized carbon intensity: {DISPLAY_NAME.get(args.region_set, args.region_set)} "
                  "(shared shape => spatial correlation)", fontsize=12)
     for p in _save(fig, f"ci_overlay_{args.region_set}"):
         print(f"  wrote {p}")

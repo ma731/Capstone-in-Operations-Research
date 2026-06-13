@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-from src.analysis.stratified_correlations import REGION_SETS  # noqa: E402
+from src.analysis.stratified_correlations import DISPLAY_NAME, REGION_SETS  # noqa: E402
 from src.analysis.tail_dependence import (  # noqa: E402
     chi_upper_curve,
     residualize_hour_of_day,
@@ -102,7 +102,7 @@ def main() -> None:
     for k in range(len(pairs), nrow * ncol):  # hide unused axes
         axes[k // ncol][k % ncol].axis("off")
     axes[0][0].legend(frameon=False, fontsize=8, loc="upper left")
-    fig.suptitle(f"Upper-tail dependence vs Gaussian benchmark - {args.region_set} "
+    fig.suptitle(f"Upper-tail dependence vs Gaussian benchmark: {DISPLAY_NAME.get(args.region_set, args.region_set)} "
                  "(residual CI, 2021-2025)\nshaded = structure the covariance DRO "
                  "cannot see", fontsize=11)
     for pth in _save(fig, f"tail_dependence_{args.region_set}"):
