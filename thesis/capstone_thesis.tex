@@ -686,11 +686,28 @@ value from it.}
 \centering
 \includegraphics[width=\textwidth]{../figures/finding.pdf}
 \caption{The Phase 1 finding. \textbf{A:} spatial gap vs.\ mean residual
-cross-region correlation (value does not track correlation anywhere on the
-spectrum. \textbf{B:} mean-ablation) in the covariance-only world (constant
+cross-region correlation; value does not track correlation anywhere on the
+spectrum. \textbf{B:} mean-ablation; in the covariance-only world (constant
 scheduling mean) the joint covariance pays off by up to $+1.46\%$, proving the
 spatial signal is real but \emph{masked} by the mean carbon field, not absent.}
 \label{fig:finding}
+\end{figure}
+
+The null is visible in the schedules themselves. Figure~\ref{fig:schedule} overlays
+the optimal load for the joint and shuffled covariances on each region's mean carbon
+field: the two schedules are indistinguishable to the eye, and both place compute in
+the cleaner hours subject to the deadline and ramp constraints. Destroying the
+cross-region covariance changes essentially nothing about what the scheduler does.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{../figures/schedule_us_west.pdf}
+\caption{The spatial null, seen directly (\texttt{us\_west}, regime R3,
+$\alpha=0.5$, $\varepsilon^\star=1$). Bars are the optimal load under the joint
+covariance; the red step is the load under the shuffled (block-diagonal)
+covariance. The two coincide. The gold curve is each region's mean carbon
+intensity; the green band marks the deadline window $[0,7]$.}
+\label{fig:schedule}
 \end{figure}
 
 \subsection{The null survives a pre-registered robustness battery
@@ -716,7 +733,20 @@ less freedom to track the mean field, yet the null is unmoved, with maximum
 absolute gap $0.028\%$ (\texttt{us\_west}), $0.044\%$ (\texttt{taskc}) and $0.169\%$
 (\texttt{us\_hetero}), all sign-flipping and with $\varepsilon^\star=1$ retained.
 The covariance does not begin to pay even when the mean's pull is mechanically
-curtailed.
+curtailed. Figure~\ref{fig:robust} collects the whole battery: across all six arms
+and three grids, every spatial gap sits inside the materiality band.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{../figures/robustness.pdf}
+\caption{Robustness of the null. For each grid and each robustness arm (sample
+covariance, Ledoit--Wolf, seasonal and AR(1) residuals, walk-forward to 2024, and a
+$3\times$ tighter ramp), dots are the spatial gap for the nine (regime,~$\alpha$)
+cells and the tick marks the median. The shaded band is the $\pm0.1\%$ materiality
+threshold. No arm produces a sign-stable, material gap; the few \texttt{us\_hetero}
+excursions are negative (the joint covariance mildly hurts).}
+\label{fig:robust}
+\end{figure}
 
 \begin{table}[t]
 \centering\small
