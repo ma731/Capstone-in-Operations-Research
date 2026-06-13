@@ -766,10 +766,11 @@ $\chiU=0.26$ for CISO--BANC), exactly the structure the symmetric Gaussian copul
 ($\chiL\approx\chiU\approx0.46$) and any covariance ball cannot represent. Yet when
 each dependence model is used to schedule and evaluated out-of-sample on 2025
 (Table~\ref{tab:copula}, Figure~\ref{fig:copularesult}), no model beats the
-independence baseline by a material, sign-stable margin: the largest absolute
-copula gap anywhere is $0.13\%$ of $\CVaR_{0.95}$ (\texttt{us\_hetero}), with signs
-flipping across $\alpha$ exactly as in Phase 1. The null is now \emph{total} --- it
-holds not just for the covariance ball but for the full copula.
+independence baseline by a material, sign-stable margin: across both arms the
+largest absolute copula gap anywhere is $0.27\%$ of $\CVaR_{0.95}$ (the Gaussian
+arm on \texttt{us\_hetero}; the lower-tail Clayton arm peaks at $0.13\%$), with
+signs flipping across $\alpha$ exactly as in Phase 1. The null is now \emph{total}
+--- it holds not just for the covariance ball but for the full copula.
 
 \begin{figure}[t]
 \centering
@@ -1026,7 +1027,7 @@ VMs on variable capacity datacenters,'' in \emph{Proc. ACM Symp. Cloud Computing
 \section{Reproducibility Details}\label{app:repro}
 
 \paragraph{Repository and environment.} All code lives in a private,
-version-controlled repository with a continuous-integration suite ($163$ unit
+version-controlled repository with a continuous-integration suite ($168$ unit
 tests; the Electricity-Maps integration test is excluded from CI as it requires
 licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL/ECOS
 for the second-order cone program and HiGHS for deterministic LP baselines. The
