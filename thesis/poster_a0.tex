@@ -88,14 +88,13 @@ covariance vs.\ a \emph{block-diagonal} one with all cross-region structure zero
 \end{itemize}
 }
 
-\block{RQ1, the correlation is real}{
+\block{RQ1: the correlation is real}{
 After removing each zone's hour-of-day mean, residual cross-region correlation is
 \textbf{strong and survives de-seasonalization}: US West CISO--NEVP $0.78$;
-Ontario belt CA-ON--NYISO $0.73$.
+Ontario belt CA-ON--NYISO $0.73$. The three grids and their correlation network:
 \vspace{0.2cm}
 \centering
-\includegraphics[width=0.49\linewidth]{../figures/ci_corr_heatmap_us_west.pdf}\hfill
-\includegraphics[width=0.49\linewidth]{../figures/ci_corr_heatmap_taskc.pdf}
+\includegraphics[width=0.98\linewidth]{../figures/correlation_map.pdf}
 \vspace{0.1cm}
 \innerblock{}{\centering\textbf{The assumption motivating spatial DRO is empirically
 valid.}}
@@ -145,8 +144,9 @@ We replace the covariance ball with copula schedulers (CVaR sample-average) that
 \includegraphics[width=0.99\linewidth]{../figures/copula_density.pdf}\\[0.3cm]
 \includegraphics[width=0.99\linewidth]{../figures/copula_result.pdf}
 \vspace{0.1cm}
-\innerblock{}{Even the \emph{maximal} copula caps the gain at
-$\Lambda\approx\mathbf{0.18\%}$, the null is \textbf{total}.}
+\innerblock{}{Even the \emph{maximal} copula's gain sits at the scenario-noise
+floor ($|\Lambda|\lesssim\mathbf{0.1\%}$, $\approx0$ over seeds): the null is
+\textbf{total}.}
 }
 
 \block{A mean-dominance bound}{
@@ -160,7 +160,8 @@ $\big|\mathrm{OPT}(\Sigma)-\mathrm{OPT}(\Sigma^{\mathrm{shuf}})\big|\le
 vanishing as $\varepsilon\to0$ or $\Sigma^{\mathrm{off}}\to0$.}
 \vspace{0.15cm}
 The tight ceiling is \emph{measured} by the comonotone arm
-($\Lambda\!\approx\!0.18\%$), an order below the mean-driven value.
+($|\Lambda|\!\lesssim\!0.1\%$, at the scenario-noise floor), an order below the
+mean-driven value.
 }
 
 \block{Conclusions \& future work}{
