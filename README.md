@@ -1,108 +1,147 @@
-# carbon-dro-capstone
+# Does spatial correlation of carbon intensity improve robust data-center scheduling?
 
-Spatially-correlated DRO scheduling for carbon-aware data centers.
+A falsification study with a causal mechanism.
 
-**Capstone project · IE School of Science & Technology · 2026**
-**Supervisor:** Prof. Bissan Ghaddar
-**Student:** Marco Ortiz Togashi
+**Research Capstone in Operations Research · IE School of Science & Technology · 2026**
+**Student:** Marco Ortiz Togashi · **Supervisor:** Prof. Bissan Ghaddar
 
-## What this is
+---
 
-We extend Hall et al. (2024)'s distributionally robust optimization framework for carbon-aware data center scheduling by treating carbon intensity as a stochastic vector across multiple co-regional clusters (e.g., CAISO sub-regions), capturing spatial correlation that the existing literature ignores.
+## The finding (TL;DR)
 
-**Two phases:**
+Carbon-aware schedulers shift compute toward cleaner hours and regions. A natural
+extension of single-region carbon DRO (Hall et al. 2024) is to treat carbon
+intensity as a stochastic **vector** across coupled regions, so that **spatial
+correlation** can inform the schedule. This project asks whether that helps.
 
-- **Phase 1 (capstone, ends June 2026):** Empirical correlation analysis on real ISO data + Algorithm 2 implementation + sensitivity analysis. Deliverable: capstone report.
-- **Phase 2 (publication, ends August 2026):** Methodological extension via vine copulas + paper submission to HotCarbon or e-Energy.
+**It does not — a replicated, robustness-checked null.** Across three US/Canada
+grids spanning the full dependence spectrum, the spatial covariance adds no robust
+$\mathrm{CVaR}_{0.95}$ scheduling value, and neither does a Gaussian, lower-tail
+Clayton, or even the maximal comonotone **copula**. Two diagnostics explain why:
 
-See `docs/algorithm-spec.pdf` for the formal specification.
+- **Mean-ablation** shows the covariance signal is *real* (worth up to +1.46% in a
+  mean-flattened world) but *dominated* by the diurnal mean carbon field.
+- **Tail-dependence** shows the residual dependence is *non-elliptical*
+  (upper-tail-independent, radially asymmetric $\chi_L>\chi_U$) — invisible to a
+  covariance ball by construction.
+
+A small **mean-dominance theorem** (a-priori bound on the spatial gap) ties it
+together. The practical recommendation: a per-region marginal scheduler captures
+essentially all the value; spatial value, if any, must come from an *active*
+inter-region transfer channel, not a richer dependence model.
+
+Deliverables: `thesis/capstone_thesis.pdf` (the report) and `thesis/poster_a0.pdf`
+(the A0 poster).
+
+## The three grids
+
+| Display name | Internal key | Zones | Character |
+|---|---|---|---|
+| **Western US** | `us_west` | CISO, BANC, LDWP, NEVP, AZPS | strongly correlated (WECC) |
+| **Eastern US–Canada** | `taskc` | CA-ON, NYISO, MISO, PJM | strongly correlated (Eastern Interconnection) |
+| **Diversified** | `us_hetero` | CISO (solar), ERCOT (wind), BPAT (hydro) | engineered near-uncorrelated (adversarial best case) |
+
+Corroborated by a California–Nevada subset (`taskA`) and an Iberia–France panel
+(`es_pt_fr`) at the low-correlation end.
+
+## Method
+
+- **Model:** Mahalanobis–Wasserstein DRO, $\min\langle\bar\rho,x\rangle +
+  \varepsilon\lVert L^\top x\rVert_2$, solved as a second-order cone program
+  (`src/models/algorithm_2b_mahalanobis.py`).
+- **Falsification:** the *shuffled-marginals* test — fit the schedule on the joint
+  covariance vs. a block-diagonal one with all cross-region structure destroyed, and
+  compare out-of-sample $\mathrm{CVaR}_{0.95}$. Pre-registered: commit-lock →
+  dry-run → single test read on 2025.
+- **Phase 2:** copula schedulers (independence / Gaussian / Clayton / comonotone)
+  via a CVaR sample-average LP over the same feasible set
+  (`src/models/cvar_saa.py`, `src/models/copula_scenarios.py`).
+- **Robustness:** Ledoit–Wolf shrinkage, seasonal & AR(1) residualization,
+  Benjamini–Hochberg correction, walk-forward to 2024, tighter-ramp and
+  utilization (50–95%) sensitivities, statistical-power (MDE) analysis.
+
+## Reproduce the experiments
+
+```bash
+# Phase 1 shuffled-marginals (a region set; flags select estimator / ablation / etc.)
+python -m scripts.run_case_experiment --region-set us_west
+python -m scripts.run_case_experiment --region-set taskc --shrinkage
+python -m scripts.run_case_experiment --region-set us_hetero --ablate-mean flat
+python -m scripts.run_case_experiment --region-set taskc --ramp-mw 5        # tight ramp
+python -m scripts.run_case_experiment --region-set taskc --utilization 0.95 # tight util
+
+# Phase 2 copula schedulers
+python -m scripts.run_copula_experiment --region-set us_west
+
+# Figures (write to figures/, gitignored)
+python -m scripts.plot_carbon_correlation --region-set us_west
+python -m scripts.plot_finding
+python -m scripts.plot_copula
+python -m scripts.plot_robustness
+```
+
+Every number in the thesis traces to an archived summary table in
+`docs/results_snapshots/` (license-safe derived statistics; see the finding figures
+generated under `figures/`).
 
 ## Project structure
 
 ```
-carbon-dro-capstone/
-├── README.md
-├── pyproject.toml          # dependencies, project metadata
-├── .gitignore
-├── .env.example            # template for API keys (real .env is gitignored)
-├── data/
-│   ├── raw/                # downloaded ISO / Electricity Maps data (gitignored)
-│   └── processed/          # cleaned parquet files
 ├── src/
-│   ├── data/               # ingestion: CAISO, Electricity Maps, Google traces
-│   ├── models/             # Algorithm 1, 2, 3 implementations
-│   └── analysis/           # correlation studies, sensitivity analyses
-├── notebooks/              # exploratory Jupyter notebooks
-├── tests/                  # pytest unit + sanity tests
-├── scripts/                # one-off CLI scripts (e.g., bulk data pulls)
-└── docs/
-    ├── proposal.pdf
-    ├── algorithm-spec.pdf
-    ├── decisions.md        # log of every meaningful design decision
-    └── meeting_notes/
+│   ├── data/            # Electricity Maps ingestion, CFE capacity, temperature
+│   ├── models/          # algorithm_1 (det. baseline), algorithm_2b (Mahalanobis DRO),
+│   │                    #   feasible_set (shared X), cvar_saa, copula_scenarios, covariance
+│   └── analysis/        # stratified_correlations, tail_dependence, metrics, plots
+├── scripts/             # experiment runners + plotting (see docs/DEPRECATED.md for status)
+├── tests/               # 169 pytest unit tests (CI on push/PR)
+├── thesis/              # capstone_thesis.{tex,pdf}, poster_a0.{tex,pdf}
+├── docs/
+│   ├── decisions.md             # design-decision log
+│   ├── results_snapshots/       # archived summary CSVs (license-safe)
+│   ├── proposal_transfer_channel.md   # Part 3 (transfer DRO) proposal
+│   ├── progress_note_v*.md      # phase history (v16 = Phase 2 close-out)
+│   └── DEPRECATED.md            # which scripts are canonical / superseded
+├── data/raw/            # Electricity Maps CSVs (gitignored, non-redistributable)
+└── figures/             # generated plots (gitignored; embed into the committed PDFs)
 ```
 
 ## Setup
 
-### 1. Clone and install
-
 ```bash
-git clone https://github.com/YOUR_USERNAME/carbon-dro-capstone.git
-cd carbon-dro-capstone
+# uv (recommended)
+uv venv && uv pip install -e ".[dev]"
+# or: python -m venv .venv && pip install -e ".[dev]"
 
-# Using uv (recommended)
-uv venv
-source .venv/bin/activate          # macOS/Linux
-# .venv\Scripts\activate           # Windows
-uv pip install -e ".[dev]"
-
-# Alternative: regular venv + pip
-python -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
+cp .env.example .env        # add ELECTRICITY_MAPS_TOKEN
+pytest tests/               # 169 tests should pass
 ```
 
-### 2. Configure API keys
+**Solvers:** HiGHS (LP / CVaR-SAA) and CLARABEL/ECOS/SCS (SOCP), all free and in the
+dev extras. Gurobi is *not* required.
 
-```bash
-cp .env.example .env
-# Edit .env and fill in your tokens:
-#   ELECTRICITY_MAPS_TOKEN=...
-#   GUROBI_LICENSE_FILE=...  (path to gurobi.lic)
-```
+**Data licence:** carbon intensity is from Electricity Maps under a
+**non-redistributable academic licence**. Raw CSVs live in `data/raw/`
+(gitignored) and are **never committed**; only derived aggregate statistics are
+archived. Do not redistribute the raw data.
 
-### 3. Verify the setup
+## Status
 
-```bash
-pytest tests/                       # should pass
-python -m src.models.algorithm_1    # solves a synthetic problem
-```
+- **Phase 1 (covariance) and Phase 2 (copulas):** done — the total null + the
+  mean-dominance bound. Capstone report and poster complete.
+- **Part 3 (future work / publication):** a *spatially-coupled transfer DRO* — make
+  the spatial structure an active decision (`f_{r→s,t}` flows) rather than a passive
+  hedge. Scoped in `docs/proposal_transfer_channel.md`; pending supervisor sign-off.
 
-## Workflow conventions
+## Key references
 
-- **Branches:** work on feature branches (`feat/caiso-ingestion`, `fix/timezone-alignment`), open PRs to `main`.
-- **Commits:** present-tense imperative ("add CAISO parser", not "added").
-- **Notebooks:** explore in `notebooks/`, promote stable logic to `src/`.
-- **Data:** never commit raw data. Keep it in `data/raw/` (gitignored). Processed data goes to `data/processed/` and *can* be committed if small.
-- **Decisions:** log meaningful choices in `docs/decisions.md`. Date, decision, alternatives considered, reason.
-
-## Phase 1 milestones
-
-- [ ] Week 1: repo + Algorithm 1 + first CAISO data pull
-- [ ] Week 2: full data pipeline, 2 years of CAISO across 3 sub-regions
-- [ ] Week 3: empirical correlation analysis; **decision gate**
-- [ ] Week 4: Algorithm 2 multi-cluster deterministic
-- [ ] Week 5–6: Algorithm 2 DRO layer; validate against Hall et al.
-- [ ] Week 7–8: sensitivity analysis; capstone report
-
-## References
-
-- Hall et al. 2024 — [arXiv:2410.21510](https://arxiv.org/abs/2410.21510)
-- Radovanović et al. 2022 — IEEE TPS 38(2), 1270–1280
-- Yang et al. 2025 — [arXiv:2510.04053](https://arxiv.org/abs/2510.04053)
-- Li, Liu, Ding 2024 — HotCarbon '24
-- Esfahani & Kuhn 2018 — *Mathematical Programming* 171, 115–166
+- Hall et al. 2024 — Wasserstein DRO for carbon-aware scheduling, [arXiv:2410.21510](https://arxiv.org/abs/2410.21510)
+- Wijayawardana & Chien 2025 — variable-capacity datacenter scheduling, SoCC '25
+- Mohajerin Esfahani & Kuhn 2018 — Wasserstein DRO, *Math. Program.* 171
+- Rockafellar & Uryasev 2000 — CVaR optimization, *J. Risk* 2(3)
+- Aas et al. 2009; Dißmann et al. 2013; Czado 2019 — vine copulas
+- Fan, Ji & Lejeune 2024 — copula-ambiguity Wasserstein DRO
 
 ## License
 
-Not yet licensed. Decide with Bissan before any external publication.
+Not yet licensed. Decide with the supervisor before any external publication.
+The repository is private pending submission/defense.
