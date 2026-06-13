@@ -222,9 +222,11 @@ fully described by the copula \citep{sklar1959,joe2014}; tail-dependence
 coefficients quantify joint extremes that correlation cannot see, and the Gaussian
 copula has zero asymptotic tail dependence for any correlation below one
 \citep{embrechts2002}, a property we exploit as a diagnostic benchmark.
-Vine-copula constructions make high-dimensional non-elliptical dependence tractable
-\citep{joe2014} and are the natural candidate for a dependence-aware extension of
-DRO ambiguity sets.
+Vine (pair-copula) constructions make high-dimensional non-elliptical dependence
+tractable \citep{aas2009,joe2014,czado2019}, with established sequential
+structure-selection procedures \citep{dissmann2013}, and are the natural candidate
+for a dependence-aware extension of DRO ambiguity sets. Copula-based scenario
+generation for stochastic programs is likewise well developed \citep{kaut2014}.
 
 \subsection{The gap}
 To our knowledge, no prior work \emph{tests} whether spatial correlation of carbon
@@ -362,8 +364,9 @@ The scheduler is fitted twice, with covariances differing in exactly one respect
 preserving every region's marginal distribution and within-region autocorrelation
 while destroying only cross-region dependence. Each fitted schedule $x$ is evaluated
 by the out-of-sample conditional value-at-risk of daily emissions
-$e_i=\langle\rho_i,x\rangle$ realized on test day $i$. We use the
-Rockafellar--Uryasev form \citep{rockafellar2000}
+$e_i=\langle\rho_i,x\rangle$ realized on test day $i$; CVaR is a coherent risk
+measure \citep{artzner1999} standard in stochastic programming
+\citep{shapiro2009}. We use the Rockafellar--Uryasev form \citep{rockafellar2000}
 \begin{equation}
 \CVaR_{\beta}(e)=\min_{\tau\in\R}\;\Big\{\tau+\tfrac{1}{1-\beta}\,
 \E\big[(e-\tau)_+\big]\Big\},
@@ -804,8 +807,15 @@ less freedom to track the mean field, yet the null is unmoved, with maximum
 absolute gap $0.028\%$ (Western US), $0.044\%$ (Eastern US--Canada) and $0.169\%$
 (Diversified), all sign-flipping and with $\varepsilon^\star=1$ retained.
 The covariance does not begin to pay even when the mean's pull is mechanically
-curtailed. Figure~\ref{fig:robust} collects the whole battery: across all six arms
-and three grids, every spatial gap sits inside the materiality band.
+curtailed. A complementary \emph{utilization} sweep makes the same point through the
+workload: raising daily utilization from the baseline $80\%$ to $95\%$ packs the
+facility near capacity and strips out almost all scheduling freedom, yet the gap
+only \emph{shrinks} (maximum absolute gap $0.017\%$ for Western US, $0.048\%$ for
+Eastern US--Canada, $0.071\%$ for Diversified), and at a loose $50\%$ it stays
+immaterial ($\le0.25\%$); $\varepsilon^\star=1$ throughout. Across the full
+$\{50,80,95\}\%$ range the null is unmoved. Figure~\ref{fig:robust} collects the
+covariance-estimator and temporal battery: across all six arms and three grids,
+every spatial gap sits inside the materiality band.
 
 \begin{figure}[t]
 \centering
@@ -1092,16 +1102,24 @@ asymmetry an elliptical ball cannot encode regardless. The covariance is thus bo
 
 \subsection{Relation to prior work}
 The finding refines rather than contradicts the carbon-aware DRO literature.
-Single-region robust formulations~\citep{wijayawardana2025} remain well-motivated:
-our per-region marginal schedulers capture essentially all the value. The
-contribution is to the \emph{multi-region} extension that treats carbon intensity
-as a correlated vector, a natural and previously untested generalization. We
-show that the covariance channel of that extension is empirically inert under
-realistic grid data, and we locate the reason in the mean-dominance and
-non-ellipticity of the dependence. This both saves practitioners from modelling
-complexity that does not pay and gives theorists a precise target: the value, if
-any, lives in non-elliptical tail structure that a Wasserstein ball over
-covariance cannot reach.
+Single-region Wasserstein DRO for carbon-aware scheduling is established by
+Hall et al.~\citep{hall2024}, who report robustness gains over sample-average
+approximation; the present model is the natural \emph{multi-region} extension that
+treats carbon intensity as a correlated vector. Two quantitative observations place
+our null in that context. First, the robustification \emph{is} engaged:
+cross-validation selects a non-trivial ambiguity radius
+($\varepsilon^\star=1$, Figure~\ref{fig:cvcurve}) rather than collapsing to the
+nominal problem, consistent with the motivation in \citep{hall2024}. Second, holding
+that single-region robustification fixed, the cross-region covariance adds nothing:
+the spatial gap is null throughout. Indeed, in our out-of-sample 2025 test even the
+single-region DRO improves on the nominal (mean-greedy) schedule by at most $0.18\%$
+of $\CVaR_{0.95}$ across grids, itself a reflection of the mean-dominance we
+document; the spatial extension then adds a further nothing. The contribution is to
+map where the value is \emph{not}: neither robustification depth nor spatial
+coupling materially improves on a mean-greedy per-region schedule for this problem.
+This saves practitioners from modelling complexity that does not pay and gives
+theorists a precise target: the value, if any, lives in non-elliptical tail
+structure that a Wasserstein ball over covariance cannot reach.
 
 \subsection{Practical recommendation}
 For carbon-aware schedulers on the grids studied, a \emph{per-region marginal}
@@ -1124,11 +1142,12 @@ worth pursuing live in the mean field, not its second moment.
 
 \subsection{Limitations}
 Five bound the claims. \emph{(i)~Representative schedule.} We evaluate one
-canonical workload (fixed daily utilization, splittable load, ramp limits). A
-sharply different cost geometry could in principle re-weight the covariance term;
-the constraint-tightness sensitivity (Section~\ref{sec:res-robust}) addresses the
-most plausible case, a $3\times$ tighter ramp leaves the null intact, but a
-qualitatively different objective (e.g.\ hard per-job deadlines) is untested.
+canonical workload (splittable load, ramp limits). A sharply different cost geometry
+could in principle re-weight the covariance term; the constraint-tightness
+sensitivities (Section~\ref{sec:res-robust}) address the most plausible cases, a
+$3\times$ tighter ramp and a $50$--$95\%$ utilization sweep both leave the null
+intact, but a qualitatively different objective (e.g.\ hard per-job deadlines) is
+untested.
 \emph{(ii)~Test horizon.} The primary read is a single held-out year (2025);
 walk-forward to 2024 reproduces the null, but multi-year rolling evaluation would
 strengthen external validity. \emph{(iii)~Dependence model.} The DRO uses a
@@ -1198,18 +1217,27 @@ version-controlled, CI-tested pipeline (168 tests) with archived license-safe
 summary tables for every reported number.
 
 \subsection{Future work}
-Phase 2 closed the most immediate question (whether a copula that sees the
-asymmetry recovers value (it does not)) and in doing so sharpened the remaining
+Phase 2 closed the most immediate question, whether a copula that sees the
+asymmetry recovers value (it does not), and in doing so sharpened the remaining
 agenda. First, a \emph{copula-ambiguity Wasserstein DRO} in the Fan--Ji--Lejeune
-sense \citep{fan2024}, which robustifies the dependence structure itself rather than
-sampling from a single fitted copula; Proposition~\ref{prop:meandom} predicts the
-mean field will still dominate, but this would make the claim fully model-free.
-Second, an \emph{inter-region transfer channel}: allowing load to physically
-migrate between zones ($f_{r\to s,t}$) converts spatial structure from a passive
-hedge into an active decision lever and remains an SOCP; because the mean-dominance
-bound concerns \emph{passive} risk reduction, the transfer channel is the most
-promising route to extracting spatial value, and it overlaps a collaborator's scope
-pending supervisor sign-off. Third, \emph{rolling re-optimization} over multiple
+sense \citep{fan2024}, built on a fitted vine \citep{aas2009,dissmann2013}, which
+robustifies the dependence structure itself rather than sampling from a single
+fitted copula; Proposition~\ref{prop:meandom} predicts the mean field will still
+dominate, but this would make the claim fully model-free.
+Second, and most promising, a \emph{spatially-coupled transfer DRO}: introduce
+inter-region load flows $f_{r\to s,t}\ge0$ as decision variables, so that the work
+served in a zone, $\tilde x_{r,t}=x_{r,t}+\sum_{s}(f_{s\to r,t}-f_{r\to s,t})$, can
+migrate toward whichever region is cleanest at each hour, subject to flow
+conservation, transfer-capacity and (optionally) transmission-loss constraints.
+Minimizing the worst-case $\CVaR$ of $\langle\rho,\tilde x\rangle$ over a Wasserstein
+ball keeps the program an SOCP, but now the cross-region covariance enters the
+\emph{decision}, not merely a passive penalty. This is the genuinely novel
+formulation the present results motivate: the mean-dominance bound
+(Proposition~\ref{prop:meandom}) shows passive dependence modelling cannot help, so
+the only route to spatial value is to make the spatial structure actionable. To our
+knowledge no prior work combines Wasserstein-DRO robustification with active
+inter-region transfer; the channel overlaps a collaborator's deterministic-transfer
+scope and awaits supervisor sign-off. Third, \emph{rolling re-optimization} over multiple
 test years. The null is thus not a dead end but a sharpened mandate: it shows that
 the value, if any, will not come from a better passive dependence model but from an
 active spatial decision.
@@ -1237,6 +1265,20 @@ scheduling with virtual capacity curves,'' arXiv:2410.21510, 2024.
 \bibitem{iea2024} International Energy Agency, \emph{Electricity 2024: Analysis and
 Forecast to 2026}. Paris: IEA, 2024.
 \bibitem{joe2014} H.~Joe, \emph{Dependence Modeling with Copulas}. CRC Press, 2014.
+\bibitem{aas2009} K.~Aas, C.~Czado, A.~Frigessi, and H.~Bakken, ``Pair-copula
+constructions of multiple dependence,'' \emph{Insurance Math. Econ.}, vol.~44,
+no.~2, pp.~182--198, 2009.
+\bibitem{dissmann2013} J.~Di\ss mann, E.~C. Brechmann, C.~Czado, and D.~Kurowicka,
+``Selecting and estimating regular vine copulae and application to financial
+returns,'' \emph{Comput. Statist. Data Anal.}, vol.~59, pp.~52--69, 2013.
+\bibitem{czado2019} C.~Czado, \emph{Analyzing Dependent Data with Vine Copulas}.
+Cham: Springer, 2019.
+\bibitem{kaut2014} M.~Kaut, ``A copula-based heuristic for scenario generation,''
+\emph{Comput. Manag. Sci.}, vol.~11, no.~4, pp.~503--516, 2014.
+\bibitem{artzner1999} P.~Artzner, F.~Delbaen, J.-M. Eber, and D.~Heath, ``Coherent
+measures of risk,'' \emph{Math. Finance}, vol.~9, no.~3, pp.~203--228, 1999.
+\bibitem{shapiro2009} A.~Shapiro, D.~Dentcheva, and A.~Ruszczy\'nski, \emph{Lectures
+on Stochastic Programming: Modeling and Theory}. Philadelphia: SIAM, 2009.
 \bibitem{kuhn2019} D.~Kuhn, P.~Mohajerin Esfahani, V.~A. Nguyen, and
 S.~Shafieezadeh-Abadeh, ``Wasserstein distributionally robust optimization: theory
 and applications in machine learning,'' in \emph{Operations Research \& Management

@@ -341,12 +341,16 @@ def main() -> int:
                     help="Per-region ramp limit (MW/h). Tighten (e.g. 5) to shrink "
                          "the feasible set and test whether the spatial null survives "
                          "when the schedule has less freedom to track the mean field.")
+    ap.add_argument("--utilization", type=float, default=0.80,
+                    help="Daily utilization (fraction of capacity). Raise (e.g. 0.95) "
+                         "to leave the schedule little room to chase clean hours.")
     args = ap.parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
     global USE_SHRINKAGE, RESIDUALIZE, ABLATE_MEAN, _VARCAP_CEILING, REGION_ORDER, TZ
-    global TRAIN_YEARS, TEST_YEAR, EPSILON_GRID, RAMP_PER_REGION
+    global TRAIN_YEARS, TEST_YEAR, EPSILON_GRID, RAMP_PER_REGION, UTILIZATION_FIXED
     RAMP_PER_REGION = args.ramp_mw
+    UTILIZATION_FIXED = args.utilization
     USE_SHRINKAGE = args.shrinkage
     RESIDUALIZE = args.residualize
     ABLATE_MEAN = args.ablate_mean
@@ -470,6 +474,8 @@ def main() -> int:
         suffix += f"_{args.regime}"
     if args.ramp_mw != 15.0:
         suffix += f"_ramp{args.ramp_mw:g}"
+    if args.utilization != 0.80:
+        suffix += f"_util{args.utilization:g}"
     stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
     base = f"{args.region_set}_regimes_{stamp}{suffix}"
     csv_path = args.out_dir / f"{base}.csv"
