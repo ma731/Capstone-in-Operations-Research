@@ -126,6 +126,7 @@ class CopulaCell:
     cvar_indep: float
     cvar_gauss: float
     cvar_clayton: float
+    cvar_comonotone: float
     clayton_theta: float
     kendall_tau: float
     gap_gauss_pct: float
@@ -134,9 +135,13 @@ class CopulaCell:
     gap_clayton_pct: float
     gap_clayton_ci_lo: float
     gap_clayton_ci_hi: float
+    gap_comonotone_pct: float
+    gap_comonotone_ci_lo: float
+    gap_comonotone_ci_hi: float
     gap_clayton_vs_gauss_pct: float
     detectable_gauss: bool
     detectable_clayton: bool
+    detectable_comonotone: bool
 
 
 def main() -> int:
@@ -190,26 +195,30 @@ def main() -> int:
             cv = {k: cvar_upper_tail(em[k]) for k in KINDS}
             g_gauss, gglo, gghi = bootstrap_gap_ci(em["gaussian"], em["independence"])
             g_clay, gclo, gchi = bootstrap_gap_ci(em["clayton"], em["independence"])
+            g_como, gmlo, gmhi = bootstrap_gap_ci(em["comonotone"], em["independence"])
             g_cvg = cv["gaussian"] - cv["clayton"]
             base = cv["independence"]
             rows.append(CopulaCell(
                 regime=regime_key, alpha=alpha_val,
                 cvar_indep=cv["independence"], cvar_gauss=cv["gaussian"],
-                cvar_clayton=cv["clayton"],
+                cvar_clayton=cv["clayton"], cvar_comonotone=cv["comonotone"],
                 clayton_theta=models["clayton"].clayton_theta,
                 kendall_tau=models["clayton"].kendall_tau,
                 gap_gauss_pct=100 * g_gauss / base,
                 gap_gauss_ci_lo=100 * gglo / base, gap_gauss_ci_hi=100 * gghi / base,
                 gap_clayton_pct=100 * g_clay / base,
                 gap_clayton_ci_lo=100 * gclo / base, gap_clayton_ci_hi=100 * gchi / base,
+                gap_comonotone_pct=100 * g_como / base,
+                gap_comonotone_ci_lo=100 * gmlo / base, gap_comonotone_ci_hi=100 * gmhi / base,
                 gap_clayton_vs_gauss_pct=100 * g_cvg / base,
                 detectable_gauss=(gglo > 0 or gghi < 0),
                 detectable_clayton=(gclo > 0 or gchi < 0),
+                detectable_comonotone=(gmlo > 0 or gmhi < 0),
             ))
             print(f"  {regime_key} a={alpha_val}: tau={models['clayton'].kendall_tau:.2f} "
                   f"theta={models['clayton'].clayton_theta:.2f} | "
                   f"gap_gauss={100*g_gauss/base:+.3f}% gap_clayton={100*g_clay/base:+.3f}% "
-                  f"clayton-vs-gauss={100*g_cvg/base:+.3f}%")
+                  f"gap_comono={100*g_como/base:+.3f}% clay-v-gauss={100*g_cvg/base:+.3f}%")
 
     if args.dry_run or not rows:
         print("Done (dry-run / no rows written).")
@@ -223,7 +232,7 @@ def main() -> int:
     df.to_csv(path, index=False)
     print(f"\nWrote {path}")
     print(df[["regime", "alpha", "gap_gauss_pct", "gap_clayton_pct",
-              "gap_clayton_vs_gauss_pct", "detectable_clayton"]].to_string(index=False))
+              "gap_comonotone_pct", "detectable_comonotone"]].to_string(index=False))
     return 0
 
 

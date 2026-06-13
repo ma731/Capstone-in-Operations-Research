@@ -52,6 +52,16 @@ def test_clayton_is_lower_tail_asymmetric():
     assert abs(gL - gU) < 0.08                        # symmetric
 
 
+def test_comonotone_is_perfectly_rank_coupled():
+    """Comonotone (upper Frechet) must give rank correlation ~1 and chi_L=chi_U=1."""
+    panel = _correlated_panel(rho=0.5)
+    cm = fit_copula("comonotone", panel)
+    u = sample_uniforms(cm, 20000, np.random.default_rng(5))
+    assert np.corrcoef(u[:, 0], u[:, 1])[0, 1] > 0.999
+    assert _chi_lower(u[:, 0], u[:, 1], 0.05) > 0.95
+    assert _chi_upper(u[:, 0], u[:, 1], 0.95) > 0.95
+
+
 def test_independence_destroys_cross_dependence():
     panel = _correlated_panel(rho=0.8)
     ind = fit_copula("independence", panel)

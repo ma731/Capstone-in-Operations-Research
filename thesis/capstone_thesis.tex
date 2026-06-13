@@ -765,12 +765,25 @@ as intended --- its samples pile into the joint-clean corner ($\chiL=0.70$ vs.\
 $\chiU=0.26$ for CISO--BANC), exactly the structure the symmetric Gaussian copula
 ($\chiL\approx\chiU\approx0.46$) and any covariance ball cannot represent. Yet when
 each dependence model is used to schedule and evaluated out-of-sample on 2025
-(Table~\ref{tab:copula}, Figure~\ref{fig:copularesult}), no model beats the
-independence baseline by a material, sign-stable margin: across both arms the
-largest absolute copula gap anywhere is $0.27\%$ of $\CVaR_{0.95}$ (the Gaussian
-arm on \texttt{us\_hetero}; the lower-tail Clayton arm peaks at $0.13\%$), with
-signs flipping across $\alpha$ exactly as in Phase 1. The null is now \emph{total}
---- it holds not just for the covariance ball but for the full copula.
+(Table~\ref{tab:copula}, Figure~\ref{fig:copularesult}), no fitted copula beats the
+independence baseline by a material, sign-stable margin; the Gaussian and Clayton
+gains never exceed $0.16\%$ of $\CVaR_{0.95}$ and flip sign across $\alpha$ exactly
+as in Phase 1.
+
+To test the \emph{actual} worst case we add the comonotone (upper-Fr\'echet) arm:
+perfect rank coupling, which maximizes the CVaR of a sum of positively-associated
+risks and therefore realizes the supremum $\sup_C$ in the leverage $\Lambda$ of
+Section~\ref{sec:method-copula}. This is the most any copula can buy. In the two
+weakly- or heterogeneously-coupled grids it too returns nothing sign-stable
+($\le0.11\%$, not detectable). In the genuinely positively-coupled belt
+(\texttt{taskc}, $\bar\tau=0.31$) it does produce a sign-stable, fully-detectable
+gain --- but of only $+0.10$ to $+0.18\%$ across all nine cells. This is the key
+number: the comonotone arm \emph{measures} the copula ceiling directly, and even
+perfect knowledge of the dependence caps the achievable gain at
+$\Lambda\approx0.18\%$ of $\CVaR_{0.95}$ --- immaterial, and an order of magnitude
+below the schedule's mean-driven value. Crucially this measurement is
+\emph{independent} of the mean-ablation, so it pins $\Lambda$ without circularity:
+no copula, not even the maximal one, recovers material value.
 
 \begin{figure}[t]
 \centering
@@ -786,18 +799,21 @@ elliptical models force to zero.}
 \begin{table}[t]
 \centering\small
 \caption{Phase 2 copula results. Gap $=$ reduction in out-of-sample
-$\CVaR_{0.95}$ versus the independence baseline (\%; positive $=$ the structured
-copula helps); ``Clay$-$Gauss'' is the mean asymmetry increment. No case shows a
-material, sign-stable copula gain. $\theta$ is the fitted Clayton parameter.}
+$\CVaR_{0.95}$ versus the independence baseline (\%; positive $=$ the copula helps),
+reported as the maximum \emph{positive} gain over the nine cells. The
+\emph{comonotone} arm is the upper Fr\'echet bound (perfect rank coupling) --- the
+supremum over all copulas, hence the empirical ceiling $\Lambda$ on copula value.
+$\theta$ is the fitted Clayton parameter; ``stable'' flags a sign-stable,
+bootstrap-detectable gain across all nine cells.}
 \label{tab:copula}
-\begin{tabular}{lcccccc}
+\begin{tabular}{lccccccc}
 \toprule
-Case & $\bar\tau$ & $\theta$ & max$|$gap$_{\text{Gauss}}|$ &
-max$|$gap$_{\text{Clay}}|$ & mean (Clay$-$Gauss) & detectable\\
+Case & $\bar\tau$ & $\theta$ & gain$_{\text{Gauss}}$ & gain$_{\text{Clay}}$ &
+gain$_{\text{comon}}$ & $\Lambda$ stable? & material?\\
 \midrule
-\texttt{us\_west}   & 0.47 & 1.77 & 0.066 & 0.038 & $+0.011$ & none stable\\
-\texttt{taskc}      & 0.31 & 0.90 & 0.158 & 0.083 & $-0.056$ & none stable\\
-\texttt{us\_hetero} & 0.20 & 0.50 & 0.270 & 0.127 & $+0.070$ & none stable\\
+\texttt{us\_west}   & 0.47 & 1.77 & 0.066 & 0.038 & 0.089 & no & no\\
+\texttt{taskc}      & 0.31 & 0.90 & 0.158 & 0.014 & 0.182 & \textbf{yes (9/9)} & no\\
+\texttt{us\_hetero} & 0.20 & 0.50 & 0.069 & 0.127 & 0.114 & no & no\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -805,12 +821,14 @@ max$|$gap$_{\text{Clay}}|$ & mean (Clay$-$Gauss) & detectable\\
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{../figures/copula_result.pdf}
-\caption{Phase 2 result. \textbf{A:} maximum $|$gap$|$ versus independence for the
-Gaussian and Clayton arms --- neither copula materially beats the decoupled
-baseline. \textbf{B:} the mean Clayton$-$Gaussian increment by grid; it is positive
-where dependence is heterogeneous (\texttt{us\_hetero}, $+0.07\%$), confirming the
-copula \emph{does} capture the asymmetry --- but the effect is an order of magnitude
-too small to matter, as Proposition~\ref{prop:meandom} predicts.}
+\caption{Phase 2 result. \textbf{A:} maximum positive gain versus independence for
+the Gaussian, Clayton, and comonotone (upper-Fr\'echet $\sup_C$) arms. The
+comonotone ceiling $\Lambda$ caps at $0.18\%$, and only in the coupled belt
+(\texttt{taskc}); the fitted copulas do not even reach it. \textbf{B:} the mean
+Clayton$-$Gaussian increment by grid; positive where dependence is heterogeneous
+(\texttt{us\_hetero}, $+0.07\%$), confirming the copula \emph{does} capture the
+asymmetry --- but an order of magnitude too small to matter, as
+Proposition~\ref{prop:meandom} predicts.}
 \label{fig:copularesult}
 \end{figure}
 

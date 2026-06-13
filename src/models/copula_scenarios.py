@@ -21,6 +21,11 @@ cross-region dependence. Three nested dependence models:
   lower-tail dependence lambda_L = 2^(-1/theta) and zero upper-tail dependence --
   matched to the Phase 1 finding's chi_L. The object the covariance ball cannot
   represent.
+* ``comonotone``   -- regions perfectly rank-coupled (the upper Frechet bound). This
+  is the copula that *maximizes* the CVaR of a sum of positively-associated risks,
+  i.e. the supremum over all copulas in the mean-dominance bound. Running it answers
+  ``did you test the actual worst case?'': if even comonotone coupling buys no value,
+  no copula can.
 
 A scenario is built by drawing a copula sample u in [0,1]^R, then for each region
 mapping u_r through the empirical quantile of that region's *daily summary*
@@ -37,7 +42,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-KINDS = ("independence", "gaussian", "clayton")
+KINDS = ("independence", "gaussian", "clayton", "comonotone")
 
 
 @dataclass
@@ -170,6 +175,9 @@ def sample_uniforms(model: CopulaModel, S: int, rng: np.random.Generator) -> np.
     R = model.region_profiles.shape[0]
     if model.kind == "independence":
         return rng.random((S, R))
+    if model.kind == "comonotone":
+        # Upper Frechet bound: every region shares the same uniform draw.
+        return np.tile(rng.random((S, 1)), (1, R))
     if model.kind == "gaussian":
         zc = rng.standard_normal((S, R)) @ model.gaussian_chol.T
         return _cdf(zc)
