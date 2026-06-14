@@ -1,8 +1,53 @@
 # Proposal — Part 3: Spatially-coupled transfer DRO (the new algorithm)
 
 **Author:** Marco (DRO/spatial). **For:** Prof. Bissan Ghaddar.
-**Date:** 2026-06-11, **updated 2026-06-14 (post-Phase-2).**
+**Date:** 2026-06-11, **updated 2026-06-14 (post-Phase-2 + prototype results).**
 **Status:** proposal — needs sign-off (scope overlaps a teammate; see §5).
+
+---
+
+## 0. Prototype results (2026-06-14) — the story is already taking shape
+
+Three throwaway prototypes (`scripts/prototype_transfer_dro.py`,
+`run_transfer_experiment.py`, `prototype_twostage_transfer.py`,
+`prototype_emergency_crossover.py`) already map the answer:
+
+1. **Active transfer unlocks 5–10% carbon savings.** A transfer-budget sweep cuts
+   out-of-sample CVaR by **10.1%** (Eastern US–Canada), **9.1%** (Diversified),
+   **4.7%** (Western US). *Spatial value exists once the decision is active* — the
+   value the capstone null left on the table. It is **mean-exploiting** (ship work
+   to the region cleanest *on average*), saturating when the clean region's capacity
+   fills.
+
+2. **Robustness is worthless under normal carbon — comprehensively.** One-shot DRO,
+   a forecast-error (persistence) ambiguity set, and a full **two-stage robust
+   commitment with costly recourse over stress scenarios** all leave robust ≈
+   deterministic (or slightly worse). The capstone's mean-dominance extends to the
+   active-decision setting: the mean forecast dominates every robust formulation.
+
+3. **But robustness pays under grid-emergency tail risk — a sharp crossover.** Model
+   rare emergencies (w.p. 10%/day a region's carbon ×M; renewable drought / peaker
+   dispatch). Sweeping severity M traces a clean phase transition (two-stage,
+   migration-limited):
+
+   | severity M | robust gain (Western US) | robust gain (Diversified) |
+   |-----------:|-------------------------:|--------------------------:|
+   | 1.0 (none) | −0.03% | −0.12% |
+   | 2.0 | +0.17% | +0.34% |
+   | 3.0 | **+3.67%** | +1.32% |
+   | 4.0 | **+8.39%** | +1.47% |
+
+   The robust commitment's CVaR stays flat (hedged); the risk-neutral one's climbs.
+   **Robustness's value in carbon scheduling is a function of tail risk, and we can
+   map the crossover.**
+
+**The Part 3 thesis, in one line:** *active transfer captures the spatial carbon
+value passive modelling could not; distributional robustness is worthless for it
+under normal conditions but essential under rare grid-emergency tail risk, with a
+sharp severity crossover we characterize.* That is a complete arc — a positive
+practical result, a provocative comprehensive null, and a positive nuanced result —
+on a genuinely hard formulation (two-stage stochastic programming with CVaR
+recourse). The build below promotes these prototypes to a clean, tested module.
 
 > **Where this sits.** Part 1 (covariance) and Part 2 (copulas) are *done* and live
 > in the capstone: both are nulls, and the mean-dominance bound explains why no
