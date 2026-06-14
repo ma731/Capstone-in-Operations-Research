@@ -1240,9 +1240,14 @@ honest open question, and the real content of the next phase, is not whether
 transfer helps (it must, being mean-exploiting) but whether \emph{robustifying} it
 beats plain deterministic transfer, e.g.\ under forecast error or for tail-averse
 operators, since the same mean-dominance logic suggests the robustness layer may
-again be second-order. To our knowledge no prior work combines Wasserstein-DRO
-robustification with active inter-region transfer; the channel overlaps a
-collaborator's deterministic-transfer scope and awaits supervisor sign-off. Further
+again be second-order. Preliminary, proof-of-concept experiments
+(Appendix~\ref{app:phase3}) already bear this out and sharpen it: active transfer
+cuts out-of-sample $\CVaR_{0.95}$ by $4.7$--$10.1\%$; robustness stays immaterial
+under normal carbon; but a stylised grid-emergency stress reveals a sharp tail-risk
+\emph{crossover} beyond which the robust commitment wins, by up to $+8\%$. To our
+knowledge no prior work combines Wasserstein-DRO robustification with active
+inter-region transfer; the channel overlaps a collaborator's deterministic-transfer
+scope and awaits supervisor sign-off. Further
 out, the transfer model invites an \emph{online, multistage} treatment in which
 forecasts arrive sequentially and demand and transmission are themselves uncertain,
 with a Wasserstein ball centred on a learned forecast, and the mean-dominance bound
@@ -1387,6 +1392,55 @@ Section & Result & Archived source\\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\section{Preliminary Phase 3 results: active transfer and the tail-risk
+crossover}\label{app:phase3}
+This appendix sketches where the line goes next, with \emph{preliminary,
+proof-of-concept} experiments. They are prototype-grade --- a stylised
+grid-emergency stress model, modest scenario counts, no pre-registration --- and a
+rigorous treatment is the subject of a follow-on study; we include them only because
+they already complete the arc the capstone opened. The capstone showed that
+\emph{passive} spatial modelling adds no value because the mean dominates. The
+natural question is whether making the spatial structure an \emph{active decision}
+changes that. We add inter-region load flows $f_{r\to s,t}\ge0$ so the executed load
+$y_{r,t}=x_{r,t}+\sum_s(f_{s\to r,t}-f_{r\to s,t})$ can migrate toward the cleaner
+region; the program stays an SOCP/LP.
+
+Three findings emerge (Figure~\ref{fig:phase3}). \textbf{(1)~Active transfer unlocks
+spatial value.} A transfer-budget sweep cuts out-of-sample $\CVaR_{0.95}$ by
+$4.7$--$10.1\%$ across the three grids --- the value the passive null left on the
+table, captured by exploiting the spatial \emph{mean} (shipping work to the region
+cleanest on average). \textbf{(2)~Robustness is worthless under normal carbon, even
+here.} A one-shot transfer DRO, a forecast-error (persistence) ambiguity set, and a
+two-stage robust commitment with costly recourse all leave robust $\approx$
+deterministic --- the mean-dominance of the main text extends into the active
+setting. \textbf{(3)~But robustness pays under tail risk.} Modelling rare
+grid-emergency events (with probability $0.1$ per day a region's carbon is scaled by
+a severity $M$, as in a renewable drought or peaker dispatch) and re-solving the
+two-stage problem with migration-limited recourse traces a sharp \emph{crossover}:
+at $M=1$ the robust commitment is no better than the risk-neutral one (the main
+null), but as $M$ grows it increasingly wins, by up to $+8.4\%$ of $\CVaR_{0.95}$ at
+$M=4$ on the US West. The robust commitment stays hedged while the risk-neutral one
+is burned when its favoured region spikes.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{../figures/part3_preliminary.pdf}
+\caption{Preliminary Phase 3. \textbf{A:} active transfer reduces out-of-sample
+$\CVaR_{0.95}$ by $4.7$--$10.1\%$. \textbf{B:} the tail-risk crossover --- the robust
+(CVaR-hedged) commitment's advantage over the risk-neutral one as grid-emergency
+severity $M$ grows; near $M\approx2$ it turns positive. Proof-of-concept; full
+treatment is future work.}
+\label{fig:phase3}
+\end{figure}
+
+The synthesis is a clean phase diagram: distributional robustness is immaterial for
+carbon-aware scheduling under normal conditions (the mean dominates, whether the
+spatial structure is modelled passively or acted on actively), but becomes valuable
+precisely when rare tail events make the mean forecast unreliable. The value of
+robustness is thus a function of tail risk --- the precise characterisation of which,
+together with a calibrated emergency model and a pre-registered evaluation, is the
+agenda for the follow-on work.
 
 \section*{Annex A: Individual Contribution Statement}\label{app:ics}
 \addcontentsline{toc}{section}{Annex A: Individual Contribution Statement}
