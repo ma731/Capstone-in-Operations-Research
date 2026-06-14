@@ -12,6 +12,7 @@ the committed configuration that produced a result can always be re-read.
 | `scripts/run_copula_experiment.py` | Phase 2 copula schedulers (independence / Gaussian / Clayton / comonotone). |
 | `scripts/calibrate_capacity.py` | Goldilocks calibration of the 3c capacity bounds. |
 | `scripts/measure_complexity.py` | Solve-time / problem-dimension reporting. |
+| `src/models/transfer_dro.py` | Part 3 canonical module (one-shot transfer DRO, two-stage commit, recourse). Tested in `tests/test_transfer_dro.py`. Supersedes the `scripts/prototype_*transfer*.py` and `run_transfer_experiment.py` prototypes (which produced the Appendix B numbers and are kept for provenance). |
 
 ## Locked pre-registration artifacts (keep, do not edit or delete)
 

@@ -90,10 +90,11 @@ generated under `figures/`).
 ├── src/
 │   ├── data/            # Electricity Maps ingestion, CFE capacity, temperature
 │   ├── models/          # algorithm_1 (det. baseline), algorithm_2b (Mahalanobis DRO),
-│   │                    #   feasible_set (shared X), cvar_saa, copula_scenarios, covariance
+│   │                    #   feasible_set (shared X), cvar_saa, copula_scenarios,
+│   │                    #   transfer_dro (Part 3), covariance
 │   └── analysis/        # stratified_correlations, tail_dependence, metrics, plots
 ├── scripts/             # experiment runners + plotting (see docs/DEPRECATED.md for status)
-├── tests/               # 169 pytest unit tests (CI on push/PR)
+├── tests/               # 175 pytest unit tests (CI on push/PR)
 ├── thesis/              # capstone_thesis.{tex,pdf}, poster_a0.{tex,pdf}
 ├── docs/
 │   ├── decisions.md             # design-decision log
@@ -113,7 +114,7 @@ uv venv && uv pip install -e ".[dev]"
 # or: python -m venv .venv && pip install -e ".[dev]"
 
 cp .env.example .env        # add ELECTRICITY_MAPS_TOKEN
-pytest tests/               # 169 tests should pass
+pytest tests/               # 175 tests should pass
 ```
 
 **Solvers:** HiGHS (LP / CVaR-SAA) and CLARABEL/ECOS/SCS (SOCP), all free and in the
@@ -128,9 +129,12 @@ archived. Do not redistribute the raw data.
 
 - **Phase 1 (covariance) and Phase 2 (copulas):** done — the total null + the
   mean-dominance bound. Capstone report and poster complete.
-- **Part 3 (future work / publication):** a *spatially-coupled transfer DRO* — make
-  the spatial structure an active decision (`f_{r→s,t}` flows) rather than a passive
-  hedge. Scoped in `docs/proposal_transfer_channel.md`; pending supervisor sign-off.
+- **Part 3 (preliminary, in the thesis as Appendix B):** a *spatially-coupled
+  transfer DRO* (`src/models/transfer_dro.py`) makes the spatial structure an active
+  decision (`f_{r→s,t}` flows). Proof-of-concept results: active transfer cuts CVaR
+  4.7–10.1%; robustness stays immaterial under normal carbon but crosses over to pay
+  under grid-emergency tail risk (up to +8%). Full treatment + supervisor sign-off
+  is the follow-on (`docs/proposal_transfer_channel.md`, `docs/research_roadmap.md`).
 
 ## Key references
 

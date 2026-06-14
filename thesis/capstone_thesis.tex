@@ -608,7 +608,7 @@ the entire study is under two hours on one core, so reproduction is cheap.
 
 \subsection{Reproducibility}
 All code is version-controlled (private repository, continuous-integration test
-suite, $168$ unit tests, including a feasible-set equivalence test pinning the
+suite, $175$ unit tests, including a feasible-set equivalence test pinning the
 Phase 2 CVaR scheduler to the Phase 1 constraint set); experiment configurations
 are commit-locked before test-set evaluation; bootstrap and scenario seeds are
 fixed; and every number reported in
@@ -1213,7 +1213,7 @@ hierarchy from covariance ball to elliptical and lower-tail copulas;
 (3)~a causal mechanism (formalized as a mean-dominance bound
 (Proposition~\ref{prop:meandom}) and demonstrated by mean-ablation) that
 explains the null rather than merely reporting it; and (4)~a fully reproducible,
-version-controlled, CI-tested pipeline (168 tests) with archived license-safe
+version-controlled, CI-tested pipeline (175 tests) with archived license-safe
 summary tables for every reported number.
 
 \subsection{Future work}
@@ -1341,7 +1341,7 @@ with $S$; the $\pm0.1\%$ materiality band is shaded.}
 \end{figure}
 
 \paragraph{Repository and environment.} All code lives in a private,
-version-controlled repository with a continuous-integration suite ($168$ unit
+version-controlled repository with a continuous-integration suite ($175$ unit
 tests; the Electricity-Maps integration test is excluded from CI as it requires
 licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL/ECOS
 for the second-order cone program and HiGHS for deterministic LP baselines. The
