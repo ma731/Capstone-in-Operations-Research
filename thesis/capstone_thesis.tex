@@ -535,6 +535,34 @@ schedule is evaluated once on the 2025 panel by out-of-sample $\CVaR_{0.95}$;
 the reported copula gaps are $\CVaR(\text{indep})-\CVaR(\text{Gaussian})$,
 $\CVaR(\text{indep})-\CVaR(\text{Clayton})$, and the asymmetry increment
 $\CVaR(\text{Gaussian})-\CVaR(\text{Clayton})$, each with a paired day-bootstrap CI.
+Algorithm~\ref{alg:copula} summarizes the procedure.
+
+\begin{algorithm}[t]
+\caption{Copula-scenario CVaR scheduling (one region set)}
+\label{alg:copula}
+\begin{algorithmic}[1]
+\State \textbf{Input:} daily panels $\rho_{1:N}$ (train 2021--2024, test 2025);
+dependence models $\{$independence, Gaussian, Clayton, comonotone$\}$; regimes;
+$\alpha$-levels; scenarios $S=1000$, fixed seed
+\For{each dependence model $C$}
+  \State fit $C$ on training daily summaries (rank pseudo-observations); for Clayton,
+  $\theta=2\tau/(1-\tau)$ from mean Kendall $\tau$
+  \For{each regime, each $\alpha$}
+    \State draw $S$ copula samples $u^s\in[0,1]^R$ \Comment{indep./Gaussian/Clayton
+    frailty/comonotone}
+    \State map each region's $u^s_r$ to the training day of that daily-summary rank;
+    take its full profile $\Rightarrow$ scenario $\rho^s\in\R^{R\times T}$
+    \Statex \hspace{1.1em}\Comment{copula-coupled resampling: marginals exact,
+    only cross-region coupling changes}
+    \State solve the CVaR-SAA program \eqref{eq:saacvar} over $\mathcal X$
+    $\Rightarrow$ schedule $x$
+    \State evaluate \emph{once} on 2025 $\Rightarrow$ out-of-sample $\CVaR_{0.95}$
+  \EndFor
+\EndFor
+\State copula gaps vs.\ independence $+$ paired day-bootstrap CIs; comonotone
+realizes $\sup_C$, the ceiling $\Lambda$
+\end{algorithmic}
+\end{algorithm}
 
 \paragraph{Why the dependence model is second-order.} Two facts make the
 dependence model second-order to the mean field. The first is a decomposition: by
