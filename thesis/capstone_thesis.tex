@@ -1395,10 +1395,16 @@ Section & Result & Archived source\\
 
 \section{Preliminary Phase 3 results: active transfer and the tail-risk
 crossover}\label{app:phase3}
-This appendix sketches where the line goes next, with \emph{preliminary,
-proof-of-concept} experiments. They are prototype-grade --- a stylised
-grid-emergency stress model, modest scenario counts, no pre-registration --- and a
-rigorous treatment is the subject of a follow-on study; we include them only because
+\emph{The work in this appendix lies beyond the scope of the capstone proper
+(Sections~\ref{sec:intro}--\ref{sec:conclusion}); it is a preliminary glimpse of a
+planned multi-part extension and is included only to show where the line leads. The
+capstone's graded contribution is the rigorous, pre-registered null and the
+mean-dominance bound; what follows is deliberately exploratory.}
+
+\medskip\noindent This appendix sketches where the line goes next, with
+\emph{preliminary, proof-of-concept} experiments. They are prototype-grade --- a
+stylised grid-emergency stress model, modest scenario counts, no pre-registration ---
+and a rigorous treatment is the subject of a follow-on study; we include them only because
 they already complete the arc the capstone opened. The capstone showed that
 \emph{passive} spatial modelling adds no value because the mean dominates. The
 natural question is whether making the spatial structure an \emph{active decision}
@@ -1441,6 +1447,24 @@ precisely when rare tail events make the mean forecast unreliable. The value of
 robustness is thus a function of tail risk --- the precise characterisation of which,
 together with a calibrated emergency model and a pre-registered evaluation, is the
 agenda for the follow-on work.
+
+\paragraph{The extension beyond this capstone.} These preliminary results are the
+opening of a planned five-part programme that continues well past the capstone. The
+capstone is Parts~1--2 (the covariance and copula nulls plus the mean-dominance
+bound). \textbf{Part~3}, sketched above, is the spatially-coupled transfer DRO ---
+the active-decision algorithm and the tail-risk crossover --- promoted to a rigorous,
+pre-registered study with calibrated emergencies and, ideally, affine decision rules
+for the recourse policy. \textbf{Part~4} takes the transfer model \emph{online}: a
+multistage / rolling-horizon robust controller in which forecasts arrive
+sequentially and demand and transmission are themselves uncertain, with a Wasserstein
+ball centred on a \emph{learned} forecast (learning-augmented DRO) and evaluated
+closed-loop on real operational traces --- the deployable systems contribution.
+\textbf{Part~5} generalises the mean-dominance bound itself into a problem-class
+condition for \emph{when} cross-coordinate dependence can ever improve a robust
+allocation, of which carbon-aware scheduling is one instance and energy storage, EV
+fleets and spatial supply chains are others --- the theory that turns the sequence
+into a research programme. The programme is detailed in the project's research
+roadmap; this appendix is only its first, deliberately preliminary, datapoint.
 
 \section*{Annex A: Individual Contribution Statement}\label{app:ics}
 \addcontentsline{toc}{section}{Annex A: Individual Contribution Statement}
