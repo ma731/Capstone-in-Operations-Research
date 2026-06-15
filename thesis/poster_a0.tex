@@ -19,17 +19,32 @@
 \colorlet{navylt}{navy!8}      % pre-mixed (xcolor expressions fail inside coloredbox opts)
 \colorlet{goldlt}{gold!18}
 
-%, theme: clean academic grid in the thesis palette ,
+%, theme + Johns-Hopkins-style flat blocks (centered navy header bar, borderless body) ,
 \usetheme{Default}
 \usecolorstyle{Germany}
 \colorlet{titlefgcolor}{white}
 \colorlet{titlebgcolor}{navy}
 \colorlet{blocktitlebgcolor}{navy}
 \colorlet{blocktitlefgcolor}{white}
-\colorlet{backgroundcolor}{paper}
-\colorlet{framecolor}{navy}
+\colorlet{backgroundcolor}{white}
+\colorlet{framecolor}{white}
 \colorlet{notefgcolor}{black}
 \colorlet{notebgcolor}{gold!25}
+
+% Flat, conference-poster block: a centered filled navy title bar, no body frame.
+\defineblockstyle{JHbar}{
+  titlewidthscale=1, bodywidthscale=1,
+  titleoffsetx=0pt, titleoffsety=0pt, bodyoffsetx=0pt, bodyoffsety=0pt,
+  bodyverticalshift=2mm, roundedcorners=5, linewidth=0pt,
+  titleinnersep=6mm, bodyinnersep=2mm
+}{
+  \ifBlockHasTitle
+    \draw[draw=none, fill=blocktitlebgcolor, rounded corners=\blockroundedcorners]
+      (blocktitle.south west) rectangle (blocktitle.north east);
+  \fi
+  % body intentionally undrawn -> content flows flat on the white background
+}
+\useblockstyle{JHbar}
 \settitle{
   % === conference-poster title bar: IE logo left, title centered ===
   \begin{minipage}[c]{0.17\linewidth}\centering
@@ -62,7 +77,7 @@
 % ===================== COLUMN 1 =====================
 \column{0.33}
 
-\block{Background \& research questions}{
+\block{\centering Background \& research questions}{
 Data centers consume 1--2\% of global electricity, and compute is unusually
 \textbf{flexible}, batch/training jobs can shift in time and across sites.
 Carbon intensity varies strongly by hour and region, so a scheduler can defer work
