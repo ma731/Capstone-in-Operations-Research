@@ -358,18 +358,22 @@ single constraint's effect in isolation.
 Before running the falsification experiment we check that the optimization model
 itself behaves correctly. The full model is validated \emph{as a whole}, with all
 constraints of \eqref{eq:feasible} active simultaneously, on a small,
-human-checkable instance (one region, eight hours, $10$ MWh per-cell capacity,
-$W=35$ MWh), rather than each constraint in isolation: correctness is a property of
-the constraints' \emph{interaction}, and a set that every constraint satisfies
-alone can still be jointly binding in unexpected ways. We fix an analyst-anticipated
+human-checkable \emph{two-region} instance (two regions, eight hours, $10$ MWh
+per-cell capacity, $W=30$ MWh each), rather than each constraint in isolation:
+correctness is a property of the constraints' \emph{interaction}, and a set that
+every constraint satisfies alone can still be jointly binding in unexpected ways. We
+use two regions specifically so the \emph{cross-region} interaction is exercised: a
+shared aggregate hourly cap $\sum_r x_{r,t}\le P_{\mathrm{agg}}$ couples the regions,
+which must then compete for the same clean hours. We fix an analyst-anticipated
 outcome, perturb one input at a time, and verify the solved schedule moves the
-anticipated way (Figure~\ref{fig:modelval}). Under a clean carbon field the load
-concentrates in the cheapest hours subject to the ramp and deadline (panel A).
-Making two of those hours dirty drives the load to the next-cleanest feasible hours,
-work still conserved and the deadline still met (panel B). Tightening the ramp limit
-from $6$ to $3$ MW/h removes the model's ability to jump to capacity, so the schedule
-smooths into a gradual plateau (panel C). All three responses match the
-hand-anticipated solution and conserve work to machine precision. This model-level
+anticipated way (Figure~\ref{fig:modelval}). At baseline the two regions' clean
+windows overlap, and the aggregate cap forces them to split the contested hours
+(panel A). Making region~1's clean window dirty drives it to cede those hours to
+region~2 and spread to its own next-cleanest hours, with each region's work still
+conserved (panel B). Tightening the shared cap removes joint headroom, so both
+regions spread further in time rather than co-locating in the clean window (panel C).
+All three responses match the hand-anticipated solution and conserve work per region
+to machine precision. This model-level
 check is complementary to, and distinct from, the software test suite
 (Section~\ref{sec:repro}, which pins component behaviour such as feasible-set
 equivalence) and the falsification experiment below (which probes a scientific
@@ -378,13 +382,15 @@ hypothesis, not model correctness).
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{../figures/model_validation.pdf}
-\caption{Full-model validation on a small instance. The complete feasible set
-(capacity, work conservation, ramp, deferral deadline) is solved jointly; bars are
-the optimal schedule $x^\star$, the gold curve the carbon field, the green band the
-deadline window. \textbf{A:} baseline. \textbf{B:} after making hours 3--4 dirty,
-load migrates to the next-cleanest hours. \textbf{C:} after tightening the ramp
-limit, the schedule can no longer spike and ramps gradually. Each response is the
-one an analyst anticipates, confirming the model encodes the intended behaviour.}
+\caption{Full-model validation on a two-region instance. The complete feasible set
+(capacity, work conservation, ramp, deferral deadline) plus a shared aggregate
+hourly cap is solved jointly; stacked bars show how the two regions share each hour,
+the dashed line is the aggregate cap, the curves are each region's carbon field, the
+green band the deadline window. \textbf{A:} baseline, the regions split the contested
+clean hours (4--5) under the cap. \textbf{B:} after dirtying region~1's clean window,
+it cedes those hours to region~2 and spreads out. \textbf{C:} after tightening the
+shared cap, both regions spread further in time. Each response is the one an analyst
+anticipates, confirming the model encodes the intended cross-region behaviour.}
 \label{fig:modelval}
 \end{figure}
 
@@ -659,7 +665,12 @@ $0.23\%$, two orders of magnitude smaller. The theorem therefore caps the spatia
 gap at the few-percent scale \emph{before any experiment is run}, and the
 experiments then pin it far below that cap. What the bound buys is not tightness but
 structure: the spatial gap is governed by $\varepsilon$ and the cross-region block
-norm, and is forced to zero in the no-robustification and no-cross-structure limits. The
+norm, and is forced to zero in the no-robustification and no-cross-structure limits.
+Most of the remaining slack lives in the feasible-diameter factor $\max_x\lVert
+x\rVert_2$, an a-priori worst case; substituting the realized optimal $\lVert
+x^\star\rVert_2$ would tighten the certificate considerably, at the cost of making it
+post-hoc rather than a-priori. We keep the a-priori form deliberately, since its
+purpose is to bound the gap \emph{before} the experiment, not to predict it. The
 \emph{tight} ceiling is measured, not bounded: the comonotone arm of
 Section~\ref{sec:res-copula} realizes the supremum over copulas, and across scenario
 seeds its gain is centred on zero with $|\Lambda|\lesssim0.1\%$ of $\CVaR_{0.95}$, at
@@ -908,6 +919,16 @@ adversarial Diversified grid the joint covariance becomes \emph{more} negative a
 $\beta=0.99$ ($-0.36\%$, i.e.\ it hurts), exactly as the noise-fitting account
 predicts. Deepening the tail, the regime where elliptical-blind tail dependence
 should matter most, does not turn the covariance on.
+The $\beta=0.99$ estimates are necessarily noisier, since the tail thins to a handful
+of days: the per-cell paired-bootstrap standard error rises to $0.15\%$ for Western
+US (against $\le0.04\%$ at $\beta=0.90$), so that grid's largest $\beta=0.99$ point
+estimate ($+0.14\%$) is itself within one standard error of zero. The apparent
+widening at the deepest tail is sampling noise, not emerging spatial value. This
+sweep is reported as a descriptive robustness check, \emph{outside} the
+pre-registered $144$-cell FDR family of Table~\ref{tab:robust}; for completeness, no
+sweep cell produces a gap that is both positive and materially large (every
+detectable cell is either negative or below the $0.4\%$ margin), so none would
+survive multiple-testing correction as a discovery.
 
 \begin{table}[h]
 \centering\small
@@ -970,6 +991,17 @@ still clears both one-sided tests, $z=(\Delta-\lvert\text{gap}\rvert)/\mathrm{SE
 merely fail to detect a spatial benefit; we statistically reject the existence of
 one (in either direction) larger than the materiality threshold, cell by cell. That
 is the strongest form a null can take.
+
+The claim is of course threshold-sensitive, so we state where it breaks. The
+smallest margin each grid still clears (its largest $\lvert\text{gap}\rvert+
+1.645\,\mathrm{SE}$ over cells) is $\Delta^\star=0.05\%$ for Eastern US--Canada and
+$0.10\%$ for Western US, but $\Delta^\star=0.31\%$ for the adversarial Diversified
+grid. Equivalence at the $0.4\%$ economic margin therefore holds everywhere with
+room to spare on the two interconnected grids, and only narrowly on the engineered
+near-uncorrelated portfolio. That last caveat does not threaten the thesis: the
+Diversified gap is \emph{negative}, so the one grid where equivalence is hardest to
+assert is precisely the one where the joint covariance \emph{hurts} rather than adds
+value.
 
 \begin{table}[h]
 \centering\small
