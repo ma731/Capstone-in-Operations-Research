@@ -4,8 +4,9 @@
                blockverticalspace=12mm, colspace=14mm, subcolspace=8mm]{tikzposter}
 
 \usepackage[T1]{fontenc}
-\usepackage{newtxtext,newtxmath}
 \usepackage{amsmath,amssymb}
+\let\Bbbk\relax            % avoid amssymb/newtxmath clash on \Bbbk
+\usepackage{newtxtext,newtxmath}
 \usepackage{graphicx}
 \usepackage{enumitem}
 \setlist[itemize]{leftmargin=1.4em, itemsep=2pt, topsep=3pt}
@@ -15,6 +16,8 @@
 \definecolor{rust}{HTML}{B3402F}
 \definecolor{sage}{HTML}{4A7C59}
 \definecolor{paper}{HTML}{F7F7F4}
+\colorlet{navylt}{navy!8}      % pre-mixed (xcolor expressions fail inside coloredbox opts)
+\colorlet{goldlt}{gold!18}
 
 %, theme: clean academic grid in the thesis palette ,
 \usetheme{Default}
@@ -28,25 +31,26 @@
 \colorlet{notefgcolor}{black}
 \colorlet{notebgcolor}{gold!25}
 \settitle{
-  \centering
-  \vspace*{0.1cm}
-  % Official IE logo: drop figures/ie_logo.pdf (or .png) and it appears here.
-  \IfFileExists{../figures/ie_logo.pdf}{%
-    {\colorbox{white}{\includegraphics[height=3.2cm]{../figures/ie_logo.pdf}}}\par
-    \vspace{0.5cm}}{%
-    \IfFileExists{../figures/ie_logo.png}{%
-      {\colorbox{white}{\includegraphics[height=3.2cm]{../figures/ie_logo.png}}}\par
-      \vspace{0.5cm}}{}}
-  {\color{titlefgcolor}\bfseries\fontsize{44}{52}\selectfont
-   Does Spatial Correlation of Carbon Intensity Improve\\[4pt]
-   Robust Carbon-Aware Data-Center Scheduling?\par}
-  \vspace{0.5cm}
-  {\color{titlefgcolor}\Large
-   A Multi-Grid Falsification Study with a Causal Mechanism, and a Phase-2 Copula Test\par}
-  \vspace{0.6cm}
-  {\color{titlefgcolor}\large \textbf{Marco Ortiz Togashi}\quad$\cdot$\quad
-   Supervisor: Prof.\ Bissan Ghaddar\quad$\cdot$\quad
-   IE University, Master in Business Analytics \& Data Science\par}
+  % === conference-poster title bar: IE logo left, title centered ===
+  \begin{minipage}[c]{0.17\linewidth}\centering
+    \IfFileExists{../figures/ie_logo.pdf}{%
+      \colorbox{white}{\rule[-1.7cm]{0pt}{0pt}\includegraphics[height=4.0cm]{../figures/ie_logo.pdf}}}{%
+      \IfFileExists{../figures/ie_logo.png}{%
+        \colorbox{white}{\rule[-1.7cm]{0pt}{0pt}\includegraphics[height=4.0cm]{../figures/ie_logo.png}}}{%
+        {\color{titlefgcolor}\large IE University\\[2pt]School of Sci.\ \& Tech.}}}
+  \end{minipage}\hfill
+  \begin{minipage}[c]{0.80\linewidth}\centering
+    {\color{titlefgcolor}\bfseries\fontsize{46}{54}\selectfont
+     Does Spatial Correlation of Carbon Intensity Improve\\[4pt]
+     Robust Carbon-Aware Data-Center Scheduling?\par}
+    \vspace{0.45cm}
+    {\color{titlefgcolor}\Large
+     A Multi-Grid Falsification Study: Causal Mechanism, Copula Test, and an Active-Transfer Extension\par}
+    \vspace{0.45cm}
+    {\color{titlefgcolor}\large \textbf{Marco Ortiz Togashi}\quad$\cdot$\quad
+     Supervisor: Prof.\ Bissan Ghaddar\quad$\cdot$\quad
+     IE University, Master in Business Analytics \& Data Science\par}
+  \end{minipage}
 }
 \title{Carbon DRO}  % placeholder; the real title is hardcoded in \settitle above
 
@@ -67,7 +71,7 @@ to cleaner moments. Robust scheduling under \emph{uncertain} carbon intensity us
 carbon intensity as a stochastic \emph{vector} so that \textbf{spatial correlation}
 can inform the schedule.
 \vspace{0.3cm}
-\coloredbox[bgcolor=navy!8, framecolor=navy]{
+\coloredbox[bgcolor=navylt, framecolor=navy]{
 \textbf{RQ1.} Is carbon intensity of coupled grids genuinely correlated?\\[2pt]
 \textbf{RQ2.} Does feeding that correlation to a covariance-based DRO reduce
 out-of-sample tail emissions ($\mathrm{CVaR}_{0.95}$)?\\[2pt]
@@ -89,8 +93,8 @@ covariance vs.\ a \emph{block-diagonal} one with all cross-region structure zero
 \emph{spatial gap} is positive iff the joint covariance helps.
 \begin{itemize}
 \item Pre-registered: config commit-locked, single 2025 test read.
-\item Five region sets: 3 US/Canada grids spanning the dependence spectrum
-($\bar\tau\!\approx\!0\to0.5$) $+$ an Iberia--France anchor.
+\item Five region sets: 3 US/Canada grids spanning low-to-strong correlation
+($\bar r\!\approx\!0.2$ to $0.65$) $+$ a near-zero Iberia--France anchor.
 \item Blocked 5-fold CV selects $\varepsilon^\star$; 1000-bootstrap CIs.
 \end{itemize}
 }
@@ -114,7 +118,10 @@ valid.}}
 Across the dependence spectrum the spatial gap \textbf{never exceeds a few tenths
 of one percent} and is not sign-stable. It survives Ledoit--Wolf shrinkage,
 seasonal/AR(1) residualization, Benjamini--Hochberg correction over 144 cells,
-walk-forward to 2024, and a $3\times$ \textbf{tighter-ramp} sensitivity.
+walk-forward to 2024, tighter-ramp and utilization sweeps, and the full tail range
+$\mathrm{CVaR}_{0.90}$--$\mathrm{CVaR}_{0.99}$. A per-cell \textbf{equivalence test
+(TOST)} affirmatively rejects any effect above the $0.4\%$ materiality margin in all
+$27$ cells, the gap is statistically $\mathbf{=0}$, not merely undetected.
 \vspace{0.2cm}
 \centering
 \includegraphics[width=0.99\linewidth]{../figures/finding.pdf}
@@ -160,7 +167,7 @@ floor ($|\Lambda|\lesssim\mathbf{0.1\%}$, $\approx0$ over seeds): the null is
 By translation invariance of CVaR, $\langle\rho,x\rangle=\langle\bar\rho,x\rangle
 +\langle\xi,x\rangle$, the dependence model moves only the residual term.
 \vspace{0.15cm}
-\coloredbox[bgcolor=gold!18, framecolor=rust]{
+\coloredbox[bgcolor=goldlt, framecolor=rust]{
 \textbf{Proposition.} For the SOCP, the spatial gap obeys
 $\big|\mathrm{OPT}(\Sigma)-\mathrm{OPT}(\Sigma^{\mathrm{shuf}})\big|\le
 \varepsilon\,(\max_{x}\lVert x\rVert_2)\,\lVert\Sigma^{\mathrm{off}}\rVert_2^{1/2}$,
@@ -171,22 +178,26 @@ The tight ceiling is \emph{measured} by the comonotone arm
 mean-driven value.
 }
 
-\block{Conclusions \& future work}{
+\block{Conclusions \& the active extension}{
 \begin{itemize}
-\item Spatial correlation of carbon intensity is \textbf{real but adds no robust
-scheduling value}, anywhere on the spectrum, for \emph{any} passive dependence
-model.
+\item Spatial correlation of carbon is \textbf{real but adds no robust scheduling
+value}, anywhere on the spectrum, for \emph{any} passive dependence model.
 \item The binding constraint is the \textbf{mean field}, not the shape of the
 dependence (mean-dominance bound $+$ comonotone ceiling).
 \item \textbf{Recommendation:} per-region marginal schedulers capture essentially
 all the value at a fraction of the cost.
-\item \textbf{Next:} spatial value, if any, requires an \emph{active} inter-region
-transfer channel $f_{r\to s,t}$, the one route the bound does not close.
+\item \textbf{We built the one route the bound leaves open}, an \emph{active}
+inter-region transfer channel $f_{r\to s,t}$. It cuts $\mathbf{4}$--$\mathbf{10\%}$
+\emph{deterministically} (by exploiting the spatial mean), but \emph{robustifying}
+it pays nowhere data-grounded, online or under real tail-day emergencies. The null
+extends to the active and online settings: value lives in the decision, not the
+dependence model.
 \end{itemize}
 \vspace{0.2cm}
-\small Reproducible pipeline: 169 unit tests, pre-registered configs, license-safe
-archived results. \emph{AI used as a coding/drafting assistant under the author's
-direction.}
+\small Reproducible pipeline: \textbf{187 unit tests}, pre-registered configs,
+per-cell equivalence tests, multi-seed stability, an independent adversarial review,
+license-safe archived results. \emph{AI used as a coding/drafting assistant under the
+author's direction.}
 }
 
 \end{columns}
