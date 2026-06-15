@@ -76,17 +76,30 @@ def rolling_eval(
     lam: float = 0.0,
     stride: int = 1,
     seed: int = 0,
+    forecast_kind: str = "seasonal",
     solver: Optional[str] = None,
 ) -> np.ndarray:
     """Roll a controller across ``test_panel`` (subsampled by ``stride``). Each step:
-    forecast from training, commit (robust or deterministic), realise the actual day,
-    record realised carbon cost. Returns the array of realised daily costs."""
+    form the day-ahead forecast, commit (robust or deterministic), realise the actual
+    day, record realised carbon cost. ``forecast_kind``:
+      * ``seasonal``    -- fixed hour-of-day training mean (the original);
+      * ``persistence`` -- yesterday's realised carbon (a naive but strong day-ahead
+                           forecast); error pool is the training day-over-day change;
+      * ``lagged_week`` -- the same calendar day one week earlier; weekly-cycle aware.
+    Returns the array of realised daily costs."""
+    if forecast_kind not in ("seasonal", "persistence", "lagged_week"):
+        raise ValueError(f"unknown forecast_kind {forecast_kind!r}")
     rng = np.random.default_rng(seed)
-    forecast = seasonal_forecast(train_panel)
-    pool = residual_pool(train_panel, forecast)
-    days = range(0, len(test_panel), stride)
-    out = np.empty(len(list(days)))
+    seasonal = seasonal_forecast(train_panel)
+    lag = {"seasonal": 0, "persistence": 1, "lagged_week": 7}[forecast_kind]
+    if lag:                                   # error pool = realised minus lag-forecast
+        pool = train_panel[lag:] - train_panel[:-lag]
+    else:
+        pool = residual_pool(train_panel, seasonal)
+    full = np.concatenate([train_panel[-lag:], test_panel]) if lag else None
+    out = np.empty(len(range(0, len(test_panel), stride)))
     for k, t in enumerate(range(0, len(test_panel), stride)):
+        forecast = seasonal if lag == 0 else full[t]        # full[t] = test day t-lag
         scen = None
         if robust:
             idx = rng.integers(0, len(pool), n_scenarios)

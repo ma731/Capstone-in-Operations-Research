@@ -105,12 +105,12 @@ capture essentially all the value; spatial value, if any, must come from an acti
 transfer channel, not a richer dependence model. This extended version develops that
 channel directly (Section~\ref{sec:transfer}): a spatially-coupled transfer DRO that
 makes inter-region load flows a decision variable cuts out-of-sample $\CVaR_{0.95}$
-by $4.0$--$9.9\%$, and a two-stage robust commitment exposes a tail-risk
-\emph{crossover} on the strongly correlated grid, where under severe emergencies the
-robust schedule beats the risk-neutral one (a multi-seed-stable effect absent on
-structureless grids). Rolling
-the controller \emph{online} under forecast error confirms robustness stays
-second-order in normal operation (Section~\ref{sec:online}), and a dimensionless
+by $4.0$--$9.9\%$. Whether \emph{robustifying} that transfer pays is then the sharper
+question, and the answer is a deeper null: a tail-risk \emph{crossover} appears only
+under \emph{synthetic} stress more severe than the historical record (and only
+marginally, on the correlated grid), and vanishes once emergencies are drawn from the
+data's real upper tail. Rolling the controller \emph{online} under forecast error
+likewise leaves robustness immaterial (Section~\ref{sec:online}), and a dimensionless
 mean-dominance ratio generalises \emph{when} cross-coordinate dependence can ever help
 (Section~\ref{sec:condition}). A dedicated chapter (Section~\ref{sec:testing})
 documents the validation behind every claim: small-instance model checks, a
@@ -1479,31 +1479,48 @@ Diversified        & $-0.8\pm1.1$ (1/4) & $-0.1\pm0.4$ (2/4) & $-0.7\pm0.8$ (1/4
 \end{tabular}
 \end{table}
 
-\subsection{A phase diagram for the value of robustness}
-The synthesis is a clean phase diagram. Distributional robustness is immaterial for
-carbon-aware scheduling under normal conditions, whether the spatial structure is
-modelled passively (the covariance and copula nulls) or acted on actively (one-shot
-and two-stage transfer), because the mean dominates. It becomes valuable precisely
-when rare tail events make the mean forecast unreliable. The value of robustness is
-thus a \emph{function of tail risk}: negligible in the body of the distribution,
-decisive in its extreme. This unifies the thesis. The passive null and the active
-crossover are two readings of one mechanism: the mean field governs the schedule
-until a tail event dislodges it, and only then does the robustness layer earn its
-cost.
+\subsection{Does the crossover survive a data-grounded emergency model?}
+The crossover so far rests on a synthetic severity multiplier $M$, and the fair test is
+whether it survives when the emergencies are drawn from the data rather than imposed. We
+re-ran the experiment with each emergency replacing a region's day by a draw from that
+region's empirical upper tail, its top $5\%$ highest-carbon days (real
+renewable-drought / peak realizations), and swept the emergency \emph{frequency} $p$
+(\texttt{run\_part3\_real\_emergency.py}, Figure~\ref{fig:part3real}, three seeds). It
+does not. At no frequency up to $30\%$ does any grid show a robust gain: Western US
+stays slightly negative ($-0.25$ to $-0.37\%$), Eastern US--Canada immaterially positive
+($+0.13$ to $+0.24\%$), and Diversified increasingly negative as emergencies rise
+($-0.9$ to $-2.3\%$, the structureless-grid harm again). The synthetic crossover
+therefore required a severity ($M=3$--$4$, a three-to-fourfold carbon spike) beyond what
+the historical record contains; real tail days are not extreme enough to make
+robustification pay. The crossover is real \emph{as a mathematical regime} but, on this
+data, an \emph{out-of-record} one.
 
-\subsection{Honest status}
-Multi-seed testing (Table~\ref{tab:crossover}) is deliberately conservative and
-tightens the claim rather than inflating it: of the three grids, only the strongly
-correlated Western US shows a crossover that survives seed variation, and even there
-the magnitude is uncertain ($+4.4\pm3.4\%$ at $M=4$). The single-seed positives on the
-other grids were scenario-draw noise, the same artifact a day-bootstrap cannot detect,
-caught here only by re-seeding the emergency draw. What remains short of the body's
-null is therefore both the \emph{emergency model} (a Bernoulli severity shock,
-interpretable but not a calibrated outage process) and the magnitude's wide
-seed-variance; what is solid is the \emph{direction} and its restriction to grids with
-genuine structure. We report the crossover because it completes the arc the null
-opened, and because where it appears, robustness paying only in the tail on a
-correlated grid, is exactly what the mean-dominance mechanism predicts.
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.82\textwidth]{../figures/part3_real_emergency.pdf}
+\caption{Part 3 with data-grounded emergencies. Robust gain vs.\ risk-neutral
+(\% of $\CVaR_{0.95}$, three seeds) as the frequency $p$ of real upper-tail emergency
+days rises. No grid crosses over: robustifying the transfer is immaterial-to-harmful
+under emergencies grounded in the historical record, unlike the synthetic $M=3$--$4$
+shocks of Figure~\ref{fig:part3}.}
+\label{fig:part3real}
+\end{figure}
+
+\subsection{The honest synthesis}
+The picture is more conservative, and more unified, than a tail-risk crossover would
+suggest. Distributional robustness is immaterial for carbon-aware scheduling under
+\emph{every} condition we can ground in data: passively (the covariance and copula
+nulls), actively (one-shot and two-stage transfer), online under forecast error
+(Section~\ref{sec:online}), and under data-grounded tail emergencies (above). A robust
+advantage appears only under synthetic stress more severe than the historical record,
+the $M=3$--$4$ crossover, itself only marginally significant (Western US, one-sided
+$p\approx0.04$, $3/4$ seeds; Section~\ref{sec:testing}) and confined to the correlated
+grid. The value of the spatial structure therefore lives entirely in the
+\emph{deterministic, mean-exploiting} active decision (Finding~1, $4$--$10\%$), not in
+robustifying it. This sharpens the thesis rather than softening it: the mean field
+governs the schedule, and the robustness layer does not earn its cost short of
+out-of-record stress, the same mean-dominance, now traced through the active and online
+settings as well as the passive one.
 
 % ===================== 7. ONLINE OPERATION (PART 4) =====================
 \section{Online Operation: Rolling-Horizon Control}\label{sec:online}
@@ -1602,6 +1619,32 @@ null on the correlated grids and counterproductive on the structureless one.}
 \label{fig:part4}
 \end{figure}
 
+\subsection{Forecast robustness}\label{sec:online-forecast}
+Because a single forecast might drive the verdict, we re-ran the closed loop under three
+day-ahead forecasts, the seasonal mean, persistence (yesterday's carbon), and the
+same-day-last-week lag, each across three seeds
+(\texttt{run\_part4\_forecasts.py}, Figure~\ref{fig:part4fc}). The picture sharpens
+rather than wobbles. On the correlated grids the sign of the robustness effect
+\emph{flips with the forecast} and never exceeds $1.6\%$ in magnitude (Western US:
+$+1.4\%$ seasonal, $-0.6\%$ persistence, $-1.6\%$ lagged-week; Eastern US--Canada:
+within $\pm0.2\%$ throughout), which is the signature of a noise-level effect, not a
+real advantage: robustness is genuinely immaterial online. On the Diversified grid the
+loss is instead \emph{forecast-robust}: the robust controller is worse under all three
+forecasts ($-8.1$, $-6.8$, $-3.9\%$), so its counterproductivity, robustifying where
+there is no structure to hedge, is not an artifact of the seasonal forecast. The single
+caveat the review raised, that a different forecast could overturn the result, is thus
+answered: the immateriality and the structureless-grid harm both survive the change.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.82\textwidth]{../figures/part4_forecasts.pdf}
+\caption{Part 4 forecast robustness. Online robust-vs-deterministic gap (\% of
+$\CVaR_{0.95}$, three seeds) under three day-ahead forecasts. On the correlated grids
+the sign flips with the forecast (immaterial); on Diversified the robust controller
+loses under every forecast.}
+\label{fig:part4fc}
+\end{figure}
+
 % ===================== 8. PROBLEM-CLASS CONDITION (PART 5) =====================
 \section{A Problem-Class Condition}\label{sec:condition}
 The five experiments invite a general question: for which allocation problems can
@@ -1651,11 +1694,18 @@ pre-registered ablation (a different, tighter feasible set); what transfers is t
 value. The interior therefore confirms $\Delta$ as a \emph{coarse, ordinal} indicator,
 correct in
 direction where real structure exists but not a calibrated predictor, exactly the
-honest status we claim for it. Tightening $B$ so the screen becomes conclusive, and
-calibrating an absolute threshold, is future work. The diagnostic nonetheless transfers
-beyond carbon: cross-coordinate dependence is worth modelling only where the mean field
-is weak relative to the residual structure, a condition the carbon-aware problem fails
-by a wide margin.
+honest status we claim for it. We tested whether the obvious tightening recovers
+conclusiveness, replacing the a-priori worst-case diameter $\max_x\lVert x\rVert$ with
+the \emph{realized} optimal schedule norm $\lVert x^\star\rVert$
+(\texttt{run\_part5\_tight.py}): it does not, $\Delta^\star=1.46$--$3.22$ stays above
+$1$ on all three grids, because the realized schedule is only $\approx6\%$ less
+concentrated than the worst case. The looseness is therefore \emph{intrinsic} to the
+bound (the $\lvert\sqrt a-\sqrt b\rvert\le\sqrt{\lvert a-b\rvert}$ and spectral-norm
+steps), not an artifact of the diameter, so $\Delta$ remains an ordinal screen;
+calibrating an absolute threshold is left to future work. The diagnostic nonetheless
+transfers beyond carbon: cross-coordinate dependence is worth modelling only where the
+mean field is weak relative to the residual structure, a condition the carbon-aware
+problem fails by a wide margin.
 
 \begin{figure}[t]
 \centering
@@ -1776,7 +1826,15 @@ days, we report stability across multiple independent \emph{seeds}
 day-bootstrap cannot see scenario-draw variance, the same blind spot that produced an
 earlier false positive (Section~\ref{sec:res-copula}). That check is what demoted the
 single-seed Part~3 crossovers on the weakly structured grids to noise and confirmed the
-Part~4 results as sign-stable.
+Part~4 results as sign-stable. We also apply the body's affirmative discipline to the
+extension. A two-one-sided-tests procedure on the Part~4 online gaps (four seeds)
+establishes \emph{equivalence}: robustness is immaterial to within $\pm1.0\%$ on
+Western US and $\pm0.5\%$ on Eastern US--Canada (the $90\%$ interval on $\lvert$gap$
+\rvert$ clears those margins). And a power analysis keeps the crossover claim honest:
+the Western US gain at $M=4$ is only \emph{marginally} significant across seeds
+(one-sided $t=2.6$, $p\approx0.04$, $3/4$ seeds positive, with a minimum detectable
+effect of $\approx5.7\%$ at $80\%$ power just above the observed $+4.4\%$), which is
+why we report it as a real-but-modest, grid-specific effect rather than a headline.
 
 \subsection{What ``tested in many files'' does and does not mean}
 Because the project spans many experiment scripts, a clarification is warranted. The
@@ -1804,14 +1862,15 @@ cells and the full $\CVaR_{0.90}$--$\CVaR_{0.99}$ tail range) and proves why wit
 mean-dominance bound. Part~2 forecloses the obvious objection: a Gaussian, a lower-tail
 Clayton, and even the maximal comonotone copula recover nothing either, so the limit is
 not the \emph{shape} of the dependence object but its subordination to the mean. Part~3
-turns the diagnosis into a positive result, making the spatial structure an
-\emph{active} transfer decision unlocks $4.0$--$9.9\%$, and under \emph{severe}
-grid-emergency stress a tail-risk crossover appears, multi-seed-stable, on the
-strongly correlated grid (the robust commitment winning $+4.4\%$ on average at $M=4$)
-but absent on structureless grids, exactly where genuine spatial structure exists to
-hedge. Part~4 confirms the same logic online: rolled day by day under realistic
-forecast error, robustness is null on the correlated grids and counterproductive on
-the structureless one, the closed-loop echo of the passive null. Part~5 abstracts the whole pattern into a single
+turns the diagnosis into a positive result, but a precisely bounded one: making the
+spatial structure an \emph{active} transfer decision unlocks $4.0$--$9.9\%$
+\emph{deterministically} (by exploiting the spatial mean), while \emph{robustifying}
+that decision adds nothing under any data-grounded condition, a tail-risk crossover
+surfaces only under synthetic stress beyond the historical record, and even then only
+marginally and only on the correlated grid. Part~4 confirms the same logic online:
+rolled day by day under realistic forecast error and across three forecast models,
+robustness is immaterial on the correlated grids (its sign flips with the forecast) and
+counterproductive on the structureless one, the closed-loop echo of the passive null. Part~5 abstracts the whole pattern into a single
 dimensionless ratio $\Delta=B/M$ that orders the regimes: dependence can matter only
 where the mean field is weak relative to the residual structure, a condition this
 problem fails by a wide margin and the mean-ablated world satisfies (recovering
@@ -1838,10 +1897,12 @@ only a falsification experiment can settle it (Part~5).
 \item \textbf{Reach for an \emph{active} transfer channel, not a richer uncertainty
 model, if you want spatial value.} Inter-region flows unlock $5$--$10\%$ by exploiting
 the spatial mean (Part~3); a passive ambiguity set cannot.
-\item \textbf{Robustify only against \emph{calibrated tail emergencies}, and only on
-grids with genuine structure.} Under normal carbon, robustness is neutral-to-harmful
-(Parts~1--4); it earns its cost solely in severe, rare events, and even then
-demonstrably only where the grid is correlated enough to hedge (Part~3, multi-seed).
+\item \textbf{Do not robustify the schedule at all, on current evidence.} Under
+normal carbon, online forecast error, \emph{and} data-grounded tail emergencies,
+distributional robustness is neutral-to-harmful (Parts~1--4); a robust advantage
+appears only under synthetic stress more severe than the historical record, and even
+then marginally and only on a correlated grid. Unless an operator can document
+outage risk beyond the historical tail, the robustness layer does not pay.
 \end{enumerate}
 The throughline is economy: every step that adds modelling complexity must first clear
 the bar of beating a mean-greedy per-region schedule, and most do not.
@@ -1899,8 +1960,10 @@ hierarchy from covariance ball to elliptical and lower-tail copulas;
 explains the null rather than merely reporting it; (4)~a fully reproducible,
 version-controlled, CI-tested pipeline (187 tests) with archived license-safe
 summary tables for every reported number; (5)~an \emph{active transfer channel}
-(Section~\ref{sec:transfer}) that recovers $4.0$--$9.9\%$ of $\CVaR_{0.95}$ and
-exhibits a tail-risk crossover on the correlated grid, the positive resolution the null predicts; and
+(Section~\ref{sec:transfer}) that recovers $4.0$--$9.9\%$ of $\CVaR_{0.95}$
+\emph{deterministically}, the positive resolution the null predicts, while showing
+that \emph{robustifying} the channel stays immaterial under every data-grounded
+condition (a crossover surfaces only under out-of-record synthetic stress); and
 (6)~an end-to-end validation account (Section~\ref{sec:testing}) spanning model,
 protocol, and software, that licenses trusting an automated null.
 
@@ -1934,13 +1997,13 @@ fitted copula; Proposition~\ref{prop:meandom} predicts the mean field will still
 dominate, but this would make the claim fully model-free.
 Second, the active transfer channel that the null points to is developed in the main
 body of this extended version (Section~\ref{sec:transfer}): making inter-region flows
-$f_{r\to s,t}$ a decision unlocks $4.0$--$9.9\%$ of $\CVaR_{0.95}$ and, under
-grid-emergency stress, reveals the tail-risk crossover on the correlated grid, where robustness pays under severe emergencies.
-The immediate future work is to promote that proof of concept to the body's own
-standard: a \emph{calibrated} grid-emergency model in place of the stylised severity
-shock, a pre-registered evaluation, and affine decision rules for the recourse policy,
-which together would turn the crossover from a robust qualitative phenomenon into a
-precisely located threshold. To our knowledge no prior work combines Wasserstein-DRO
+$f_{r\to s,t}$ a decision unlocks $4.0$--$9.9\%$ of $\CVaR_{0.95}$ deterministically;
+robustifying it, by contrast, pays only under synthetic stress beyond the historical
+record (the crossover does not survive data-grounded emergencies). The immediate future
+work is therefore to settle whether the crossover is ever real: build a \emph{calibrated}
+outage model from grid-operator data (not the historical carbon tail alone), with a
+pre-registered evaluation and affine recourse rules, and test whether genuine emergency
+risk reaches the severity the crossover needs. To our knowledge no prior work combines Wasserstein-DRO
 robustification with active inter-region transfer; the channel overlaps a
 collaborator's deterministic-transfer scope and awaits supervisor sign-off. Further
 out, the transfer model invites an \emph{online, multistage} treatment in which
