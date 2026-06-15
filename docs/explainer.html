@@ -67,9 +67,11 @@ window.MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } 
 <header class="hero">
   <div class="wrap">
     <h1>Does knowing how dirty different power grids get<br>at the same time help schedule data centers greener?</h1>
-    <p class="sub">We spent months rigorously testing this one idea. The answer turned out to be
-      <b>no</b> — and the <i>reason why</i> is the interesting part. This page explains everything we
-      did, in plain language, with the math, the code, and the choices behind it.</p>
+    <p class="sub">We spent months rigorously testing this one idea — then built and stress-tested
+      the four follow-up questions too. The answer turned out to be <b>no</b> (the daily mean
+      rhythm dominates everywhere), and the <i>reason why</i> is the interesting part. This page
+      explains everything we did, in plain language: the math, the code, the five-part program,
+      and the honesty checks that made the conclusions <i>more</i> conservative, not less.</p>
     <span class="tag">IE School of Science &amp; Technology</span>
     <span class="tag">Operations Research Capstone</span>
     <span class="tag">Marco Ortiz Togashi · Prof. Bissan Ghaddar</span>
@@ -86,6 +88,8 @@ window.MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } 
   <a href="#code">The code</a>
   <a href="#choices">Why these choices</a>
   <a href="#different">What we'd change</a>
+  <a href="#extension">Parts 3–5</a>
+  <a href="#rigor">How we stayed honest</a>
   <a href="#future">Roadmap</a>
 </div></nav>
 
@@ -377,10 +381,10 @@ window.MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } 
       against finding a fluke just because we ran many tests.</div></div>
 
   <h3>Trust &amp; reproducibility</h3>
-  <p><b>169 automated tests</b> check every piece (including one that proves the Phase-1 and
-    Phase-2 schedulers use the <i>identical</i> rule set). The licensed carbon data is never
-    committed; only derived summary numbers are saved, so every figure traces to a tracked
-    source.</p>
+  <p><b>187 automated tests</b> check every piece (including one that proves the Phase-1 and
+    Phase-2 schedulers use the <i>identical</i> rule set, and tests for the Part 3–5 transfer,
+    online, and screening code). The licensed carbon data is never committed; only derived
+    summary numbers are saved, so every figure traces to a tracked source.</p>
 </div></section>
 
 <!-- ============ CHOICES ============ -->
@@ -437,28 +441,139 @@ window.MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } 
   <div class="alt"><b>Tested more grids and more years.</b> We did walk-forward to 2024 and five
     region sets; a multi-year rolling evaluation across more continents would strengthen
     external validity.</div>
-  <div class="alt"><b>Built the active transfer channel.</b> This is the one change that could
-    actually break the null — but it's a whole new project (Part 3) and overlaps a teammate's
-    scope, so it's future work, not a capstone tweak.</div>
+  <div class="alt"><b>Built the active transfer channel.</b> This was the one change that could
+    actually break the null — so we built it (Part 3, see §10). It does create value (4–10%),
+    but by exploiting the mean, not the correlation; robustifying it still pays nothing on real
+    data. The null survived even its strongest challenge.</div>
+</div></section>
+
+<!-- ============ EXTENSION (PARTS 3-5) ============ -->
+<section id="extension"><div class="wrap">
+  <h2><span class="n">10</span>We actually built the rest: Parts 3, 4 &amp; 5</h2>
+  <p class="lead">Parts 1–2 proved a passive scheduler can't <i>use</i> spatial correlation.
+    So we built the three follow-ups — and stress-tested them hard. The short version:
+    <b>the only thing that helps is moving work to the region that's cleanest on average; every
+    attempt to profit from "robustness" or correlation failed once we tested it honestly.</b></p>
+
+  <h3>Part 3 — what if we <i>actively move work</i> between regions?</h3>
+  <p>Until now the scheduler only chose <b>when</b> to compute. Part 3 lets it also choose
+    <b>where</b>: ship a batch of work from a dirty region to a clean one (an "inter-region
+    transfer"). This is the one change that could genuinely create spatial value.</p>
+  <div class="eli"><b>Does it help? Yes — about 4–10% greener.</b> But here's the catch: it
+    helps by sending work to whichever region is cleanest <i>on average</i>. That's the
+    <b>mean</b> again — not the correlation. The active decision is valuable; modelling how
+    regions correlate still isn't.</div>
+
+  <h3>The "commit now, adjust later" model (and a word that sounds scary: <i>recourse</i>)</h3>
+  <p>In reality you commit a plan a day ahead, then when tomorrow's carbon actually arrives you
+    can nudge it — but nudging costs something (you can't undo everything). That two-step
+    "commit, then partially fix" is called a <b>two-stage</b> problem, and the fix-up step is
+    <b>recourse</b>. We asked: does planning <i>cautiously</i> (robustly) beat planning for the
+    best-guess forecast?</p>
+
+  <h3>The "crossover" — and why we don't trust it</h3>
+  <p>Under <b>fake emergencies</b> (we multiplied one region's carbon by 3–4× at random, like a
+    sudden renewable drought), the cautious plan started to win, by a few percent, on the most
+    correlated grid. That looked like a real positive result.</p>
+  <div class="why"><b>Then we tested it honestly and it fell apart.</b> Instead of fake 3–4×
+    spikes, we used the <i>real worst days in the data</i> (each region's actual top-5% dirtiest
+    days) as emergencies. The payoff <b>vanished</b> — at every frequency, on every grid, being
+    cautious gave back nothing or lost money. The "crossover" only existed because our fake
+    spikes were more extreme than anything that has ever actually happened. Honest conclusion:
+    <b>even under tail risk, robustness doesn't pay on real data.</b></div>
+
+  <h3>Part 4 — does it work live, day by day?</h3>
+  <p>We ran the scheduler <b>online</b>: each day it makes a fresh forecast, commits, sees the
+    real day, and rolls forward — like actually operating it for a year. Result: being cautious
+    is still pointless. In fact the "benefit" of robustness <b>flips between positive and
+    negative depending on which forecast you use</b> — the tell-tale sign that it's just noise,
+    not a real effect. (On the oddly-built "Diversified" grid, caution actively <i>hurt</i> by
+    several percent — robustifying when there's no real structure to hedge just fits noise.)</p>
+
+  <h3>Part 5 — is there a <i>general rule</i> for when correlation could ever matter?</h3>
+  <p>We boiled it down to one number, the <b>mean-dominance ratio</b> $\Delta$:</p>
+  $$\Delta \;=\; \frac{\text{biggest the correlation could possibly be worth}}{\text{how much the mean wave already gives you}}$$
+  <div class="eli"><b>Read it as:</b> if $\Delta$ is tiny, correlation <i>cannot</i> matter — the
+    mean already ate all the value. It's a free 30-second check you can run before building
+    anything. On our grids $\Delta\approx1.5$–$3.4$ (our formula for the top is deliberately
+    loose, so the check is "inconclusive" here — which is exactly why we had to run the real
+    experiment). But as we artificially flatten the mean wave, $\Delta$ climbs in lock-step with
+    the correlation becoming useful — confirming the rule travels to other problems (energy
+    storage, EV fleets, supply chains), not just carbon.</div>
+</div></section>
+
+<!-- ============ RIGOR ============ -->
+<section id="rigor"><div class="wrap">
+  <h2><span class="n">11</span>How we made sure we weren't fooling ourselves</h2>
+  <p class="lead">A "we found nothing" result is only worth anything if the test was genuinely
+    capable of finding something. Most of the work was guarding against self-deception. Here are
+    the guards, in plain words.</p>
+
+  <h3>Pre-registration — deciding the test before seeing the answer</h3>
+  <p>We wrote down the <i>exact</i> experiment — which grids, which settings, which year to score
+    on — and locked it in version control <b>before</b> ever touching the 2025 test data, which
+    we then read <b>once</b>. You can't accidentally tune an experiment toward the answer you
+    want if you've committed to it in advance.</p>
+
+  <h3>Mean-ablation — proving the signal is <i>real but drowned</i></h3>
+  <p>How do we know the correlation isn't just absent? We <b>deleted the mean wave</b> from the
+    scheduler's view and re-ran. In that flattened world the correlation suddenly <i>did</i> pay
+    (up to +1.46%). So the signal is genuinely there — it's simply drowned out by the daily mean
+    rhythm in the real problem. That's a much stronger statement than "we found nothing."</p>
+
+  <h3>Equivalence testing — proving "about zero," not just "didn't find it"</h3>
+  <p>"Absence of evidence isn't evidence of absence." So we ran a <b>TOST equivalence test</b>:
+    it doesn't just fail to find an effect, it <i>positively proves</i> the effect is smaller
+    than a meaningful threshold (here, smaller than 0.4% of the bill). Every single test case
+    passed — the spatial benefit is statistically <b>equivalent to zero</b>.</p>
+
+  <h3>Multi-seed testing — the guard that caught a fake result</h3>
+  <p>Many of our experiments use randomness (random "what-if" days). Run once, you might get
+    lucky and see a flattering number. So we re-ran everything with <b>several different random
+    seeds</b> and kept only results that held up across all of them.</p>
+  <div class="why"><b>This caught a real mistake.</b> A first run showed the Part-3 crossover at
+    a juicy <b>+8%</b>. Re-running with four seeds, the true picture was +4% <i>on average with a
+    huge ±3.4% wobble</i>, and on two of three grids the "win" was pure noise that flipped sign.
+    The single lucky number would have been an overclaim. The honest, multi-seed number is what
+    we report. (An independent reviewer later caught one more lucky-seed number that had slipped
+    through — we fixed that too.)</p></div>
+
+  <h3>The "Diversified" grid — why it isn't really "zero correlation"</h3>
+  <p>We call one grid "Diversified" (a solar + wind + hydro mix). It's tempting to call it
+    "uncorrelated," but that's wrong: two of its three region-pairs correlate at ~0.3, only one
+    is near zero (average ≈ 0.2). That mix is exactly why it behaves oddly — it has just enough
+    correlation that a greedy estimator <b>fits noise</b> and the robust scheduler <i>loses</i>,
+    yet not the clean common-moving structure that would ever help. Getting this label right was
+    one of the honesty fixes.</p>
+
+  <div class="eli"><b>The bottom line on rigor:</b> 187 automated tests, a pre-registered
+    protocol, equivalence tests, multi-seed stability, an independent adversarial review, and
+    every number traceable to a saved file. The conclusions got <i>more conservative</i> the
+    harder we tested — which is the sign of an honest study, not a lucky one.</div>
 </div></section>
 
 <!-- ============ FUTURE ============ -->
 <section id="future"><div class="wrap">
-  <h2><span class="n">10</span>Where this goes next (the 5-part program)</h2>
+  <h2><span class="n">12</span>Where this goes next (the 5-part program)</h2>
   <p>The whole research line answers one question: <b>when does spatial structure create value
     in robust carbon scheduling?</b></p>
   <table>
     <tr><th>Part</th><th>Question</th><th>Answer</th><th>Status</th></tr>
     <tr><td><b>1</b></td><td>Does the covariance help?</td><td>No (null)</td><td><span class="pill p-done">done</span></td></tr>
     <tr><td><b>2</b></td><td>Does a richer copula help?</td><td>No — null is total</td><td><span class="pill p-done">done</span></td></tr>
-    <tr><td><b>3</b></td><td>Does making the decision <i>spatial</i> (active transfer) help?</td><td>likely — the new algorithm</td><td><span class="pill p-key">proposed</span></td></tr>
-    <tr><td><b>4</b></td><td>Does it survive real-time deployment?</td><td>to find out</td><td>future</td></tr>
-    <tr><td><b>5</b></td><td>Is there a general principle (when does coupling ever matter)?</td><td>to find out</td><td>future</td></tr>
+    <tr><td><b>3</b></td><td>Does <i>actively moving</i> work between regions help?</td><td>Yes, 4–10% — but it's the mean again; robustifying it still pays nothing on real data</td><td><span class="pill p-done">done</span></td></tr>
+    <tr><td><b>4</b></td><td>Does robustness help live, day by day?</td><td>No — immaterial (its sign flips with the forecast)</td><td><span class="pill p-done">done</span></td></tr>
+    <tr><td><b>5</b></td><td>A general rule for when coupling can ever matter?</td><td>A screening ratio $\Delta$; coarse here, but the mechanism is confirmed</td><td><span class="pill p-done">done</span></td></tr>
   </table>
-  <p class="lead" style="margin-top:18px">The one-sentence summary of the whole capstone:
-    <b>spatial correlation of carbon is real, but a passive scheduler can't use it, because the
-    daily mean rhythm dominates — so the value, if any, lies in actively moving work between
-    regions, not in modeling how they correlate.</b></p>
+  <p style="margin-top:14px">Each of Parts 3–5 is a <b>validated first cut</b> — tested code and
+    real numbers, but with honest caveats (a stylised emergency model would become a calibrated
+    one; the screening ratio would be tightened). Turning them into a published paper is the
+    work that continues past the capstone.</p>
+  <p class="lead" style="margin-top:18px">The one-sentence summary of the whole project:
+    <b>spatial correlation of carbon is real, but neither a passive scheduler nor a robustness
+    layer can use it — the daily mean rhythm dominates everywhere we tested (passive, active,
+    online, even under real emergencies) — so the only spatial value comes from actively sending
+    work to the region that's cleanest on average, not from modelling how regions correlate.</b></p>
 </div></section>
 
 <footer><div class="wrap">
