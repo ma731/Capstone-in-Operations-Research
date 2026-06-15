@@ -349,7 +349,44 @@ Three nested regimes report results as a function of operational tightness:
 \textbf{R3} (reference) imposes C0\,+\,C2\,+\,C3; \textbf{R1} (lean) adds the deferral
 deadline 3a; and \textbf{R2} adds the thermal ceiling 3b (climate cases) or the
 variable-capacity ceiling 3c (interconnection cases). The carbon budget 3d is
-available but inactive in the reported regimes.
+available but inactive in the reported regimes. Each regime is solved as a
+\emph{complete} model with all of its constraints active jointly; the nesting
+probes the null's robustness to operational tightness, and is not a test of any
+single constraint's effect in isolation.
+
+\subsection{Model validation on a small instance}\label{sec:modelval}
+Before running the falsification experiment we check that the optimization model
+itself behaves correctly. The full model is validated \emph{as a whole}, with all
+constraints of \eqref{eq:feasible} active simultaneously, on a small,
+human-checkable instance (one region, eight hours, $10$ MWh per-cell capacity,
+$W=35$ MWh), rather than each constraint in isolation: correctness is a property of
+the constraints' \emph{interaction}, and a set that every constraint satisfies
+alone can still be jointly binding in unexpected ways. We fix an analyst-anticipated
+outcome, perturb one input at a time, and verify the solved schedule moves the
+anticipated way (Figure~\ref{fig:modelval}). Under a clean carbon field the load
+concentrates in the cheapest hours subject to the ramp and deadline (panel A).
+Making two of those hours dirty drives the load to the next-cleanest feasible hours,
+work still conserved and the deadline still met (panel B). Tightening the ramp limit
+from $6$ to $3$ MW/h removes the model's ability to jump to capacity, so the schedule
+smooths into a gradual plateau (panel C). All three responses match the
+hand-anticipated solution and conserve work to machine precision. This model-level
+check is complementary to, and distinct from, the software test suite
+(Section~\ref{sec:repro}, which pins component behaviour such as feasible-set
+equivalence) and the falsification experiment below (which probes a scientific
+hypothesis, not model correctness).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{../figures/model_validation.pdf}
+\caption{Full-model validation on a small instance. The complete feasible set
+(capacity, work conservation, ramp, deferral deadline) is solved jointly; bars are
+the optimal schedule $x^\star$, the gold curve the carbon field, the green band the
+deadline window. \textbf{A:} baseline. \textbf{B:} after making hours 3--4 dirty,
+load migrates to the next-cleanest hours. \textbf{C:} after tightening the ramp
+limit, the schedule can no longer spike and ramps gradually. Each response is the
+one an analyst anticipates, confirming the model encodes the intended behaviour.}
+\label{fig:modelval}
+\end{figure}
 
 \subsection{The falsification test: shuffled marginals}\label{sec:test}
 The scheduler is fitted twice, with covariances differing in exactly one respect:
@@ -638,7 +675,7 @@ AR(1), two ablations, walk-forward, fine grid\}) is on the order of $10^4$ SOCP
 solves; Phase 2 adds $3\times3\times3\times4=108$ CVaR-SAA LPs. Total wall-clock for
 the entire study is under two hours on one core, so reproduction is cheap.
 
-\subsection{Reproducibility}
+\subsection{Reproducibility}\label{sec:repro}
 All code is version-controlled (private repository, continuous-integration test
 suite, $175$ unit tests, including a feasible-set equivalence test pinning the
 Phase 2 CVaR scheduler to the Phase 1 constraint set); experiment configurations
@@ -875,6 +912,24 @@ of Section~\ref{sec:practical} this is $\approx0.4\%$ of the energy bill), and
 roughly the same order as the per-cell gaps themselves, yet no sign-stable positive
 gap of even this size survives. The null is a genuine absence
 of usable spatial value, not a test too blunt to see one.
+
+\paragraph{Equivalence: the absence of a material effect is itself significant.}
+Power bounds the effect the test \emph{could} have missed; an equivalence test makes
+the complementary, affirmative claim that a material effect is \emph{absent}. We
+apply the two-one-sided-tests (TOST) procedure \citep{schuirmann1987,lakens2018}
+against the economic materiality margin $\Delta=0.4\%$ of $\CVaR_{0.95}$ (the
+energy-bill threshold of Section~\ref{sec:practical}; the $\approx1\%$ practitioner
+threshold is looser still). For each grid we take its most adversarial observed gap
+and the paired-bootstrap standard error of Table~\ref{tab:power}, and test
+$H_0\!:\lvert\text{gap}\rvert\ge\Delta$ against $H_1\!:\lvert\text{gap}\rvert<\Delta$.
+The $90\%$ confidence interval lies strictly inside $(-\Delta,+\Delta)$ in every
+grid. Even the worst case (Diversified, gap $=-0.233\%$, $\mathrm{SE}=0.039\%$, CI
+$[-0.297,-0.169]\%$) clears both one-sided tests at the $5\%$ level, the binding
+statistic being $z=(\Delta-\lvert\text{gap}\rvert)/\mathrm{SE}=4.3$ ($p<10^{-4}$);
+against the looser $1\%$ margin every grid gives $z\ge19$. We therefore do not merely
+fail to detect a spatial benefit; we statistically reject the existence of one (in
+either direction) larger than the materiality threshold. That is the strongest form a
+null can take.
 
 \begin{table}[h]
 \centering\small
@@ -1136,7 +1191,11 @@ co-movement that does exist is in the \emph{clean} tail ($\chiL>\chiU$), exactly
 the regime a risk-averse scheduler is not protecting against, and a radial
 asymmetry an elliptical ball cannot encode regardless. The covariance is thus both
 \emph{masked} (dominated by the mean) and, for its varying part, \emph{mis-shaped}
-(non-elliptical).
+(non-elliptical). The same mechanism surfaces from the operational side: when these
+grids are scheduled under tightening geographic and ramp constraints, the binding
+dimension is geographic flexibility rather than temporal smoothing, again locating
+the value in \emph{where} each region is clean on average rather than in second-order
+co-movement.
 
 \subsection{Relation to prior work}
 The finding refines rather than contradicts the carbon-aware DRO literature.
@@ -1175,7 +1234,7 @@ modelled facility (four zones at $50$ MW each, $80\%$ utilization, $\approx160$ 
 aggregate) emits on the order of $460{,}000\,\text{tCO}_2$ per year. A
 spatial-covariance benefit of $0.1\%$ of $\CVaR_{0.95}$, taken at its full
 point estimate, is about $460\,\text{tCO}_2$ per year, or roughly \$$37{,}000$ at a
-\$$80/\text{tCO}_2$ price, which is $0.04\%$ of the facility's $\approx$\$$84$M
+\$$80/\text{tCO}_2$ price. That is $0.04\%$ of the facility's $\approx$\$$84$M
 annual energy bill, and it is not even reliably positive. The covariance channel is
 therefore immaterial in absolute as well as relative terms; the carbon savings
 worth pursuing live in the mean field, not its second moment.
@@ -1183,10 +1242,10 @@ worth pursuing live in the mean field, not its second moment.
 \subsection{Limitations}
 Five bound the claims. \emph{(i)~Representative schedule.} We evaluate one
 canonical workload (splittable load, ramp limits). A sharply different cost geometry
-could in principle re-weight the covariance term; the constraint-tightness
-sensitivities (Section~\ref{sec:res-robust}) address the most plausible cases, a
+could in principle re-weight the covariance term. The constraint-tightness
+sensitivities (Section~\ref{sec:res-robust}) address the most plausible cases: a
 $3\times$ tighter ramp and a $50$--$95\%$ utilization sweep both leave the null
-intact, but a qualitatively different objective (e.g.\ hard per-job deadlines) is
+intact. A qualitatively different objective (e.g.\ hard per-job deadlines) remains
 untested.
 \emph{(ii)~Test horizon.} The primary read is a single held-out year (2025);
 walk-forward to 2024 reproduces the null, but multi-year rolling evaluation would
@@ -1356,6 +1415,13 @@ pp.~260--272.
 \bibitem{wijayawardana2025} R.~Wijayawardana and A.~A. Chien, ``Scheduling cloud
 VMs on variable capacity datacenters,'' in \emph{Proc. ACM Symp. Cloud Computing
 (SoCC)}, 2025.
+\bibitem{schuirmann1987} D.~J. Schuirmann, ``A comparison of the two one-sided tests
+procedure and the power approach for assessing the equivalence of average
+bioavailability,'' \emph{J. Pharmacokinet. Biopharm.}, vol.~15, no.~6,
+pp.~657--680, 1987.
+\bibitem{lakens2018} D.~Lakens, A.~M. Scheel, and P.~M. Isager, ``Equivalence
+testing for psychological research: a tutorial,'' \emph{Adv. Methods Pract. Psychol.
+Sci.}, vol.~1, no.~2, pp.~259--269, 2018.
 \end{thebibliography}
 
 % ===================== APPENDICES (RUN 3) =====================
