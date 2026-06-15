@@ -1796,6 +1796,32 @@ but the sharper ``\emph{distributional robustness and cross-coordinate dependenc
 their cost exactly when, and only when, the mean field stops being a reliable guide},''
 in the tail, or under an active decision that the mean cannot already exploit.
 
+\subsection{A decision rule for practitioners}
+The five parts collapse into a short operating procedure for anyone building a
+carbon-aware scheduler, ordered cheapest-first.
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+\item \textbf{Get the mean forecast right.} A per-region seasonal mean carbon forecast
+captures essentially all attainable value (Parts~1--2, 4). Spend the engineering
+budget here, not on dependence modelling.
+\item \textbf{Do not model the joint covariance.} A per-region marginal robust
+scheduler matches the full joint one and, where structure is weak, the joint estimator
+fits noise and \emph{hurts} (Part~1; Part~4's $-3$ to $-8\%$ online loss on the
+structureless grid). Skip it.
+\item \textbf{Screen with $\Delta=B/M$ before modelling any cross-coordinate
+dependence.} It is a one-line, solve-free computation; $\Delta\ll1$ certifies the
+dependence is immaterial. If $\Delta\gtrsim1$ (as here), the screen is inconclusive and
+only a falsification experiment can settle it (Part~5).
+\item \textbf{Reach for an \emph{active} transfer channel, not a richer uncertainty
+model, if you want spatial value.} Inter-region flows unlock $5$--$10\%$ by exploiting
+the spatial mean (Part~3); a passive ambiguity set cannot.
+\item \textbf{Robustify only against \emph{calibrated tail emergencies}, and only on
+grids with genuine structure.} Under normal carbon, robustness is neutral-to-harmful
+(Parts~1--4); it earns its cost solely in severe, rare events, and even then
+demonstrably only where the grid is correlated enough to hedge (Part~3, multi-seed).
+\end{enumerate}
+The throughline is economy: every step that adds modelling complexity must first clear
+the bar of beating a mean-greedy per-region schedule, and most do not.
+
 \subsection{Answers to the research questions}
 \textbf{RQ1, Is carbon intensity spatially correlated in coupled grids?}
 Yes. After removing the shared diurnal cycle, residual cross-region correlations
