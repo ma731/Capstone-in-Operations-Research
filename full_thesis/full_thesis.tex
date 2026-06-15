@@ -1826,6 +1826,25 @@ exhibits a tail-risk crossover, the positive resolution the null predicts; and
 (6)~an end-to-end validation account (Section~\ref{sec:testing}) spanning model,
 protocol, and software, that licenses trusting an automated null.
 
+\subsection{Limitations of the extension}
+The Parts~1--2 null is at full rigour; the extension (Parts~3--5) carries honest
+caveats that bound its claims. \emph{Part~3:} the grid-emergency model is a
+Bernoulli severity shock, interpretable but not a calibrated outage process, and the
+migration cost $\lambda$ and budget $\Phi$ are chosen rather than estimated from a
+real interconnect; the crossover's \emph{direction} is robust but its precise
+threshold $M^\star$ is model-dependent. \emph{Part~4:} the controller uses a single
+seasonal forecast and one workload archetype; the counterproductive $-10\%$ on the
+Diversified grid is a genuine phenomenon (a CVaR hedge fitting forecast-error noise
+where no structure exists) but its magnitude is specific to that forecast and that
+engineered portfolio, and a learned forecast could change it. \emph{Part~5:} the
+bound $B$ is loose, so the ratio $\Delta$ is an ordinal regime indicator rather than
+a calibrated predictor, and the mean-flattening $\kappa$ is a stylised counterfactual.
+\emph{Across all three:} the evaluation is a single held-out year, one operator's
+splittable workload, and one cost geometry, the same external-validity bounds the
+body's Limitations note (Section~\ref{sec:discussion}) records. None of these weakens
+the unifying mechanism; they mark where the quantitative thresholds, not the
+direction, would move under a fuller treatment.
+
 \subsection{Future work}
 Phase 2 closed the most immediate question, whether a copula that sees the
 asymmetry recovers value (it does not), and in doing so sharpened the remaining
