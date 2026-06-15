@@ -648,11 +648,18 @@ polytope (the capacity bounds C0), hence compact, so $\max_{x\in\mathcal X}\lVer
 x\rVert_2$ is attained; taking that maximum gives \eqref{eq:propbound}.
 \end{proof}
 
-\noindent The bound is conservative (on our data its right-hand side is
-$\approx10$--$16\%$ of the mean term, while realized gaps are two orders of
-magnitude smaller), but it isolates the controlling quantities: the spatial gap is
-governed by $\varepsilon$ and the cross-region block norm, and is structurally
-forced to zero in the no-robustification and no-cross-structure limits. The
+\noindent The bound is a conservative \emph{certificate}, not a tight prediction.
+Evaluated on each grid's training covariance (with $\varepsilon^\star=1$, the
+a-priori feasible bound $\max_{x}\lVert x\rVert_2=\bar x\sqrt{R\,T\,u}$ where $\bar
+x$ is the per-cell cap and $u$ the utilization, and $\lVert\Sigma^{\mathrm{off}}
+\rVert_2$ the spectral norm of the destroyed cross-region blocks), its right-hand
+side is $7.4\%$ (Eastern US--Canada), $9.6\%$ (Diversified) and $12.7\%$ (Western
+US) of $\CVaR_{0.95}$; the realized gaps (Table~\ref{tab:gaps}) never exceed
+$0.23\%$, two orders of magnitude smaller. The theorem therefore caps the spatial
+gap at the few-percent scale \emph{before any experiment is run}, and the
+experiments then pin it far below that cap. What the bound buys is not tightness but
+structure: the spatial gap is governed by $\varepsilon$ and the cross-region block
+norm, and is forced to zero in the no-robustification and no-cross-structure limits. The
 \emph{tight} ceiling is measured, not bounded: the comonotone arm of
 Section~\ref{sec:res-copula} realizes the supremum over copulas, and across scenario
 seeds its gain is centred on zero with $|\Lambda|\lesssim0.1\%$ of $\CVaR_{0.95}$, at
@@ -887,6 +894,39 @@ $\{50,80,95\}\%$ range the null is unmoved. Figure~\ref{fig:robust} collects the
 covariance-estimator and temporal battery: across all six arms and three grids,
 every spatial gap sits inside the no-value band.
 
+\paragraph{Tail level: the null holds from $\CVaR_{0.90}$ to $\CVaR_{0.99}$.}
+The primary read fixes the tail at $\beta=0.95$. Because the residual co-movement
+lives in the \emph{clean} tail (Section~\ref{sec:res-tails}), the natural worry is
+that spatial value might surface only at a deeper risk level. Re-running the full
+pipeline (cross-validated $\varepsilon$, single 2025 read) at
+$\beta\in\{0.90,0.95,0.99\}$ rejects this (Table~\ref{tab:cvarsweep}). The DRO stays
+engaged ($\varepsilon^\star=1$ almost everywhere) and the gap stays immaterial at
+every level. Probing the deepest tail widens the magnitudes slightly but never to
+materiality: the largest \emph{positive} gap anywhere is $+0.14\%$ (Western US,
+$\beta=0.99$), still a third of the $0.4\%$ margin and not sign-stable, while in the
+adversarial Diversified grid the joint covariance becomes \emph{more} negative at
+$\beta=0.99$ ($-0.36\%$, i.e.\ it hurts), exactly as the noise-fitting account
+predicts. Deepening the tail, the regime where elliptical-blind tail dependence
+should matter most, does not turn the covariance on.
+
+\begin{table}[h]
+\centering\small
+\caption{Spatial gap range (min, max over the nine cells, \% of test
+$\CVaR_\beta$) at three tail levels. The DRO is engaged ($\varepsilon^\star=1$
+almost everywhere) throughout. No level yields a sign-stable positive gap reaching
+the $0.4\%$ materiality margin.}
+\label{tab:cvarsweep}
+\begin{tabular}{lccc}
+\toprule
+Grid & $\beta=0.90$ & $\beta=0.95$ & $\beta=0.99$\\
+\midrule
+Western US         & $[-0.04,+0.01]$ & $[-0.01,+0.04]$ & $[\phantom{-}0.00,+0.14]$\\
+Eastern US--Canada & $[-0.02,+0.04]$ & $[-0.02,+0.04]$ & $[-0.01,+0.09]$\\
+Diversified        & $[-0.23,+0.08]$ & $[-0.23,+0.06]$ & $[-0.36,+0.02]$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{../figures/robustness.pdf}
@@ -917,19 +957,19 @@ of usable spatial value, not a test too blunt to see one.
 Power bounds the effect the test \emph{could} have missed; an equivalence test makes
 the complementary, affirmative claim that a material effect is \emph{absent}. We
 apply the two-one-sided-tests (TOST) procedure \citep{schuirmann1987,lakens2018}
-against the economic materiality margin $\Delta=0.4\%$ of $\CVaR_{0.95}$ (the
-energy-bill threshold of Section~\ref{sec:practical}; the $\approx1\%$ practitioner
-threshold is looser still). For each grid we take its most adversarial observed gap
-and the paired-bootstrap standard error of Table~\ref{tab:power}, and test
+\emph{per cell}, using each cell's own paired-bootstrap standard error (recovered
+from its $95\%$ gap interval), against the economic materiality margin
+$\Delta=0.4\%$ of $\CVaR_{0.95}$ (Section~\ref{sec:practical}; the $\approx1\%$
+practitioner threshold is looser still), testing
 $H_0\!:\lvert\text{gap}\rvert\ge\Delta$ against $H_1\!:\lvert\text{gap}\rvert<\Delta$.
-The $90\%$ confidence interval lies strictly inside $(-\Delta,+\Delta)$ in every
-grid. Even the worst case (Diversified, gap $=-0.233\%$, $\mathrm{SE}=0.039\%$, CI
-$[-0.297,-0.169]\%$) clears both one-sided tests at the $5\%$ level, the binding
-statistic being $z=(\Delta-\lvert\text{gap}\rvert)/\mathrm{SE}=4.3$ ($p<10^{-4}$);
-against the looser $1\%$ margin every grid gives $z\ge19$. We therefore do not merely
-fail to detect a spatial benefit; we statistically reject the existence of one (in
-either direction) larger than the materiality threshold. That is the strongest form a
-null can take.
+All $27$ cells across the three grids are equivalent: every $90\%$ confidence
+interval lies strictly inside $(-\Delta,+\Delta)$. The binding cell is the
+adversarial Diversified case (gap $=-0.233\%$, cell $\mathrm{SE}=0.046\%$), which
+still clears both one-sided tests, $z=(\Delta-\lvert\text{gap}\rvert)/\mathrm{SE}
+=3.7$ ($p=1.3\times10^{-4}$); every other cell gives $z\ge7$. We therefore do not
+merely fail to detect a spatial benefit; we statistically reject the existence of
+one (in either direction) larger than the materiality threshold, cell by cell. That
+is the strongest form a null can take.
 
 \begin{table}[h]
 \centering\small
@@ -1279,8 +1319,10 @@ dependence spectrum (and two corroborating panels), the out-of-sample
 $\CVaR_{0.95}$ spatial gap never exceeds a few tenths
 of one percent and is not sign-stable; the null survives Ledoit--Wolf shrinkage,
 seasonal and AR(1) residualization, Benjamini--Hochberg correction over 144 cells,
-walk-forward validation to 2024, and a log-denser $\varepsilon$ grid
-(Sections~\ref{sec:res-gap}--\ref{sec:res-robust}). In the most
+walk-forward validation to 2024, a log-denser $\varepsilon$ grid, and the full tail
+range from $\CVaR_{0.90}$ to $\CVaR_{0.99}$
+(Sections~\ref{sec:res-gap}--\ref{sec:res-robust}), and a per-cell equivalence test
+rejects any effect above the materiality margin in all $27$ cells. In the most
 diversification-friendly case the joint covariance is mildly counterproductive.
 Critically, this is an \emph{active} null: cross-validation selects a non-trivial
 ambiguity radius ($\varepsilon^\star=1$) in nearly every cell of the US/Canada

@@ -271,7 +271,7 @@ def cv_select_epsilon(train_panel, workloads, shuffle, alpha_val, regime_key, co
         _, L_fit = fit_sigma_and_cholesky(cov_panel[fit_idx], shuffle)
         for eps in EPSILON_GRID:
             x = schedule_for(rho_bar_fit, L_fit, workloads, eps, alpha_vec, regime_key)
-            by_eps[eps].append(cvar_upper_tail(per_day_emissions(x, train_panel[val_idx])))
+            by_eps[eps].append(cvar_upper_tail(per_day_emissions(x, train_panel[val_idx]), CVAR_ALPHA))
     cv_mean = {e: float(np.mean(v)) for e, v in by_eps.items()}
     cv_std = {e: float(np.std(v, ddof=1)) for e, v in by_eps.items()}
     eps_star = min(cv_mean, key=cv_mean.get)
@@ -294,7 +294,7 @@ def evaluate_on_test(train_panel, test_panel, workloads, shuffle,
     return TestResult(
         regime=regime_key, alpha=alpha_val,
         sigma_label="shuf" if shuffle else "joint",
-        epsilon_star=eps_star, test_cvar=cvar_upper_tail(em),
+        epsilon_star=eps_star, test_cvar=cvar_upper_tail(em, CVAR_ALPHA),
         test_mean=float(em.mean()), test_max=float(em.max()),
         schedule=x, per_day_emissions=em,
     )
@@ -306,8 +306,8 @@ def bootstrap_gap_ci(joint_pd, shuf_pd, n_resamples=N_BOOTSTRAP, seed=BOOTSTRAP_
     gaps = np.empty(n_resamples)
     for b in range(n_resamples):
         idx = rng.integers(0, n, size=n)
-        gaps[b] = cvar_upper_tail(shuf_pd[idx]) - cvar_upper_tail(joint_pd[idx])
-    point = cvar_upper_tail(shuf_pd) - cvar_upper_tail(joint_pd)
+        gaps[b] = cvar_upper_tail(shuf_pd[idx], CVAR_ALPHA) - cvar_upper_tail(joint_pd[idx], CVAR_ALPHA)
+    point = cvar_upper_tail(shuf_pd, CVAR_ALPHA) - cvar_upper_tail(joint_pd, CVAR_ALPHA)
     lo, hi = np.percentile(gaps, [2.5, 97.5])
     return float(point), float(lo), float(hi)
 
@@ -344,11 +344,17 @@ def main() -> int:
     ap.add_argument("--utilization", type=float, default=0.80,
                     help="Daily utilization (fraction of capacity). Raise (e.g. 0.95) "
                          "to leave the schedule little room to chase clean hours.")
+    ap.add_argument("--cvar-alpha", type=float, default=0.95,
+                    help="Tail level for the CVaR metric and epsilon selection "
+                         "(e.g. 0.90 or 0.99). Default 0.95 reproduces the "
+                         "pre-registered runs; other values get a filename suffix.")
     args = ap.parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
     global USE_SHRINKAGE, RESIDUALIZE, ABLATE_MEAN, _VARCAP_CEILING, REGION_ORDER, TZ
     global TRAIN_YEARS, TEST_YEAR, EPSILON_GRID, RAMP_PER_REGION, UTILIZATION_FIXED
+    global CVAR_ALPHA
+    CVAR_ALPHA = args.cvar_alpha
     RAMP_PER_REGION = args.ramp_mw
     UTILIZATION_FIXED = args.utilization
     USE_SHRINKAGE = args.shrinkage
@@ -452,7 +458,7 @@ def main() -> int:
             })
 
     print("\n" + "=" * 96)
-    print(f"[{args.region_set}] SPATIAL GAP (shuf - joint) CVaR_0.95, by regime x alpha")
+    print(f"[{args.region_set}] SPATIAL GAP (shuf - joint) CVaR_{CVAR_ALPHA:g}, by regime x alpha")
     print("Positive gap = joint beats shuf. 'detectable' = bootstrap CI excludes 0.")
     print("=" * 96)
     df = pd.DataFrame(rows)
@@ -476,6 +482,8 @@ def main() -> int:
         suffix += f"_ramp{args.ramp_mw:g}"
     if args.utilization != 0.80:
         suffix += f"_util{args.utilization:g}"
+    if CVAR_ALPHA != 0.95:
+        suffix += f"_cvar{CVAR_ALPHA:g}"
     stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
     base = f"{args.region_set}_regimes_{stamp}{suffix}"
     csv_path = args.out_dir / f"{base}.csv"
