@@ -106,10 +106,13 @@ transfer channel, not a richer dependence model. This extended version develops 
 channel directly (Section~\ref{sec:transfer}): a spatially-coupled transfer DRO that
 makes inter-region load flows a decision variable cuts out-of-sample $\CVaR_{0.95}$
 by $4.7$--$10.1\%$, and a two-stage robust commitment exposes a sharp tail-risk
-\emph{crossover} under grid-emergency stress, beyond which robustness pays. A
-dedicated chapter (Section~\ref{sec:testing}) documents the validation that
-underpins every claim: small-instance model checks, a pre-registered falsification
-protocol, and a $184$-test software suite.
+\emph{crossover} under grid-emergency stress, beyond which robustness pays. Rolling
+the controller \emph{online} under forecast error confirms robustness stays
+second-order in normal operation (Section~\ref{sec:online}), and a dimensionless
+mean-dominance ratio generalises \emph{when} cross-coordinate dependence can ever help
+(Section~\ref{sec:condition}). A dedicated chapter (Section~\ref{sec:testing})
+documents the validation behind every claim: small-instance model checks, a
+pre-registered protocol, and a $184$-test software suite.
 \end{abstract}
 \newpage
 \tableofcontents
