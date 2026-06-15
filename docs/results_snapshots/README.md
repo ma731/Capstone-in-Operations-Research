@@ -19,7 +19,9 @@ academic license does not apply.
   locked pre-registered Task C script (same numbers).
 - **variant:** none = baseline; `seasonal`/`ar1` = residualized covariance;
   `lw` = Ledoit-Wolf shrinkage; `ablate-level`/`ablate-flat` = mean-ablation;
-  `finegrid` = denser epsilon grid; `ty2024` = walk-forward (test year 2024).
+  `finegrid` = denser epsilon grid; `ty2024` = walk-forward (test year 2024);
+  `ramp5`/`util0.5`/`util0.95` = constraint-tightness sweeps;
+  `cvar0.9`/`cvar0.99` = CVaR tail-level sweep (default metric is CVaR_0.95).
 - `bh_correction.csv` = Benjamini-Hochberg over all gap cells.
 - `<case>_copula_<date>.csv` = **Phase 2** copula schedulers. Columns:
   `regime, alpha, cvar_indep, cvar_gauss, cvar_clayton, clayton_theta, kendall_tau,

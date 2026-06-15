@@ -8,8 +8,9 @@ the committed configuration that produced a result can always be re-read.
 
 | Script | Purpose |
 |--------|---------|
-| `scripts/run_case_experiment.py` | The generalized Phase 1 shuffled-marginals runner (`--region-set us_west\|taskc\|us_hetero`, `--shrinkage`, `--residualize`, `--ablate-mean`, `--test-year`, `--eps-grid`, `--ramp-mw`). Supersedes all the per-case runners below. |
+| `scripts/run_case_experiment.py` | The generalized Phase 1 shuffled-marginals runner (`--region-set us_west\|taskc\|us_hetero`, `--shrinkage`, `--residualize`, `--ablate-mean`, `--test-year`, `--eps-grid`, `--ramp-mw`, `--utilization`, `--cvar-alpha`). `--cvar-alpha` sets the CVaR tail level (default 0.95 reproduces the pre-registered runs; 0.90/0.99 get a filename suffix). Supersedes all the per-case runners below. |
 | `scripts/run_copula_experiment.py` | Phase 2 copula schedulers (independence / Gaussian / Clayton / comonotone). |
+| `scripts/equivalence_and_bound.py` | Post-hoc examiner-review analyses from archived snapshots (no test-set re-read): per-cell TOST equivalence, numerical Proposition-1 bound, and joint-vs-shuffled covariance conditioning. |
 | `scripts/calibrate_capacity.py` | Goldilocks calibration of the 3c capacity bounds. |
 | `scripts/measure_complexity.py` | Solve-time / problem-dimension reporting. |
 | `src/models/transfer_dro.py` | Part 3 canonical module (one-shot transfer DRO, two-stage commit, recourse). Tested in `tests/test_transfer_dro.py`. Supersedes the `scripts/prototype_*transfer*.py` and `run_transfer_experiment.py` prototypes (which produced the Appendix B numbers and are kept for provenance). |
