@@ -105,6 +105,30 @@ def prop1_bound():
     print("  experiments then pin the realized gap two orders of magnitude below it.\n")
 
 
+def conditioning():
+    """Condition number of the joint vs shuffled (block-diagonal) covariance arms,
+    to show the null is not an estimation-conditioning artifact."""
+    print("=" * 78)
+    print("  COVARIANCE CONDITIONING  kappa(Sigma_joint) vs kappa(Sigma_shuf)")
+    print("=" * 78)
+    print(f"  {'grid':20s} {'kappa(joint)':>13} {'kappa(shuf)':>12} {'ratio s/j':>10}")
+    for name, (key, _f) in GRIDS.items():
+        zones = list(REGION_SETS[key]["zones"])
+        panel, dates = build_daily_panel(to_wide(load_all_zones(zones)),
+                                         region_order=zones, tz=REGION_SETS[key]["tz"])
+        train = panel[np.array([d.year in TRAIN_YEARS for d in dates])]
+        R, T = train.shape[1], train.shape[2]
+        _, sigma = estimate_mean_and_covariance(train.reshape(train.shape[0], R * T))
+        kj = np.linalg.cond(regularize_covariance(sigma, eta=RIDGE))
+        ks = np.linalg.cond(regularize_covariance(
+            block_diagonal_by_region(sigma, R=R, T=T), eta=RIDGE))
+        print(f"  {name:20s} {kj:>13.0f} {ks:>12.0f} {ks/kj:>10.2f}")
+    print("-" * 78)
+    print("  Shuffled arm is better conditioned (ratio < 1), so the joint arm's")
+    print("  parity is not a conditioning advantage; mean-ablation is the control.\n")
+
+
 if __name__ == "__main__":
     per_cell_tost()
     prop1_bound()
+    conditioning()

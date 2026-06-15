@@ -948,6 +948,17 @@ Diversified        & $[-0.23,+0.08]$ & $[-0.23,+0.06]$ & $[-0.36,+0.02]$\\
 \end{tabular}
 \end{table}
 
+\paragraph{The null is not a conditioning artifact.} Block-diagonalizing $\Sigma$
+also changes its conditioning, so one might worry the null reflects the joint arm
+being harder to estimate rather than the cross-structure being valueless. The two
+arms are conditioned to the same order (ridge-regularized $\kappa\approx
+1.1$--$1.6\times10^5$ for the joint covariance, $0.4$--$0.8\times10^5$ for the
+shuffled, the joint arm somewhat higher as expected for the richer model). The
+mean-ablation of Section~\ref{sec:res-ablation} is the decisive control: it reuses
+the \emph{same} joint $\Sigma$ at the \emph{same} conditioning and, removing only
+the mean field, the covariance recovers up to $+1.46\%$. Estimation conditioning
+therefore cannot be what suppresses the spatial value; the mean field is.
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{../figures/robustness.pdf}
@@ -1247,7 +1258,7 @@ as ``the data had no signal''; the ablation shows the signal is present but
 \emph{subordinate}. This is the central intellectual contribution: a clean
 separation of \emph{validity} of a modelling assumption from its \emph{value}.
 
-\subsection{Why the mean dominates: a mechanism}
+\subsection{Why the mean dominates: a mechanism}\label{sec:res-mech}
 Three forces compound. (i)~\emph{Magnitude.} The within-day swing of mean carbon
 intensity (night-to-noon ratios of two-to-fourfold in solar-heavy grids) dwarfs
 the residual covariance, so the optimal schedule is driven almost entirely by
@@ -1325,10 +1336,14 @@ strengthen external validity. \emph{(iii)~Dependence model.} The DRO uses a
 covariance (second-moment) ambiguity set by construction; Phase 2
 (Section~\ref{sec:res-copula}) closes this gap with Gaussian and Clayton copula
 schedulers, but a full copula-\emph{ambiguity} Wasserstein DRO in the
-Fan--Ji--Lejeune sense remains future work. \emph{(iv)~Geographic scope.} The region sets span WECC, the
-Eastern Interconnection, and Iberia--France across the dependence spectrum, but
-grids with different generation mixes (e.g.\ hydro-thermal systems with strong
-seasonal storage) remain untested. \emph{(v)~Data licence and clocks.} Carbon
+Fan--Ji--Lejeune sense remains future work. \emph{(iv)~Geographic scope and the limit of generalization.} The region sets span
+WECC, the Eastern Interconnection, and Iberia--France across the dependence
+spectrum, but grids with different generation mixes (e.g.\ hydro-thermal systems
+with strong seasonal storage) remain untested. More fundamentally, the result
+generalizes only to grids where the diurnal mean field dominates residual
+cross-region covariance: mean-dominance is an empirical regularity of carbon
+intensity (Section~\ref{sec:res-mech}), not a universal law, and a grid whose
+residual covariance rivalled its mean swing could in principle behave differently. \emph{(v)~Data licence and clocks.} Carbon
 intensity is Electricity Maps lifecycle estimates on a common local clock per
 region set; alternative intensity methodologies or clock conventions could shift
 point estimates, though not by the order of magnitude separating the observed gaps
