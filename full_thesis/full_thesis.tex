@@ -173,7 +173,7 @@ evaluated out-of-sample under pre-registration discipline (commit-locked
 configurations, dry-run gates, single test-set read). (ii)~\emph{A replicated
 empirical null across the dependence spectrum}: three primary US/Canada region sets, two interconnected grids where strong correlation survives de-seasonalization
 (the US West (California, Nevada, Phoenix; and an Ontario--Eastern belt) and one
-engineered near-uncorrelated solar/wind/hydro portfolio) corroborated by an
+engineered low, heterogeneous-correlation solar/wind/hydro portfolio) corroborated by an
 Iberia--France panel where residual correlation collapses to the diurnal cycle, all
 yielding spatial gaps below $0.4\%$ of $\CVaR$,
 robust to estimator choice, multiple-testing correction, and walk-forward
@@ -745,9 +745,16 @@ cross-region correlations of carbon intensity in the two electrically coupled
 US/Canada cases are strong and survive de-seasonalization: in the US West,
 CISO--NEVP $0.78$ and CISO--LDWP $0.72$ (shared solar resource and weather across
 WECC); in the Ontario--Eastern belt, CA-ON--NYISO $0.73$ and MISO--PJM $0.70$
-(weather fronts traversing the Eastern Interconnection). The engineered
-heterogeneous portfolio behaves as designed: ERCOT--BPAT residual correlation is
-$0.00$, with CISO--BPAT at $0.33$. Figure~\ref{fig:heatmaps} shows the residual
+(weather fronts traversing the Eastern Interconnection). The engineered portfolio
+behaves as designed, but the design is \emph{heterogeneity}, not zero correlation: its
+three residual pairs span $-0.01$ (ERCOT--BPAT, wind vs.\ hydro), $0.29$ (CISO--ERCOT)
+and $0.37$ (CISO--BPAT), mean $\bar r\approx0.2$. It is therefore the low,
+\emph{mixed-correlation} end of the US cases, one near-zero edge and two moderate ones,
+a diversified generation mix rather than a uniformly decoupled grid. This distinction
+matters later: heterogeneous, partly low correlation is \emph{diversifiable} structure
+(it drives the largest mean-ablation signal, Section~\ref{sec:res-ablation}), whereas
+the US West's strong but \emph{uniform} correlation is common-mode and offers no hedge.
+Figure~\ref{fig:heatmaps} shows the residual
 correlation matrices; overlay plots of standardized intensity (archived with the
 code) confirm visible co-movement in summer and winter weeks for the coupled
 cases. Together with the corroborating panels, the California/Nevada subset
@@ -770,7 +777,8 @@ Figure~\ref{fig:map} places the three grids geographically and draws each
 within-grid residual correlation as a weighted edge. The picture matches the
 physics: the US West forms one tightly-coupled WECC cluster, the Ontario--Eastern
 belt another along the Eastern Interconnection, while the engineered portfolio
-spans the continent with thin (near-zero) edges by construction.
+spans the continent with deliberately \emph{mixed} edges, one near-zero and two
+moderate, by construction.
 
 \begin{figure}[t]
 \centering
@@ -834,8 +842,9 @@ the thesis (where there is no cross-region structure, the machinery sees nothing
 worth robustifying) but it makes the Iberian null the \emph{weak} kind. We
 therefore retain it only as low-correlation, real-grid external validity, and rest
 the central claim on the US/Canada cases where the DRO is unambiguously on. The
-engineered Diversified portfolio supplies the strong zero-correlation null
-($\varepsilon^\star=1$ throughout, still no value) that Iberia cannot.
+engineered Diversified portfolio supplies the DRO-active low-correlation null
+($\varepsilon^\star=1$ throughout, still no value) that Iberia, where
+$\varepsilon^\star$ collapses to $0$, cannot.
 
 \begin{table}[t]
 \centering\small
@@ -846,9 +855,9 @@ excludes zero.}
 \label{tab:gaps}
 \begin{tabular}{llrrrrrr}
 \toprule
-& & \multicolumn{2}{c}{Diversified ($\bar r\approx0$)} &
-\multicolumn{2}{c}{Eastern US--Canada ($\bar r\approx0.5$)} &
-\multicolumn{2}{c}{Western US ($\bar r\approx0.5$)}\\
+& & \multicolumn{2}{c}{Diversified ($\bar r\approx0.2$)} &
+\multicolumn{2}{c}{Eastern US--Canada ($\bar r\approx0.45$)} &
+\multicolumn{2}{c}{Western US ($\bar r\approx0.65$)}\\
 \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
 Regime & $\alpha$ & gap\,\% & det. & gap\,\% & det. & gap\,\% & det.\\
 \midrule
@@ -1042,7 +1051,7 @@ smallest margin each grid still clears (its largest $\lvert\text{gap}\rvert+
 $0.10\%$ for Western US, but $\Delta^\star=0.31\%$ for the adversarial Diversified
 grid. Equivalence at the $0.4\%$ economic margin therefore holds everywhere with
 room to spare on the two interconnected grids, and only narrowly on the engineered
-near-uncorrelated portfolio. That last caveat does not threaten the thesis: the
+low, heterogeneous-correlation portfolio. That last caveat does not threaten the thesis: the
 Diversified gap is \emph{negative}, so the one grid where equivalence is hardest to
 assert is precisely the one where the joint covariance \emph{hurts} rather than adds
 value.
@@ -1540,11 +1549,14 @@ controller's realised $\CVaR_{0.95}$ is statistically indistinguishable from the
 deterministic one (Western US $+0.28\%$, CI $[-0.65,1.16]$; Eastern US--Canada
 $+0.04\%$, CI $[-0.10,0.25]$): mean-dominance extends to the closed loop, the seasonal
 forecast is good enough that hedging its error buys nothing. On the engineered
-near-uncorrelated Diversified grid robustness is not merely neutral but
+low-correlation Diversified grid robustness is not merely neutral but
 \emph{counterproductive}, its realised CVaR is $10.3\%$ \emph{worse} (CI
-$[-18.3,-4.4]$): with no exploitable cross-structure the CVaR hedge fits
-forecast-error noise and pays a real mean penalty, the online echo of the Phase-1
-finding that the joint covariance \emph{hurts} on this grid. The lesson is consistent
+$[-18.3,-4.4]$): with the mean already capturing the placement value (the grid's
+genuine but \emph{masked} covariance structure, Section~\ref{sec:res-ablation},
+surfaces only once the mean is removed), the CVaR hedge has nothing left to exploit
+and instead fits forecast-error noise on only three regions, paying a real mean
+penalty. This is the online echo of the Phase-1 finding that the joint covariance
+\emph{hurts} on this grid. The lesson is consistent
 across the whole arc: absent a genuine tail event or genuine structure, robustifying
 the schedule does not help and can harm; the mean forecast is what to get right.
 
@@ -1621,7 +1633,7 @@ $\kappa\in\{1,0.75,0.5,0.25,0\}$ (Figure~\ref{fig:part5kappa},
 \texttt{run\_part5\_kappa.py}). The result is honest and instructive. On the strongly
 correlated Eastern grid the realised spatial gap climbs essentially monotonically as
 $\kappa\to0$ (from $\approx0$ to $+0.24\%$), tracking $\Delta$ as the condition
-predicts. On the \emph{engineered} near-uncorrelated Diversified grid the relationship
+predicts. On the \emph{engineered} heterogeneous Diversified grid the relationship
 is \emph{non-monotone}: at intermediate flattening the joint covariance first
 \emph{fits noise} (the gap dips negative, the same pathology as the Phase-1 result that
 it hurts there) and the genuine signal surfaces only at full ablation. The interior
@@ -1827,8 +1839,10 @@ the bar of beating a mean-greedy per-region schedule, and most do not.
 Yes. After removing the shared diurnal cycle, residual cross-region correlations
 reach $0.78$ in the US West and $0.73$ in the Ontario-anchored Eastern belt and
 survive de-seasonalization (Section~\ref{sec:res-corr}). The premise of spatial
-DRO is empirically sound; the engineered heterogeneous portfolio confirms the
-diagnostic resolves genuine near-zero dependence ($0.00$) when it is present.
+DRO is empirically sound; the engineered heterogeneous portfolio (pairwise
+correlations spanning $0.00$ to $0.37$, mean $\approx0.2$) confirms the diagnostic
+resolves a genuinely near-zero \emph{pair} (ERCOT--BPAT, $0.00$) alongside moderate
+ones, rather than washing everything to a single value.
 
 \textbf{RQ2, Does encoding that correlation in a covariance-based ambiguity set
 improve robust scheduling?} No. Across three primary region sets spanning the
