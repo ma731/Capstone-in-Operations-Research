@@ -1428,9 +1428,9 @@ honest open question, and the real content of the next phase, is not whether
 transfer helps (it must, being mean-exploiting) but whether \emph{robustifying} it
 beats plain deterministic transfer, e.g.\ under forecast error or for tail-averse
 operators, since the same mean-dominance logic suggests the robustness layer may
-again be second-order. Preliminary, proof-of-concept experiments
-(Appendix~\ref{app:phase3}) already bear this out and sharpen it: active transfer
-cuts out-of-sample $\CVaR_{0.95}$ by $4.7$--$10.1\%$; robustness stays immaterial
+again be second-order. Preliminary experiments on a unit-tested transfer
+module (Appendix~\ref{app:phase3}) already bear this out and sharpen it: active
+transfer cuts out-of-sample $\CVaR_{0.95}$ by $4.7$--$10.1\%$; robustness stays immaterial
 under normal carbon; but a stylised grid-emergency stress reveals a sharp tail-risk
 \emph{crossover} beyond which the robust commitment wins, by up to $+8\%$. To our
 knowledge no prior work combines Wasserstein-DRO robustification with active
@@ -1641,6 +1641,22 @@ precisely when rare tail events make the mean forecast unreliable. The value of
 robustness is thus a function of tail risk, the precise characterisation of which,
 together with a calibrated emergency model and a pre-registered evaluation, is the
 agenda for the follow-on work.
+
+\paragraph{Implementation and validation.} These results are not throwaway script
+output: the transfer model is implemented as a standalone, unit-tested module
+(\texttt{src/models/transfer\_dro.py}), where the one-shot transfer DRO, the
+two-stage robust commitment, and the costly-recourse evaluation are each exercised
+by tests pinning the model's invariants, conservation of work under inter-region
+flows ($\sum_{r,t} y_{r,t}=\sum_r W_r$), monotone emission reduction as the transfer
+budget grows, and exact recovery of the no-transfer schedule at zero budget. The
+flow variables $f_{r\to s,t}$ carry no self-loops and respect a transfer-capacity
+budget, and the two-stage program is solved as an LP per scenario with a shared
+CVaR epigraph. What remains \emph{preliminary} is therefore the experimental
+protocol, the stylised emergency model, the modest scenario counts, and the absence
+of pre-registration, not the optimization itself: the crossover of
+Figure~\ref{fig:phase3} rests on validated code. This is what makes promoting Part~3
+to a rigorous study a matter of protocol and calibration, the steps below, rather
+than of rebuilding the machinery.
 
 \paragraph{The extension beyond this capstone.} These preliminary results are the
 opening of a planned five-part programme that continues well past the capstone. The
