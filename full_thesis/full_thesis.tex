@@ -1591,14 +1591,41 @@ deliberately loose bound, the a-priori screen is \emph{inconclusive} here, $\Del
 not $\ll1$, which is precisely why the empirical falsification of Parts~1--2 was
 necessary rather than optional. $\Delta$'s value is therefore twofold. As a
 \emph{negative filter} it would rule out dependence cheaply on any problem with
-$\Delta\ll1$. As a \emph{regime indicator} it is monotone: a mean-flattening sweep
-($\kappa:1\!\to\!0$) shrinks $M$ and raises $\Delta$ (Figure~\ref{fig:part5}) in
-lockstep with the empirical dependence value, which rises from $\approx0$ on the real
-grids to $+1.46\%$ in the mean-ablated world (Section~\ref{sec:res-ablation}). The
-condition correctly \emph{orders} the regimes; calibrating an absolute threshold is
-future work. The diagnostic transfers beyond carbon: cross-coordinate dependence is
-worth modelling only where the mean field is weak relative to the residual structure,
-a condition the carbon-aware problem fails by a wide margin.
+$\Delta\ll1$. As a \emph{regime indicator} it tracks where dependence becomes
+material: a mean-flattening sweep ($\kappa:1\!\to\!0$) shrinks $M$ and raises $\Delta$
+(Figure~\ref{fig:part5}), and the pre-registered ablation confirms the empirical
+dependence value rises with it, from $\approx0$ on the real grids to $+1.46\%$ in the
+fully mean-ablated world (Section~\ref{sec:res-ablation}).
+
+To test that link in the \emph{interior}, not only at the two endpoints, we re-solved
+the shuffled-marginals DRO at intermediate flattenings
+$\kappa\in\{1,0.75,0.5,0.25,0\}$ (Figure~\ref{fig:part5kappa},
+\texttt{run\_part5\_kappa.py}). The result is honest and instructive. On the strongly
+correlated Eastern grid the realised spatial gap climbs essentially monotonically as
+$\kappa\to0$ (from $\approx0$ to $+0.24\%$), tracking $\Delta$ as the condition
+predicts. On the \emph{engineered} near-uncorrelated Diversified grid the relationship
+is \emph{non-monotone}: at intermediate flattening the joint covariance first
+\emph{fits noise} (the gap dips negative, the same pathology as the Phase-1 result that
+it hurts there) and the genuine signal surfaces only at full ablation. The interior
+therefore confirms $\Delta$ as a \emph{coarse, ordinal} indicator, correct in
+direction where real structure exists but not a calibrated predictor, exactly the
+honest status we claim for it. Tightening $B$ so the screen becomes conclusive, and
+calibrating an absolute threshold, is future work. The diagnostic nonetheless transfers
+beyond carbon: cross-coordinate dependence is worth modelling only where the mean field
+is weak relative to the residual structure, a condition the carbon-aware problem fails
+by a wide margin.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.82\textwidth]{../figures/part5_kappa.pdf}
+\caption{Interior validation of the Part 5 condition. Realised spatial gap (\% of
+$\CVaR_{0.95}$) from re-solving the DRO at intermediate mean-flattenings $\kappa$. On
+the correlated Eastern grid the gap rises monotonically as the mean weakens
+($\kappa\to0$), tracking $\Delta$; on the engineered Diversified grid it is
+non-monotone, the joint covariance fitting noise before the true signal emerges, so
+$\Delta$ orders the regimes only coarsely.}
+\label{fig:part5kappa}
+\end{figure}
 
 \begin{table}[t]
 \centering\small
