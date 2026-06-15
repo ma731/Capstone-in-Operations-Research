@@ -109,7 +109,7 @@ by $4.7$--$10.1\%$, and a two-stage robust commitment exposes a sharp tail-risk
 \emph{crossover} under grid-emergency stress, beyond which robustness pays. A
 dedicated chapter (Section~\ref{sec:testing}) documents the validation that
 underpins every claim: small-instance model checks, a pre-registered falsification
-protocol, and a $175$-test software suite.
+protocol, and a $184$-test software suite.
 \end{abstract}
 \newpage
 \tableofcontents
@@ -184,7 +184,7 @@ spatially-coupled transfer DRO that makes inter-region flows a decision recovers
 $4.7$--$10.1\%$ of $\CVaR_{0.95}$ and exhibits a tail-risk crossover under
 grid-emergency stress, the positive counterpart that the passive null predicts.
 (vi)~\emph{An end-to-end validation account} (Section~\ref{sec:testing}): a
-small-instance model validation, a pre-registered protocol, and a $175$-test software
+small-instance model validation, a pre-registered protocol, and a $184$-test software
 suite, that licenses trusting a null produced by an automated pipeline.
 
 \subsection{Thesis structure}
@@ -195,12 +195,13 @@ validation and the experimental results across all region sets, including the
 robustness battery, mean-ablation, tail-dependence diagnostics, and the Phase 2
 copula schedulers.
 Section~\ref{sec:discussion} interprets the findings against prior work and states
-limitations. Section~\ref{sec:transfer} then develops the active transfer channel
-that the null points to, the spatially-coupled transfer DRO and its tail-risk
-crossover. Section~\ref{sec:testing} consolidates the model, protocol, and software
-validation behind every claim. Section~\ref{sec:conclusion} concludes and outlines
-future work, and Appendix~\ref{app:programme} places the thesis within a five-part
-research programme.
+limitations. Section~\ref{sec:transfer} then develops the active transfer channel the
+null points to, the spatially-coupled transfer DRO and its tail-risk crossover;
+Section~\ref{sec:online} takes it \emph{online} as a rolling-horizon controller; and
+Section~\ref{sec:condition} generalises the mean-dominance bound into a problem-class
+condition. Section~\ref{sec:testing} consolidates the model, protocol, and software
+validation behind every claim. Section~\ref{sec:conclusion} concludes, and
+Appendix~\ref{app:programme} records the five-part programme's status and horizon.
 
 % ===================== 2. LITERATURE REVIEW =====================
 \section{Literature Review}\label{sec:lit}
@@ -722,7 +723,7 @@ the entire study is under two hours on one core, so reproduction is cheap.
 
 \subsection{Reproducibility}\label{sec:repro}
 All code is version-controlled (private repository, continuous-integration test
-suite, $175$ unit tests, including a feasible-set equivalence test pinning the
+suite, $184$ unit tests, including a feasible-set equivalence test pinning the
 Phase 2 CVaR scheduler to the Phase 1 constraint set); experiment configurations
 are commit-locked before test-set evaluation; bootstrap and scenario seeds are
 fixed; and every number reported in
@@ -1408,7 +1409,7 @@ turning the spatial coupling into a \emph{control} rather than an uncertainty
 description. Algorithm and API details are in Section~\ref{sec:testing-transfer}.
 
 \subsection{Three findings}\label{sec:transfer-findings}
-Three findings emerge (Figure~\ref{fig:phase3}). \textbf{(1)~Active transfer unlocks
+Three findings emerge. \textbf{(1)~Active transfer unlocks
 spatial value.} A transfer-budget sweep cuts out-of-sample $\CVaR_{0.95}$ by
 $4.7$--$10.1\%$ across the three grids, the value the passive null left on the table,
 captured by exploiting the spatial \emph{mean} (shipping work to the region cleanest
@@ -1416,24 +1417,46 @@ on average). \textbf{(2)~Robustness is worthless under normal carbon, even here.
 one-shot transfer DRO, a forecast-error (persistence) ambiguity set, and a two-stage
 robust commitment with costly recourse all leave robust $\approx$ deterministic: the
 mean-dominance of the main text extends into the active setting. \textbf{(3)~But
-robustness pays under tail risk.} Modelling rare grid-emergency events (with
-probability $0.1$ per day a region's carbon is scaled by a severity $M$, as in a
-renewable drought or peaker dispatch) and re-solving the two-stage problem with
-migration-limited recourse traces a sharp \emph{crossover}: at $M=1$ the robust
-commitment is no better than the risk-neutral one (the main null), but as $M$ grows
-it increasingly wins, by up to $+8.4\%$ of $\CVaR_{0.95}$ at $M=4$ on the US West.
-The robust commitment stays hedged while the risk-neutral one is burned when its
-favoured region spikes.
+robustness pays under tail risk.} We model rare grid-emergency events: with
+probability $0.1$ per day one region's carbon is multiplied by a severity
+$M\in[1,4]$ (the realistic renewable-drought / peaker-dispatch range), hitting both
+the day-ahead scenarios and the evaluation world, and re-solve the two-stage problem
+with costly, migration-limited recourse. Sweeping $M$ with a paired bootstrap traces
+a sharp \emph{crossover} (Figure~\ref{fig:part3}, Table~\ref{tab:crossover}): at
+$M=1$ the robust commitment matches the risk-neutral one (the main null, gap CI
+spans zero), but past a grid-specific threshold $M^\star$ its advantage becomes
+bootstrap-significant, reaching $+8.4\%$ of $\CVaR_{0.95}$ (CI $[2.8,13.1]$) at
+$M=4$ on the US West. The robust commitment stays hedged while the risk-neutral one
+is burned when its favoured region spikes.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\textwidth]{../figures/part3_preliminary.pdf}
-\caption{The transfer channel. \textbf{A:} active transfer reduces out-of-sample
-$\CVaR_{0.95}$ by $4.7$--$10.1\%$. \textbf{B:} the tail-risk crossover, the robust
-(CVaR-hedged) commitment's advantage over the risk-neutral one as grid-emergency
-severity $M$ grows; near $M\approx2$ it turns positive.}
-\label{fig:phase3}
+\includegraphics[width=0.82\textwidth]{../figures/part3_crossover.pdf}
+\caption{The tail-risk crossover, with uncertainty. Robust-minus-risk-neutral gain
+(\% of $\CVaR_{0.95}$) against emergency severity $M$; shaded bands are $95\%$
+paired-bootstrap intervals, dotted verticals mark each grid's crossover threshold
+$M^\star$. Robustness is null at $M=1$ everywhere and pays only once emergencies are
+severe enough.}
+\label{fig:part3}
 \end{figure}
+
+\begin{table}[t]
+\centering\small
+\caption{Tail-risk crossover: robust gain over risk-neutral (\% of $\CVaR_{0.95}$,
+$95\%$ bootstrap CI) by emergency severity $M$, and the crossover threshold $M^\star$
+(smallest $M$ with a bootstrap-significant gain). Generated by
+\texttt{run\_part3\_emergency.py}.}
+\label{tab:crossover}
+\begin{tabular}{lcccc}
+\toprule
+Grid & $M^\star$ & $M=2$ & $M=3$ & $M=4$\\
+\midrule
+Western US         & $3.0$ & $+0.17\,[-1.1,1.7]$ & $+3.67\,[0.1,6.9]$ & $+8.39\,[2.8,13.1]$\\
+Eastern US--Canada & $1.5$ & $+0.36\,[0.1,0.5]$ & $+0.33\,[0.1,0.5]$ & $+0.33\,[0.2,0.5]$\\
+Diversified        & $3.0$ & $+0.34\,[-0.3,1.0]$ & $+1.32\,[0.0,2.1]$ & $+1.47\,[0.2,2.8]$\\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{A phase diagram for the value of robustness}
 The synthesis is a clean phase diagram. Distributional robustness is immaterial for
@@ -1448,18 +1471,162 @@ until a tail event dislodges it, and only then does the robustness layer earn it
 cost.
 
 \subsection{Honest status}
-These transfer results are a strong proof of concept, and the supporting
-optimization is validated code (Section~\ref{sec:testing-transfer}), but the
-\emph{experimental protocol} is not yet at the standard of the body's null. The
-grid-emergency model is stylised (a Bernoulli severity shock, not a calibrated
-outage process), the scenario counts are modest, and the transfer experiments are
-not pre-registered. The crossover is therefore a robust qualitative phenomenon whose
-precise threshold awaits a calibrated emergency model and a pre-registered
-evaluation. We report it because it completes the arc the null opened, and because
-its direction, robustness pays only in the tail, is exactly what the mean-dominance
-mechanism predicts.
+The crossover is now quantified, not merely asserted: each severity carries a
+$95\%$ bootstrap interval and each grid an identified threshold $M^\star$
+(Table~\ref{tab:crossover}), and the supporting optimization is validated code
+(Section~\ref{sec:testing-transfer}). What remains short of the body's null is the
+\emph{emergency model}: a Bernoulli severity shock is interpretable but stylised, not
+a calibrated outage process estimated from real grid-stress data, and the
+experiment, while bootstrap-quantified, is not pre-registered. The crossover is
+therefore a robust, uncertainty-bounded phenomenon whose precise threshold would
+sharpen further under a calibrated outage model. We report it because it completes
+the arc the null opened, and because its direction, robustness pays only in the
+tail, is exactly what the mean-dominance mechanism predicts.
 
-% ===================== 7. TESTING & VALIDATION =====================
+% ===================== 7. ONLINE OPERATION (PART 4) =====================
+\section{Online Operation: Rolling-Horizon Control}\label{sec:online}
+Parts~1--3 commit against a fixed scenario set. Real operation is \emph{online}: each
+day a fresh forecast arrives, a schedule is committed before carbon is realised, the
+day is observed, and the controller rolls forward. Part~4 asks whether day-ahead
+robustness pays once forecast error is faced in a closed loop, under \emph{normal}
+carbon (severe emergencies are Part~3's regime).
+
+\subsection{The controller}
+Each day $t$ a seasonal hour-of-day forecast $\hat\rho_t$ is formed from the training
+window, and forecast-error scenarios are $\hat\rho_t$ plus resampled historical
+residuals. Two controllers commit a transfer allocation over the executed load $y$:
+the \emph{deterministic} one minimises $\langle\hat\rho_t,y\rangle$ (acts on the point
+forecast); the \emph{robust} one minimises $\CVaR_\beta$ of cost over the error
+scenarios. The realised cost is $\langle\rho_t,y\rangle$ on the actual day. Both are
+single LPs, so a full year rolls in minutes (Algorithm~\ref{alg:online}).
+
+\begin{algorithm}[t]
+\caption{Rolling-horizon transfer control (one controller, one year)}
+\label{alg:online}
+\begin{algorithmic}[1]
+\State \textbf{Input:} train panel $\rho_{1:N}$, test panel $\rho^{\rm te}_{1:D}$,
+mode $\in\{$deterministic, robust$\}$, scenarios $S$, level $\beta$
+\State $\hat\rho \gets \tfrac1N\sum_n \rho_n$ \Comment{seasonal hour-of-day forecast}
+\State $E \gets \{\rho_n-\hat\rho\}_{n=1}^N$ \Comment{historical forecast-error pool}
+\For{each test day $t=1,\dots,D$}
+  \If{mode is robust}
+     \State draw $S$ errors from $E$; scenarios $\rho^s \gets \max(\hat\rho+e^s,0)$
+     \State $y_t \gets \arg\min_{y\in\mathcal X_{\rm transf}} \CVaR_\beta\big(\{\langle\rho^s,y\rangle\}_s\big)$
+  \Else
+     \State $y_t \gets \arg\min_{y\in\mathcal X_{\rm transf}} \langle\hat\rho,y\rangle$
+  \EndIf
+  \State observe $\rho^{\rm te}_t$; record realised cost $\langle\rho^{\rm te}_t, y_t\rangle$
+\EndFor
+\State \Return realised daily costs $\Rightarrow$ mean and $\CVaR_{0.95}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Result: robustness is second-order online too}
+Rolling both controllers across the 2025 test year (Table~\ref{tab:online},
+Figure~\ref{fig:part4}) gives a clear reading. On the two correlated grids the robust
+controller's realised $\CVaR_{0.95}$ is statistically indistinguishable from the
+deterministic one (Western US $+0.28\%$, CI $[-0.65,1.16]$; Eastern US--Canada
+$+0.04\%$, CI $[-0.10,0.25]$): mean-dominance extends to the closed loop, the seasonal
+forecast is good enough that hedging its error buys nothing. On the engineered
+near-uncorrelated Diversified grid robustness is not merely neutral but
+\emph{counterproductive}, its realised CVaR is $10.3\%$ \emph{worse} (CI
+$[-18.3,-4.4]$): with no exploitable cross-structure the CVaR hedge fits
+forecast-error noise and pays a real mean penalty, the online echo of the Phase-1
+finding that the joint covariance \emph{hurts} on this grid. The lesson is consistent
+across the whole arc: absent a genuine tail event or genuine structure, robustifying
+the schedule does not help and can harm; the mean forecast is what to get right.
+
+\begin{table}[t]
+\centering\small
+\caption{Part 4, online closed-loop over 2025. Realised $\CVaR_{0.95}$ for the
+deterministic and robust controllers, and the robust gap (\% , positive $=$ robust
+better) with a $95\%$ paired-bootstrap CI. Generated by \texttt{run\_part4\_online.py}.}
+\label{tab:online}
+\begin{tabular}{lccc}
+\toprule
+Grid & robust CVaR gap & $95\%$ CI & verdict\\
+\midrule
+Western US         & $+0.28\%$  & $[-0.65,\,1.16]$  & null\\
+Eastern US--Canada & $+0.04\%$  & $[-0.10,\,0.25]$  & null\\
+Diversified        & $-10.34\%$ & $[-18.3,\,-4.4]$  & robust \emph{loses}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.82\textwidth]{../figures/part4_online.pdf}
+\caption{Part 4. Realised closed-loop $\CVaR_{0.95}$, deterministic vs robust
+controller, per grid; annotations give the robust gap and its $95\%$ CI. Robustness is
+null on the correlated grids and counterproductive on the structureless one.}
+\label{fig:part4}
+\end{figure}
+
+% ===================== 8. PROBLEM-CLASS CONDITION (PART 5) =====================
+\section{A Problem-Class Condition}\label{sec:condition}
+The five experiments invite a general question: for which allocation problems can
+cross-coordinate dependence \emph{ever} improve a robust schedule? Part~5 turns the
+mean-dominance bound into a dimensionless screen.
+
+\subsection{The mean-dominance ratio}
+Proposition~\ref{prop:meandom} bounds the spatial gap by
+$B=\varepsilon\,(\max_{x\in\mathcal X}\lVert x\rVert)\,\lVert\Sigma^{\rm off}\rVert^{1/2}$.
+Let $M=\max_{x\in\mathcal X}\langle\bar\rho,x\rangle-\min_{x\in\mathcal X}\langle\bar
+\rho,x\rangle$ be the value the mean field alone makes exploitable over the feasible
+set. Their ratio
+\begin{equation}
+\Delta \;=\; B / M
+\label{eq:delta}
+\end{equation}
+is a cheap, a-priori, data-only quantity (no optimization solve): the dependence gap is
+at most $B$, hence at most a fraction $\Delta$ of what the mean already delivers. A
+value $\Delta\ll1$ \emph{certifies} that cross-coordinate dependence is immaterial.
+
+\subsection{Validation: a screen and a regime indicator}
+On the three grids $\Delta\approx1.5$--$3.4$ (Table~\ref{tab:delta}). Because $B$ is a
+deliberately loose bound, the a-priori screen is \emph{inconclusive} here, $\Delta$ is
+not $\ll1$, which is precisely why the empirical falsification of Parts~1--2 was
+necessary rather than optional. $\Delta$'s value is therefore twofold. As a
+\emph{negative filter} it would rule out dependence cheaply on any problem with
+$\Delta\ll1$. As a \emph{regime indicator} it is monotone: a mean-flattening sweep
+($\kappa:1\!\to\!0$) shrinks $M$ and raises $\Delta$ (Figure~\ref{fig:part5}) in
+lockstep with the empirical dependence value, which rises from $\approx0$ on the real
+grids to $+1.46\%$ in the mean-ablated world (Section~\ref{sec:res-ablation}). The
+condition correctly \emph{orders} the regimes; calibrating an absolute threshold is
+future work. The diagnostic transfers beyond carbon: cross-coordinate dependence is
+worth modelling only where the mean field is weak relative to the residual structure,
+a condition the carbon-aware problem fails by a wide margin.
+
+\begin{table}[t]
+\centering\small
+\caption{Part 5, the mean-dominance ratio $\Delta=B/M$ \eqref{eq:delta} on the three
+grids (a-priori, $\varepsilon^\star=1$). $\Delta\gtrsim1$: the cheap screen is
+inconclusive, the empirical test settles it. Generated by
+\texttt{run\_part5\_condition.py}.}
+\label{tab:delta}
+\begin{tabular}{lccc}
+\toprule
+Grid & $B$ (gap bound) & $M$ (mean value) & $\Delta=B/M$\\
+\midrule
+Western US         & $253{,}057$ & $131{,}556$ & $1.92$\\
+Eastern US--Canada & $112{,}245$ & $32{,}910$  & $3.41$\\
+Diversified        & $83{,}627$  & $54{,}086$  & $1.55$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.82\textwidth]{../figures/part5_delta.pdf}
+\caption{Part 5. The mean-dominance ratio $\Delta=B/M$ along a mean-flattening sweep
+($\kappa=1$ real grid $\to$ $\kappa\to0$ mean-ablated). $\Delta$ rises monotonically
+as the mean weakens, tracking the empirical dependence value ($\approx0$ on real grids,
+$+1.46\%$ ablated); the shaded band marks the $\Delta<1$ region where dependence is
+provably immaterial.}
+\label{fig:part5}
+\end{figure}
+
+% ===================== 9. TESTING & VALIDATION =====================
 \section{Testing, Validation, and Reproducibility}\label{sec:testing}
 A falsification study is only as trustworthy as the machinery that produces it.
 Because the central result is a \emph{null}, the burden is heavier than usual: a bug
@@ -1494,7 +1661,7 @@ multiple-testing correction (Benjamini--Hochberg over the pre-registered $144$-c
 family) guards the discovery rate.
 
 \subsection{The software test suite}\label{sec:testing-suite}
-The implementation carries a $175$-test suite run under continuous integration on
+The implementation carries a $184$-test suite run under continuous integration on
 every push. The tests pin the components the results depend on: a \emph{feasible-set
 equivalence} test ties the Phase~2 $\CVaR$-SAA scheduler to the Phase~1 constraint
 set so the two phases optimise over the same $\mathcal X$; $\CVaR$ correctness tests
@@ -1513,9 +1680,13 @@ transfer DRO, the two-stage robust commitment, and the costly-recourse evaluatio
 each exercised by tests pinning the model's invariants: conservation of work under
 inter-region flows ($\sum_{r,t} y_{r,t}=\sum_r W_r$), monotone emission reduction as
 the transfer budget grows, and exact recovery of the no-transfer schedule at zero
-budget, plus a guard rejecting an invalid risk argument. What remains preliminary
-about Part~3 (Section~\ref{sec:transfer}) is therefore the experimental protocol, not
-the optimisation: the crossover rests on validated code.
+budget, plus a guard rejecting an invalid risk argument. The Part~4 online controller
+(\texttt{online\_transfer.py}, Section~\ref{sec:online}) and the Part~5 ratio
+computation are likewise unit-tested, the former for work conservation and feasible
+realised cost across the rolling loop, the latter for the mean-value-range and
+flattening operators against hand-computed cases, bringing the suite to $184$ tests.
+What remains preliminary about Parts~3--5 is therefore the experimental protocol and
+calibration, not the optimisation: every reported number rests on validated code.
 
 \subsection{Statistical validation}
 Finally, the null is defended statistically rather than merely asserted. A power
@@ -1543,6 +1714,31 @@ validation is deliberately avoided.
 
 % ===================== 8. CONCLUSIONS (RUN 3) =====================
 \section{Conclusions}\label{sec:conclusion}
+
+\subsection{The arc, in one mechanism}
+Five parts, one mechanism. The carbon-aware scheduling problem is governed by the
+diurnal \emph{mean} carbon field; everything else, cross-region covariance, copula
+tail dependence, the robustness layer itself, is second-order until a rare event
+dislodges the mean. Part~1 shows that a passive covariance ambiguity set adds no
+robust value (the spatial gap is a statistical zero, equivalence-tested across $27$
+cells and the full $\CVaR_{0.90}$--$\CVaR_{0.99}$ tail range) and proves why with the
+mean-dominance bound. Part~2 forecloses the obvious objection: a Gaussian, a lower-tail
+Clayton, and even the maximal comonotone copula recover nothing either, so the limit is
+not the \emph{shape} of the dependence object but its subordination to the mean. Part~3
+turns the diagnosis into a positive result, making the spatial structure an
+\emph{active} transfer decision unlocks $4.7$--$10.1\%$, and under grid-emergency stress
+a sharp, bootstrap-quantified tail-risk crossover appears, beyond a grid-specific
+severity $M^\star$ the robust commitment wins (up to $+8.4\%$). Part~4 confirms the
+same logic online: rolled day by day under realistic forecast error, robustness is
+null on the correlated grids and counterproductive on the structureless one, the
+closed-loop echo of the passive null. Part~5 abstracts the whole pattern into a single
+dimensionless ratio $\Delta=B/M$ that orders the regimes: dependence can matter only
+where the mean field is weak relative to the residual structure, a condition this
+problem fails by a wide margin and the mean-ablated world satisfies (recovering
+$+1.46\%$). The unifying statement is therefore not ``spatial structure is useless''
+but the sharper ``\emph{distributional robustness and cross-coordinate dependence earn
+their cost exactly when, and only when, the mean field stops being a reliable guide},''
+in the tail, or under an active decision that the mean cannot already exploit.
 
 \subsection{Answers to the research questions}
 \textbf{RQ1, Is carbon intensity spatially correlated in coupled grids?}
@@ -1593,7 +1789,7 @@ hierarchy from covariance ball to elliptical and lower-tail copulas;
 (3)~a causal mechanism (formalized as a mean-dominance bound
 (Proposition~\ref{prop:meandom}) and demonstrated by mean-ablation) that
 explains the null rather than merely reporting it; (4)~a fully reproducible,
-version-controlled, CI-tested pipeline (175 tests) with archived license-safe
+version-controlled, CI-tested pipeline (184 tests) with archived license-safe
 summary tables for every reported number; (5)~an \emph{active transfer channel}
 (Section~\ref{sec:transfer}) that recovers $4.7$--$10.1\%$ of $\CVaR_{0.95}$ and
 exhibits a tail-risk crossover, the positive resolution the null predicts; and
@@ -1719,7 +1915,7 @@ with $S$; the $\pm0.1\%$ no-value band is shaded.}
 \end{figure}
 
 \paragraph{Repository and environment.} All code lives in a private,
-version-controlled repository with a continuous-integration suite ($175$ unit
+version-controlled repository with a continuous-integration suite ($184$ unit
 tests; the Electricity-Maps integration test is excluded from CI as it requires
 licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL/ECOS
 for the second-order cone program and HiGHS for deterministic LP baselines. The
@@ -1771,29 +1967,28 @@ Section & Result & Archived source\\
 \end{tabular}
 \end{table}
 
-\section{The Five-Part Research Programme}\label{app:programme}
-The body of this extended thesis establishes Parts~1--3 of a planned five-part
-programme. \textbf{Part~1} is the covariance null and the mean-dominance bound
-(Sections~\ref{sec:results}--\ref{sec:discussion}); \textbf{Part~2} is the copula
-extension that forecloses the ``wrong dependence object'' objection
-(Section~\ref{sec:res-copula}); \textbf{Part~3} is the spatially-coupled transfer DRO,
-the active-decision algorithm and the tail-risk crossover (Section~\ref{sec:transfer}),
-included here as a validated proof of concept whose rigorous, pre-registered version,
-with a calibrated emergency model and, ideally, affine decision rules for the recourse
-policy, is itself the immediate next step.
-
-The programme then continues beyond this thesis. \textbf{Part~4} takes the transfer
-model \emph{online}: a multistage / rolling-horizon robust controller in which
-forecasts arrive sequentially and demand and transmission are themselves uncertain,
-with a Wasserstein ball centred on a \emph{learned} forecast (learning-augmented DRO)
-and evaluated closed-loop on real operational traces, the deployable systems
-contribution. \textbf{Part~5} generalises the mean-dominance bound itself into a
-problem-class condition for \emph{when} cross-coordinate dependence can ever improve a
-robust allocation, of which carbon-aware scheduling is one instance and energy
-storage, EV fleets and spatial supply chains are others, the theory that turns the
-sequence into a research programme. Parts~4--5 are scoped but not yet executed; they
-are stated to place the present contribution within its arc, not as claimed results.
-The programme is detailed in the project's research roadmap.
+\section{The Five-Part Research Programme: Status and Horizon}\label{app:programme}
+This extended thesis gives a first, end-to-end treatment of all five parts of the
+programme; this appendix records what is settled versus what each part's full version
+still demands. \textbf{Part~1} (covariance null and mean-dominance bound,
+Sections~\ref{sec:results}--\ref{sec:discussion}) and \textbf{Part~2} (the copula
+extension, Section~\ref{sec:res-copula}) are at full rigour: pre-registered,
+robustness-checked, equivalence-tested. \textbf{Part~3} (the active transfer DRO and
+the tail-risk crossover, Section~\ref{sec:transfer}) is bootstrap-quantified and
+code-validated; its remaining step is a \emph{calibrated} emergency model and a
+pre-registered protocol, ideally with affine recourse rules. \textbf{Part~4} (the
+online rolling-horizon controller, Section~\ref{sec:online}) demonstrates the
+closed-loop result; its full version is a true multistage controller with a
+\emph{learned} forecast (learning-augmented DRO), uncertain demand and transmission,
+and evaluation on real operational traces, the deployable-systems contribution.
+\textbf{Part~5} (the problem-class condition, Section~\ref{sec:condition}) supplies the
+mean-dominance ratio $\Delta$ and validates it as a monotone regime indicator; its full
+version tightens the bound $B$ (so the screen becomes conclusive, not merely a negative
+filter) and calibrates an absolute threshold, then tests the condition on other
+allocation domains, energy storage, EV fleets, spatial supply chains. In short, the
+arc is complete in outline and rigorous at its core (Parts~1--2); Parts~3--5 are
+validated first cuts whose sharpening is the post-capstone research agenda, detailed in
+the project's research roadmap.
 
 \section*{Annex A: Individual Contribution Statement}\label{app:ics}
 \addcontentsline{toc}{section}{Annex A: Individual Contribution Statement}
