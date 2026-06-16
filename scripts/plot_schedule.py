@@ -83,15 +83,15 @@ def main() -> None:
         ax2.set_ylim(0, np.nanmax(rho_bar) * 1.1)
         if r == 0:
             ax.set_ylabel("scheduled load [MW]", fontsize=9)
-        if r == R - 1:
-            ax2.set_ylabel("carbon intensity [$\\mathrm{gCO_2/kWh}$]", fontsize=9,
-                           color=GOLD)
-        ax2.tick_params(axis="y", labelcolor=GOLD, labelsize=7)
+        ax2.set_yticks([])
+        ax2.spines["right"].set_visible(False)
         ax.tick_params(labelsize=7)
-    # one combined legend
+    # combined legend: load (joint/shuffled) + the gold carbon backdrop
+    from matplotlib.lines import Line2D
     h1, l1 = axes[0][0].get_legend_handles_labels()
-    h2, l2 = axes[0][0].twinx().get_legend_handles_labels()
-    axes[0][0].legend(h1, l1, frameon=False, fontsize=7.5, loc="upper right")
+    h1 = h1 + [Line2D([0], [0], color=GOLD, lw=2.6)]
+    l1 = l1 + ["carbon intensity (mean field)"]
+    axes[0][0].legend(h1, l1, frameon=False, fontsize=7.0, loc="upper right")
     fig.suptitle(f"Joint vs.\\ shuffled-covariance schedules are visually "
                  f"indistinguishable ({DISPLAY_NAME.get(args.region_set, args.region_set)}): the spatial null, seen "
                  f"directly. Load (bars) tracks the low-carbon hours.", fontsize=11)
