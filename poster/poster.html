@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>IE Capstone Poster, Carbon DRO</title>
+<link rel="stylesheet" href="design-system.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+<script>
+  window.MathJax = { tex: { inlineMath:[['$','$']], displayMath:[['$$','$$']] },
+                     svg: { fontCache:'global' } };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<div class="poster">
+
+  <!-- ===== title bar ===== -->
+  <header class="topbar">
+    <div class="topbar__logo"><img src="figs/ie_logo.svg" alt="IE University"></div>
+    <div>
+      <div class="topbar__title">Does Spatial Correlation of Carbon Intensity Improve<br>
+        Robust Carbon-Aware Data-Center Scheduling?</div>
+      <div class="topbar__sub">A multi-grid falsification study: a causal mechanism, a copula test, and an active-transfer extension</div>
+      <div class="topbar__authors">MARCO ORTIZ TOGASHI &nbsp;·&nbsp; SUPERVISOR: PROF. BISSAN GHADDAR &nbsp;·&nbsp; IE UNIVERSITY, MASTER IN BUSINESS ANALYTICS &amp; DATA SCIENCE</div>
+    </div>
+  </header>
+
+  <!-- ===== hero ===== -->
+  <section class="hero">
+    <div class="hero__fig"><img src="figs/finding.png" alt="Spatial value does not track correlation"></div>
+    <div class="hero__take">
+      <div class="hero__kicker">The finding</div>
+      <div class="hero__line">Spatial correlation of carbon is <em>real</em>, but a robust scheduler can&rsquo;t use it.</div>
+      <div class="hero__note">Across every grid and every dependence model, the out-of-sample spatial gap
+        never leaves <b>zero</b>. The value lives in the diurnal <b>mean</b> carbon field, not in how regions correlate.</div>
+    </div>
+  </section>
+
+  <!-- ===== stat strip ===== -->
+  <section class="stats">
+    <div class="stat"><div class="stat__n is-navy">0.78</div><div class="stat__l">Cross-grid correlation is real</div></div>
+    <div class="stat"><div class="stat__n is-gold">&sim;0%</div><div class="stat__l">Robust scheduling value</div></div>
+    <div class="stat"><div class="stat__n is-rust">+1.46%</div><div class="stat__l">Only when the mean is flattened</div></div>
+    <div class="stat"><div class="stat__n is-sage">4&ndash;10%</div><div class="stat__l">Only via active transfer</div></div>
+  </section>
+
+  <!-- ===== 3 columns ===== -->
+  <section class="cols">
+
+    <!-- column 1 -->
+    <div class="col">
+      <div class="section">
+        <div class="section__head">The question</div>
+        <div class="section__body">
+          <p>Compute is unusually <b>flexible</b>: batch and training jobs can shift in time and
+            <b>across sites</b> (logically, over the network, no grid interconnection needed).
+            Carbon intensity varies by hour and region, so a scheduler can defer work to cleaner moments
+            under <b>distributionally robust optimization (DRO)</b>.</p>
+          <p>Prior models treat each region in isolation. We treat carbon intensity as a stochastic
+            <b>vector</b> so that <b>spatial correlation</b> can inform the schedule, and ask whether it helps.</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section__head">How we test it</div>
+        <div class="section__body">
+          <p>A Mahalanobis&ndash;Wasserstein DRO, solved as a second-order cone program:</p>
+          <div class="eq">$$\min_{x\in\mathcal X}\ \langle\bar\rho,x\rangle\;+\;\varepsilon\,\lVert L^\top x\rVert_2,\qquad LL^\top=\widehat\Sigma$$</div>
+          <p><b>Shuffled-marginals test.</b> Fit the schedule on the <em>joint</em> covariance vs.\ a
+            <em>block-diagonal</em> one with all cross-region structure zeroed, and compare out-of-sample
+            $\mathrm{CVaR}_{0.95}$. A positive gap means correlation helps.</p>
+          <ul>
+            <li><b>Pre-registered</b>: config commit-locked, single 2025 test read.</li>
+            <li>Three US/Canada grids spanning low-to-strong correlation ($\bar r\approx0.2$ to $0.65$).</li>
+            <li>Best-case stress test: real fleets are dispersed (low correlation) and also null.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section__head">The premise holds</div>
+        <div class="section__body">
+          <div class="fig"><img src="figs/ci_corr_heatmap_us_west.png" alt="US West correlation heatmap"></div>
+          <div class="cap">Residual cross-region correlation is strong and survives de-seasonalization
+            (US West up to 0.78). The spatial assumption is empirically valid.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- column 2 -->
+    <div class="col">
+      <div class="section">
+        <div class="section__head section__head--gold">It adds no robust value</div>
+        <div class="section__body">
+          <p>Across the spectrum the spatial gap <b>never exceeds a few tenths of a percent</b> and is not
+            sign-stable. It survives shrinkage, residualization, Benjamini&ndash;Hochberg over 144 cells,
+            walk-forward, tightness sweeps, and the full $\mathrm{CVaR}_{0.90}$&ndash;$\mathrm{CVaR}_{0.99}$ tail range.</p>
+          <div class="callout"><b>Statistically zero, not undetected.</b> A per-cell equivalence test (TOST)
+            rejects any effect above the materiality margin in all 27 cells. And the DRO is genuinely
+            <em>active</em> ($\varepsilon^\star=1$ almost everywhere), it pays for robustness and the covariance still buys nothing.</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section__head">Why, the mechanism</div>
+        <div class="section__body">
+          <p><b>Mean-ablation (causal).</b> Flatten the mean field and the joint covariance suddenly pays,
+            up to <b>+1.46%</b>: the spatial signal is <em>real but masked</em> by the diurnal mean, not absent.</p>
+          <p><b>Tail dependence (structural).</b> The residual dependence is <em>non-elliptical</em>:
+            regions go clean together more than dirty together ($\chi_L>\chi_U$). An elliptical covariance
+            ball forces $\chi_L=\chi_U$, it is the <em>wrong object</em>.</p>
+          <div class="fig"><img src="figs/tail_dependence_taskc.png" alt="Tail dependence"></div>
+          <div class="cap">Clean-together exceeds dirty-together: the dependence a covariance ball cannot represent.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- column 3 -->
+    <div class="col">
+      <div class="section">
+        <div class="section__head">Even the right copula fails</div>
+        <div class="section__body">
+          <p>We replace the covariance ball with copula schedulers that <em>can</em> see the asymmetry:
+            independence, Gaussian, lower-tail <b>Clayton</b>, and the maximal <b>comonotone</b> ceiling.</p>
+          <div class="fig"><img src="figs/copula_result.png" alt="Copula result"></div>
+          <div class="callout--navy callout">Even the <em>maximal</em> copula sits at the scenario-noise floor
+            ($|\Lambda|\lesssim$<b>0.1%</b>): the null is <b>total</b>.</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section__head">A mean-dominance bound</div>
+        <div class="section__body">
+          <p>By translation invariance of CVaR the dependence model moves only the residual term, and the
+            spatial gap is bounded a-priori:</p>
+          <div class="eq">$$\big|\mathrm{OPT}(\Sigma)-\mathrm{OPT}(\Sigma^{\mathrm{shuf}})\big|\ \le\
+            \varepsilon\,\big(\max_{x}\lVert x\rVert\big)\,\lVert\Sigma^{\mathrm{off}}\rVert^{1/2}$$</div>
+          <p>It vanishes with no robustification ($\varepsilon\to0$) or no cross-structure. The tight ceiling
+            is <em>measured</em> by the comonotone arm, an order of magnitude below the mean-driven value.</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section__head">Conclusions &amp; extension</div>
+        <div class="section__body">
+          <ul>
+            <li>Spatial correlation is <b>real but adds no robust value</b>, for any passive dependence model.</li>
+            <li>The binding constraint is the <b>mean field</b> (bound + comonotone ceiling).</li>
+            <li><b>Use a per-region marginal scheduler</b>: it captures essentially all the value.</li>
+            <li>An <b>active transfer channel</b> recovers <b>4&ndash;10%</b> <em>deterministically</em>, but
+              robustifying it pays nowhere data-grounded (online or under real emergencies).</li>
+          </ul>
+          <div class="cap">Reproducible: 187 unit tests, pre-registered configs, equivalence tests, multi-seed
+            stability, an independent review. AI used as a coding/drafting assistant under the author&rsquo;s direction.</div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===== full-width schedule band (fills remaining height) ===== -->
+  <section class="band">
+    <div class="band__head">Seen directly: the joint and shuffled-covariance schedules coincide (US West)</div>
+    <div class="band__fig"><img src="figs/schedule_us_west.png" alt="Joint vs shuffled schedules coincide"></div>
+  </section>
+</div>
+</body>
+</html>
