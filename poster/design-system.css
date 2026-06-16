@@ -50,7 +50,9 @@
   line-height: var(--lh-body);
   padding: var(--s5);
   display: grid;
-  grid-template-rows: auto auto auto auto 1fr;
+  /* the 3-column row (1fr) absorbs slack so the columns fill the page height;
+     the bottom band is sized to its own content instead of stretching tall. */
+  grid-template-rows: auto auto auto 1fr auto;
   row-gap: var(--s4);
 }
 
@@ -93,16 +95,17 @@
 .is-rust { color: var(--rust); } .is-sage { color: var(--sage); }
 
 /* ---- 3-column content ---- */
-.cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s4); align-items: start; }
-.col { display: flex; flex-direction: column; gap: var(--s4); }
+/* stretch makes all three columns equal height; space-between spreads each
+   column's sections to fill that height, so no column leaves dead whitespace. */
+.cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s4); align-items: stretch; }
+.col { display: flex; flex-direction: column; justify-content: space-between; gap: var(--s4); }
 
-/* full-width schedule band absorbs the remaining page height */
-.band { display: flex; flex-direction: column; min-height: 0; }
+/* full-width schedule band: sized to its figure (a wide, short chart) */
+.band { display: flex; flex-direction: column; }
 .band__head { background: var(--navy); color:#fff; font-weight:700; font-size: var(--fs-h2);
   text-align:center; padding: 12px var(--s2); border-radius:6px; }
-.band__fig { flex: 1; min-height: 0; display:flex; align-items:center; justify-content:center;
-  padding-top: var(--s2); }
-.band__fig img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.band__fig { display:flex; align-items:center; justify-content:center; padding-top: var(--s2); }
+.band__fig img { width: 100%; height: auto; max-height: 760px; object-fit: contain; }
 
 .section { break-inside: avoid; }
 .section__head { background: var(--navy); color: #fff; font-weight: 700;
@@ -126,6 +129,10 @@ em { color: inherit; }
 
 .eq { background: var(--tint); border-radius: 6px; padding: 14px 18px; margin: 10px 0;
   font-size: var(--fs-small); overflow-x: auto; }
+
+/* inline conceptual SVG diagrams */
+.diagram { margin: 8px 0 4px; }
+.diagram svg { width: 100%; height: auto; display: block; }
 
 .full { grid-column: 1 / -1; }
 .footer { color: var(--muted); font-size: 15px; text-align: center; }
