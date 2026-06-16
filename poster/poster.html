@@ -144,11 +144,44 @@
         <div class="section__body">
           <p><b>Mean-ablation (causal).</b> Flatten the mean field and the joint covariance suddenly pays,
             up to <b>+1.46%</b>: the spatial signal is <em>real but masked</em> by the diurnal mean, not absent.</p>
-          <p><b>Tail dependence (structural).</b> The residual dependence is <em>non-elliptical</em>:
-            regions go clean together more than dirty together ($\chi_L>\chi_U$). An elliptical covariance
-            ball forces $\chi_L=\chi_U$, it is the <em>wrong object</em>.</p>
-          <div class="fig"><img src="figs/tail_dependence_taskc.png" alt="Tail dependence"></div>
-          <div class="cap">Clean-together exceeds dirty-together: the dependence a covariance ball cannot represent.</div>
+          <div class="diagram">
+          <svg viewBox="0 0 680 234" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Helvetica, sans-serif">
+            <!-- gold mean-wave area + curve -->
+            <path d="M36,78 Q200,90 342,156 Q484,90 648,78 L648,188 L36,188 Z" fill="#fbf2dd"/>
+            <path d="M36,78 Q200,90 342,156 Q484,90 648,78" fill="none" stroke="#E69F00" stroke-width="4.5"/>
+            <!-- schedule bars following the clean valley -->
+            <g fill="#0E2A52" opacity=".9">
+              <rect x="32"  y="181" width="36" height="7"/>
+              <rect x="88"  y="173" width="36" height="15"/>
+              <rect x="144" y="160" width="36" height="28"/>
+              <rect x="200" y="141" width="36" height="47"/>
+              <rect x="256" y="123" width="36" height="65"/>
+              <rect x="312" y="114" width="36" height="74"/>
+              <rect x="368" y="123" width="36" height="65"/>
+              <rect x="424" y="141" width="36" height="47"/>
+              <rect x="480" y="160" width="36" height="28"/>
+              <rect x="536" y="173" width="36" height="15"/>
+              <rect x="592" y="181" width="36" height="7"/>
+            </g>
+            <line x1="36" y1="188" x2="648" y2="188" stroke="#cfd6e0" stroke-width="1.5"/>
+            <!-- labels -->
+            <text x="60" y="64" font-size="17" font-weight="700" fill="#9a6b00">diurnal mean carbon</text>
+            <text x="60" y="84" font-size="14" fill="#b89535">the big daily wave</text>
+            <text x="342" y="214" text-anchor="middle" font-size="14" fill="#0E2A52" font-weight="600">compute follows the clean valley</text>
+            <text x="48" y="206" font-size="13" fill="#5b6675">night</text>
+            <text x="600" y="206" font-size="13" fill="#5b6675">night</text>
+            <!-- tiny covariance ripple, drowned -->
+            <g transform="translate(404,36)">
+              <path d="M0,9 q5,-6 10,0 t10,0 t10,0 t10,0" fill="none" stroke="#38B6FF" stroke-width="2.4"/>
+              <text x="50" y="6" font-size="13.5" fill="#5b6675">spatial covariance:</text>
+              <text x="50" y="22" font-size="13.5" fill="#5b6675">a tiny ripple, drowned</text>
+            </g>
+          </svg>
+          </div>
+          <div class="cap">The schedule chases the big mean valley; the covariance ripple is too small to move it.</div>
+          <p><b>Tail dependence (structural).</b> The residual dependence is also <em>non-elliptical</em>:
+            regions go clean together more than dirty together ($\chi_L>\chi_U$), so an elliptical covariance
+            ball is the <em>wrong object</em> as well as a subordinate one.</p>
         </div>
       </div>
 
