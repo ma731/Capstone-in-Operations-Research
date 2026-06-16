@@ -109,7 +109,11 @@ transfer channel, not a richer dependence model.
 Data centers consumed an estimated 1--2\% of global electricity and their demand is
 growing rapidly with AI workloads \citep{iea2024}. Unlike most industrial loads,
 compute is unusually \emph{flexible}: many batch and training workloads can be
-delayed by hours or moved between sites with little loss of utility. Because the
+delayed by hours or moved between sites with little loss of utility. This movement is
+\emph{logical}, jobs relocate over the network between an operator's data centers, and
+does not require the regions' power grids to be physically interconnected; spatial
+correlation of carbon intensity therefore matters as information for the scheduler, not
+as an electrical constraint. Because the
 carbon intensity of grid electricity varies strongly by hour and by region, driven by wind, solar, hydro availability, and demand, this flexibility lets a
 data-center operator act as a grid-aware participant, deferring work from dirty
 hours to clean ones \citep{radovanovic2022,wiesner2021}. Google's carbon-intelligent
@@ -492,8 +496,17 @@ Three primary US/Canada region sets span the dependence spectrum:
 \textbf{(1)}~the \emph{US West}, California, Nevada and Phoenix (CISO, BANC,
 LDWP, NEVP, AZPS); \textbf{(2)}~an \emph{Ontario--Eastern belt} (CA-ON, NYISO,
 MISO, PJM); and \textbf{(3)}~an \emph{engineered heterogeneous portfolio} (CISO
-(solar), ERCOT (wind), BPAT (hydro)) deliberately chosen so clean periods do
-\emph{not} align: the adversarial best case for diversification. Two earlier panels
+(solar), ERCOT (wind), BPAT (hydro), spanning \emph{different} interconnections)
+deliberately chosen so clean periods do \emph{not} align: the adversarial best case
+for diversification. This spread is deliberate on both ends of the spectrum. The two
+correlated, within-interconnection grids are the \emph{best case for the spatial
+hypothesis}, the most cross-region correlation a covariance model could possibly
+exploit, and double as a stress test rather than a realistic deployment (no operator
+clusters data centers within one interconnection). A realistic, globally dispersed
+fleet looks instead like the heterogeneous portfolio, low and mixed correlation, so
+the practically relevant case is the one where diversification \emph{should} help
+most. The null holding at both ends is therefore stronger than a null on either alone.
+Two earlier panels
 corroborate: an \emph{Iberia--France} European set (ES, PT, FR), where residual
 correlation collapses to the diurnal cycle, and the California/Nevada subset of the
 US West before Phoenix was added at the supervisor's request. Temperature for

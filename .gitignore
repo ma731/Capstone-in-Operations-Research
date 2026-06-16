@@ -75,3 +75,13 @@ thesis/*.out
 thesis/*.toc
 thesis/*.bbl
 thesis/*.blg
+
+# full_thesis build artifacts + scratch/preview files
+full_thesis/*.aux
+full_thesis/*.log
+full_thesis/*.out
+full_thesis/*.toc
+thesis/_*.png
+thesis/_*.txt
+thesis/*.bak
+*.ORIG.bak

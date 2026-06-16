@@ -14,7 +14,7 @@ extension of single-region carbon DRO (Hall et al. 2024) is to treat carbon
 intensity as a stochastic **vector** across coupled regions, so that **spatial
 correlation** can inform the schedule. This project asks whether that helps.
 
-**It does not — a replicated, robustness-checked null.** Across three US/Canada
+**It does not, a replicated, robustness-checked null.** Across three US/Canada
 grids spanning the full dependence spectrum, the spatial covariance adds no robust
 $\mathrm{CVaR}_{0.95}$ scheduling value, and neither does a Gaussian, lower-tail
 Clayton, or even the maximal comonotone **copula**. Two diagnostics explain why:
@@ -22,7 +22,7 @@ Clayton, or even the maximal comonotone **copula**. Two diagnostics explain why:
 - **Mean-ablation** shows the covariance signal is *real* (worth up to +1.46% in a
   mean-flattened world) but *dominated* by the diurnal mean carbon field.
 - **Tail-dependence** shows the residual dependence is *non-elliptical*
-  (upper-tail-independent, radially asymmetric $\chi_L>\chi_U$) — invisible to a
+  (upper-tail-independent, radially asymmetric $\chi_L>\chi_U$), invisible to a
   covariance ball by construction.
 
 A small **mean-dominance theorem** (a-priori bound on the spatial gap) ties it
@@ -49,7 +49,7 @@ Corroborated by a California–Nevada subset (`taskA`) and an Iberia–France pa
 - **Model:** Mahalanobis–Wasserstein DRO, $\min\langle\bar\rho,x\rangle +
   \varepsilon\lVert L^\top x\rVert_2$, solved as a second-order cone program
   (`src/models/algorithm_2b_mahalanobis.py`).
-- **Falsification:** the *shuffled-marginals* test — fit the schedule on the joint
+- **Falsification:** the *shuffled-marginals* test, fit the schedule on the joint
   covariance vs. a block-diagonal one with all cross-region structure destroyed, and
   compare out-of-sample $\mathrm{CVaR}_{0.95}$. Pre-registered: commit-lock →
   dry-run → single test read on 2025.
@@ -94,7 +94,7 @@ generated under `figures/`).
 │   │                    #   transfer_dro (Part 3), covariance
 │   └── analysis/        # stratified_correlations, tail_dependence, metrics, plots
 ├── scripts/             # experiment runners + plotting (see docs/DEPRECATED.md for status)
-├── tests/               # 175 pytest unit tests (CI on push/PR)
+├── tests/               # 187 pytest unit tests (CI on push/PR)
 ├── thesis/              # capstone_thesis.{tex,pdf}, poster_a0.{tex,pdf}
 ├── docs/
 │   ├── decisions.md             # design-decision log
@@ -114,7 +114,7 @@ uv venv && uv pip install -e ".[dev]"
 # or: python -m venv .venv && pip install -e ".[dev]"
 
 cp .env.example .env        # add ELECTRICITY_MAPS_TOKEN
-pytest tests/               # 175 tests should pass
+pytest tests/               # 187 tests should pass
 ```
 
 **Solvers:** HiGHS (LP / CVaR-SAA) and CLARABEL/ECOS/SCS (SOCP), all free and in the
@@ -127,23 +127,36 @@ archived. Do not redistribute the raw data.
 
 ## Status
 
-- **Phase 1 (covariance) and Phase 2 (copulas):** done — the total null + the
-  mean-dominance bound. Capstone report and poster complete.
-- **Part 3 (preliminary, in the thesis as Appendix B):** a *spatially-coupled
-  transfer DRO* (`src/models/transfer_dro.py`) makes the spatial structure an active
-  decision (`f_{r→s,t}` flows). Proof-of-concept results: active transfer cuts CVaR
-  4.7–10.1%; robustness stays immaterial under normal carbon but crosses over to pay
-  under grid-emergency tail risk (up to +8%). Full treatment + supervisor sign-off
-  is the follow-on (`docs/proposal_transfer_channel.md`, `docs/research_roadmap.md`).
+- **Capstone report (`thesis/capstone_thesis.pdf`):** complete. Phases 1 and 2 (the
+  covariance and copula nulls plus the mean-dominance bound), with Part 3 (transfer
+  DRO) as a clearly fenced, preliminary appendix.
+- **Extended thesis (`full_thesis/full_thesis.pdf`):** a longer, non-page-limited
+  version that develops all five parts in the body and stress-tests them.
+  - **Part 3 (active transfer):** inter-region flows cut out-of-sample CVaR by
+    4.0--9.9% *deterministically* (by exploiting the spatial mean). A tail-risk
+    crossover appears only under *synthetic* over-stress and **does not survive
+    data-grounded emergencies**, so robustifying the transfer pays nowhere
+    data-grounded.
+  - **Part 4 (online):** a rolling-horizon controller. Robustness is immaterial under
+    forecast error (its sign flips with the forecast) and counterproductive on the
+    structureless grid.
+  - **Part 5 (theory):** a dimensionless mean-dominance ratio that screens when
+    cross-coordinate dependence can ever matter (ordinal on these grids).
+
+  The uniform-rigor pass (multi-seed stability, equivalence tests, an independent
+  adversarial review) made the findings *more conservative, not larger*: the only
+  positive result is the deterministic transfer value.
+- **Code:** 187 unit tests, CI on push/PR; every reported number traces to an
+  archived, license-safe snapshot in `docs/results_snapshots/`.
 
 ## Key references
 
-- Hall et al. 2024 — Wasserstein DRO for carbon-aware scheduling, [arXiv:2410.21510](https://arxiv.org/abs/2410.21510)
-- Wijayawardana & Chien 2025 — variable-capacity datacenter scheduling, SoCC '25
-- Mohajerin Esfahani & Kuhn 2018 — Wasserstein DRO, *Math. Program.* 171
-- Rockafellar & Uryasev 2000 — CVaR optimization, *J. Risk* 2(3)
-- Aas et al. 2009; Dißmann et al. 2013; Czado 2019 — vine copulas
-- Fan, Ji & Lejeune 2024 — copula-ambiguity Wasserstein DRO
+- Hall et al. 2024, Wasserstein DRO for carbon-aware scheduling, [arXiv:2410.21510](https://arxiv.org/abs/2410.21510)
+- Wijayawardana & Chien 2025, variable-capacity datacenter scheduling, SoCC '25
+- Mohajerin Esfahani & Kuhn 2018, Wasserstein DRO, *Math. Program.* 171
+- Rockafellar & Uryasev 2000, CVaR optimization, *J. Risk* 2(3)
+- Aas et al. 2009; Dißmann et al. 2013; Czado 2019, vine copulas
+- Fan, Ji & Lejeune 2024, copula-ambiguity Wasserstein DRO
 
 ## License
 

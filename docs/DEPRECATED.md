@@ -14,6 +14,9 @@ the committed configuration that produced a result can always be re-read.
 | `scripts/run_part3_transfer_value.py` | Part 3 Finding 1: active-transfer out-of-sample CVaR reduction (4.0--9.9%). |
 | `scripts/run_part3_emergency.py` | Part 3 crossover, single-seed bootstrap. **Superseded for the thesis headline** by `run_parts34_stability.py` (multi-seed): the single-seed crossovers on the weakly structured grids were scenario-seed noise. Kept for the finer M-grid only. |
 | `scripts/run_part4_online.py`, `run_part5_condition.py`, `run_part5_kappa.py`, `run_parts34_stability.py` | Parts 4--5 experiments and the Parts 3--4 multi-seed stability run. |
+| `scripts/run_part3_real_emergency.py` | Part 3 rigor: data-grounded emergencies (real top-5% tail days); the crossover does not survive. |
+| `scripts/run_part4_forecasts.py` | Part 4 rigor: forecast-model robustness (seasonal / persistence / lagged-week). |
+| `scripts/run_part5_tight.py` | Part 5 rigor: realized-norm tightening of the mean-dominance bound (stays inconclusive). |
 | `scripts/calibrate_capacity.py` | Goldilocks calibration of the 3c capacity bounds. |
 | `scripts/measure_complexity.py` | Solve-time / problem-dimension reporting. |
 | `src/models/transfer_dro.py` | Part 3 canonical module (one-shot transfer DRO, two-stage commit, recourse). Tested in `tests/test_transfer_dro.py`. Supersedes the `scripts/prototype_*transfer*.py` and `run_transfer_experiment.py` prototypes (which produced the Appendix B numbers and are kept for provenance). |
