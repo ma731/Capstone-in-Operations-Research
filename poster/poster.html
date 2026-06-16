@@ -57,6 +57,77 @@
             <b>across sites</b> (logically, over the network, no grid interconnection needed).
             Carbon intensity varies by hour and region, so a scheduler can defer work to cleaner moments
             under <b>distributionally robust optimization (DRO)</b>.</p>
+          <div class="diagram">
+          <svg viewBox="0 0 680 250" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Helvetica, sans-serif">
+            <defs>
+              <marker id="ahGold" markerWidth="11" markerHeight="11" refX="7" refY="5.5" orient="auto">
+                <path d="M0,1 L9,5.5 L0,10 Z" fill="#E69F00"/></marker>
+              <marker id="ahGrey" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto">
+                <path d="M0,1 L8,5 L0,9 Z" fill="#9aa4b2"/></marker>
+            </defs>
+            <!-- three region data centers, each with a carbon meter -->
+            <g font-size="12.5">
+              <!-- West: clean -->
+              <g transform="translate(14,8)">
+                <rect width="200" height="98" rx="10" fill="#fff" stroke="#0E2A52" stroke-width="2"/>
+                <text x="14" y="28" font-size="17" font-weight="700" fill="#0E2A52">West</text>
+                <g transform="translate(14,40)">
+                  <rect x="0" y="0"  width="46" height="13" rx="3" fill="#eef1f6" stroke="#0E2A52"/>
+                  <rect x="0" y="17" width="46" height="13" rx="3" fill="#eef1f6" stroke="#0E2A52"/>
+                  <rect x="0" y="34" width="46" height="13" rx="3" fill="#eef1f6" stroke="#0E2A52"/>
+                  <circle cx="8" cy="6.5" r="2.4" fill="#4A7C59"/><circle cx="8" cy="23.5" r="2.4" fill="#4A7C59"/><circle cx="8" cy="40.5" r="2.4" fill="#4A7C59"/>
+                </g>
+                <text x="78" y="50" fill="#5b6675">carbon now</text>
+                <rect x="78" y="58" width="108" height="14" rx="7" fill="#eef1f6"/>
+                <rect x="78" y="58" width="26" height="14" rx="7" fill="#4A7C59"/>
+                <text x="78" y="90" font-size="13" font-weight="700" fill="#4A7C59">clean</text>
+              </g>
+              <!-- Central: dirty -->
+              <g transform="translate(240,8)">
+                <rect width="200" height="98" rx="10" fill="#fff" stroke="#0E2A52" stroke-width="2"/>
+                <text x="14" y="28" font-size="17" font-weight="700" fill="#0E2A52">Central</text>
+                <g transform="translate(14,40)">
+                  <rect x="0" y="0"  width="46" height="13" rx="3" fill="#eef1f6" stroke="#0E2A52"/>
+                  <rect x="0" y="17" width="46" height="13" rx="3" fill="#eef1f6" stroke="#0E2A52"/>
+                  <rect x="0" y="34" width="46" height="13" rx="3" fill="#eef1f6" stroke="#0E2A52"/>
+                  <circle cx="8" cy="6.5" r="2.4" fill="#B3402F"/><circle cx="8" cy="23.5" r="2.4" fill="#B3402F"/><circle cx="8" cy="40.5" r="2.4" fill="#B3402F"/>
+                </g>
+                <text x="78" y="50" fill="#5b6675">carbon now</text>
+                <rect x="78" y="58" width="108" height="14" rx="7" fill="#eef1f6"/>
+                <rect x="78" y="58" width="90" height="14" rx="7" fill="#B3402F"/>
+                <text x="78" y="90" font-size="13" font-weight="700" fill="#B3402F">dirty</text>
+              </g>
+              <!-- East: mixed -->
+              <g transform="translate(466,8)">
+                <rect width="200" height="98" rx="10" fill="#fff" stroke="#0E2A52" stroke-width="2"/>
+                <text x="14" y="28" font-size="17" font-weight="700" fill="#0E2A52">East</text>
+                <g transform="translate(14,40)">
+                  <rect x="0" y="0"  width="46" height="13" rx="3" fill="#eef1f6" stroke="#0E2A52"/>
+                  <rect x="0" y="17" width="46" height="13" rx="3" fill="#eef1f6" stroke="#0E2A52"/>
+                  <rect x="0" y="34" width="46" height="13" rx="3" fill="#eef1f6" stroke="#0E2A52"/>
+                  <circle cx="8" cy="6.5" r="2.4" fill="#E69F00"/><circle cx="8" cy="23.5" r="2.4" fill="#E69F00"/><circle cx="8" cy="40.5" r="2.4" fill="#E69F00"/>
+                </g>
+                <text x="78" y="50" fill="#5b6675">carbon now</text>
+                <rect x="78" y="58" width="108" height="14" rx="7" fill="#eef1f6"/>
+                <rect x="78" y="58" width="58" height="14" rx="7" fill="#E69F00"/>
+                <text x="78" y="90" font-size="13" font-weight="700" fill="#b8860b">mixed</text>
+              </g>
+            </g>
+            <!-- routing arrows from the compute pool to the regions -->
+            <path d="M300,168 C238,140 168,138 116,110" fill="none" stroke="#E69F00" stroke-width="4.5" marker-end="url(#ahGold)"/>
+            <path d="M340,168 L340,112" fill="none" stroke="#9aa4b2" stroke-width="2.5" stroke-dasharray="4 5" marker-end="url(#ahGrey)"/>
+            <path d="M380,168 C442,140 512,138 564,110" fill="none" stroke="#9aa4b2" stroke-width="2.5" stroke-dasharray="4 5" marker-end="url(#ahGrey)"/>
+            <text x="150" y="150" font-size="13.5" font-weight="700" fill="#9a6b00">run here, cleanest</text>
+            <!-- the flexible compute pool -->
+            <g transform="translate(240,166)">
+              <rect width="200" height="74" rx="10" fill="#0E2A52"/>
+              <text x="100" y="31" text-anchor="middle" font-size="16.5" font-weight="700" fill="#fff">Flexible compute</text>
+              <text x="100" y="54" text-anchor="middle" font-size="12.5" fill="#cdd6e4">batch &#183; AI training &#183; deferrable</text>
+            </g>
+          </svg>
+          </div>
+          <div class="cap">Defer flexible compute to the cleanest region and hour. The question: does the
+            spatial correlation <em>between</em> regions help the scheduler choose?</div>
           <p>Prior models treat each region in isolation. We treat carbon intensity as a stochastic
             <b>vector</b> so that <b>spatial correlation</b> can inform the schedule, and ask whether it helps.</p>
         </div>
