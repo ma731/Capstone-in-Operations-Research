@@ -86,3 +86,8 @@ thesis/_*.txt
 thesis/*.bak
 *.ORIG.bak
 poster/_*.png
+
+# deck build artifacts
+deck/_preview/
+deck/_eq_*.png
+deck/_sheet.png
