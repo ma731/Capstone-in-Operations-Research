@@ -30,8 +30,9 @@ together. The practical recommendation: a per-region marginal scheduler captures
 essentially all the value; spatial value, if any, must come from an *active*
 inter-region transfer channel, not a richer dependence model.
 
-Deliverables: `thesis/capstone_thesis.pdf` (the report) and `thesis/poster_a0.pdf`
-(the A0 poster).
+Deliverables: `thesis/capstone_thesis.pdf` (the report), the A0 conference poster
+(latest `poster/poster_capstone_v*.pdf`), and the defense slide deck
+(`deck/capstone_defense.pptx`).
 
 ## The three grids
 
@@ -95,7 +96,10 @@ generated under `figures/`).
 │   └── analysis/        # stratified_correlations, tail_dependence, metrics, plots
 ├── scripts/             # experiment runners + plotting (see docs/DEPRECATED.md for status)
 ├── tests/               # 187 pytest unit tests (CI on push/PR)
-├── thesis/              # capstone_thesis.{tex,pdf}, poster_a0.{tex,pdf}
+├── thesis/              # capstone_thesis.{tex,pdf} (the report)
+├── poster/              # A0 conference poster (build_v*.js -> poster_capstone_v*.pdf)
+├── deck/                # capstone_defense.pptx (defense deck) + build_deck.py
+├── full_thesis/         # extended write-up (full_thesis.pdf, Parts 3-5 in body)
 ├── docs/
 │   ├── decisions.md             # design-decision log
 │   ├── results_snapshots/       # archived summary CSVs (license-safe)
