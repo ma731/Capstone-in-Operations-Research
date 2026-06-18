@@ -114,7 +114,7 @@ likewise leaves robustness immaterial (Section~\ref{sec:online}), and a dimensio
 mean-dominance ratio generalises \emph{when} cross-coordinate dependence can ever help
 (Section~\ref{sec:condition}). A dedicated chapter (Section~\ref{sec:testing})
 documents the validation behind every claim: small-instance model checks, a
-pre-registered protocol, and a $187$-test software suite.
+pre-registered protocol, and a $194$-test software suite.
 \end{abstract}
 \newpage
 \tableofcontents
@@ -193,7 +193,7 @@ spatially-coupled transfer DRO that makes inter-region flows a decision recovers
 $4.0$--$9.9\%$ of $\CVaR_{0.95}$ and exhibits a tail-risk crossover on the correlated grid under
 grid-emergency stress, the positive counterpart that the passive null predicts.
 (vi)~\emph{An end-to-end validation account} (Section~\ref{sec:testing}): a
-small-instance model validation, a pre-registered protocol, and a $187$-test software
+small-instance model validation, a pre-registered protocol, and a $194$-test software
 suite, that licenses trusting a null produced by an automated pipeline.
 
 \subsection{Thesis structure}
@@ -741,7 +741,7 @@ the entire study is under two hours on one core, so reproduction is cheap.
 
 \subsection{Reproducibility}\label{sec:repro}
 All code is version-controlled (private repository, continuous-integration test
-suite, $187$ unit tests, including a feasible-set equivalence test pinning the
+suite, $194$ unit tests, including a feasible-set equivalence test pinning the
 Phase 2 CVaR scheduler to the Phase 1 constraint set); experiment configurations
 are commit-locked before test-set evaluation; bootstrap and scenario seeds are
 fixed; and every number reported in
@@ -1796,14 +1796,14 @@ multiple-testing correction (Benjamini--Hochberg over the pre-registered $144$-c
 family) guards the discovery rate.
 
 \subsection{The software test suite}\label{sec:testing-suite}
-The implementation carries a $187$-test suite run under continuous integration on
+The implementation carries a $194$-test suite run under continuous integration on
 every push. The tests pin the components the results depend on: a \emph{feasible-set
 equivalence} test ties the Phase~2 $\CVaR$-SAA scheduler to the Phase~1 constraint
 set so the two phases optimise over the same $\mathcal X$; $\CVaR$ correctness tests
 check the Rockafellar--Uryasev value against direct tail averages; covariance tests
 verify positive-definite regularisation and Cholesky factorisation, and that the
 block-diagonal (shuffled) operator zeroes exactly the cross-region blocks while
-preserving the diagonal; and copula tests check the sampling and rank mapping. The
+preserving the diagonal; and copula tests check the sampling and rank mapping. A dedicated \emph{claim-binding} group goes further, certifying the paper's theoretical statements in code rather than only on the page: that the shuffled covariance stays positive-semidefinite (a valid covariance, not a degenerate object); that $\CVaR$ is translation-invariant, the algebraic backbone of Proposition~\ref{prop:meandom} by which the mean field passes through additively; that the realised spatial gap on a solved instance respects the mean-dominance bound $\varepsilon\,\max\lVert x\rVert\,\sqrt{\lVert\Sigma_{\mathrm{off}}\rVert}$; and that scaling the mean field up drives the relative gap monotonically to zero. The central mechanism is thus a continuous-integration invariant, not merely a claim. The
 suite is what licenses trusting an automated pipeline that reads the test set only
 once: the code is exercised exhaustively on synthetic and small inputs \emph{before}
 it is run on the real data.
@@ -1819,7 +1819,7 @@ budget, plus a guard rejecting an invalid risk argument. The Part~4 online contr
 (\texttt{online\_transfer.py}, Section~\ref{sec:online}) and the Part~5 ratio
 computation are likewise unit-tested, the former for work conservation and feasible
 realised cost across the rolling loop, the latter for the mean-value-range and
-flattening operators against hand-computed cases, bringing the suite to $187$ tests.
+flattening operators against hand-computed cases, bringing the suite to $194$ tests.
 What remains preliminary about Parts~3--5 is therefore the experimental protocol and
 calibration, not the optimisation: every reported number rests on validated code.
 
@@ -1971,7 +1971,7 @@ hierarchy from covariance ball to elliptical and lower-tail copulas;
 (3)~a causal mechanism (formalized as a mean-dominance bound
 (Proposition~\ref{prop:meandom}) and demonstrated by mean-ablation) that
 explains the null rather than merely reporting it; (4)~a fully reproducible,
-version-controlled, CI-tested pipeline (187 tests) with archived license-safe
+version-controlled, CI-tested pipeline (194 tests) with archived license-safe
 summary tables for every reported number; (5)~an \emph{active transfer channel}
 (Section~\ref{sec:transfer}) that recovers $4.0$--$9.9\%$ of $\CVaR_{0.95}$
 \emph{deterministically}, the positive resolution the null predicts, while showing
@@ -2119,7 +2119,7 @@ with $S$; the $\pm0.1\%$ no-value band is shaded.}
 \end{figure}
 
 \paragraph{Repository and environment.} All code lives in a private,
-version-controlled repository with a continuous-integration suite ($187$ unit
+version-controlled repository with a continuous-integration suite ($194$ unit
 tests; the Electricity-Maps integration test is excluded from CI as it requires
 licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL/ECOS
 for the second-order cone program and HiGHS for deterministic LP baselines. The

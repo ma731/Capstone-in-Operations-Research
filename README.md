@@ -95,7 +95,7 @@ generated under `figures/`).
 │   │                    #   transfer_dro (Part 3), covariance
 │   └── analysis/        # stratified_correlations, tail_dependence, metrics, plots
 ├── scripts/             # experiment runners + plotting (see docs/DEPRECATED.md for status)
-├── tests/               # 187 pytest unit tests (CI on push/PR)
+├── tests/               # 194 pytest unit tests (CI on push/PR)
 ├── thesis/              # capstone_thesis.{tex,pdf} (the report)
 ├── poster/              # A0 conference poster (build_v*.js -> poster_capstone_v*.pdf)
 ├── deck/                # capstone_defense.pptx (defense deck) + build_deck.py
@@ -118,7 +118,7 @@ uv venv && uv pip install -e ".[dev]"
 # or: python -m venv .venv && pip install -e ".[dev]"
 
 cp .env.example .env        # add ELECTRICITY_MAPS_TOKEN
-pytest tests/               # 187 tests should pass
+pytest tests/               # 194 tests should pass
 ```
 
 **Solvers:** HiGHS (LP / CVaR-SAA) and CLARABEL/ECOS/SCS (SOCP), all free and in the
@@ -150,7 +150,7 @@ archived. Do not redistribute the raw data.
   The uniform-rigor pass (multi-seed stability, equivalence tests, an independent
   adversarial review) made the findings *more conservative, not larger*: the only
   positive result is the deterministic transfer value.
-- **Code:** 187 unit tests, CI on push/PR; every reported number traces to an
+- **Code:** 194 unit tests, CI on push/PR; every reported number traces to an
   archived, license-safe snapshot in `docs/results_snapshots/`.
 
 ## Key references
