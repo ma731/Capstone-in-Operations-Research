@@ -48,10 +48,10 @@
 {\large Master in Business Analytics \& Data Science\par}
 {\large Research Capstone in Operations Research\par}
 \vspace{2.2cm}
-{\Large\bfseries Does Spatial Correlation of Carbon Intensity Improve\par
-Distributionally Robust Carbon-Aware Data-Center Scheduling?\par}
+{\Large\bfseries The Price of Sophistication: When Do Spatial and\par
+Robust Modeling Pay in Carbon-Aware Data-Center Scheduling?\par}
 \vspace{0.5cm}
-{\large A Multi-Grid Falsification Study with a Causal Mechanism\par}
+{\large A Day-Ahead Migration Scheduler and a Complexity--Value Decision Rule\par}
 \vspace{2.2cm}
 {\large\bfseries Marco Ortiz Togashi\par}
 \vspace{0.3cm}
@@ -72,31 +72,36 @@ text was reviewed and edited by the author.
 
 % ===================== ABSTRACT =====================
 \begin{abstract}
-\noindent Carbon-aware schedulers shift data-center compute toward cleaner hours and
-regions, and recent work models carbon intensity as uncertain within a
-distributionally robust optimization (DRO) framework. A natural extension treats
-carbon intensity as a stochastic \emph{vector} across coupled regions, so that
-\emph{spatial correlation} can inform the schedule. This thesis asks whether that
-spatial structure carries any robust scheduling value. Using a Mahalanobis--Wasserstein
-DRO solved as a second-order cone program, we design a falsification test that
-compares the schedule fitted to the joint covariance against one fitted to a
-block-diagonal covariance with cross-region structure destroyed, scored by
-out-of-sample conditional value-at-risk ($\CVaR_{0.95}$) of daily emissions under
-pre-registration. Across three US/Canada grids spanning the dependence spectrum
-(the US West, an Ontario-anchored Eastern Interconnection belt, and an engineered
-solar/wind/hydro portfolio), with an Iberia--France low-correlation anchor, the
-answer is a replicated \textbf{null}: the spatial gap never exceeds a few tenths of
-one percent and survives shrinkage, residualization, Benjamini--Hochberg correction,
-walk-forward validation, and a tighter-ramp sensitivity. Two diagnostics give the
-mechanism: a \emph{mean-ablation} shows the covariance signal is genuine but
-dominated by the mean field, and a \emph{tail-dependence} analysis shows the
-residual dependence is non-elliptical, radially asymmetric and upper-tail
-independent, hence invisible to covariance-based ambiguity sets. A second phase
-forecloses the ``wrong object'' objection: Gaussian, lower-tail Clayton, and the
-maximal (comonotone) copula all leave the null intact, and an a-priori bound caps
-the achievable gain. The recommendation is that per-region marginal schedulers
-capture essentially all the value; spatial value, if any, must come from an active
-transfer channel, not a richer dependence model.
+\noindent Data-center operators can shift compute toward cleaner hours and regions,
+and recent work applies distributionally robust optimization (DRO) to carbon-aware
+scheduling. The unexamined question is which modelling layers actually pay for their
+complexity. This thesis builds a working day-ahead carbon-aware migration scheduler
+and characterises the value of each layer. Over the honest baseline (carbon-aware
+scheduling with no inter-region transfer, $\Phi=0$, on the same feasible set), active
+migration cuts daily $\CVaR_{0.95}$ emissions by $4.7$--$10.1\%$, an $8$ to $11$
+percentage-point spatial lever, and this deterministic transfer channel is the
+dominant lever; the carbon-computing literature independently finds spatial shifting
+dominates temporal shifting. We then isolate the value of \emph{passive}
+sophistication. Using a Mahalanobis--Wasserstein DRO solved as a second-order cone
+program, a pre-registered shuffled-marginals falsification test across three real
+US/Canada grids spanning the dependence spectrum (the US West, an Ontario-anchored
+Eastern belt, and an engineered solar/wind/hydro portfolio), with an Iberia--France
+anchor, returns a replicated \textbf{null}: encoding spatial covariance adds below
+$0.4\%$ of $\CVaR$, surviving Ledoit--Wolf shrinkage, residualization,
+Benjamini--Hochberg correction, walk-forward validation, and a per-cell equivalence
+test. A mean-ablation shows the covariance signal is genuine but masked by the mean
+field (a mean-dominance bound), and a tail-dependence analysis shows the residual
+dependence is non-elliptical and upper-tail independent, hence invisible to
+covariance-based ambiguity sets; a one-paragraph copula appendix confirms even the
+maximal coupling recovers nothing. Finally we ask when robustness itself pays.
+Following the price of robustness of Bertsimas and Sim, a DRO over day-ahead forecast
+error buys a small worst-day ($\CVaR$) tail reduction at a mean premium, with a value
+of the stochastic solution near zero, and pays over deterministic transfer only past
+an emergency-severity crossover $M^\star\approx3$; tested against real data-grounded
+worst-tail emergencies across 17 zones, that crossover never activates. The thesis
+contributes a working scheduler with honest savings, a screening rule for when
+passive dependence modelling fails, and a price-of-robustness decision rule with a
+tested, data-grounded bound, all under 194 unit tests and pre-registration.
 \end{abstract}
 \newpage
 \tableofcontents
@@ -133,51 +138,52 @@ clean periods. It is therefore natural to model carbon intensity as a stochastic
 \emph{vector} with a full spatial covariance, the extension studied here.
 
 \subsection{Problem statement and research questions}
-Modelling spatial dependence is not free: cross-region covariance blocks must be
-estimated from limited data, and a richer uncertainty model is only worthwhile if it
-buys measurably better schedules. The literature has assumed, rather than tested,
-that spatial correlation in the carbon field is worth modelling. This thesis tests
-that assumption directly.
+Each modelling layer, spatial covariance, distributional robustness, and richer
+copulas, adds estimation and computational cost, and is worthwhile only if it buys
+measurably better schedules. The literature has assumed, rather than measured, that
+this sophistication pays. This thesis builds the scheduler and measures the value of
+each layer directly.
 
 \begin{description}[leftmargin=1.4em,itemsep=2pt]
-\item[RQ1.] Is the carbon intensity of electrically coupled regions genuinely
-spatially correlated, beyond shared diurnal cycles?
-\item[RQ2.] Does feeding that spatial correlation to a covariance-based
-(Mahalanobis--Wasserstein) DRO scheduler reduce out-of-sample tail emissions
-($\CVaR_{0.95}$), relative to an otherwise identical scheduler that ignores
-cross-region dependence?
-\item[RQ3.] If not, \emph{why} not, and what dependence structure, if any,
-would a richer uncertainty model need to capture?
+\item[RQ1.] How much can a day-ahead carbon-aware migration scheduler cut daily
+$\CVaR_{0.95}$ emissions relative to carbon-aware scheduling without inter-region
+transfer, and which lever drives the saving?
+\item[RQ2.] When does adding passive modelling complexity (spatial covariance, or a
+non-elliptical copula) improve out-of-sample tail emissions, and at what cost?
+\item[RQ3.] When does robustifying against day-ahead forecast error pay over
+deterministic transfer, and do real grids ever reach that regime? What decision rule
+follows?
 \end{description}
 
 \subsection{Contributions}
-The thesis makes four contributions. (i)~\emph{A falsification design}: a
-shuffled-marginals test that isolates exactly the value of spatial covariance,
-evaluated out-of-sample under pre-registration discipline (commit-locked
-configurations, dry-run gates, single test-set read). (ii)~\emph{A replicated
-empirical null across the dependence spectrum}: three primary US/Canada region sets, two interconnected grids where strong correlation survives de-seasonalization
-(the US West (California, Nevada, Phoenix; and an Ontario--Eastern belt) and one
-engineered low, heterogeneous-correlation solar/wind/hydro portfolio) corroborated by an
-Iberia--France panel where residual correlation collapses to the diurnal cycle, all
-yielding spatial gaps below $0.4\%$ of $\CVaR$,
-robust to estimator choice, multiple-testing correction, and walk-forward
-validation. (iii)~\emph{A causal mechanism}: a mean-ablation experiment showing the
-covariance signal is real but dominated by the mean field, and a tail-dependence
-analysis showing the residual dependence is non-elliptical
-(upper-tail-independent, radially asymmetric), hence invisible to covariance-based
-ambiguity sets by construction. (iv)~\emph{Practice and theory implications}: a
-per-region marginal scheduler captures essentially all attainable value, and the
-evidence yields a precise specification mandate for copula-based DRO.
+The thesis makes four contributions. (i)~\emph{A working day-ahead scheduler with
+honest savings}: active inter-region migration cuts out-of-sample $\CVaR_{0.95}$ by
+$4.7$--$10.1\%$ ($8$ to $11$ percentage points) over the carbon-aware no-transfer
+baseline ($\Phi=0$, same feasible set) across three real grids, with the transfer
+lever dominant. (ii)~\emph{A screening rule}: a pre-registered shuffled-marginals
+falsification test and mean-ablation diagnostic isolate the value of spatial
+covariance, yielding a replicated null (gaps below $0.4\%$ of $\CVaR$, robust to
+estimator choice, multiple-testing correction, and walk-forward), with a
+mean-dominance bound (Proposition~1) as the a-priori certificate of when passive
+dependence modelling cannot help. (iii)~\emph{A price-of-robustness decision rule}:
+framing robustness as a complexity--value trade-off after Bertsimas and Sim, the DRO
+over day-ahead forecast error buys tail reduction at a mean premium and pays only
+past an emergency-severity crossover $M^\star\approx3$ that real data-grounded
+emergencies across 17 zones never reach. (iv)~\emph{A reproducible pipeline}:
+version-controlled, CI-tested (194 unit tests), pre-registered, with archived
+license-safe summary tables for every reported number.
 
 \subsection{Thesis structure}
-Section~\ref{sec:lit} reviews the literature and locates the gap.
-Section~\ref{sec:method} develops the optimization model, the falsification test,
-and the evaluation protocol. Section~\ref{sec:results} reports the correlation
-validation and the experimental results across all region sets, including the
-robustness battery, mean-ablation, tail-dependence diagnostics, and the Phase 2
-copula schedulers.
-Section~\ref{sec:discussion} interprets the findings against prior work and states
-limitations. Section~\ref{sec:conclusion} concludes and outlines future work.
+Section~\ref{sec:lit} reviews the carbon-aware scheduling and DRO literature and
+locates the gap: the value of modelling sophistication has been assumed, not
+measured. Section~\ref{sec:method} develops the day-ahead migration scheduler, the
+DRO model, the falsification test, and the evaluation protocol.
+Section~\ref{sec:results} reports the scheduler savings and the value of each
+modelling layer: where the value comes from, the screening rule for passive
+dependence, and the price-of-robustness decision rule with the severity crossover.
+Section~\ref{sec:discussion} interprets the findings and states limitations.
+Section~\ref{sec:conclusion} concludes with the practitioner decision rule and future
+work.
 
 % ===================== 2. LITERATURE REVIEW =====================
 \section{Literature Review}\label{sec:lit}

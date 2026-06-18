@@ -121,8 +121,10 @@ DISPLAY_NAME = {
     "us_west": "Western US",
     "taskc": "Eastern US–Canada",
     "us_hetero": "Diversified",
-    "es_pt_fr": "Iberia–France",
     "taskA": "California–Nevada",
+    "ab_on": "Alberta–Ontario",
+    "us_west_full": "Western US (7-zone)",
+    "south_central": "South-Central (NM+MO+TX)",
 }
 
 
@@ -134,11 +136,6 @@ REGION_SETS = {
         "zones": ["US-CAL-CISO", "US-CAL-BANC", "US-CAL-LDWP"],
         "tz": "America/Los_Angeles", "strip_prefix": "US-CAL-",
         "clock": "local Pacific time",
-    },
-    "es_pt_fr": {
-        "zones": ["ES", "PT", "FR"],
-        "tz": "Europe/Madrid", "strip_prefix": "",
-        "clock": "local CET/CEST (PT is WET, +1h)",
     },
     # --- Task C cases (Bissan: validate the DRO correlation assumption on the
     # interconnected US / US+Canada grid, where she expects strong correlation) ---
@@ -161,6 +158,31 @@ REGION_SETS = {
         "zones": ["US-CAL-CISO", "US-TEX-ERCO", "US-NW-BPAT"],
         "tz": "UTC", "strip_prefix": "US-",
         "clock": "UTC (cross-interconnect set spans Pacific/Central)",
+    },
+    # Alberta (dirty, gas/coal) + Ontario (clean, hydro/nuclear): a real
+    # clean/dirty, anti-correlated cross-province pair. The targeted test of
+    # whether real carbon-tail severity ever reaches the robustness crossover M*.
+    "ab_on": {
+        "zones": ["CA-AB", "CA-ON"],
+        "tz": "UTC", "strip_prefix": "CA-",
+        "clock": "UTC (Alberta Mountain + Ontario Eastern)",
+    },
+    # Expanded Western set: all five California utilities (CISO/BANC/LDWP/IID/TIDC)
+    # plus Nevada and Arizona -> 7 zones. A robustness check that the strong-
+    # correlation null does not hinge on the 5-zone us_west choice.
+    "us_west_full": {
+        "zones": ["US-CAL-CISO", "US-CAL-BANC", "US-CAL-LDWP", "US-CAL-IID",
+                  "US-CAL-TIDC", "US-NW-NEVP", "US-SW-AZPS"],
+        "tz": "America/Los_Angeles", "strip_prefix": "US-",
+        "clock": "local Pacific time",
+    },
+    # South-central all-dirty cluster: New Mexico (PNM) + Missouri (AECI) + Texas
+    # (ERCO). A held-out grid to confirm the null generalizes beyond the three
+    # training sets.
+    "south_central": {
+        "zones": ["US-SW-PNM", "US-MIDW-AECI", "US-TEX-ERCO"],
+        "tz": "UTC", "strip_prefix": "US-",
+        "clock": "UTC (NM Mountain + MO/TX Central)",
     },
 }
 
