@@ -42,7 +42,7 @@ inter-region transfer channel** captures the value; a richer dependence model an
 robust layer are conditional options, not free wins.
 
 Deliverables: `thesis/capstone_thesis.pdf` (the report), the A0 conference poster
-(latest `poster/poster_capstone_v*.pdf`), and the defense slide deck
+(`poster/poster_capstone_v24.pdf`), and the defense slide deck
 (`deck/capstone_defense.pptx`).
 
 ## The three grids
@@ -178,5 +178,18 @@ archived. Do not redistribute the raw data.
 
 ## License
 
-Not yet licensed. Decide with the supervisor before any external publication.
-The repository is private pending submission/defense.
+**Code:** MIT (see [`LICENSE`](LICENSE)) — the source in `src/`, `scripts/`, and
+`tests/` is free to use, modify, and redistribute.
+
+This MIT grant is **scoped to the code only**. It does **not** cover:
+
+- **The thesis text, poster, and deck** (`thesis/`, `full_thesis/`, `poster/`,
+  `deck/`) — © 2026 Marco Ortiz Togashi, all rights reserved pending
+  submission/defense; do not redistribute without permission.
+- **The carbon-intensity data** — supplied by Electricity Maps under a
+  **non-redistributable academic licence**. Raw CSVs are gitignored and never
+  committed; only derived aggregate statistics are archived. Do not redistribute
+  the raw data.
+
+The repository is private pending submission/defense. Before any external
+publication of the thesis itself, confirm with the supervisor.

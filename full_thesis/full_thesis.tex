@@ -171,7 +171,9 @@ The thesis makes six contributions. (i)~\emph{A working day-ahead scheduler with
 honest savings}: active inter-region migration cuts out-of-sample $\CVaR_{0.95}$ by
 $4.0$--$9.9\%$ over the carbon-aware no-transfer
 baseline ($\Phi=0$, same feasible set) across three real grids, with the transfer
-lever dominant. (ii)~\emph{A screening rule}: a pre-registered shuffled-marginals
+lever dominant. The migration mechanism follows established carbon-aware practice; the
+contribution is the honest, $\Phi=0$-anchored measurement of its spatial value.
+(ii)~\emph{A screening rule}: a pre-registered shuffled-marginals
 falsification test and mean-ablation diagnostic isolate the value of spatial
 covariance, yielding a replicated null (gaps below $0.4\%$ of $\CVaR$, robust to
 estimator choice, multiple-testing correction, and walk-forward), with a
@@ -228,7 +230,12 @@ carbon budget forces capacity to fall as intensity rises) and document the
 goodput cost of capacity variation for long-running jobs. This systems literature
 establishes operational levers (deferral, throttling, capacity coupling) that we
 adopt as constraints, but it treats future carbon intensity as a point forecast;
-uncertainty is handled implicitly, by re-planning.
+uncertainty is handled implicitly, by re-planning. That geographic migration itself
+lowers carbon, moving compute toward whichever region is cleaner, is established by
+this line of work \citep{radovanovic2022,wiesner2021}; we take the mechanism as given.
+What remains assumed rather than measured is whether \emph{modelling} the joint spatial
+structure, or hedging forecast error robustly, adds anything on top, the modelling
+layers this thesis prices.
 
 \subsection{Distributionally robust optimization and the price of robustness}
 DRO optimizes against the worst-case distribution within an ambiguity set, and the
@@ -2380,8 +2387,11 @@ established the causal mechanism, and wrote the manuscript in full.
 Generative AI tools were used as a coding and drafting assistant under my
 direction, as declared on the cover page; all research questions, modelling
 decisions, experimental designs, interpretations, and final text are my own. The
-inter-region transfer channel is developed under the supervisor's direction and is
-identified throughout as the author's day-ahead migration scheduler.
+inter-region migration mechanism itself follows established carbon-aware practice
+(Section~\ref{sec:lit}); my individual contribution, developed under the supervisor's
+direction, is its distributionally robust treatment, the honest $\Phi=0$-anchored
+measurement of its spatial value, and the screening and price-of-robustness decision
+rules.
 
 \vspace{1.2cm}
 \noindent\begin{tabular}{@{}p{6cm}p{6cm}@{}}

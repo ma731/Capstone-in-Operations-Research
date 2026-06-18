@@ -159,7 +159,8 @@ The thesis makes four contributions. (i)~\emph{A working day-ahead scheduler wit
 honest savings}: active inter-region migration cuts out-of-sample $\CVaR_{0.95}$ by
 $4.0$--$9.9\%$ over the carbon-aware no-transfer
 baseline ($\Phi=0$, same feasible set) across three real grids, with the transfer
-lever dominant. (ii)~\emph{A screening rule}: a pre-registered shuffled-marginals
+lever dominant. The migration mechanism follows established carbon-aware practice; the
+contribution is the honest, $\Phi=0$-anchored measurement of its spatial value. (ii)~\emph{A screening rule}: a pre-registered shuffled-marginals
 falsification test and mean-ablation diagnostic isolate the value of spatial
 covariance, yielding a replicated null (gaps below $0.4\%$ of $\CVaR$, robust to
 estimator choice, multiple-testing correction, and walk-forward), with a
@@ -202,7 +203,12 @@ carbon budget forces capacity to fall as intensity rises) and document the
 goodput cost of capacity variation for long-running jobs. This systems literature
 establishes operational levers (deferral, throttling, capacity coupling) that we
 adopt as constraints, but it treats future carbon intensity as a point forecast;
-uncertainty is handled implicitly, by re-planning.
+uncertainty is handled implicitly, by re-planning. That geographic migration itself
+lowers carbon, moving compute toward whichever region is cleaner, is established by
+this line of work \citep{radovanovic2022,wiesner2021}; we take the mechanism as given.
+What remains assumed rather than measured is whether \emph{modelling} the joint spatial
+structure, or hedging forecast error robustly, adds anything on top, the modelling
+layers this thesis prices.
 
 \subsection{Distributionally robust optimization and the price of robustness}
 DRO optimizes against the worst-case distribution within an ambiguity set, and the
@@ -642,43 +648,31 @@ x\rVert_2$ is attained; taking that maximum gives \eqref{eq:propbound}.
 \end{proof}
 
 \noindent The bound is a conservative \emph{certificate}, not a tight prediction.
-Evaluated on each grid's training covariance (with $\varepsilon^\star=1$, the
-a-priori feasible bound $\max_{x}\lVert x\rVert_2=\bar x\sqrt{R\,T\,u}$ where $\bar
-x$ is the per-cell cap and $u$ the utilization, and $\lVert\Sigma^{\mathrm{off}}
+Evaluated on each grid's training covariance (with $\varepsilon^\star=1$, feasible
+bound $\max_{x}\lVert x\rVert_2=\bar x\sqrt{R\,T\,u}$ and $\lVert\Sigma^{\mathrm{off}}
 \rVert_2$ the spectral norm of the destroyed cross-region blocks), its right-hand
 side is $7.4\%$ (Eastern US--Canada), $9.6\%$ (Diversified) and $12.7\%$ (Western
 US) of $\CVaR_{0.95}$; the realized gaps (Table~\ref{tab:gaps}) never exceed
-$0.23\%$, two orders of magnitude smaller. The theorem therefore caps the spatial
-gap at the few-percent scale \emph{before any experiment is run}, and the
-experiments then pin it far below that cap. What the bound buys is not tightness but
-structure: the spatial gap is governed by $\varepsilon$ and the cross-region block
-norm, and is forced to zero in the no-robustification and no-cross-structure limits.
-Most of the remaining slack lives in the feasible-diameter factor $\max_x\lVert
-x\rVert_2$, an a-priori worst case; substituting the realized optimal $\lVert
-x^\star\rVert_2$ would tighten the certificate considerably, at the cost of making it
-post-hoc rather than a-priori. We keep the a-priori form deliberately, since its
-purpose is to bound the gap \emph{before} the experiment, not to predict it. The
-\emph{tight} ceiling is measured, not bounded: the comonotone arm of
-Section~\ref{sec:res-copula} realizes the supremum over copulas, and across scenario
-seeds its gain is centred on zero with $|\Lambda|\lesssim0.1\%$ of $\CVaR_{0.95}$, at
-the sampling-noise floor. The mean-ablation of Section~\ref{sec:res-ablation}
-bounds the same quantity from a second, independent angle. Both put $\Lambda$ an
-order of magnitude below the schedule's mean-driven value; hence the mean field pins
-the schedule and the dependence model, elliptical or not, is immaterial. The prediction that even Clayton cannot recover material
-value is confirmed in Section~\ref{sec:res-copula}.
+$0.23\%$, two orders of magnitude smaller. The theorem caps the spatial gap at the
+few-percent scale \emph{before any experiment is run}; what it buys is not tightness
+but structure, the gap is governed by $\varepsilon$ and the cross-region block norm
+and forced to zero in the no-robustification and no-cross-structure limits. We keep
+the a-priori form deliberately (substituting the realized $\lVert x^\star\rVert_2$
+would tighten it but make it post-hoc). The \emph{tight} ceiling is measured, not
+bounded: the comonotone arm of Section~\ref{sec:res-copula} realizes the supremum
+over copulas, and across scenario seeds its gain is centred on zero with
+$|\Lambda|\lesssim0.1\%$ of $\CVaR_{0.95}$; the mean-ablation of
+Section~\ref{sec:res-ablation} bounds the same quantity independently. Both put
+$\Lambda$ an order of magnitude below the schedule's mean-driven value, so the mean
+field pins the schedule and the dependence model, elliptical or not, is immaterial.
 
 \paragraph{Computational considerations.} Each instance is small: the decision
-vector has $RT\le 5\times24=120$ entries and the feasible set adds $O(RT)$ linear
-constraints, so the SOCP \eqref{eq:socp} solves in $0.19$--$0.26$\,s and the
-CVaR-SAA LP \eqref{eq:saacvar}, which appends $S=1000$ epigraph variables and
-constraints, in $0.9$--$1.3$\,s (median over five repetitions, CLARABEL/HiGHS,
-commodity laptop). The cost is in the \emph{number} of instances, not their size:
-one region-set experiment solves $3\text{ regimes}\times3\,\alpha\times2\text{
-arms}\times(6\,\varepsilon\times5\text{ folds}+1\text{ test read})=558$ SOCPs, and
-the full Phase 1 battery (region sets $\times$ \{sample, Ledoit--Wolf, seasonal,
-AR(1), two ablations, walk-forward, fine grid\}) is on the order of $10^4$ SOCP
-solves; Phase 2 adds $3\times3\times3\times4=108$ CVaR-SAA LPs. Total wall-clock for
-the entire study is under two hours on one core, so reproduction is cheap.
+vector has $RT\le120$ entries, so the SOCP \eqref{eq:socp} solves in $0.19$--$0.26$\,s
+and the $S=1000$ CVaR-SAA LP \eqref{eq:saacvar} in $0.9$--$1.3$\,s (CLARABEL/HiGHS,
+commodity laptop). The cost is in the \emph{number} of instances, not their size: the
+full Phase 1 battery is on the order of $10^4$ SOCP solves and Phase 2 adds $108$
+CVaR-SAA LPs, yet the entire study runs in under two hours on one core, so
+reproduction is cheap.
 
 \subsection{Reproducibility}\label{sec:repro}
 All code is version-controlled (private repository, continuous-integration test
@@ -901,29 +895,25 @@ that passes the pre-registered agreement rule (positive and sign-stable across
 both residual estimators). The largest battery value anywhere, $+0.179\%$ (AR(1),
 Eastern US--Canada, $\alpha=0.30$), appears \emph{only} under AR(1) and not under the
 seasonal estimator, so the rule rejects it. Benjamini--Hochberg correction at
-$q=0.05$ across all 144 non-ablation cells (four grid-runs, the three primary grids
-plus the locked Task~C replication, each at $3\text{ regimes}\times3\,\alpha=9$ cells
-under the four covariance estimators \{sample, Ledoit--Wolf, seasonal, AR(1)\}:
-$4\times9\times4=144$) leaves that same already-rejected cell as the largest
-surviving positive gap; nothing material survives both filters.
+$q=0.05$ across all 144 non-ablation cells ($4$ grid-runs $\times\,9$
+regime-$\alpha$ cells $\times\,4$ covariance estimators) leaves that same
+already-rejected cell as the largest surviving positive gap; nothing material
+survives both filters.
 A walk-forward refit (train 2021--2023, test 2024) reproduces the null out of
 time: maximum absolute gap $0.036\%$ (Eastern US--Canada), $0.028\%$
 (Western US), $0.217\%$ (Diversified, again negative). An
 11-point log-denser $\varepsilon$ grid changes no gap at the reported precision.
-Finally, a \emph{constraint-tightness} sensitivity directly probes the most
-plausible route to spatial value: tripling the binding tightness of the ramp limit
-($\Delta_r=5$ instead of $15$ MW/h) shrinks the feasible set so the schedule has far
-less freedom to track the mean field, yet the null is unmoved, with maximum
-absolute gap $0.028\%$ (Western US), $0.044\%$ (Eastern US--Canada) and $0.169\%$
-(Diversified), all sign-flipping and with $\varepsilon^\star=1$ retained.
-The covariance does not begin to pay even when the mean's pull is mechanically
-curtailed. A complementary \emph{utilization} sweep makes the same point through the
-workload: raising daily utilization from the baseline $80\%$ to $95\%$ packs the
-facility near capacity and strips out almost all scheduling freedom, yet the gap
-only \emph{shrinks} (maximum absolute gap $0.017\%$ for Western US, $0.048\%$ for
-Eastern US--Canada, $0.071\%$ for Diversified), and at a loose $50\%$ it stays
-immaterial ($\le0.25\%$); $\varepsilon^\star=1$ throughout. Across the full
-$\{50,80,95\}\%$ range the null is unmoved. Figure~\ref{fig:robust} collects the
+Finally, a \emph{constraint-tightness} sensitivity probes the most plausible route to
+spatial value: tripling the ramp limit's tightness ($\Delta_r=5$ vs $15$ MW/h) strips
+the schedule's freedom to track the mean field, yet the null is unmoved (maximum
+absolute gap $0.028\%$ Western US, $0.044\%$ Eastern US--Canada, $0.169\%$
+Diversified; all sign-flipping, $\varepsilon^\star=1$ retained). The covariance does
+not begin to pay even when the mean's pull is mechanically curtailed. A complementary
+\emph{utilization} sweep makes the same point through the workload: packing the
+facility from $80\%$ to $95\%$ strips almost all scheduling freedom, yet the gap only
+\emph{shrinks} ($0.017\%$ Western US, $0.048\%$ Eastern US--Canada, $0.071\%$
+Diversified), and at a loose $50\%$ it stays immaterial ($\le0.25\%$);
+$\varepsilon^\star=1$ throughout the $\{50,80,95\}\%$ range. Figure~\ref{fig:robust} collects the
 covariance-estimator and temporal battery: across all six arms and three grids,
 every spatial gap sits inside the no-value band.
 
@@ -941,16 +931,14 @@ adversarial Diversified grid the joint covariance becomes \emph{more} negative a
 $\beta=0.99$ ($-0.36\%$, i.e.\ it hurts), exactly as the noise-fitting account
 predicts. Deepening the tail, the regime where elliptical-blind tail dependence
 should matter most, does not turn the covariance on.
-The $\beta=0.99$ estimates are necessarily noisier, since the tail thins to a handful
-of days: the per-cell paired-bootstrap standard error rises to $0.15\%$ for Western
-US (against $\le0.04\%$ at $\beta=0.90$), so that grid's largest $\beta=0.99$ point
-estimate ($+0.14\%$) is itself within one standard error of zero. The apparent
-widening at the deepest tail is sampling noise, not emerging spatial value. This
-sweep is reported as a descriptive robustness check, \emph{outside} the
-pre-registered $144$-cell FDR family of Table~\ref{tab:robust}; for completeness, no
-sweep cell produces a gap that is both positive and materially large (every
-detectable cell is either negative or below the $0.4\%$ margin), so none would
-survive multiple-testing correction as a discovery.
+The $\beta=0.99$ estimates are necessarily noisier (the tail thins to a handful of
+days): the paired-bootstrap standard error rises to $0.15\%$ for Western US (vs
+$\le0.04\%$ at $\beta=0.90$), so that grid's largest point estimate ($+0.14\%$) is
+within one standard error of zero. The apparent widening at the deepest tail is
+sampling noise, not emerging spatial value. This sweep is descriptive, \emph{outside}
+the pre-registered $144$-cell FDR family of Table~\ref{tab:robust}; no sweep cell is
+both positive and materially large (every detectable cell is negative or below the
+$0.4\%$ margin), so none would survive correction as a discovery.
 
 \begin{table}[h]
 \centering\small
@@ -1025,13 +1013,12 @@ merely fail to detect a spatial benefit; we statistically reject the existence o
 one (in either direction) larger than the materiality threshold, cell by cell. That
 is the strongest form a null can take.
 
-The claim is of course threshold-sensitive, so we state where it breaks. The
-smallest margin each grid still clears (its largest $\lvert\text{gap}\rvert+
-1.645\,\mathrm{SE}$ over cells) is $\Delta^\star=0.05\%$ for Eastern US--Canada and
-$0.10\%$ for Western US, but $\Delta^\star=0.31\%$ for the adversarial Diversified
-grid. Equivalence at the $0.4\%$ economic margin therefore holds everywhere with
-room to spare on the two interconnected grids, and only narrowly on the engineered
-low, heterogeneous-correlation portfolio. That last caveat does not threaten the thesis: the
+The claim is threshold-sensitive, so we state where it breaks: the smallest margin
+each grid still clears (its largest $\lvert\text{gap}\rvert+1.645\,\mathrm{SE}$) is
+$\Delta^\star=0.05\%$ (Eastern US--Canada) and $0.10\%$ (Western US), but $0.31\%$ for
+the adversarial Diversified grid. Equivalence at the $0.4\%$ economic margin thus holds
+with room to spare on the two interconnected grids, and only narrowly on the engineered
+portfolio. That last caveat does not threaten the thesis: the
 Diversified gap is \emph{negative}, so the one grid where equivalence is hardest to
 assert is precisely the one where the joint covariance \emph{hurts} rather than adds
 value.
@@ -1323,6 +1310,12 @@ intensity is Electricity Maps lifecycle estimates on a common local clock per
 region set; alternative intensity methodologies or clock conventions could shift
 point estimates, though not by the order of magnitude separating the observed gaps
 from materiality.
+\emph{(vi)~Forecast model.} The day-ahead point forecast is deliberately a transparent
+hour-of-day climatological mean updated daily, not a learned predictor: anchoring the
+robust layer to a simple, reproducible forecast keeps the price-of-robustness result a
+property of hedging residual error, not of any one forecaster. A learned forecaster
+would only shrink the residual variance the DRO hedges, and with it the
+already-immaterial robustness premium; quantifying that is future work.
 
 % ===================== 6. CONCLUSIONS (RUN 3) =====================
 \section{Conclusions}\label{sec:conclusion}
@@ -1773,8 +1766,11 @@ established the causal mechanism, and wrote the manuscript in full.
 Generative AI tools were used as a coding and drafting assistant under my
 direction, as declared on the cover page; all research questions, modelling
 decisions, experimental designs, interpretations, and final text are my own. The
-inter-region transfer channel is developed under the supervisor's direction and is
-identified throughout as the author's day-ahead migration scheduler.
+inter-region migration mechanism itself follows established carbon-aware practice
+(Section~\ref{sec:lit}); my individual contribution, developed under the supervisor's
+direction, is its distributionally robust treatment, the honest $\Phi=0$-anchored
+measurement of its spatial value, and the screening and price-of-robustness decision
+rules.
 
 \vspace{1.2cm}
 \noindent\begin{tabular}{@{}p{6cm}p{6cm}@{}}
