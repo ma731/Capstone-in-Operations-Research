@@ -8,11 +8,13 @@ exist; only the narrative + two integrity items need work.**
 - **M1 — baseline strawman (INTEGRITY, do first).** `run_dayahead_savings.py` and
   `run_transfer_value_curve.py` compare vs a **uniform** per-region spread, not the honest
   comparator. Fix: report (a) carbon-aware-no-transfer (Φ=0, same feasible set) vs carbon-blind,
-  and (b) full-transfer vs Φ=0 = **the +8–11 pt spatial lever**. Make Φ=0 the reference line.
+  and (b) full-transfer vs Φ=0 = **the 4.0–9.9% CVaR-reduction spatial lever** (verified;
+  earlier drafts said "+8–11 pt", a different carbon-blind decomposition — superseded).
+  Make Φ=0 the reference line.
   Retire "12–16% vs carbon-blind." (Note: `greedy_sort_schedule_multiregion` ignores ramp/thermal
   constraints, so use the Φ=0 rolling baseline on the *same* feasible set, not the raw greedy sort.)
   Re-run 3 grids, re-snapshot. ~2–3 h.
-- **M5 — Yaxin attribution (INTEGRITY).** The deterministic transfer savings (bulk of the +8–11 pts)
+- **M5 — Yaxin attribution (INTEGRITY).** The deterministic transfer savings (the 4.0–9.9% lever)
   are Yaxin's territory; Marco owns the **robust/stochastic** layer + the crossover decision rule.
   Boundary statement + Annex A (ICS) + cite Yaxin. Email Bissan + Yaxin to confirm. ~1 h + email.
 

@@ -18,7 +18,7 @@ yearly; (4) doesn't get where the copula came from.
 | **Copula chapter (Phase 2)** | **Drop to appendix** | Bissan #4, explicit. One paragraph: "richer passive dependence (Gaussian/Clayton) also adds nothing — corroborates the screening rule." Removes the unmotivated piece, costs ~0 pages. |
 | **RQ1 correlation validation** | **Keep, brief** | A premise check (the data has structure), one figure. |
 | **Robustness battery (BH, walk-forward, shrinkage, MDE power)** | **Keep** | Now validates the *savings* + the *screening rule*, not the null. High rigor, transfers directly. |
-| **§4.1 day-ahead scheduler + savings** | **ADD (the artifact)** | #1: the useful result. Savings over the **honest per-region-greedy baseline**; the transfer-value curve (transfer is the dominant lever, +8–11 pts). |
+| **§4.1 day-ahead scheduler + savings** | **ADD (the artifact)** | #1: the useful result. Savings over the **honest per-region-greedy baseline**; the transfer-value curve (transfer is the dominant lever, 4.0–9.9% CVaR reduction over Φ=0). |
 | **§4.4 the tail-severity crossover** | **ADD (the OR money shot)** | #2: the one place robustness unambiguously earns its keep — robustness pays only past M*≈3, framed as a **decision rule**, with the honest bound that real grids stay below it. |
 | **Discussion / practical recommendation** | **Recast** | Around the unified decision rule: deploy deterministic migration; robustify only above M*; skip joint/copula modeling. |
 | **Conclusions** | **Recast** | From "we found a null" to "we built a scheduler that saves X, and derived the rule for when each layer of complexity pays." |

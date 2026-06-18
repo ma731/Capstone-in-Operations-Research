@@ -98,3 +98,20 @@ poster/node_modules/
 *.fdb_latexmk
 *.fls
 docs/results_snapshots/*.out
+
+# Old poster iterations: only v23 (build_v23.js -> poster_capstone_v23.*) is canonical
+# and tracked; everything below is superseded scratch output.
+poster/build_v*.js
+poster/poster_capstone.pdf
+poster/poster_capstone.pptx
+poster/poster_capstone_FINAL.*
+poster/poster_capstone_v*.pdf
+poster/poster_capstone_v*.pptx
+poster/poster_capstone_v*_CMYK_print.pdf
+poster/poster_v*_PREVIEW.png
+poster/poster_v*_proof.pdf
+poster/poster_v*_A4_proof.pdf
+poster/toplook.png
+
+# Transient LaTeX recompile log
+thesis/_recompile.log

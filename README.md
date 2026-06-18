@@ -1,6 +1,7 @@
-# Does spatial correlation of carbon intensity improve robust data-center scheduling?
+# The Price of Sophistication: when do spatial and robust models pay in carbon-aware data-center scheduling?
 
-A falsification study with a causal mechanism.
+A working day-ahead migration scheduler, and an honest accounting of what each extra
+layer of modelling sophistication actually buys.
 
 **Research Capstone in Operations Research · IE School of Science & Technology · 2026**
 **Student:** Marco Ortiz Togashi · **Supervisor:** Prof. Bissan Ghaddar
@@ -9,26 +10,36 @@ A falsification study with a causal mechanism.
 
 ## The finding (TL;DR)
 
-Carbon-aware schedulers shift compute toward cleaner hours and regions. A natural
-extension of single-region carbon DRO (Hall et al. 2024) is to treat carbon
-intensity as a stochastic **vector** across coupled regions, so that **spatial
-correlation** can inform the schedule. This project asks whether that helps.
+Carbon-aware schedulers shift compute toward cleaner hours and regions. Building on
+single-region carbon DRO (Hall et al. 2024), this project asks a value-first question:
+once you have a working scheduler, **which extra layer of sophistication is worth its
+price** — active inter-region migration, a richer joint dependence model, or
+distributional robustness?
 
-**It does not, a replicated, robustness-checked null.** Across three US/Canada
-grids spanning the full dependence spectrum, the spatial covariance adds no robust
-$\mathrm{CVaR}_{0.95}$ scheduling value, and neither does a Gaussian, lower-tail
-Clayton, or even the maximal comonotone **copula**. Two diagnostics explain why:
+The answer separates a lever that pays from two that mostly do not:
 
-- **Mean-ablation** shows the covariance signal is *real* (worth up to +1.46% in a
-  mean-flattened world) but *dominated* by the diurnal mean carbon field.
-- **Tail-dependence** shows the residual dependence is *non-elliptical*
-  (upper-tail-independent, radially asymmetric $\chi_L>\chi_U$), invisible to a
-  covariance ball by construction.
+- **The lever (RQ1) — active migration pays.** Letting compute move *between* regions
+  cuts out-of-sample $\mathrm{CVaR}_{0.95}$ by **4.0–9.9%** over a no-transfer
+  $\Phi=0$ baseline (Western **4.0%**, Eastern **9.9%**, Diversified **9.0%**). This is
+  the spatial value, and it comes from exploiting the diurnal mean carbon field across
+  regions, not from a fancier dependence model.
+- **The screening rule (RQ2) — passive covariance adds ≈0.** Across three US/Canada
+  grids spanning the full dependence spectrum, modelling the joint *covariance* adds no
+  robust scheduling value, and neither does a Gaussian, lower-tail Clayton, or even the
+  maximal comonotone **copula**. A small **mean-dominance theorem** (an a-priori bound
+  on the spatial gap) explains why: the covariance signal is *real* (worth up to +1.46%
+  in a mean-flattened world) but *dominated* by the mean field, and the residual
+  dependence is *non-elliptical* (upper-tail-independent, $\chi_L>\chi_U$), invisible to
+  a covariance ball by construction.
+- **The price of robustness (RQ3) — pays only past a crossover real grids don't reach.**
+  Distributional robustness hedges day-ahead forecast error and begins to pay only above
+  an emergency-severity crossover $M^\star\approx3$; data-grounded worst-tail emergencies
+  across 17 zones reach only $M\approx1.4$, so on observed conditions the deterministic
+  transfer scheduler is dominant.
 
-A small **mean-dominance theorem** (a-priori bound on the spatial gap) ties it
-together. The practical recommendation: a per-region marginal scheduler captures
-essentially all the value; spatial value, if any, must come from an *active*
-inter-region transfer channel, not a richer dependence model.
+The practical recommendation: a per-region marginal scheduler plus an **active
+inter-region transfer channel** captures the value; a richer dependence model and a
+robust layer are conditional options, not free wins.
 
 Deliverables: `thesis/capstone_thesis.pdf` (the report), the A0 conference poster
 (latest `poster/poster_capstone_v*.pdf`), and the defense slide deck
@@ -131,9 +142,11 @@ archived. Do not redistribute the raw data.
 
 ## Status
 
-- **Capstone report (`thesis/capstone_thesis.pdf`):** complete. Phases 1 and 2 (the
-  covariance and copula nulls plus the mean-dominance bound), with Part 3 (transfer
-  DRO) as a clearly fenced, preliminary appendix.
+- **Capstone report (`thesis/capstone_thesis.pdf`):** complete. The body develops the
+  day-ahead migration scheduler and its 4.0–9.9% savings (RQ1), the screening rule for
+  passive covariance and the mean-dominance bound (RQ2), and the price of robustness with
+  its $M^\star\approx3$ crossover (RQ3); the richer dependence models (copulas) are
+  confirmed in an appendix.
 - **Extended thesis (`full_thesis/full_thesis.pdf`):** a longer, non-page-limited
   version that develops all five parts in the body and stress-tests them.
   - **Part 3 (active transfer):** inter-region flows cut out-of-sample CVaR by
@@ -148,8 +161,9 @@ archived. Do not redistribute the raw data.
     cross-coordinate dependence can ever matter (ordinal on these grids).
 
   The uniform-rigor pass (multi-seed stability, equivalence tests, an independent
-  adversarial review) made the findings *more conservative, not larger*: the only
-  positive result is the deterministic transfer value.
+  adversarial review) made the findings *more conservative, not larger*: the value
+  concentrates in the deterministic transfer lever, with the dependence and robust
+  layers priced as conditional rather than free.
 - **Code:** 194 unit tests, CI on push/PR; every reported number traces to an
   archived, license-safe snapshot in `docs/results_snapshots/`.
 

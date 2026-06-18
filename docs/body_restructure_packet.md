@@ -1,3 +1,16 @@
+> **DEPRECATED — historical work-log, do not use as a source of truth.**
+>
+> Superseded agent transcript from the value-first restructure. The restructure it plans
+> was completed and the body now carries the transfer-savings, crossover, and
+> complexity-frontier sections it called for. Its savings figures (`4.7–10.1%`,
+> `8–11 percentage-point`) and the "✔ uniform" consistency claim are **wrong**: the
+> verified number is **4.0–9.9%** out-of-sample $\mathrm{CVaR}_{0.95}$ reduction over
+> $\Phi=0$ (Western 4.0%, Eastern 9.9%, Diversified 9.0%). The page-budget warning was
+> resolved (graded body is ~29 pp, ≤30). Kept only for provenance; for current numbers
+> see `thesis/capstone_thesis.tex` and `README.md`.
+
+---
+
 I now have complete, verified knowledge of the file. Here is my final analysis.
 
 The fundamental situation: **the front matter is on the new spine; the body is NOT.** The body's Results section is a refined NULL-spine (it has the gap/robustness/copula tests but NO transfer-savings section, NO crossover section, NO complexity frontier). The transfer/crossover material lives only in Appendix B as "preliminary Phase 3." The new spine requires PROMOTING that material into the graded body, which collides head-on with the 30-page ceiling the file already hits.

@@ -1,3 +1,16 @@
+> **DEPRECATED — historical work-log, do not use as a source of truth.**
+>
+> This is a superseded agent transcript from the value-first restructure. Its headline
+> savings figures (`4.7–10.1%` and the `8–11 percentage-point` framing) are **wrong**:
+> the honest $\Phi=0$ re-run produced **4.0–9.9%** out-of-sample $\mathrm{CVaR}_{0.95}$
+> reduction (Western 4.0%, Eastern 9.9%, Diversified 9.0%), now archived in
+> `docs/results_snapshots/part3_transfer_value_2026-06-15.csv` and reflected in the
+> thesis. The BLOCKING "number not yet earned" warning further down was **resolved** by
+> running `scripts/run_part3_transfer_value.py`. Kept only for provenance. For current
+> numbers see `thesis/capstone_thesis.tex` and `README.md`.
+
+---
+
 I now have the complete ground truth. I have everything I need to merge the six reviews into one ruthless, paste-ready implementation packet. Let me write it.
 
 ---
