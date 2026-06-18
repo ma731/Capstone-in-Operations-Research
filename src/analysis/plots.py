@@ -34,16 +34,6 @@ PAIR_COLORS = {
 }
 PAIR_ORDER = ["BANC-CISO", "BANC-LDWP", "CISO-LDWP"]
 
-# Task B (Iberia ES-PT-FR). Pairs are alphabetised the same way _pairs_long
-# builds them (ES-FR, ES-PT, FR-PT in column order ES,PT,FR -> i<j gives
-# ES-PT, ES-FR, PT-FR). No "US-CAL-" prefix to strip.
-PAIR_COLORS_ES_PT_FR = {
-    "ES-PT": "#0072B2",  # blue  (the tightly-coupled MIBEL pair)
-    "ES-FR": "#E69F00",  # orange
-    "PT-FR": "#009E73",  # green
-}
-PAIR_ORDER_ES_PT_FR = ["ES-PT", "ES-FR", "PT-FR"]
-
 # Region-set display config: (zones, pair_order, pair_colors, strip_prefix,
 # tz, clock_label, region_label).
 REGION_SETS = {
@@ -52,13 +42,6 @@ REGION_SETS = {
         "pair_order": PAIR_ORDER, "pair_colors": PAIR_COLORS,
         "strip_prefix": "US-CAL-", "tz": "America/Los_Angeles",
         "clock_label": "local Pacific time", "region_label": "California sub-zones",
-    },
-    "es_pt_fr": {
-        "zones": ["ES", "PT", "FR"],
-        "pair_order": PAIR_ORDER_ES_PT_FR, "pair_colors": PAIR_COLORS_ES_PT_FR,
-        "strip_prefix": "", "tz": "Europe/Madrid",
-        "clock_label": "local CET/CEST (PT is WET, +1h)", "region_label": "Iberia + France",
-        "stem_suffix": "_es_pt_fr",  # so Iberian figures do not overwrite the CA ones
     },
 }
 SEASON_ORDER = ["DJF", "MAM", "JJA", "SON"]

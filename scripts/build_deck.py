@@ -166,7 +166,7 @@ def _title_bar(slide, title, num):
 def _footer(slide, num):
     _rect(slide, 0.5, SH - 0.42, SW - 1.0, 0.012, LINE)
     _text(slide, 0.5, SH - 0.40, 8.0, 0.34,
-          [[("Spatial correlation & carbon-aware DRO scheduling", SANS, 10, MUTED, False)]],
+          [[("The Price of Sophistication: carbon-aware data-center scheduling", SANS, 10, MUTED, False)]],
           anchor=MSO_ANCHOR.MIDDLE)
     _text(slide, SW - 2.5, SH - 0.40, 2.0, 0.34,
           [[("M. Ortiz Togashi  ·  " + str(num), SANS, 10, MUTED, False)]],
@@ -194,9 +194,6 @@ def render_eq(tex, name, *, size=30, color="#0E2A52"):
 EQ_DRO = render_eq(
     r"\min_{x \in \mathcal{X}}\ \langle \bar{\rho},\, x \rangle \;+\; "
     r"\varepsilon\, \| L^{\top} x \|_2 \qquad LL^{\top} = \hat{\Sigma}", "dro")
-EQ_BOUND = render_eq(
-    r"| \mathrm{OPT}(\Sigma) - \mathrm{OPT}(\Sigma_{\mathrm{shuf}}) |"
-    r"\;\leq\; \varepsilon\, \max\|x\|\, \sqrt{\,\|\Sigma_{\mathrm{off}}\|\,}", "bound", size=26)
 
 # =============================================================================== SLIDES
 
@@ -208,244 +205,267 @@ _rect(s, 0, 0, 0.28, SH, GOLD)               # gold spine
 logo = ROOT / "poster" / "figs" / "ie_logo_white.png"
 if logo.exists():
     _pic(s, logo, 0.95, 0.72, w=2.0)
-_text(s, 0.95, 2.62, 11.7, 2.2, [
-    [("Does Spatial Correlation of Carbon Intensity", SERIF, 29, WHITE, True)],
-    [("Improve Robust Carbon-Aware Data-Center Scheduling?", SERIF, 29, WHITE, True)],
+_text(s, 0.95, 2.42, 11.7, 2.4, [
+    [("The Price of Sophistication", SERIF, 33, WHITE, True)],
+    [("When Do Spatial and Robust Models Pay in", SERIF, 25, WHITE, True)],
+    [("Carbon-Aware Data-Center Scheduling?", SERIF, 25, WHITE, True)],
 ], line_spacing=1.04, space_after=8)
-_rect(s, 1.0, 4.78, 3.2, 0.05, GOLD)
-_text(s, 0.95, 4.98, 11.4, 0.8,
-      [[("A multi-grid falsification study: a causal mechanism, a copula test, "
-         "and an active-transfer extension", SANS, 17, CLOUD, False)]])
+_rect(s, 1.0, 4.92, 3.2, 0.05, GOLD)
+_text(s, 0.95, 5.12, 11.4, 0.8,
+      [[("A working day-ahead migration scheduler, and a decision rule for when each "
+         "modelling layer earns its complexity", SANS, 17, CLOUD, False)]])
 _text(s, 0.95, 6.15, 11.0, 1.1, [
     [("Marco Ortiz Togashi", SANS, 17, WHITE, True),
      ("    ·    IE University  ·  MSc Business Analytics & Data Science", SANS, 15, CLOUD, False)],
     [("Supervisor: Prof. Bissan Ghaddar", SANS, 15, CLOUD, False)],
 ], space_after=4)
 
-# ---- 2. Motivation ----
-s = content("Data centers can move their work", 2)
+# ---- 2. The opportunity ----
+s = content("Flexible compute meets a varying grid", 2)
 _bullets(s, 0.7, 1.5, 6.0, 5.0, [
     ("Compute is unusually flexible: batch and AI-training jobs can shift in time "
      "and across sites.", None, False),
-    ("Carbon intensity of electricity varies sharply by hour and by region.", None, False),
-    ("So a scheduler can defer work to cleaner moments, cutting emissions for free.", None, False),
-    ("Recent work makes this robust: model carbon as uncertain inside a "
-     "distributionally robust optimization (DRO).", None, False),
+    ("Carbon intensity of electricity varies sharply by hour and by region, driven by "
+     "wind, solar, hydro, and demand.", None, False),
+    ("So an operator can ship work to cleaner hours and cleaner regions, cutting "
+     "emissions at almost no cost.", None, False),
+    ("The open question is not whether to schedule, but which modelling layers actually "
+     "pay for their complexity.", NAVY, True),
 ], size=19, gap=16, lead="The opportunity")
 _pic(s, FIG / "correlation_map.png", 7.0, 1.7, max_w=5.7, max_h=4.6)
-_text(s, 7.0, 6.35, 5.7, 0.4, [[("Regional carbon intensity is spatially structured.",
+_text(s, 7.0, 6.35, 5.7, 0.4, [[("Carbon intensity is spatially structured, and it moves.",
       SANS, 12, MUTED, False)]], align=PP_ALIGN.CENTER)
 
-# ---- 3. The idea on trial ----
-s = content("The idea on trial", 3)
-_bullets(s, 0.7, 1.6, 11.9, 4.8, [
-    ("A natural next step: treat carbon intensity as a stochastic vector across "
-     "coupled regions, not one region at a time.", None, False),
-    ("Then spatial correlation between regions could inform the robust schedule.", None, False),
-    ("Intuition: if neighbouring grids move together, a robust scheduler should be "
-     "able to exploit that joint structure.", None, False),
-], size=21, gap=18, lead="What if regions move together?")
-_rect(s, 0.7, 5.55, 11.9, 1.15, TINT)
-_text(s, 1.0, 5.62, 11.3, 1.0, [[(
-    "This thesis asks one question: does that spatial structure actually carry any "
-    "robust scheduling value?", SERIF, 20, NAVY, True)]], anchor=MSO_ANCHOR.MIDDLE)
+# ---- 3. The question: which layers pay ----
+s = content("Which layers earn their complexity?", 3)
+_bullets(s, 0.7, 1.55, 11.9, 3.6, [
+    ("Each layer (inter-region transfer, spatial covariance, distributional "
+     "robustness, richer copulas) adds estimation and compute cost.", None, False),
+    ("The literature has assumed this sophistication pays, rather than measuring it.", None, False),
+    ("We build a working day-ahead scheduler and price each layer directly, "
+     "out of sample.", NAVY, True),
+], size=20, gap=16, lead="Sophistication is not free")
+_rect(s, 0.7, 5.45, 11.9, 1.25, TINT)
+_text(s, 1.0, 5.52, 11.3, 1.1, [[(
+    "RQ1: how much does the transfer lever save?   RQ2: does passive covariance or a "
+    "copula add anything?   RQ3: when does robustness pay?", SERIF, 18, NAVY, True)]],
+    anchor=MSO_ANCHOR.MIDDLE)
 
-# ---- 4. The gap ----
-s = content("The gap in prior work", 4)
-_bullets(s, 0.7, 1.6, 11.9, 4.5, [
-    ("Existing carbon-aware DRO models treat each region in isolation: per-region "
-     "marginal uncertainty only.", None, False),
-    ("The cross-region dependence is never put on trial for scheduling value.", None, False),
-    ("It is simply assumed to help, or ignored. Nobody has tested it directly.", None, False),
-], size=21, gap=18, lead="Regions are modelled one at a time")
-_rect(s, 0.7, 5.5, 11.9, 1.2, NAVY)
-_text(s, 1.0, 5.56, 11.3, 1.05, [[(
-    "We build the joint-covariance model, then design a test that can falsify its value.",
-    SERIF, 20, WHITE, True)]], anchor=MSO_ANCHOR.MIDDLE)
+# ---- 4. The day-ahead system ----
+s = content("The day-ahead scheduler", 4)
+_bullets(s, 0.7, 1.5, 6.1, 5.0, [
+    ("Forecast tomorrow's per-region carbon intensity from history.", None, False),
+    ("Optimize a migration schedule: move splittable compute across regions under "
+     "ramp limits and a transfer budget Phi.", None, False),
+    ("Roll forward day by day; score out-of-sample CVaR(0.95) of daily emissions.", None, False),
+    ("Honest baseline: carbon-aware scheduling with no inter-region transfer (Phi=0), "
+     "on the same feasible set.", NAVY, True),
+], size=18, gap=14, lead="Forecast, optimize, roll")
+_pic(s, FIG / "model_validation.png", 7.0, 1.6, max_w=5.7, max_h=4.6)
+_text(s, 7.0, 6.3, 5.7, 0.4, [[(
+    "The scheduler matches the exact optimum on small instances.", SANS, 12, MUTED, False)]],
+    align=PP_ALIGN.CENTER)
 
-# ---- 5. Research questions ----
-s = content("Research questions", 5)
-_rect(s, 0.7, 1.55, 11.9, 2.35, TINT)
-_rect(s, 0.7, 1.55, 0.14, 2.35, SAGE)
-_text(s, 1.1, 1.7, 11.0, 0.6, [[("RQ1   Is the spatial premise valid?", SERIF, 24, NAVY, True)]])
-_text(s, 1.1, 2.45, 11.0, 1.3, [[(
-    "Is carbon intensity genuinely correlated across the regions we study, so the "
-    "joint model has something real to exploit?", SANS, 19, INK, False)]])
-_rect(s, 0.7, 4.2, 11.9, 2.35, TINT)
-_rect(s, 0.7, 4.2, 0.14, 2.35, RUST)
-_text(s, 1.1, 4.35, 11.0, 0.6, [[("RQ2   Does spatial structure pay?", SERIF, 24, NAVY, True)]])
-_text(s, 1.1, 5.1, 11.0, 1.3, [[(
-    "Does scheduling to the joint covariance beat scheduling to the marginals alone, "
-    "measured by out-of-sample tail risk?", SANS, 19, INK, False)]])
+# ---- 5. The value: transfer lever (RQ1) ----
+s = content("RQ1: the transfer lever pays", 5)
+_pic(s, FIG / "transfer_value_curve.png", 0.7, 1.55, max_w=7.6, max_h=4.9)
+_bullets(s, 8.5, 1.7, 4.2, 4.6, [
+    ("Active migration cuts out-of-sample CVaR(0.95) by 4.0 to 9.9% over Phi=0.", SAGE, True),
+    ("Per grid: Western 4.0%, Eastern 9.9%, Diversified 9.0%.", None, False),
+    ("The lever is the spatial mean: at each hour one region is cleanest, "
+     "and migration ships work there.", None, False),
+    ("Deterministic: captured with no dependence model at all.", NAVY, True),
+], size=17, gap=14, lead="The lever, and it works")
 
-# ---- 6. Method: the model ----
-s = content("Method 1: the robust model", 6)
+# ---- 6. The complexity-value frontier ----
+s = content("Where the value lives", 6)
+_pic(s, FIG / "complexity_frontier.png", 0.7, 1.55, max_w=7.6, max_h=4.9)
+_bullets(s, 8.5, 1.7, 4.2, 4.6, [
+    ("Every model class on one complexity-value frontier.", None, False),
+    ("Deterministic transfer dominates the frontier.", SAGE, True),
+    ("Passive covariance and copula layers add no height.", None, False),
+    ("Robust transfer pays only in the tail, conditional on severity.", None, False),
+], size=18, gap=15, lead="The frontier")
+
+# ---- 7. The screening rule (RQ2) ----
+s = content("RQ2: passive sophistication adds nothing", 7)
+_pic(s, FIG / "cv_curve.png", 0.7, 1.55, max_w=7.4, max_h=4.9)
+_bullets(s, 8.4, 1.7, 4.3, 4.8, [
+    ("The spatial covariance gap stays below 0.4% of CVaR, and its sign is not "
+     "stable.", None, False),
+    ("The DRO is genuinely engaged (CV selects a non-trivial radius), so this is an "
+     "active null, not a switched-off one.", None, False),
+    ("Design justification: a simple per-region model is enough.", NAVY, True),
+], size=17, gap=14, lead="A strong, active null")
+
+# ---- 8. Why the screening rule holds: mechanism ----
+s = content("Why covariance cannot add value", 8)
 _bullets(s, 0.7, 1.5, 6.1, 4.6, [
-    ("Mahalanobis–Wasserstein DRO: hedge against carbon distributions close to "
-     "the data in a covariance-aware metric.", None, False),
-    ("It reduces to a second-order cone program (SOCP), solved exactly and fast.", None, False),
-    ("ε sets the robustness radius; Σ̂ carries the spatial structure "
-     "through L.", None, False),
-], size=18, gap=15, lead="DRO as a second-order cone program")
-_rect(s, 7.0, 2.2, 5.7, 1.5, TINT)
-_pic(s, EQ_DRO, 7.0, 2.55, max_w=5.4, max_h=0.95, center_x=9.85)
-_text(s, 7.0, 4.05, 5.7, 1.8, [[(
-    "The covariance Σ̂ enters only through the cone term ε‖Lᵀx‖. "
-    "Destroy the cross-region part of Σ̂ and we get a clean control.",
+    ("Mean-ablation: flatten the mean field and the covariance suddenly pays, up to "
+     "+1.46%.", RUST, True),
+    ("So the spatial signal is real, but masked by the within-day mean carbon field.", None, False),
+    ("Residual dependence is also non-elliptical and upper-tail independent, "
+     "invisible to a covariance ball.", None, False),
+    ("We checked richer dependence models (Gaussian, Clayton, comonotone): they add "
+     "nothing.", None, False),
+], size=18, gap=13, lead="The mechanism")
+_rect(s, 7.0, 1.7, 5.7, 4.5, TINT)
+_text(s, 7.25, 1.95, 5.2, 4.1, [
+    [("Mean-dominance bound", SERIF, 19, NAVY, True)],
+    [("Carbon intensity is driven overwhelmingly by the time-of-day mean (solar, "
+      "demand): shared, predictable, and large.", SANS, 16, INK, False)],
+    [("The cross-region covariance is a second-order wrinkle on a first-order wave, "
+      "so it cannot move the optimal schedule. CVaR's translation invariance makes "
+      "the dependence model second-order to the mean.", SANS, 16, INK, False)],
+], space_after=12)
+
+# ---- 9. Why DRO: day-ahead forecast error ----
+s = content("RQ3: why robustify at all", 9)
+_bullets(s, 0.7, 1.5, 6.1, 4.6, [
+    ("Scheduling against tomorrow's carbon means scheduling under forecast error.", None, False),
+    ("We hedge that error with a data-driven Wasserstein DRO: a daily, rolling "
+     "ambiguity set around the empirical distribution.", None, False),
+    ("It reduces to a second-order cone program, solved exactly and fast.", None, False),
+    ("This is a price-of-robustness question: it buys tail reduction at a mean "
+     "premium.", NAVY, True),
+], size=18, gap=14, lead="Hedging day-ahead forecast error")
+_rect(s, 7.0, 2.3, 5.7, 1.5, TINT)
+_pic(s, EQ_DRO, 7.0, 2.65, max_w=5.4, max_h=0.95, center_x=9.85)
+_text(s, 7.0, 4.1, 5.7, 2.0, [[(
+    "The mean term carries the saving; the cone term "
+    "epsilon times the norm of L-transpose x prices the hedge. "
+    "The value of the stochastic solution is near zero under nominal carbon.",
     SANS, 16, MUTED, False)]])
 
-# ---- 7. Method: the falsification test ----
-s = content("Method 2: the falsification test", 7)
+# ---- 10. The price-of-robustness crossover ----
+s = content("The price-of-robustness crossover", 10)
+_pic(s, FIG / "crossover.png", 0.7, 1.55, max_w=7.6, max_h=4.9)
+_bullets(s, 8.5, 1.7, 4.2, 4.8, [
+    ("Robust beats risk-neutral only past an emergency severity M* near 3.", None, False),
+    ("Real grids, tested across 17 zones, peak at only M near 1.4.", RUST, True),
+    ("So robustness does not activate on observed data; even Winter Storm Uri "
+     "reached only 1.3x.", None, False),
+    ("On real data, deterministic transfer is unambiguously dominant.", NAVY, True),
+], size=17, gap=13, lead="M* near 3, real grids stay below")
+
+# ---- 11. The decision rule ----
+s = content("The decision rule", 11)
+_rect(s, 0.7, 1.5, 5.85, 2.45, TINT)
+_rect(s, 0.7, 1.5, 0.14, 2.45, SAGE)
+_text(s, 1.0, 1.66, 5.4, 0.5, [[("Layer 1: always", SERIF, 19, NAVY, True)]])
+_text(s, 1.0, 2.18, 5.4, 1.6, [[(
+    "Schedule per-region, day-ahead. Temporal shifting captures the diurnal "
+    "carbon cycle.", SANS, 16, INK, False)]])
+_rect(s, 6.75, 1.5, 5.85, 2.45, TINT)
+_rect(s, 6.75, 1.5, 0.14, 2.45, GOLD)
+_text(s, 7.05, 1.66, 5.4, 0.5, [[("Layer 2: the lever", SERIF, 19, NAVY, True)]])
+_text(s, 7.05, 2.18, 5.4, 1.6, [[(
+    "Add inter-region transfer if migration bandwidth exists: a 4.0 to 9.9% CVaR "
+    "reduction over Phi=0. This is where the value is.", SANS, 16, INK, False)]])
+_rect(s, 0.7, 4.15, 5.85, 2.45, TINT)
+_rect(s, 0.7, 4.15, 0.14, 2.45, RUST)
+_text(s, 1.0, 4.31, 5.4, 0.5, [[("Layer 3: skip", SERIF, 19, NAVY, True)]])
+_text(s, 1.0, 4.83, 5.4, 1.6, [[(
+    "Spatial covariance and copulas. They add below 0.4% of CVaR: not worth the "
+    "complexity.", SANS, 16, INK, False)]])
+_rect(s, 6.75, 4.15, 5.85, 2.45, NAVY)
+_rect(s, 6.75, 4.15, 0.14, 2.45, GOLD)
+_text(s, 7.05, 4.31, 5.4, 0.5, [[("Layer 4: conditional", SERIF, 19, WHITE, True)]])
+_text(s, 7.05, 4.83, 5.4, 1.6, [[(
+    "Robustify only if you expect emergencies past M* near 3. Real grids do not "
+    "reach it.", SANS, 16, CLOUD, False)]])
+
+# ---- 12. Data ----
+s = content("Data: three grids across the spectrum", 12)
+_bullets(s, 0.7, 1.5, 6.1, 4.8, [
+    ("US West: a strongly, uniformly correlated grid (common-mode).", None, False),
+    ("Eastern Interconnection belt: an Ontario-anchored mid-correlation set.", None, False),
+    ("Engineered solar / wind / hydro portfolio: low, heterogeneous correlation.", None, False),
+    ("Iberia-France: an independent low-correlation external-validity anchor.", None, False),
+], size=18, gap=14, lead="Real Electricity Maps carbon intensity")
+_pic(s, FIG / "ci_corr_heatmap_us_west.png", 7.0, 1.6, max_w=5.7, max_h=4.6)
+_text(s, 7.0, 6.3, 5.7, 0.4, [[(
+    "Correlation is real, up to 0.78 on the US West.", SANS, 12, MUTED, False)]],
+    align=PP_ALIGN.CENTER)
+
+# ---- 13. Validation / test suite ----
+s = content("Validation and reproducibility", 13)
+_bullets(s, 0.7, 1.5, 6.1, 4.9, [
+    ("The null survives Ledoit-Wolf shrinkage, residualization, and "
+     "Benjamini-Hochberg correction across cells.", None, False),
+    ("Walk-forward out-of-sample validation and a per-cell equivalence test.", None, False),
+    ("194 unit tests in CI; bootstrap confidence intervals on every gap.", NAVY, True),
+    ("Pre-registered, version-controlled, with archived summary tables for every "
+     "reported number.", None, False),
+], size=18, gap=14, lead="A pre-registered battery")
+_pic(s, FIG / "robustness.png", 7.0, 1.7, max_w=5.7, max_h=4.6)
+
+# ---- 14. Limitations ----
+s = content("Limitations, stated honestly", 14)
+_bullets(s, 0.7, 1.5, 11.9, 4.9, [
+    ("One canonical workload (splittable load, ramp limits); a sharply different cost "
+     "geometry could re-weight the covariance term.", None, False),
+    ("Primary read is a single held-out year; walk-forward reproduces it, but "
+     "multi-year evaluation would strengthen external validity.", None, False),
+    ("Results generalize to grids where the diurnal mean dominates residual "
+     "covariance: an empirical regularity, not a universal law.", None, False),
+    ("The crossover is characterized, not observed: a grid with severe emergencies "
+     "past M* near 3 would activate the robust layer.", None, False),
+], size=19, gap=15, lead="Where the claims could be pushed")
+
+# ---- 15. Conclusions ----
+s = content("Conclusions and contributions", 15)
+_bullets(s, 0.7, 1.5, 11.9, 4.9, [
+    ("A working day-ahead migration scheduler with honest savings: a 4.0 to 9.9% CVaR "
+     "reduction over the Phi=0 baseline, the dominant lever.", SAGE, True),
+    ("A screening rule: passive covariance and copulas add nothing, with a "
+     "mean-dominance bound that says why.", None, False),
+    ("A price-of-robustness decision rule with a tested, data-grounded bound "
+     "(M near 1.4 below M* near 3).", None, False),
+    ("A reproducible, pre-registered pipeline under 194 unit tests.", NAVY, True),
+], size=19, gap=15, lead="What this thesis delivers")
+
+# ---- 16. The decision rule recap + thanks ----
+s = prs.slides.add_slide(BLANK)
+_set_bg(s, NAVY)
+_rect(s, 0, 0, 0.28, SH, GOLD)
+_text(s, 0.95, 0.9, 11.4, 1.0, [[("The takeaway, and thank you", SERIF, 32, WHITE, True)]])
+_rect(s, 0.95, 1.78, 2.6, 0.05, GOLD)
+_text(s, 0.95, 2.15, 11.4, 0.5, [[("The rule in one line", SANS, 19, GOLD, True)]])
+_bullets(s, 0.95, 2.75, 11.4, 3.0, [
+    ("Always schedule per-region.", CLOUD, False),
+    ("Add inter-region transfer: this is the lever, 4.0 to 9.9% over Phi=0.", CLOUD, False),
+    ("Skip covariance and copulas: they add nothing.", CLOUD, False),
+    ("Robustify only if you expect emergencies past M* near 3.", CLOUD, False),
+], size=18, gap=14, color=CLOUD)
+_text(s, 0.95, 6.4, 11.4, 0.8, [[(
+    "Thank you. Questions welcome.", SERIF, 22, GOLD, True)]])
+
+# ---- 17. Backup: the falsification test ----
+s = content("Backup: the falsification test", 17)
 _bullets(s, 0.7, 1.45, 6.1, 5.0, [
     ("Fit the schedule to the full joint covariance.", None, False),
-    ("Refit it to a block-diagonal covariance: identical marginals, cross-region "
+    ("Refit to a block-diagonal covariance: identical marginals, cross-region "
      "structure destroyed (shuffled).", None, False),
-    ("Score both on out-of-sample CVaR₀.₉₅ of daily emissions.", None, False),
-    ("Pre-registered. If spatial structure matters, the joint schedule must win.",
-     NAVY, True),
+    ("Score both on out-of-sample CVaR(0.95) of daily emissions.", None, False),
+    ("Pre-registered: if spatial structure matters, the joint schedule must win. "
+     "It does not.", NAVY, True),
 ], size=18, gap=14, lead="Shuffled marginals")
 _pic(s, FIG / "schedule_us_west.png", 7.0, 1.6, max_w=5.7, max_h=4.6)
 _text(s, 7.0, 6.3, 5.7, 0.4, [[(
     "Joint vs shuffled schedules, side by side.", SANS, 12, MUTED, False)]],
     align=PP_ALIGN.CENTER)
 
-# ---- 8. Data ----
-s = content("Data: three grids across the spectrum", 8)
-_bullets(s, 0.7, 1.5, 6.1, 4.8, [
-    ("US West: a strongly, uniformly correlated grid (common-mode).", None, False),
-    ("Eastern Interconnection belt: an Ontario-anchored mid-correlation set.", None, False),
-    ("Engineered solar / wind / hydro portfolio: low, heterogeneous correlation.", None, False),
-    ("Iberia–France: an independent low-correlation anchor.", None, False),
-], size=18, gap=14, lead="Real Electricity Maps carbon intensity")
-_pic(s, FIG / "correlation_map.png", 7.0, 1.7, max_w=5.7, max_h=4.5)
-_text(s, 7.0, 6.25, 5.7, 0.4, [[(
-    "Chosen to span weak → strong spatial dependence.", SANS, 12, MUTED, False)]],
-    align=PP_ALIGN.CENTER)
-
-# ---- 9. RQ1 result ----
-s = content("RQ1: the spatial premise is valid", 9)
-_pic(s, FIG / "ci_corr_heatmap_us_west.png", 0.7, 1.55, max_w=7.4, max_h=4.9)
-_bullets(s, 8.4, 1.7, 4.3, 4.6, [
-    ("Cross-region correlation is real and strong, up to 0.78 on the US West.", SAGE, True),
-    ("It is stable across hours and seasons.", None, False),
-    ("So the joint model is not fighting a strawman: there is genuine structure to "
-     "exploit.", None, False),
-], size=18, gap=16, lead="Correlation is real")
-
-# ---- 10. RQ2 result: the null ----
-s = content("RQ2: a replicated null", 10)
-_pic(s, FIG / "finding.png", 0.7, 1.5, max_w=12.0, max_h=3.7)
-_rect(s, 0.7, 5.45, 11.9, 1.25, NAVY)
-_text(s, 1.0, 5.5, 11.3, 1.15, [[(
-    "The spatial gap never exceeds a few tenths of one percent. Joint and shuffled "
-    "schedules coincide out of sample, on every grid.", SERIF, 20, WHITE, True)]],
-    anchor=MSO_ANCHOR.MIDDLE)
-
-# ---- 11. Robustness ----
-s = content("The null is genuinely robust", 11)
-_bullets(s, 0.7, 1.5, 6.1, 4.8, [
-    ("Shrinkage and residualization of the covariance.", None, False),
-    ("Benjamini–Hochberg correction across all cells.", None, False),
-    ("Walk-forward out-of-sample validation, tighter-ramp sensitivity.", None, False),
-    ("Multi-seed stability: the single-seed crossovers were scenario noise.", None, False),
-    ("TOST equivalence: statistically equivalent, not merely not-significant.",
-     NAVY, True),
-], size=17, gap=12, lead="A pre-registered battery")
-_pic(s, FIG / "robustness.png", 7.0, 1.7, max_w=5.7, max_h=4.6)
-
-# ---- 12. Mechanism 1 ----
-s = content("Mechanism 1: the mean dominates", 12)
-_bullets(s, 0.7, 1.5, 6.1, 4.6, [
-    ("Flatten the mean carbon field and the joint covariance suddenly pays, up to "
-     "+1.46%.", RUST, True),
-    ("So the spatial signal is real, but masked: dwarfed by the diurnal mean.", None, False),
-    ("The schedule chases the big mean valley; the covariance is a ripple on top.",
-     None, False),
-], size=18, gap=15, lead="Mean-ablation (causal)")
-_rect(s, 7.0, 1.7, 5.7, 4.5, TINT)
-_text(s, 7.25, 1.95, 5.2, 4.1, [
-    [("Why this happens", SERIF, 19, NAVY, True)],
-    [("Carbon intensity is driven overwhelmingly by the time-of-day mean (solar, "
-      "demand). That signal is shared, predictable, and huge.", SANS, 16, INK, False)],
-    [("The cross-region covariance is a second-order wrinkle on a first-order wave, "
-      "so it cannot move the optimal schedule.", SANS, 16, INK, False)],
-], space_after=12)
-
-# ---- 13. Mechanism 2 ----
-s = content("Mechanism 2: the wrong object", 13)
+# ---- 18. Backup: tail dependence ----
+s = content("Backup: non-elliptical tail dependence", 18)
 _pic(s, FIG / "tail_dependence_taskc.png", 0.7, 1.55, max_w=7.2, max_h=4.9)
 _bullets(s, 8.0, 1.7, 4.7, 4.8, [
     ("Residual dependence is non-elliptical: regions go clean together more than "
-     "dirty together (χ_L > χ_U).", None, False),
-    ("A covariance ball forces χ_L = χ_U by construction.", None, False),
-    ("So an elliptical ambiguity set is the wrong object, blind to the only "
-     "structure that is left.", NAVY, True),
-], size=17, gap=14, lead="Tail dependence (structural)")
-
-# ---- 14. Phase 2 ----
-s = content("Foreclosing the rebuttal: copulas", 14)
-_pic(s, FIG / "copula_result.png", 0.7, 1.5, max_w=7.2, max_h=4.9)
-_bullets(s, 8.0, 1.7, 4.7, 4.8, [
-    ("“Maybe covariance is just the wrong model.” We test richer ones.", None, False),
-    ("Gaussian, lower-tail Clayton, and the maximal comonotone copula.", None, False),
-    ("All leave the null intact; an a-priori bound caps the achievable gain.", SAGE, True),
-], size=18, gap=15, lead="Richer dependence, same null")
-
-# ---- 15. What it means ----
-s = content("What the null means", 15)
-_rect(s, 0.7, 1.55, 11.9, 2.2, TINT)
-_rect(s, 0.7, 1.55, 0.14, 2.2, SAGE)
-_text(s, 1.1, 1.75, 11.2, 1.9, [
-    [("Per-region marginal schedulers capture essentially all the value.", SERIF, 23, NAVY, True)],
-    [("Modelling the joint distribution adds complexity and solve time for no robust "
-      "scheduling benefit.", SANS, 18, INK, False)],
-], space_after=10)
-_rect(s, 0.7, 4.05, 11.9, 2.2, NAVY)
-_text(s, 1.1, 4.25, 11.2, 1.9, [
-    [("Spatial value, if any, lives in an active transfer channel.", SERIF, 23, WHITE, True)],
-    [("Not in a richer passive dependence model, but in actually moving load between "
-      "regions. That is Phase 3.", SANS, 18, CLOUD, False)],
-], space_after=10)
-
-# ---- 16. Limitations ----
-s = content("Limitations, stated honestly", 16)
-_bullets(s, 0.7, 1.5, 11.9, 4.9, [
-    ("Correlated grids are a best-case stress test: compute shifting is logical (over "
-     "the network), not electrical, so we hand the joint model its best shot.", None, False),
-    ("Results are specific to the grids and the study period; carbon series evolve.", None, False),
-    ("CVaR₀.₉₅ is one risk measure; the mean-dominance mechanism, though, "
-     "is measure-agnostic.", None, False),
-    ("The transfer-channel result (Phase 3) is preliminary and deterministic.", None, False),
-], size=19, gap=16, lead="Where the result could be pushed")
-
-# ---- 17. Conclusions ----
-s = content("Conclusions & contributions", 17)
-_bullets(s, 0.7, 1.5, 11.9, 4.9, [
-    ("A pre-registered falsification test for the scheduling value of spatial carbon "
-     "structure.", None, False),
-    ("A replicated null across the full dependence spectrum, with multi-seed and "
-     "equivalence backing.", None, False),
-    ("The mechanism: the diurnal mean dominates, and the residual dependence is "
-     "non-elliptical, so covariance is both subordinate and the wrong object.", None, False),
-    ("A clear, honest negative result that redirects effort to the active transfer "
-     "channel.", NAVY, True),
-], size=19, gap=15, lead="What this thesis delivers")
-
-# ---- 18. Future work + thanks ----
-s = prs.slides.add_slide(BLANK)
-_set_bg(s, NAVY)
-_rect(s, 0, 0, 0.28, SH, GOLD)
-_text(s, 0.95, 0.9, 11.4, 1.0, [[("Future work, and thank you", SERIF, 32, WHITE, True)]])
-_rect(s, 0.95, 1.78, 2.6, 0.05, GOLD)
-_pic(s, FIG / "part3_preliminary.png", 0.95, 2.15, max_w=7.3, max_h=3.8)
-_text(s, 8.5, 2.15, 4.2, 0.5, [[("Where the value actually is", SANS, 19, GOLD, True)]])
-_bullets(s, 8.5, 2.75, 4.2, 3.4, [
-    ("Phase 3: the active transfer channel, where moving load shows 4–10% "
-     "deterministic value.", CLOUD, False),
-    ("Stochastic and online versions of that channel.", CLOUD, False),
-], size=16, gap=14, color=CLOUD)
-_text(s, 0.95, 6.4, 11.4, 0.8, [[(
-    "Thank you. Questions welcome.", SERIF, 22, GOLD, True)]])
+     "dirty together (chi_L > chi_U).", None, False),
+    ("A covariance ball forces chi_L = chi_U by construction.", None, False),
+    ("So an elliptical ambiguity set is blind to the only structure left, "
+     "and it sits in the clean tail a risk-averse scheduler ignores.", NAVY, True),
+], size=17, gap=14, lead="Structural reason covariance fails")
 
 # =============================================================================== save
 out = DECK / "capstone_defense.pptx"

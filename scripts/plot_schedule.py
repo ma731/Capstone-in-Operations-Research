@@ -26,7 +26,7 @@ from src.models.covariance import (  # noqa: E402
 )
 
 FIG = Path("figures")
-NAVY, GOLD, RUST, SAGE = "#1F3B63", "#E69F00", "#B3402F", "#4A7C59"
+NAVY, GOLD, RUST, SAGE = "#00338D", "#E8A33D", "#0098E0", "#4A7C59"
 
 
 def _short(z: str) -> str:
@@ -60,7 +60,7 @@ def main() -> None:
                                epsilon=1.0, **kw).schedule
 
     ncol = R
-    fig, axes = plt.subplots(1, ncol, figsize=(2.7 * ncol, 4.2),
+    fig, axes = plt.subplots(1, ncol, figsize=(4.7 * ncol, 3.9),
                              sharey=True, squeeze=False)
     hours = np.arange(T)
     for r in range(R):
@@ -91,7 +91,7 @@ def main() -> None:
     h1, l1 = axes[0][0].get_legend_handles_labels()
     h1 = h1 + [Line2D([0], [0], color=GOLD, lw=2.6)]
     l1 = l1 + ["carbon intensity (mean field)"]
-    axes[0][0].legend(h1, l1, frameon=False, fontsize=7.0, loc="upper right")
+    fig.legend(h1, l1, frameon=False, loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.02))
     fig.suptitle(f"Joint vs.\\ shuffled-covariance schedules are visually "
                  f"indistinguishable ({DISPLAY_NAME.get(args.region_set, args.region_set)}): the spatial null, seen "
                  f"directly. Load (bars) tracks the low-carbon hours.", fontsize=11)

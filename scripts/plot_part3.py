@@ -20,7 +20,7 @@ NAVY, GOLD, RUST, SAGE = "#1F3B63", "#E69F00", "#B3402F", "#4A7C59"
 
 # (a) transfer-budget savings (out-of-sample CVaR reduction vs no transfer)
 GRIDS = ["Western US", "Eastern US–Canada", "Diversified"]
-SAVINGS = [4.7, 10.1, 9.1]
+SAVINGS = [4.0, 9.9, 9.0]
 
 # (b) emergency-severity crossover: robust(CVaR)-commitment gain over risk-neutral
 M = [1.0, 1.5, 2.0, 3.0, 4.0]
@@ -55,15 +55,16 @@ def main():
     axB.axhspan(0, 9, color="#eef4ef", alpha=0.6, zorder=0)
     for g, gain in GAIN.items():
         axB.plot(M, gain, "-o", color=COL[g], lw=2.2, ms=6, label=g)
-    axB.axvline(2.0, color="0.5", ls="--", lw=1)
-    axB.text(2.05, 7.2, "crossover\n($M\\approx2$)", fontsize=8, color="0.4")
-    axB.text(3.6, -0.9, "robustness\nworthless", fontsize=8, color=RUST, ha="center")
-    axB.text(1.25, 6.0, "robustness\npays", fontsize=8, color=SAGE)
+    axB.axvline(3.0, color="0.5", ls="--", lw=1)
+    axB.text(3.05, 7.2, "crossover\n($M^\\star\\approx3$)", fontsize=8, color="0.4")
+    axB.axvline(1.4, color=RUST, ls=":", lw=1.2)
+    axB.text(1.45, -0.9, "real grids reach\nonly $M\\approx1.4$", fontsize=8, color=RUST)
+    axB.text(3.4, 5.0, "robustness\npays", fontsize=8, color=SAGE)
     axB.set_xlabel("grid-emergency severity $M$ (carbon spike multiplier)", fontsize=9)
     axB.set_ylabel("robust commitment gain over\nrisk-neutral  $\\mathrm{CVaR}_{0.95}$  [%]",
                    fontsize=9)
     axB.set_title("B. When does robustness pay? The tail-risk crossover\n"
-                  "($M{=}1$: no emergencies $\\to$ our null; larger $M$ $\\to$ robustness wins)",
+                  "(crossover at $M^\\star\\approx3$; real grids reach only $M\\approx1.4$)",
                   fontsize=10)
     axB.legend(frameon=False, fontsize=9, loc="upper left")
     axB.grid(alpha=0.3, lw=0.5)

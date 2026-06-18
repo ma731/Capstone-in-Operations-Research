@@ -91,3 +91,10 @@ poster/_*.png
 deck/_preview/
 deck/_eq_*.png
 deck/_sheet.png
+
+# Archived Iberia material contains raw Electricity Maps data (non-redistributable)
+archive_iberia_removed/
+poster/node_modules/
+*.fdb_latexmk
+*.fls
+docs/results_snapshots/*.out
