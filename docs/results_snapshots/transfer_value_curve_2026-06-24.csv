@@ -1,0 +1,22 @@
+grid,display,budget_frac,cvar_reduction_pct,transfer_used
+us_west,Western US,0.0,0.0,0.0
+us_west,Western US,0.025,1.0668544948539622,120.0
+us_west,Western US,0.05,2.0582784931888645,240.0
+us_west,Western US,0.1,4.396269971968976,480.0
+us_west,Western US,0.2,4.037911361883676,960.0
+us_west,Western US,0.4,4.037911361883676,1920.0
+us_west,Western US,0.8,4.037911361883676,3060.0
+taskc,Eastern US–Canada,0.0,0.0,0.0
+taskc,Eastern US–Canada,0.025,2.4276398089701257,96.0
+taskc,Eastern US–Canada,0.05,4.858410204748918,192.0
+taskc,Eastern US–Canada,0.1,7.77547848243832,384.0
+taskc,Eastern US–Canada,0.2,9.907461596787835,768.0
+taskc,Eastern US–Canada,0.4,9.907461596787835,1290.0
+taskc,Eastern US–Canada,0.8,9.907461596787835,1290.0
+us_hetero,Diversified,0.0,0.0,0.0
+us_hetero,Diversified,0.025,2.2335432032813123,72.0
+us_hetero,Diversified,0.05,4.244055502504497,144.0
+us_hetero,Diversified,0.1,7.127875182923392,288.0
+us_hetero,Diversified,0.2,9.03736231627367,576.0
+us_hetero,Diversified,0.4,9.03736231627367,680.0
+us_hetero,Diversified,0.8,9.03736231627367,680.0

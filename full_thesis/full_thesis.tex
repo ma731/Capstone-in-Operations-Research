@@ -112,7 +112,7 @@ documents the validation behind every claim: small-instance model checks, a
 pre-registered protocol, and a $194$-test software suite. The thesis contributes a
 working scheduler with honest savings, a screening rule for when passive dependence
 modelling fails, and a price-of-robustness decision rule with a tested, data-grounded
-bound, all under pre-registration.
+bound, all under 194 unit tests, with the Phase~1--2 falsification protocol pre-registered (the stylised-emergency crossover of RQ3 is a calibrated stress test, not part of the pre-registration).
 \end{abstract}
 \newpage
 \tableofcontents
@@ -182,7 +182,7 @@ when passive dependence modelling cannot help. (iii)~\emph{A price-of-robustness
 decision rule}: framing robustness as a complexity--value trade-off after Bertsimas
 and Sim, the DRO over day-ahead forecast error buys tail reduction at a mean premium
 and pays only past an emergency-severity crossover $M^\star\approx3$ that real
-data-grounded emergencies across 17 zones never reach. (iv)~\emph{An active transfer
+data-grounded emergencies across 17 zones never reach; the robust DRO-plus-active-transfer artifact behind this rule is characterised but preliminary (Appendix~\ref{app:programme}), so the contribution is the decision rule and its data-grounded crossover rather than a production controller. (iv)~\emph{An active transfer
 channel developed in the main body} (Section~\ref{sec:transfer}): a
 spatially-coupled transfer DRO that makes inter-region flows a decision, with its
 severity crossover and a data-grounded emergency stress test. (v)~\emph{An online and
@@ -681,8 +681,12 @@ x\rVert_2^2$,
 Since the infimum is $1$-Lipschitz in the sup-norm of the objective, two objectives
 that differ pointwise by at most $\delta$ over a common feasible set have optimal
 values differing by at most $\delta$. The feasible set $\mathcal X$ is a bounded
-polytope (the capacity bounds C0), hence compact, so $\max_{x\in\mathcal X}\lVert
-x\rVert_2$ is attained; taking that maximum gives \eqref{eq:propbound}.
+polytope (the capacity bounds C0), hence compact, so the maximum
+$\max_{x\in\mathcal X}\lVert x\rVert_2$ is attained. Its value follows from combining
+the capacity bound $x_{r,t}\le\bar x$ (C0) with work conservation (C2b):
+$\lVert x\rVert_2^2=\sum_{r,t}x_{r,t}^2\le\bar x\sum_{r,t}x_{r,t}=\bar x\sum_r W_r
+=\bar x^2\,R\,T\,u$, so $\max_{x\in\mathcal X}\lVert x\rVert_2\le\bar x\sqrt{R\,T\,u}$;
+taking that maximum gives \eqref{eq:propbound}.
 \end{proof}
 
 \noindent The bound is a conservative \emph{certificate}, not a tight prediction.
@@ -803,7 +807,12 @@ work there. The saving is \emph{deterministic}, captured without any dependence 
 This is consistent with the carbon-computing literature, which finds spatial shifting
 dominates temporal shifting \citep{wiesner2021,radovanovic2022}. We deliberately report
 the saving over the $\Phi=0$ carbon-aware baseline (not over a uniform spread or a
-carbon-blind schedule): the honest lever is transfer versus no-transfer. Section~\ref{sec:transfer}
+carbon-blind schedule): the honest lever is transfer versus no-transfer. The
+out-of-sample reduction is largest at a moderate budget (on the US West a $4.4\%$ peak
+near $10\%$ of daily workload) and settles to the reported $4.04\%$ plateau as the
+budget grows: at large budgets the deterministic schedule reallocates further toward the
+training-mean-cleanest region and slightly overfits out of sample, so we quote the
+conservative plateau as the headline rather than the peak. Section~\ref{sec:transfer}
 develops the full transfer DRO, its multi-seed validation, and a data-grounded
 emergency stress test.
 
@@ -1249,36 +1258,58 @@ title poses is when \emph{robustness} pays. We make the spatial structure an act
 decision (inter-region flows) and add a two-stage robust commitment with
 migration-limited recourse, hedging day-ahead forecast error. By
 Proposition~\ref{prop:meandom}'s logic the mean dominates under nominal carbon, and
-indeed robust $\approx$ deterministic there: the value of the stochastic solution is
-near zero, and the DRO buys no mean reduction (a price-of-robustness result, not an
-emissions win).
+indeed robust $\approx$ deterministic there: the DRO buys no mean reduction (a
+price-of-robustness result, not an emissions win). The value of the stochastic solution
+is near zero at best. In the rolling online evaluation (Table~\ref{tab:online}) the
+robust controller's out-of-sample $\CVaR_{0.95}$ is statistically indistinguishable from
+the deterministic one on the US West ($+0.3\%$, 95\% CI $[-0.6,+1.2]$) and Eastern
+($+0.0\%$, $[-0.1,+0.3]$) grids, but is significantly \emph{worse} on the Diversified
+grid ($-10.3\%$, $[-18.3,-4.4]$): hedging forecast error when no emergency is present
+costs tail performance where the regions are weakly coupled. This sharpens the decision
+rule rather than softening it: under nominal conditions robustness is at best free and
+can actively hurt, so it is worth buying only when emergencies past the crossover are
+expected.
 
 Robustness earns its keep only in the tail. Modelling rare grid-emergency events (with
 probability $0.1$ per day a region's carbon scales by a severity $M$), the robust
-commitment's advantage over the risk-neutral one grows with $M$: zero at $M=1$,
-crossing positive near $M^\star\approx3$, and reaching $+8.4\%$ of $\CVaR_{0.95}$ at
-$M=4$ on the US West (Figure~\ref{fig:crossover}). The robust schedule stays hedged
-while the risk-neutral one is burned when its favoured region spikes.
+commitment's advantage over the risk-neutral one grows with $M$: zero at $M=1$, turning
+materially and significantly positive near $M^\star\approx3$ on the US West and
+Diversified grids, and reaching $+8.4\%$ of $\CVaR_{0.95}$ at $M=4$ on the US West
+(Figure~\ref{fig:crossover}). The crossover is grid-specific and seed-sensitive: on the
+Eastern grid the robust gain crosses statistical significance earlier (near
+$M\approx1.5$) but stays below $0.4\%$ of $\CVaR_{0.95}$, inside the nominal no-value
+band, so $M^\star\approx3$ is the materially relevant threshold. The robust schedule
+stays hedged while the risk-neutral one is burned when its favoured region spikes.
 
-\paragraph{Real grids stay below the crossover.} We tested data-grounded worst-tail
-emergencies across all 17 zones (US West, Eastern Interconnection, Iberia--France,
-Canada). The worst realized joint-tail severity reaches only $M\approx1.4$, well below
-$M^\star$, so on real historical data the crossover does \emph{not} activate: the robust
-layer's promised value is real but unrealized on observed conditions. We resist a clean
-carbon-ceiling impossibility theorem, because clean grids spike relatively large (BPAT
-$5\times$, Ontario $2.6\times$ clean-to-dirty), so a ceiling argument bounds only dirty
-grids. The rigorous claim is the tested one: across the 17 zones and real emergencies we
-have, $M$ never reaches $M^\star$, so deterministic transfer is unambiguously dominant on
-observed data. Section~\ref{sec:transfer} gives the full multi-seed treatment and the
-data-grounded emergency model behind this verdict.
+\paragraph{Real grids stay below the crossover.} The synthetic multiplier overstates
+real risk, and a data-grounded test confirms the crossover does not activate. On the
+\emph{joint} (portfolio) axis the crossover lives on, the worst realized day reaches only
+$1.3$--$1.9\times$ the portfolio mean across the three grids (Western $1.34\times$,
+Eastern $1.29\times$, Diversified $1.89\times$; archived in
+\texttt{carbon\_ceiling.csv}), well below $M^\star\approx3$. Per-region \emph{relative}
+swings can be larger on very clean grids (BPAT $5.1\times$, Ontario $2.6\times$), but
+those sit on near-zero carbon bases and do not move the portfolio tail, so they are not
+joint emergencies; Winter Storm Uri, the worst US grid event on record, reached only
+$1.3\times$. Decisively, when emergencies are drawn \emph{from real data} (each emergency
+replaces a region's day with a draw from its own empirical top-$5\%$ tail;
+\texttt{run\_part3\_real\_emergency.py}), the robust commitment does \emph{not} pay: its
+$\CVaR_{0.95}$ gain over the risk-neutral schedule is negative or within noise on every
+grid and frequency (Western $-0.3\%$, Diversified $-0.9\%$ to $-2.3\%$, Eastern $+0.1\%$
+to $+0.2\%$). Real emergencies are not severe enough, in joint absolute-emission terms,
+to reach the crossover, so deterministic transfer is dominant on observed data. We claim
+no universal carbon-ceiling impossibility, only the tested one: across the zones and real
+emergencies we have, robustness does not activate. Section~\ref{sec:transfer} gives the
+full multi-seed treatment and the data-grounded emergency model behind this verdict.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{../figures/crossover.pdf}
 \caption{The price-of-robustness crossover. Robust-minus-risk-neutral $\CVaR_{0.95}$
-advantage against emergency severity $M$. The crossover is $M^\star\approx3$; tested
-real grids (17 zones) peak at $M\approx1.4$, so robustness does not activate on observed
-data. Rule: deploy deterministic transfer; robustify only if you expect $M>M^\star$.}
+advantage against emergency severity $M$. The materially relevant crossover is
+$M^\star\approx3$ (grid-specific); realized joint severity stays at $1.3$--$1.9\times$
+and the robust commitment does not pay on real top-$5\%$ emergency days, so robustness
+does not activate on observed data. Rule: deploy deterministic transfer; robustify only
+if you expect $M>M^\star$.}
 \label{fig:crossover}
 \end{figure}
 
@@ -1361,9 +1392,9 @@ $+1.46\%$ in a covariance-only world) but masked by the within-day mean carbon f
 transfer against day-ahead forecast error only if grid-emergency severity realistically
 exceeds $M^\star\approx3$. The robust two-stage commitment buys a small CVaR tail
 reduction at a mean premium (value of the stochastic solution near zero), a textbook
-price-of-robustness result. Across the 17 real grids and zones we tested, worst-case
-joint-tail severity reached only $M\approx1.4$, well below $M^\star$, so the robust
-layer's promised value remained unrealized.
+price-of-robustness result. Realized joint severity stayed at $1.3$--$1.9\times$ the
+portfolio mean (well below $M^\star$), and on real top-$5\%$ emergency days the robust
+commitment did not pay, so the robust layer's promised value remained unrealized.
 
 In absolute terms, for the Eastern US--Canada facility ($\approx160$ MW aggregate,
 $\approx460{,}000\,\text{tCO}_2$/yr), the transfer lever is worth on the order of
@@ -1954,16 +1985,16 @@ value of the stochastic solution is near zero), a classic price-of-robustness re
 robustness earns value only in the tail. When grid-emergency severity is modelled as a
 rare ($0.1$/day) multiplicative scaling $M$ of carbon intensity, the robust schedule
 outperforms the risk-neutral one only past a crossover $M^\star\approx3$
-(Section~\ref{sec:res-crossover}). Tested against real data-grounded worst-tail
-emergencies across all 17 zones (US West, Eastern Interconnection, Iberia--France,
-Canada), the maximum realized severity was only $M\approx1.4$, well below $M^\star$,
-so the robust layer's promised value is characterized but unrealized on observed data.
-We resist a universal carbon-ceiling impossibility theorem: clean grids spike
-relatively large (BPAT $5\times$, Ontario $2.6\times$ clean-to-dirty), so a ceiling
-argument bounds only dirty grids. The rigorous claim is the tested one: across the
-zones and real emergencies we have, $M$ never reached $M^\star$, so deterministic
-transfer was unambiguously dominant. Robustness remains a conditional option for
-operators with a concrete, defensible emergency model.
+(Section~\ref{sec:res-crossover}). On the joint (portfolio) severity axis the crossover
+lives on, realized joint severity stayed at $1.3$--$1.9\times$ the portfolio mean across
+the three grids, well below $M^\star$; per-region relative swings reach $5\times$ (BPAT)
+on near-zero carbon bases but do not move the portfolio tail. Decisively, on real
+top-$5\%$ emergency days the robust commitment did not pay (its $\CVaR_{0.95}$ gain was
+negative or within noise on every grid), so the robust layer's promised value is
+characterized but unrealized on observed data. We claim no universal carbon-ceiling
+impossibility, only the tested one: across the zones and real emergencies we have,
+deterministic transfer was unambiguously dominant. Robustness remains a conditional
+option for operators with a concrete, defensible emergency model.
 
 \subsection{Contributions}
 This thesis contributes: (1)~a pre-registered falsification methodology
@@ -2161,7 +2192,7 @@ Table~\ref{tab:snapmap} maps each results subsection to its archived table.
 \centering\small
 \caption{Mapping of reported results to archived summary tables.}
 \label{tab:snapmap}
-\begin{tabular}{lll}
+\begin{tabular}{ll p{0.48\textwidth}}
 \toprule
 Section & Result & Archived source\\
 \midrule
@@ -2174,6 +2205,12 @@ Section & Result & Archived source\\
 \texttt{\{case\}\_..\_ablate-\{level,flat\}.csv}\\
 \ref{sec:res-corr},\ref{sec:res-tails} & CA/Iberia panels &
 \texttt{taskA\_..\, es\_pt\_fr\_..\,csv}\\
+\ref{sec:res-transfer} & Transfer value, curve &
+\texttt{transfer\_value\_curve\_..}, \texttt{part3\_transfer\_value\_..}\\
+\ref{sec:res-crossover} & Crossover, realized severity &
+\texttt{part3\_\{emergency,real\_emergency\}\_..}, \texttt{carbon\_ceiling\_..}\\
+\ref{sec:res-crossover} & Online robust (Table~\ref{tab:online}) &
+\texttt{part4\_online\_2026-06-15.csv}\\
 \bottomrule
 \end{tabular}
 \end{table}
