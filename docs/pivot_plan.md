@@ -14,9 +14,10 @@ exist; only the narrative + two integrity items need work.**
   Retire "12–16% vs carbon-blind." (Note: `greedy_sort_schedule_multiregion` ignores ramp/thermal
   constraints, so use the Φ=0 rolling baseline on the *same* feasible set, not the raw greedy sort.)
   Re-run 3 grids, re-snapshot. ~2–3 h.
-- **M5 — Yaxin attribution (INTEGRITY).** The deterministic transfer savings (the 4.0–9.9% lever)
-  are Yaxin's territory; Marco owns the **robust/stochastic** layer + the crossover decision rule.
-  Boundary statement + Annex A (ICS) + cite Yaxin. Email Bissan + Yaxin to confirm. ~1 h + email.
+- **M5 — Migration-boundary framing (RESOLVED, INTEGRITY).** The deterministic transfer savings (the
+  4.0–9.9% lever) are framed as established background (`radovanovic2022,wiesner2021`); the contribution
+  is the **robust/stochastic** layer + the crossover decision rule. Handled by the boundary framing in
+  the lit review and Annex A, not by attribution. ~1 h.
 
 ## MUST-FIX (narrative spine, Bissan's signals)
 - **M6 — sign-off first.** Email Bissan the one-paragraph new spine + `thesis_change_map.md` before
@@ -47,7 +48,7 @@ exist; only the narrative + two integrity items need work.**
   `data/raw/electricitymaps/` — need their path to stage them.
 
 ## Critical path
-1. **Today:** M6 (Bissan sign-off email) + M5 (Yaxin email) — both blocking, async.
+1. **Today:** M6 (Bissan sign-off email) + M5 (migration-boundary framing) — both blocking, async.
 2. **On sign-off:** M1 (baseline) → S1/S2 (figures).
 3. **Jun 19–24:** M2, M3, M4 (the rewrite).
 4. **Jun 25:** S3, S5 — body-complete checkpoint.

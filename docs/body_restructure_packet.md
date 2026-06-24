@@ -11,11 +11,7 @@
 
 ---
 
-I now have complete, verified knowledge of the file. Here is my final analysis.
-
 The fundamental situation: **the front matter is on the new spine; the body is NOT.** The body's Results section is a refined NULL-spine (it has the gap/robustness/copula tests but NO transfer-savings section, NO crossover section, NO complexity frontier). The transfer/crossover material lives only in Appendix B as "preliminary Phase 3." The new spine requires PROMOTING that material into the graded body, which collides head-on with the 30-page ceiling the file already hits.
-
-I have produced the final ordered packet below. Because the parent agent reads my text output, I am returning the complete packet as my response.
 
 ---
 
@@ -23,7 +19,7 @@ I have produced the final ordered packet below. Because the parent agent reads m
 
 Apply **bottom-of-file first** (highest line numbers first) so earlier line numbers stay valid. Every edit is keyed to the ACTUAL current `thesis/capstone_thesis.tex` (1736 lines), not the stale line numbers in the section drafts.
 
-A critical reconciliation note first: the section drafts were written against an OLDER file. The current file's body is an intermediate "refined-null" state, not the strawman. Several draft edits are therefore **superseded or relocated** below. Three drafts (lit-review, methodology, discussion-conclusions) map cleanly with line-number corrections. The **Results draft requires three guardrail fixes before pasting** (one Yaxin violation, em-dashes, and a duplicate `\label{fig:finding}`/`tab:gaps` collision because its content overlaps text already in the file).
+A critical reconciliation note first: the section drafts were written against an OLDER file. The current file's body is an intermediate "refined-null" state, not the strawman. Several draft edits are therefore **superseded or relocated** below. Three drafts (lit-review, methodology, discussion-conclusions) map cleanly with line-number corrections. The **Results draft requires three guardrail fixes before pasting** (one teammate-name violation, em-dashes, and a duplicate `\label{fig:finding}`/`tab:gaps` collision because its content overlaps text already in the file).
 
 ---
 
@@ -31,8 +27,8 @@ A critical reconciliation note first: the section drafts were written against an
 
 The Results-section draft I was given violates three guardrails. Before pasting it, make these three corrections **within the draft text**:
 
-1. **Yaxin violation.** In §4.2 (`sec:res-transfer`), DELETE the clause:
-   `the deterministic transfer algorithm is Yaxin Li's work (integrated here with supervisor approval).`
+1. **Teammate-name violation.** In §4.2 (`sec:res-transfer`), DELETE any clause attributing the
+   deterministic transfer algorithm to a named teammate.
    The sentence becomes: `The saving is \emph{deterministic}, captured without any dependence model. This is consistent with the carbon-computing literature, which finds spatial shifting dominates temporal shifting \citep{wiesner2021,radovanovic2022}.`
    Also in the `fig:transfercurve` caption, change `Deterministic transfer integrated from parallel work; robust layer analyzed in Section~\ref{sec:res-crossover}.` to `Robust layer analyzed in Section~\ref{sec:res-crossover}.`
 
@@ -44,7 +40,7 @@ The Results-section draft I was given violates three guardrails. Before pasting 
 
 ## EDIT GROUP 1 — Annex A (ICS), line 1727
 
-Remove the future-work hedge that still implies an external collaborator (consistency with no-Yaxin guardrail; the abstract/body now present transfer as the author's working scheduler).
+Remove the future-work hedge that still implies an external collaborator (consistency with the no-teammate-name guardrail; the abstract/body now present transfer as the author's working scheduler built on established background).
 
 **REPLACE** (lines 1727–1728):
 ```
@@ -361,7 +357,7 @@ Sim. Under nominal carbon the stochastic solution adds essentially nothing.}
 \end{figure}
 ```
 
-**6b. INSERT the savings + frontier subsections** immediately after line 773 (`\end{figure}` closing `fig:map`, end of `sec:res-corr`) and BEFORE line 775 (`\subsection{The spatial gap is null...`). This is the two new value-first subsections (transfer savings, then mechanism/frontier). Paste-ready (Yaxin removed, em-dashes removed, real figures):
+**6b. INSERT the savings + frontier subsections** immediately after line 773 (`\end{figure}` closing `fig:map`, end of `sec:res-corr`) and BEFORE line 775 (`\subsection{The spatial gap is null...`). This is the two new value-first subsections (transfer savings, then mechanism/frontier). Paste-ready (teammate name removed, em-dashes removed, real figures):
 
 ```
 \subsection{The day-ahead scheduler and its savings (RQ1)}\label{sec:res-transfer}
@@ -510,7 +506,7 @@ falsification test with a causal mechanism (RQ2), and frame robustification as a
 price-of-robustness trade-off, testing when that price is paid in real data (RQ3).
 ```
 
-**8d. Bibliography — INSERT** one bibitem after line 1479 (`blanchet2019` entry). **Add ONLY `bertsimas2004`. Do NOT add the draft's `yaxin2026` bibitem (guardrail: no Yaxin).** Paste-ready:
+**8d. Bibliography — INSERT** one bibitem after line 1479 (`blanchet2019` entry). **Add ONLY `bertsimas2004`. Do NOT add the draft's teammate-citation bibitem (guardrail: no teammate names).** Paste-ready:
 
 ```
 \bibitem{bertsimas2004} D.~Bertsimas and M.~Sim, ``The price of robustness,''
@@ -524,7 +520,7 @@ price-of-robustness trade-off, testing when that price is paid in real data (RQ3
 ```
 cd thesis
 grep -c -- "---" capstone_thesis.tex          # MUST be 0
-grep -ni "yaxin" capstone_thesis.tex          # MUST be empty
+grep -ni "<teammate-name>" capstone_thesis.tex   # MUST be empty (no teammate names)
 grep -n "carbon-ceiling impossibility\|12--16\|vs.\ carbon-blind" capstone_thesis.tex  # MUST be empty
 pdflatex -interaction=nonstopmode capstone_thesis.tex  # run x2 + check .log for "multiply defined" / "undefined references"
 pdfinfo capstone_thesis.pdf | grep Pages      # check body ends by ~p32
@@ -541,7 +537,7 @@ Confirm these labels resolve (all created above): `sec:res-transfer`, `sec:res-m
 
 2. **The body was NOT the old strawman.** The current Results already contains the gap/robustness/equivalence/power/tail/copula machinery on the new framing. The genuinely MISSING pieces were the value-first additions: the **transfer savings** subsection, the **complexity-value frontier**, and the **crossover/price-of-robustness** subsection. The Results draft's wholesale-replace would have **duplicated ~10 existing labels** (`tab:gaps`, `fig:finding`, `fig:cvcurve`, etc.) and caused compile-breaking "multiply defined label" errors. I converted it to surgical inserts (EDIT GROUP 6) that keep all existing rigor and only add the new material.
 
-3. **Yaxin guardrail violations (2).** (a) The Results draft attributes the transfer algorithm to "Yaxin Li's work" — removed. (b) The lit-review draft adds a `\bibitem{yaxin2026}` placeholder — dropped. The current file is already Yaxin-free; my packet keeps it that way.
+3. **Teammate-name guardrail violations (2).** (a) The Results draft attributes the transfer algorithm to a named teammate — removed. (b) The lit-review draft adds a teammate-citation placeholder bibitem — dropped. The current file is already free of teammate names; my packet keeps it that way.
 
 4. **Em-dashes in the drafts.** The current file has ZERO `---`. The lit-review draft introduced 3 (`---a property`, two in "the gap"), and the Results draft several. I supplied em-dash-free corrected versions of every pasted block. Final state must verify `grep -c -- "---"` = 0.
 

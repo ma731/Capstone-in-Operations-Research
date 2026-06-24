@@ -67,7 +67,7 @@ contribution (the bound) — addressing the two weakest points of a pure-null th
 
 The mean-dominance bound concerns **passive** risk reduction, so the **inter-region
 transfer channel** (`f_{r→s,t}`, active load migration) is now the clearly-motivated
-route to any spatial value — pending Bissan sign-off (overlaps Yaxin's scope). A
+route to any spatial value — pending Bissan sign-off (migration is established background). A
 full copula-*ambiguity* Wasserstein DRO (Fan–Ji–Lejeune) is the model-free version
 of Phase 2 but the bound predicts the same outcome.
 

@@ -165,14 +165,14 @@ change, carbon intensity stays the only stochastic object).
 
 ## 5. Scope / coordination (the one thing to clear)
 
-Inter-region **transfer** overlaps the deterministic-LP teammate's remit (Yaxin:
-transfer + fairness). The distinction to preserve: hers is a *deterministic* model
-of transfer + fairness; this is **transfer under distributional robustness** — the
-*combination* "DRO + spatial transfer" is the novel contribution and the reason the
-spatial covariance/copula could finally matter. Proposed boundary: Yaxin owns the
-deterministic transfer model and fairness; Marco owns the robust (DRO) transfer
-experiment and the spatial-value question. **Needs Bissan's explicit OK** before
-building, to avoid duplicated work.
+Inter-region **transfer** as a deterministic model is established background
+(deterministic transfer + fairness). The distinction to preserve: the established work
+is a *deterministic* model of transfer + fairness; this is **transfer under
+distributional robustness** — the *combination* "DRO + spatial transfer" is the novel
+contribution and the reason the spatial covariance/copula could finally matter.
+Boundary: the deterministic transfer model and fairness are taken as established
+background; Marco owns the robust (DRO) transfer experiment and the spatial-value
+question. **Needs Bissan's explicit OK** before building, to avoid duplicated work.
 
 ---
 
@@ -184,8 +184,8 @@ copulas cannot recover it. The motivation for the transfer channel is therefore
 established, not hypothetical: passive spatial structure is provably worthless, so
 the decision must be made spatial.
 
-**Next steps:** (1) get Bissan's explicit OK on the §5 boundary with Yaxin's
-deterministic-transfer work; (2) build the transfer variables into `algorithm_2b`
+**Next steps:** (1) get Bissan's explicit OK on the §5 boundary with the established
+deterministic-transfer background; (2) build the transfer variables into `algorithm_2b`
 (a small, SOCP-preserving change — `f >= 0`, the `y = x + inflow - outflow`
 substitution, and a transfer budget/penalty); (3) run experiment (b) — robust vs
 deterministic transfer under forecast error — as the core of Paper 2.

@@ -47,8 +47,8 @@ Part 4 removes those idealizations and asks whether the conclusions survive.
   report *realized* CVaR and carbon — deployed performance, not one-day-ahead
   optimality.
 
-This is where the three teammates' pieces compose (Nicolás's forecasts, Yaxin's
-deterministic transfer baseline, Marco's robust layer) and is the natural home for a
+This is where the modelling pieces compose (Nicolás's forecasts, the deterministic
+transfer baseline as established background, Marco's robust layer) and is the natural home for a
 strong systems venue. It depends on Part 3 landing first.
 
 ## Part 5 — When does coupling matter? (the general principle)

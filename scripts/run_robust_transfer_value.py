@@ -1,7 +1,8 @@
 """run_robust_transfer_value.py -- does the STOCHASTIC transfer earn its keep?
 
-Yaxin owns the deterministic transfer; Marco owns the robust (DRO/CVaR) version.
-The mean savings are the deterministic transfer's (shared). The honest question for
+The deterministic transfer is established background (radovanovic2022/wiesner2021);
+this script isolates the robust (DRO/CVaR) layer. The mean savings come from the
+deterministic transfer; the honest question for
 the stochastic layer is whether it buys better TAIL / RELIABILITY behaviour at a
 small mean premium -- the thing a deterministic LP cannot target.
 

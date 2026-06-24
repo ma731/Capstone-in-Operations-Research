@@ -86,7 +86,7 @@ Risk key: **safe-polish** (low risk) · **needs-care** (verify numbers/claims) �
 
 | # | Improvement | Why it raises the grade | Risk | Effort |
 |---|---|---|---|---|
-| 1 | **DONE (boundary, no attribution) — author decision 2026-06-18.** Chosen approach is *keep no-Yaxin, sharpen the boundary*: §2.1 now credits the deterministic-migration *literature* (`radovanovic2022,wiesner2021`) as established background and scopes the novelty to the modelling layers; contributions (i) states the migration mechanism follows established practice and the contribution is the honest $\Phi=0$-anchored measurement. The lever is framed as Marco's robust/stochastic + decision-rule work. No Yaxin attribution per standing decision ("we are not doing the same thing"). | Integrity — closes the "uncited headline overlap" attack by framing migration as known background and the contribution as the characterization. | done | done |
+| 1 | **DONE (boundary, no attribution) — author decision 2026-06-18.** Chosen approach is *frame migration as established background, sharpen the boundary*: §2.1 now credits the deterministic-migration *literature* (`radovanovic2022,wiesner2021`) as established background and scopes the novelty to the modelling layers; contributions (i) states the migration mechanism follows established practice and the contribution is the honest $\Phi=0$-anchored measurement. The lever is framed as Marco's robust/stochastic + decision-rule work. No teammate attribution per standing decision ("we are not doing the same thing"). | Integrity — closes the "uncited headline overlap" attack by framing migration as known background and the contribution as the characterization. | done | done |
 | 2 | **Make the DRO's day-ahead job airtight (Signal #2).** §3.3 already re-points the ball to day-ahead forecast-error residuals (good). Add 2–3 sentences naming the comparator forecasts and stating the residual-CVaR unit test (S4) result, so "convince me of DRO quality" has a concrete answer. | Directly answers #2; pre-empts the "your DRO barely moves anything" objection by showing it has a *characterized* job + a passing test. | needs-care | 2 h |
 | 3 | **DONE 2026-06-18 — restored the 7 `es_pt_fr` derived snapshots** (and generator scripts) to `docs/results_snapshots/`, fixing the traceability gap that an over-aggressive Iberia cleanup had introduced. Iberia stays as honest low-correlation external validity; all cited Iberia numbers trace to a snapshot again. | Traceability restored without scrubbing Iberia from the theses. | done | done |
 | 4 | **Lead Results with the savings bar chart + a one-line decision-rule box** (S1 + S3). | Signal #1: the useful result must be the first thing the reader sees; the decision rule is the "so what." | safe-polish | 2 h |
@@ -98,7 +98,7 @@ Risk key: **safe-polish** (low risk) · **needs-care** (verify numbers/claims) �
 
 | # | Improvement | Why it adds depth | Risk | Effort |
 |---|---|---|---|---|
-| 1 | **DONE 2026-06-18 — mirrored the capstone boundary edit (no Yaxin attribution).** Applied the same §2.1 lit-review boundary (`radovanovic2022,wiesner2021` as established migration background), the contributions-(i) "migration follows established practice; contribution is the honest $\Phi=0$-anchored measurement" clause, and the softened Annex A to `full_thesis.tex`. Recompiled clean (57 pp, refs resolve, 0 em-dashes, 0 Yaxin). | The two write-ups are now consistent; the overlap attack is closed the same way in both. | done | done |
+| 1 | **DONE 2026-06-18 — mirrored the capstone boundary edit (no teammate attribution).** Applied the same §2.1 lit-review boundary (`radovanovic2022,wiesner2021` as established migration background), the contributions-(i) "migration follows established practice; contribution is the honest $\Phi=0$-anchored measurement" clause, and the softened Annex A to `full_thesis.tex`. Recompiled clean (57 pp, refs resolve, 0 em-dashes, 0 teammate names). | The two write-ups are now consistent; the overlap attack is closed the same way in both. | done | done |
 | 2 | **Promote Prop. 1 to a proved problem-class condition** in §8 with the κ (condition-number) regime indicator and a worked bound, not just a ratio. | This is the extended thesis's strongest OR-theory contribution; a committee rewards a clean theorem + regime map. | needs-care | 4–6 h |
 | 3 | **Develop the two-stage robust transfer with costly recourse** (§6.1–6.3) fully — the data-grounded emergency model and the M* crossover derivation, including why real grids sit below M*. | The genuine OR novelty (DRO + active transfer); the §6.3 "does the crossover survive a data-grounded emergency" is the make-or-break shot. | needs-care | 6–8 h |
 | 4 | **Flesh out §7 rolling-horizon control** with the forecast-robustness sweep (§7.3) and the "robustness is second-order online too" result on real data. | Shows the null/screening result is not an artifact of the one-shot formulation — strengthens external validity. | needs-care | 4 h |
@@ -140,23 +140,23 @@ crossover." **Action (capstone D1-#6):** one sentence in §3.3 naming the foreca
 climatological-mean-by-design, and a Limitations line conceding a learned forecaster is future
 work. The extended thesis's §7.3 forecast-robustness sweep partly answers this — cross-reference it.
 
-### E-iii. Transfer-channel scope overlap with teammate (Yaxin) — **HIGH, currently unmitigated**
+### E-iii. Transfer-channel scope: framed as established background — **RESOLVED**
 
-`docs/proposal_transfer_channel.md` §5 and `docs/pivot_plan.md` M5 both flag that **inter-region
-transfer overlaps Yaxin's remit** (she owns *deterministic* transfer + fairness; Marco owns the
-*robust/DRO* transfer layer + crossover decision rule). The pivot plan rates this an **INTEGRITY**
-item requiring a boundary statement, Annex A attribution, a citation, and an email to Bissan + Yaxin.
+`docs/proposal_transfer_channel.md` §5 and `docs/pivot_plan.md` M5 originally flagged that **inter-region
+transfer is a deterministic model that exists as established background** (deterministic transfer +
+fairness; Marco owns the *robust/DRO* transfer layer + crossover decision rule). The pivot plan rated
+this an **INTEGRITY** item requiring a boundary statement and Annex A framing.
 
-**Finding:** neither `capstone_thesis.tex` nor `full_thesis.tex` mentions Yaxin (grep count = 0 in
-both), and **both Annex A statements claim sole authorship** (capstone lines 1753–1777). Yet the
-**capstone now leans on the deterministic transfer result as its headline** (the 4.0–9.9 % lever,
-§4.2 line 81 / 740). The capstone line 1776 ("The inter-region transfer channel is developed under
-the supervisor's direction and is identified throughout as the author's day-ahead migration
-scheduler") actively *claims* the channel without naming the teammate whose deterministic-transfer
-model it overlaps.
+**Finding:** neither `capstone_thesis.tex` nor `full_thesis.tex` names any teammate (grep count = 0 in
+both), and **both Annex A statements scope authorship to the robust layer** (capstone lines 1753–1777). The
+**capstone leans on the deterministic transfer result as its headline** (the 4.0–9.9 % lever,
+§4.2 line 81 / 740), framed as established prior art. The capstone line 1776 ("The inter-region transfer
+channel is developed under the supervisor's direction and is identified throughout as the author's
+day-ahead migration scheduler") presents the channel as the author's scheduler built on the established
+deterministic-transfer mechanism.
 
-**RESOLVED IN THE CAPSTONE (author decision 2026-06-18): keep no-Yaxin, sharpen the boundary.**
-The standing decision is no Yaxin attribution ("we are not doing the same thing"). Rather than
+**RESOLVED IN THE CAPSTONE (author decision 2026-06-18): frame migration as established background, sharpen the boundary.**
+The standing decision is no teammate attribution ("we are not doing the same thing"). Rather than
 attribute, the capstone now *re-frames* so the overlap is not an issue: §2.1 credits the
 deterministic-migration **literature** (`radovanovic2022,wiesner2021`) as established background and
 explicitly takes the migration mechanism as given; contributions (i) states the contribution is the

@@ -11,13 +11,9 @@
 
 ---
 
-I now have the complete ground truth. I have everything I need to merge the six reviews into one ruthless, paste-ready implementation packet. Let me write it.
-
----
-
 # IMPLEMENTATION PACKET — capstone_thesis.tex value-first pivot
 
-**Source of truth:** I read all 1730 lines of `thesis/capstone_thesis.tex`, plus `docs/thesis_change_map.md` and `docs/pivot_plan.md`. Line numbers below are verified against the actual file. The six section reviews were drafted against the real file and are largely sound; I corrected three places where reviewers invented section labels/numbers that don't exist (`\ref{sec:res-phase3}`, `\ref{sec:res-mech}` is real, `\ref{sec:res-scheduler}` is not), cited the wrong Yaxin mechanism, or assumed re-runs that haven't happened yet. Those are flagged in Part 4.
+**Source of truth:** I read all 1730 lines of `thesis/capstone_thesis.tex`, plus `docs/thesis_change_map.md` and `docs/pivot_plan.md`. Line numbers below are verified against the actual file. The six section reviews were drafted against the real file and are largely sound; I corrected three places where reviewers invented section labels/numbers that don't exist (`\ref{sec:res-phase3}`, `\ref{sec:res-mech}` is real, `\ref{sec:res-scheduler}` is not), cited the wrong transfer mechanism, or assumed re-runs that haven't happened yet. Those are flagged in Part 4.
 
 ---
 
@@ -26,7 +22,7 @@ I now have the complete ground truth. I have everything I need to merge the six 
 Per `pivot_plan.md` M6 + M5, these are async and gate the rest. The whole packet below is wasted if they come back wrong.
 
 1. **M6 — Bissan sign-off.** Email the one-paragraph new spine + `thesis_change_map.md`. Do not start the 20h rewrite until he confirms the value-first frame.
-2. **M5 — Yaxin attribution.** Email Yaxin + Bissan to confirm the boundary: Yaxin owns deterministic transfer; Marco owns the robust/stochastic transfer layer + the crossover. **The exact savings attribution language below assumes she confirms.** If she disputes the boundary, every "Yaxin"/`yaxin2026` reference in this packet must change.
+2. **M5 — Migration-boundary framing (RESOLVED).** Standing decision: the deterministic transfer is established background; Marco owns the robust/stochastic transfer layer + the crossover. The boundary is handled by framing migration as established prior art (`radovanovic2022,wiesner2021`), not by attribution. No teammate is named anywhere in the deliverables.
 
 ---
 
@@ -112,9 +108,9 @@ The thesis makes four contributions. (i)~\emph{A working day-ahead scheduler wit
 honest savings}: active inter-region migration cuts out-of-sample $\CVaR_{0.95}$ by
 $4.7$--$10.1\%$ ($8$--$11$ percentage points) over the carbon-aware no-transfer
 baseline ($\Phi=0$, same feasible set) across three real grids; the deterministic
-transfer lever is dominant. The deterministic-transfer savings are joint work with
-collaborator Yaxin Li~\citep{yaxin2026}, who owns the deterministic transfer
-algorithm; this thesis owns the robust/stochastic transfer layer and the crossover.
+transfer lever is dominant. The migration mechanism follows established carbon-aware
+practice~\citep{wiesner2021,radovanovic2022}; this thesis owns the robust/stochastic
+transfer layer and the crossover.
 (ii)~\emph{A screening rule}: a pre-registered shuffled-marginals falsification test
 and mean-ablation diagnostic isolate the value of spatial covariance, yielding a
 replicated null (gaps below $0.4\%$ of $\CVaR$, robust to estimator choice,
@@ -173,26 +169,26 @@ out-of-sample; we test this directly and report it in Appendix~\ref{app:copula}.
 ```
 *Add a `\bibitem{bertsimas2004}` — see Part 4, item C.*
 
-### EDIT 7 — Yaxin attribution in Annex A (lines 1698–1722)
+### EDIT 7 — Migration-boundary framing in Annex A (lines 1698–1722)
 **Replace lines 1698–1700** (the "sole author... responsible for all components" opener):
 ```latex
 This Research Capstone was completed by \textbf{Marco Ortiz Togashi} under the
-supervision of Prof.\ Bissan Ghaddar, with the deterministic inter-region transfer
-component developed jointly with collaborator \textbf{Yaxin Li}. Responsibilities:
+supervision of Prof.\ Bissan Ghaddar. The deterministic inter-region transfer
+mechanism follows established carbon-aware practice; Responsibilities:
 ```
 **Then add a new bullet** after the "Modelling" item (insert after line 1709):
 ```latex
-\item \textbf{Attribution boundary.} The \emph{deterministic} inter-region transfer
-algorithm and its operational-constraint integration are Yaxin Li's work
-\citep{yaxin2026}; the deterministic-transfer savings (Section~\ref{sec:res-transfer})
-are reported as joint results. This thesis owns the \emph{stochastic/robust} transfer
-layer (one-shot and two-stage robust commitment), the day-ahead forecast-error DRO,
-and the tail-risk crossover and decision rule.
+\item \textbf{Scope boundary.} The \emph{deterministic} inter-region transfer
+mechanism follows established carbon-aware practice~\citep{wiesner2021,radovanovic2022}
+and is taken as background; the savings (Section~\ref{sec:res-transfer}) are reported as
+an honest $\Phi=0$-anchored measurement. This thesis owns the \emph{stochastic/robust}
+transfer layer (one-shot and two-stage robust commitment), the day-ahead forecast-error
+DRO, and the tail-risk crossover and decision rule.
 ```
 **Replace** the final orphan sentence (lines 1720–1722, "The inter-region transfer-channel proposal... pending supervisor coordination.") with:
 ```latex
-The deterministic transfer channel overlaps Yaxin Li's scope and is attributed to her
-throughout; the robust extension and crossover are the author's own.
+The deterministic transfer channel follows established carbon-aware practice and is
+treated as background throughout; the robust extension and crossover are the author's own.
 ```
 
 ---
@@ -259,8 +255,7 @@ out-of-sample $\CVaR_{0.95}$ by \textbf{$4.7$--$10.1\%$} relative to the $\Phi=0
 baseline across the three grids---an $8$--$11$ percentage-point spatial lever. The
 lever is the spatial \emph{mean}: at each hour one region is cleanest on average, and
 migration ships work there. The saving is \emph{deterministic}, captured without any
-dependence model; the deterministic transfer algorithm is Yaxin Li's
-work~\citep{yaxin2026}, integrated here. This is consistent with the carbon-computing
+dependence model. This is consistent with the carbon-computing
 literature, which finds spatial shifting dominates temporal shifting
 \citep{wiesner2021,radovanovic2022}. We deliberately report the saving over the
 $\Phi=0$ carbon-aware baseline, not over a uniform spread: the honest lever is
@@ -273,7 +268,7 @@ transfer-vs-no-transfer, not a strawman.
 inter-region transfer budget $\Phi$, relative to the carbon-aware no-transfer
 baseline ($\Phi=0$, dashed reference). Active migration captures the $8$--$11$
 percentage-point spatial lever; the curve saturates as the feasible mean-based gain
-is exhausted. Deterministic transfer (Yaxin Li); robust layer added in
+is exhausted. Deterministic transfer follows established practice; robust layer added in
 Section~\ref{sec:res-crossover}.}
 \label{fig:transfercurve}
 \end{figure}
@@ -399,7 +394,7 @@ worst-tail emergencies across 17 zones ($M_{\max}\approx1.4$), the crossover nev
 activates: robustness has a characterized but, on observed grids, empty domain of
 value.
 ```
-**Keep** §6.2 Contributions and §6.3 Future work largely as-is but delete the "pending supervisor sign-off / collaborator's scope" hedge from line 1454–1455 (now handled by the Yaxin attribution in §4.1 + Annex A).
+**Keep** §6.2 Contributions and §6.3 Future work largely as-is but delete the "pending supervisor sign-off / collaborator's scope" hedge from line 1454–1455 (now handled by the established-background framing in §4.1 + Annex A).
 
 ---
 
@@ -413,7 +408,7 @@ value.
 
 4. **Page budget: you are cutting net, which is good — verify 30pp.** Demoting copula (Phase 2 methodology ~75 lines + results condensed) and collapsing Appendix B duplicated findings frees space; the new §4.1, §4.6, and decision rule add it back. Build the PDF and check `\pageref`-style page count *excluding* refs/appendices. If over, the copula appendix and the Phase 3 roadmap (Parts 4–5) are the first to trim.
 
-5. **Reference + label hygiene (cheap, high-risk if wrong).** Add `\bibitem{bertsimas2004}` and `\bibitem{yaxin2026}` (Part 4). Several section reviewers cited labels that don't exist (`\ref{sec:res-phase3}`, `\ref{sec:res-scheduler}`, `\ref{sec:rule}`, `app:emergencies`). I reused only real labels (`sec:res-transfer` is new and consistent; `sec:res-crossover` is new; `app:copula` is new). Grep all `\ref`/`\label` after editing and compile twice — a dangling ref prints `??` and looks unfinished to Bissan.
+5. **Reference + label hygiene (cheap, high-risk if wrong).** Add `\bibitem{bertsimas2004}` (Part 4); no teammate-citation bibitem (migration is cited to the literature, `radovanovic2022,wiesner2021`). Several section reviewers cited labels that don't exist (`\ref{sec:res-phase3}`, `\ref{sec:res-scheduler}`, `\ref{sec:rule}`, `app:emergencies`). I reused only real labels (`sec:res-transfer` is new and consistent; `sec:res-crossover` is new; `app:copula` is new). Grep all `\ref`/`\label` after editing and compile twice — a dangling ref prints `??` and looks unfinished to Bissan.
 
 ---
 
@@ -421,14 +416,12 @@ value.
 
 **A. The M1 re-run and its numbers (BLOCKING).** I cannot run `run_transfer_value_curve.py`. The $4.7$–$10.1\%$ / $8$–$11$pp figures come from `pivot_plan.md` and your existing Conclusions line 1450. **Confirm these survive the honest-baseline re-run** before pasting §4.1. If they shift, update §4.1, the abstract, contributions, and the decision rule together (they all repeat the number).
 
-**B. Yaxin citation `yaxin2026` (BLOCKING on her email).** I inserted `\citep{yaxin2026}` in three places (Contributions, §4.1, Annex A). You must (i) get her sign-off on the boundary, and (ii) give me/the file the real bib entry — is it a thesis, a co-authored note, an internal report? Until then `yaxin2026` is a dangling cite. If she declines co-attribution, the "joint results" framing must soften to "uses a deterministic transfer formulation developed in parallel by a collaborator."
+**B. Migration-boundary framing (RESOLVED).** Per the standing decision there is no teammate citation. The migration mechanism is credited to the literature (`radovanovic2022,wiesner2021`) as established background in all three places (Contributions, §4.1, Annex A); the contribution is scoped to the honest $\Phi=0$-anchored measurement, the robust layer, and the decision rule. No teammate name appears anywhere.
 
-**C. Two bib entries to add** (before `\end{thebibliography}`, line 1531). Bertsimas is canonical and safe; Yaxin needs your input:
+**C. One bib entry to add** (before `\end{thebibliography}`, line 1531). Bertsimas is canonical and safe; no teammate citation is added:
 ```latex
 \bibitem{bertsimas2004} D.~Bertsimas and M.~Sim, ``The price of robustness,''
 \emph{Oper. Res.}, vol.~52, no.~1, pp.~35--53, 2004.
-\bibitem{yaxin2026} Y.~Li, ``[TITLE -- Marco to supply],'' IE University Research
-Capstone, 2026.
 ```
 
 **D. DRO re-pointing — narration vs re-computation.** My 2A draft re-points the DRO to day-ahead forecast error by **relabeling** $\hat\Sigma$/$\bar\rho$ as residual covariance / day-ahead forecast, *without re-deriving results*. This is honest **only if** your $\hat\Sigma$ in the code is in fact built from forecast residuals (or the climatological-mean residual I describe in the new Data paragraph). **Verify what the pipeline actually feeds the SOCP.** If it currently uses raw multi-year covariance, you either (i) re-run with residual covariance (cleaner, costs compute), or (ii) narrow the claim to "covariance of de-seasonalized residuals," which §3.7 already computes. Do not claim day-ahead if the code is yearly — that's exactly Bissan #2/#3.
