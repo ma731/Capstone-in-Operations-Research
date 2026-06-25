@@ -117,7 +117,7 @@ generated under `figures/`).
 │   ├── proposal_transfer_channel.md   # Part 3 (transfer DRO) proposal
 │   ├── progress_note_v*.md      # phase history (v16 = Phase 2 close-out)
 │   └── DEPRECATED.md            # which scripts are canonical / superseded
-├── data/raw/            # Electricity Maps CSVs (gitignored, non-redistributable)
+├── data/raw/            # carbon CSVs (Electricity Maps, gitignored); temperature CSVs (Open-Meteo ERA5, committed, CC-BY)
 └── figures/             # generated plots (gitignored; embed into the committed PDFs)
 ```
 
@@ -136,9 +136,10 @@ pytest tests/               # 194 tests should pass
 dev extras. Gurobi is *not* required.
 
 **Data licence:** carbon intensity is from Electricity Maps under a
-**non-redistributable academic licence**. Raw CSVs live in `data/raw/`
-(gitignored) and are **never committed**; only derived aggregate statistics are
-archived. Do not redistribute the raw data.
+**non-redistributable academic licence**; its raw CSVs live in `data/raw/` and are
+**gitignored, never committed** (only derived aggregate statistics are archived). The
+Open-Meteo ERA5 temperature CSVs under `data/raw/temperature/` are CC-BY and *are*
+committed. Do not redistribute the Electricity Maps data.
 
 ## Status
 
