@@ -1262,9 +1262,9 @@ indeed robust $\approx$ deterministic there: the DRO buys no mean reduction (a
 price-of-robustness result, not an emissions win). The value of the stochastic solution
 is near zero at best. In the rolling online evaluation (Table~\ref{tab:online}) the
 robust controller's out-of-sample $\CVaR_{0.95}$ is statistically indistinguishable from
-the deterministic one on the US West ($+0.3\%$, 95\% CI $[-0.6,+1.2]$) and Eastern
-($+0.0\%$, $[-0.1,+0.3]$) grids, but is significantly \emph{worse} on the Diversified
-grid ($-10.3\%$, $[-18.3,-4.4]$): hedging forecast error when no emergency is present
+the deterministic one on the US West ($+0.28\%$, 95\% CI $[-0.65,+1.16]$) and Eastern
+($+0.04\%$, $[-0.10,+0.25]$) grids, but is significantly \emph{worse} on the Diversified
+grid ($-10.34\%$, $[-18.3,-4.4]$): hedging forecast error when no emergency is present
 costs tail performance where the regions are weakly coupled. This sharpens the decision
 rule rather than softening it: under nominal conditions robustness is at best free and
 can actively hurt, so it is worth buying only when emergencies past the crossover are
@@ -2054,7 +2054,9 @@ a \emph{calibrated} outage model from grid-operator data (not the historical car
 tail alone), with a pre-registered evaluation and affine recourse rules, and test
 whether genuine emergency risk reaches the severity the crossover needs. To our
 knowledge no prior work combines Wasserstein-DRO robustification with active
-inter-region transfer in a pre-registered study. Further
+inter-region transfer; making that combination pay under realistic forecast error,
+and pre-registering its evaluation, is an open problem we leave to future work.
+Further
 out, the transfer model invites an \emph{online, multistage} treatment in which
 forecasts arrive sequentially and demand and transmission are themselves uncertain,
 with a Wasserstein ball centred on a learned forecast, and the mean-dominance bound
@@ -2160,7 +2162,10 @@ with $S$; the $\pm0.1\%$ no-value band is shaded.}
 version-controlled repository with a continuous-integration suite ($194$ unit
 tests; the Electricity-Maps integration test is excluded from CI as it requires
 licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL/ECOS
-for the second-order cone program and HiGHS for deterministic LP baselines. The
+for the second-order cone program and HiGHS for deterministic LP baselines. Exact
+dependency versions are pinned in a tracked \texttt{requirements-lock.txt}
+(CLARABEL~0.11.1, HiGHS/highspy~1.14.0, CVXPY~1.9.1, NumPy~2.4.6, SciPy~1.17.1;
+Python~3.12.4), under which every reported number reproduces byte-identically. The
 licensed raw carbon-intensity data is never committed; only derived aggregate
 summary tables (CV-selected $\varepsilon$, test CVaR, spatial gaps, bootstrap CIs,
 BH $p$-values) are archived, so the non-redistribution academic licence is
@@ -2210,7 +2215,7 @@ Section & Result & Archived source\\
 \ref{sec:res-crossover} & Crossover, realized severity &
 \texttt{part3\_\{emergency,real\_emergency\}\_..}, \texttt{carbon\_ceiling\_..}\\
 \ref{sec:res-crossover} & Online robust (Table~\ref{tab:online}) &
-\texttt{part4\_online\_2026-06-15.csv}\\
+\texttt{part4\_online\_..}\\
 \bottomrule
 \end{tabular}
 \end{table}

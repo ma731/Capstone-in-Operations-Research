@@ -1,0 +1,30 @@
+# requirements-lock.txt -- exact, validated runtime versions.
+#
+# Every reported number (RQ1 transfer 4.04/9.91/9.04%, the RQ2 covariance/copula
+# null, the RQ3 severity reconciliation and online results) was produced and
+# reproduces byte-identically under this environment on Python 3.12.4.
+#
+# pyproject.toml keeps permissive floor bounds for normal installs; this file
+# freezes the known-good numeric and solver stack so the reported digits are
+# reproducible bit-for-bit. Install with:
+#
+#     python -m venv .venv
+#     .venv/Scripts/python -m pip install -r requirements-lock.txt
+#
+# Solvers: the second-order cone program uses CLARABEL; deterministic LP baselines
+# use HiGHS (highspy). gurobipy is intentionally omitted -- the study runs entirely
+# on the free solvers per supervisor guidance.
+
+# --- core scientific stack ---
+numpy==2.4.6
+scipy==1.17.1
+pandas==3.0.3
+pyarrow==24.0.0
+matplotlib==3.10.9
+
+# --- optimization / solvers ---
+cvxpy==1.9.1
+clarabel==0.11.1
+highspy==1.14.0
+scs==3.2.11
+osqp==1.1.2

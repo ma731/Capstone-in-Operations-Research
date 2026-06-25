@@ -33,5 +33,18 @@ academic license does not apply.
 Columns: `regime, alpha, eps*_joint, eps*_shuf, joint_CVaR, shuf_CVaR, gap_pct,
 gap_ci_lo, gap_ci_hi, detectable`. Positive gap = joint covariance beats shuffled.
 
+- `transfer_value_curve_<date>.csv` = **RQ1** transfer-value curve (out-of-sample
+  CVaR_0.95 reduction vs the Phi=0 baseline, by transfer budget). Regenerate with
+  `.venv\Scripts\python -m scripts.run_transfer_value_curve`.
+- `part3_transfer_value_<date>.csv` = **RQ1** headline transfer value (CVaR vs Phi=0,
+  per grid). `.venv\Scripts\python -m scripts.run_part3_transfer_value`.
+- `part3_emergency_<date>.csv` / `part3_real_emergency_<date>.csv` = **RQ3** synthetic
+  severity crossover M* and the data-grounded real-emergency test.
+  `.venv\Scripts\python -m scripts.run_part3_emergency` / `run_part3_real_emergency`.
+- `carbon_ceiling_<date>.csv` = **RQ3** realized carbon severity, per-region and joint
+  (the M* reconciliation). `.venv\Scripts\python -m scripts.run_carbon_ceiling`.
+- `part4_online_<date>.csv` = **RQ3** rolling online robust-vs-deterministic per grid
+  (the disclosed adverse Diversified result). `.venv\Scripts\python -m scripts.run_part4_online`.
+
 Regenerate any of these with
 `.venv\Scripts\python -m scripts.run_case_experiment --region-set <case> [flags]`.
