@@ -756,7 +756,7 @@ Phase 2 CVaR scheduler to the Phase 1 constraint set); experiment configurations
 are commit-locked before test-set evaluation; bootstrap and scenario seeds are
 fixed; and every number reported in
 Sections~\ref{sec:results}--\ref{sec:discussion} traces to an archived summary
-table. Solvers: CLARABEL/ECOS for the SOCP; HiGHS for the CVaR-SAA linear programs
+table. Solvers: CLARABEL for the SOCP; HiGHS for the CVaR-SAA linear programs
 and deterministic LP baselines.
 
 % ===================== 4. RESULTS (RUN 2) =====================
@@ -2192,7 +2192,7 @@ with $S$; the $\pm0.1\%$ no-value band is shaded.}
 \paragraph{Repository and environment.} All code lives in a private,
 version-controlled repository with a continuous-integration suite ($194$ unit
 tests; the Electricity-Maps integration test is excluded from CI as it requires
-licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL/ECOS
+licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL
 for the second-order cone program and HiGHS for deterministic LP baselines. Exact
 dependency versions are pinned in a tracked \texttt{requirements-lock.txt}
 (CLARABEL~0.11.1, HiGHS/highspy~1.14.0, CVXPY~1.9.1, NumPy~2.4.6, SciPy~1.17.1;

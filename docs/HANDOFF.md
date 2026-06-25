@@ -39,8 +39,7 @@ are worth their price.
 | Transfer lever (the headline) | **4.0–9.9%** OOS $\mathrm{CVaR}_{0.95}$ reduction over $\Phi=0$ — Western **4.0%**, Eastern **9.9%**, Diversified **9.0%** | `docs/results_snapshots/part3_transfer_value_2026-06-15.csv` (from `scripts/run_part3_transfer_value.py`) |
 | Robustness crossover | **M\*≈3**; real grids reach only **M≈1.4** | `scripts/plot_crossover.py`, `run_parts34_stability.py` |
 | Screening-rule null | spatial gaps `< 0.4%` of CVaR, robust to estimator / BH / walk-forward | `docs/results_snapshots/` |
-| Tests | **198** passing | `tests/` |
-| Total vs carbon-blind | 11.7/12.5/15.8% ("12–16%") — **a SEPARATE metric**, lives in the FULL thesis only, NOT the capstone | `docs/results_snapshots/transfer_value_curve_2026-06-18.csv` |
+| Tests | **194** passing | `tests/` |
 
 **Do not conflate** the 4.0–9.9% CVaR-reduction lever with the 12–16% total-vs-carbon-blind
 figure. An earlier draft's "4.7–10.1%" / "8–11 percentage-point" numbers were an
