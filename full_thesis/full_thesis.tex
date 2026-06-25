@@ -85,7 +85,11 @@ and characterises the value of each layer. Over the honest baseline (carbon-awar
 scheduling with no inter-region transfer, $\Phi=0$, on the same feasible set), active
 migration cuts daily $\CVaR_{0.95}$ emissions by $4.0$--$9.9\%$ (Western $4.0\%$, Eastern $9.9\%$, Diversified $9.0\%$), and this deterministic transfer channel is the
 dominant lever; the carbon-computing literature independently finds spatial shifting
-dominates temporal shifting. We then isolate the value of \emph{passive}
+dominates temporal shifting. This thesis introduces a pre-registered,
+falsification-based methodology for \emph{pricing} each modelling layer, separating the
+\emph{validity} of the spatial-dependence assumption (the cross-region carbon
+correlations are real) from its \emph{value} to the decision (a replicated null). We
+then isolate the value of \emph{passive}
 sophistication. Using a Mahalanobis--Wasserstein DRO solved as a second-order cone
 program, a pre-registered shuffled-marginals falsification test across three real
 US/Canada grids spanning the dependence spectrum (the US West, an Ontario-anchored
@@ -170,31 +174,37 @@ follows?
 \end{description}
 
 \subsection{Contributions}
-The thesis makes six contributions. (i)~\emph{A working day-ahead scheduler with
-honest savings}: active inter-region migration cuts out-of-sample $\CVaR_{0.95}$ by
-$4.0$--$9.9\%$ over the carbon-aware no-transfer
-baseline ($\Phi=0$, same feasible set) across three real grids, with the transfer
-lever dominant. The migration mechanism follows established carbon-aware practice; the
-contribution is the honest, $\Phi=0$-anchored measurement of its spatial value.
-(ii)~\emph{A screening rule}: a pre-registered shuffled-marginals
-falsification test and mean-ablation diagnostic isolate the value of spatial
-covariance, yielding a replicated null (gaps below $0.4\%$ of $\CVaR$, robust to
-estimator choice, multiple-testing correction, and walk-forward), with a
-mean-dominance bound (Proposition~\ref{prop:meandom}) as the a-priori certificate of
-when passive dependence modelling cannot help. (iii)~\emph{A price-of-robustness
-decision rule}: framing robustness as a complexity--value trade-off after Bertsimas
-and Sim, the DRO over day-ahead forecast error buys tail reduction at a mean premium
-and pays only past an emergency-severity crossover $M^\star\approx3$ that real
-data-grounded emergencies across 17 zones never reach; the robust DRO-plus-active-transfer artifact behind this rule is characterised but preliminary (Appendix~\ref{app:programme}), so the contribution is the decision rule and its data-grounded crossover rather than a production controller. (iv)~\emph{An active transfer
-channel developed in the main body} (Section~\ref{sec:transfer}): a
-spatially-coupled transfer DRO that makes inter-region flows a decision, with its
-severity crossover and a data-grounded emergency stress test. (v)~\emph{An online and
-problem-class treatment} (Sections~\ref{sec:online}--\ref{sec:condition}): a
-rolling-horizon controller under forecast error and a dimensionless mean-dominance
-ratio that generalises \emph{when} cross-coordinate dependence can ever help.
-(vi)~\emph{A reproducible, validated pipeline} (Section~\ref{sec:testing}):
-version-controlled, CI-tested (194 unit tests), pre-registered, with a small-instance
-model validation and archived license-safe summary tables for every reported number.
+The thesis makes five contributions. (i)~\emph{A working day-ahead scheduler with
+honest, baseline-anchored savings}, developed in the main body as an active transfer
+channel (Section~\ref{sec:transfer}): active inter-region migration cuts out-of-sample
+$\CVaR_{0.95}$ by $4.0$--$9.9\%$ over the no-transfer ($\Phi=0$) baseline on the same
+feasible set across three real grids, via a spatially-coupled transfer DRO that makes
+inter-region flows a decision. The transfer mechanism follows established carbon-aware
+practice; the contribution is the $\Phi=0$-anchored measurement of its spatial value.
+(ii)~\emph{A pre-registered methodology for pricing modelling layers}: holding the
+optimization fixed and manipulating one object at a time, it measures the marginal
+out-of-sample $\CVaR$ value of each layer, and separates the \emph{validity} of the
+spatial-dependence assumption (correlations are genuine, $0.7$--$0.8$) from its
+\emph{value} to the decision (null). To our knowledge this is the first treatment to
+place carbon intensity itself in a Mahalanobis--Wasserstein ball as a correlated
+cross-region vector and isolate the marginal value of that coupling via a
+shuffled-marginals falsification test. (iii)~\emph{A screening rule} for when passive
+dependence modelling cannot help, certified from three independent directions: an
+a-priori SOCP gap-bound (Proposition~\ref{prop:meandom}) before any data is touched; a
+mean-ablation showing the covariance signal is genuine but masked by the mean field;
+and a tail-dependence/comonotone-copula argument showing even the maximal coupling
+recovers nothing. A dimensionless condition $\Delta$ (Section~\ref{sec:condition})
+generalises the screen beyond carbon, reported as a coarse ordinal indicator (it does
+not bind on the real grids, so the empirical falsification remains necessary there).
+(iv)~\emph{A price-of-robustness decision rule} with a data-grounded, falsified
+crossover, taken online as a rolling-horizon controller (Section~\ref{sec:online}):
+robustification pays only past an emergency-severity crossover $M^\star\approx3$ that
+realized severity ($1.3$--$1.9\times$; Winter Storm Uri $1.3\times$) never reaches,
+stated as the rule plus its tested bound, not a universal impossibility. (v)~\emph{A
+reproducible, validated pipeline} (Section~\ref{sec:testing}): pre-registration, $194$
+unit tests, a small-instance model validation, a robustness battery,
+Benjamini--Hochberg correction, and per-cell TOST equivalence tests that affirmatively
+reject any effect above the $0.4\%$ materiality margin.
 
 \subsection{Thesis structure}
 Section~\ref{sec:lit} reviews the carbon-aware scheduling and DRO literature and
@@ -320,9 +330,15 @@ copulas, or distributional robustness) has been \emph{assumed}, not measured. Th
 literature applies sophisticated ambiguity sets to uncertain vectors without isolating
 the marginal value of the cross-coordinate dependence they encode, and neither
 literature offers a controlled mechanism for \emph{why} spatial structure should or
-should not matter. This thesis fills that gap: we build a working day-ahead scheduler
+should not matter. Adjacent work finds simple carbon-aware heuristics capture most
+attainable savings, with added sophistication offering little incremental
+benefit~\citep{bostandoost2024}, and the role of dependence structure in Wasserstein
+DRO has been studied abstractly~\citep{gao2017}; our wedge is the controlled,
+pre-registered, triangulated \emph{measurement} of the dependence layer's value, not
+the qualitative conclusion. This thesis fills that gap: we build a working day-ahead
+scheduler
 that actively migrates compute and measure the savings (RQ1), isolate the value of
-passive modelling sophistication via a falsification test with a causal mechanism (RQ2),
+passive modelling sophistication via a falsification test with a mechanistic explanation (RQ2),
 and frame robustification as a price-of-robustness trade-off, testing when that price is
 paid in real data (RQ3).
 
@@ -633,7 +649,7 @@ Benjamini--Hochberg correction at $q=0.05$ \citep{benjamini1995}; a walk-forward
 refit (train 2021--2023, test 2024) checks temporal stability; a log-denser
 $\varepsilon$ grid checks grid sensitivity.
 
-\paragraph{Mean-ablation (RQ3, causal).} To test whether the mean field masks the
+\paragraph{Mean-ablation (RQ3, mechanism).} To test whether the mean field masks the
 covariance, the mean used for \emph{scheduling} is transformed while evaluation
 stays on real emissions: \textsc{level} equalizes regional time-averages (keeping
 hour-of-day shape); \textsc{flat} sets a constant mean, making the mean term
@@ -723,8 +739,10 @@ x$ is the per-cell cap and $u$ the utilization, and $\lVert\Sigma^{\mathrm{off}}
 \rVert_2$ the spectral norm of the destroyed cross-region blocks), its right-hand
 side is $7.4\%$ (Eastern US--Canada), $9.6\%$ (Diversified) and $12.7\%$ (Western
 US) of $\CVaR_{0.95}$; the realized gaps (Table~\ref{tab:gaps}) never exceed
-$0.23\%$, two orders of magnitude smaller. The theorem therefore caps the spatial
-gap at the few-percent scale \emph{before any experiment is run}, and the
+$0.23\%$, two orders of magnitude smaller. The theorem therefore bounds the spatial
+gap by a loose, non-binding worst-case certificate (right-hand side $7.4$--$12.7\%$ of
+$\CVaR$, two orders of magnitude above the realized gaps) \emph{before any experiment
+is run}, and the
 experiments then pin it far below that cap. What the bound buys is not tightness but
 structure: the spatial gap is governed by $\varepsilon$ and the cross-region block
 norm, and is forced to zero in the no-robustification and no-cross-structure limits.
@@ -1393,17 +1411,19 @@ co-movement.
 
 \subsection{Relation to prior work}
 The finding refines rather than contradicts the carbon-aware DRO literature.
-Single-region Wasserstein DRO for carbon-aware scheduling is established by
-Hall et al.~\citep{hall2024}, who report robustness gains over sample-average
-approximation; the present model is the natural \emph{multi-region} extension that
-treats carbon intensity as a correlated vector. Two quantitative observations place
-our null in that context. First, the robustification \emph{is} engaged:
-cross-validation selects a non-trivial ambiguity radius
+Per-region Wasserstein DRO for carbon-aware scheduling, robustifying each region's
+carbon intensity in isolation, is established by
+Hall et al.~\citep{hall2024}; their multi-datacenter formulation does not model the
+joint cross-region carbon distribution. They report robustness gains over
+sample-average approximation; the present model is the natural \emph{multi-region}
+extension that treats carbon intensity as a correlated vector. Two quantitative
+observations place our null in that context. First, the robustification \emph{is}
+engaged: cross-validation selects a non-trivial ambiguity radius
 ($\varepsilon^\star=1$, Figure~\ref{fig:cvcurve}) rather than collapsing to the
 nominal problem, consistent with the motivation in \citep{hall2024}. Second, holding
-that single-region robustification fixed, the cross-region covariance adds nothing:
-the spatial gap is null throughout. Indeed, in our out-of-sample 2025 test even the
-single-region DRO improves on the nominal (mean-greedy) schedule by at most $0.18\%$
+that per-region (in-isolation) robustification fixed, the cross-region covariance adds
+nothing: the spatial gap is null throughout. Indeed, in our out-of-sample 2025 test
+even the per-region DRO improves on the nominal (mean-greedy) schedule by at most $0.18\%$
 of $\CVaR_{0.95}$ across grids, itself a reflection of the mean-dominance we
 document; the spatial extension then adds a further nothing. The contribution is to
 map where the value is \emph{not}: neither robustification depth nor spatial
@@ -2042,7 +2062,7 @@ transferable to any correlated-uncertainty DRO; (2)~a replicated,
 robustness-checked null on whether spatial dependence improves carbon-aware DRO
 scheduling, holding across multiple real grids \emph{and} across the dependence
 hierarchy from covariance ball to elliptical and lower-tail copulas;
-(3)~a causal mechanism (formalized as a mean-dominance bound
+(3)~a mechanistic explanation (formalized as a mean-dominance bound
 (Proposition~\ref{prop:meandom}) and demonstrated by mean-ablation) that
 explains the null rather than merely reporting it; (4)~a fully reproducible,
 version-controlled, CI-tested pipeline (194 tests) with archived license-safe
@@ -2115,17 +2135,22 @@ profile inference and applications to machine learning,'' \emph{J. Appl. Probab.
 vol.~56, no.~3, pp.~830--857, 2019.
 \bibitem{bertsimas2004} D.~Bertsimas and M.~Sim, ``The price of robustness,''
 \emph{Operations Research}, vol.~52, no.~1, pp.~35--53, 2004.
+\bibitem{bostandoost2024} R.~Bostandoost, W.~A. Hanafy, A.~Souza, et al., ``Data-driven
+algorithm selection for carbon-aware scheduling,'' in \emph{HotCarbon}, 2024.
 \bibitem{fan2024} Z.~Fan, R.~Ji, and M.~A. Lejeune, ``Distributionally robust
 portfolio optimization under marginal and copula ambiguity,'' \emph{J. Optim.
 Theory Appl.}, 2024.
+\bibitem{gao2017} R.~Gao and A.~J. Kleywegt, ``Distributionally robust stochastic
+optimization with dependence structure,'' arXiv:1701.04200, 2017.
 \bibitem{embrechts2002} P.~Embrechts, A.~McNeil, and D.~Straumann, ``Correlation
 and dependence in risk management: properties and pitfalls,'' in \emph{Risk
 Management: Value at Risk and Beyond}, Cambridge Univ. Press, 2002, pp.~176--223.
 \bibitem{esfahani2018} P.~Mohajerin Esfahani and D.~Kuhn, ``Data-driven
 distributionally robust optimization using the Wasserstein metric,'' \emph{Math.
 Program.}, vol.~171, pp.~115--166, 2018.
-\bibitem{hall2024} G.~Hall et al., ``Distributionally robust carbon-aware
-scheduling with virtual capacity curves,'' arXiv:2410.21510, 2024.
+\bibitem{hall2024} S.~Hall, F.~Micheli, G.~Belgioioso, A.~Radovanovi\'c, and
+F.~D\"orfler, ``Carbon-Aware Computing for Data Centers with Probabilistic
+Performance Guarantees,'' arXiv:2410.21510, 2024.
 \bibitem{iea2024} International Energy Agency, \emph{Electricity 2024: Analysis and
 Forecast to 2026}. Paris: IEA, 2024.
 \bibitem{joe2014} H.~Joe, \emph{Dependence Modeling with Copulas}. CRC Press, 2014.
