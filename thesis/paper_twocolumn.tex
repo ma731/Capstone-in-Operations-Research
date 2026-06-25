@@ -59,7 +59,8 @@ program, a pre-registered shuffled-marginals falsification test across three rea
 US/Canada grids spanning the dependence spectrum (the US West, an Ontario-anchored
 Eastern belt, and an engineered solar/wind/hydro portfolio), with an Iberia--France
 anchor, returns a replicated \textbf{null}: encoding spatial covariance adds below
-$0.4\%$ of $\CVaR$, surviving Ledoit--Wolf shrinkage, residualization,
+$0.4\%$ of $\CVaR$, surviving Ledoit--Wolf shrinkage, removing each region's average
+daily pattern (residualization),
 Benjamini--Hochberg correction, walk-forward validation, and a per-cell equivalence
 test. A mean-ablation shows the covariance signal is genuine but masked by the mean
 field (a mean-dominance bound), and a tail-dependence analysis shows the residual
@@ -69,7 +70,9 @@ maximal coupling recovers nothing. Finally we ask when robustness itself pays.
 Following the price of robustness of Bertsimas and Sim, a DRO over day-ahead forecast
 error buys a small worst-day ($\CVaR$) tail reduction at a mean premium, with a value
 of the stochastic solution near zero, and pays over deterministic transfer only past
-an emergency-severity crossover $M^\star\approx3$; tested against real data-grounded
+an emergency-severity crossover $M^\star\approx3$ (with $M$ the multiple by which a
+region's carbon intensity spikes in a rare grid emergency, so $M=3$ is a tripling);
+tested against real data-grounded
 worst-tail emergencies across 17 zones, that crossover never activates. The thesis
 contributes a working scheduler with honest savings, a screening rule for when
 passive dependence modelling fails, and a price-of-robustness decision rule with a
@@ -172,11 +175,14 @@ solved to global optimality in a fraction of a second.
 \item[Shuffled-marginals test:] re-fitting the scheduler with the cross-region link
 destroyed but each region's own pattern intact, so the difference isolates the value of
 spatial correlation.
-\item[Mean-ablation:] levelling the regions' average carbon so the only signal left to
-exploit is the cross-region structure; it reveals whether the dependence is real but
-masked by the mean field.
+\item[Mean-ablation (the mean-leveling test):] we deliberately level each region's average carbon so the only signal left is the cross-region structure; it reveals whether the dependence is real but masked by the mean field. (``Ablation'' is the machine-learning term for removing one component to measure its effect.)
 \item[Mean-dominance (Proposition~\ref{prop:meandom}):] an a-priori bound showing the
 average carbon field caps how much any dependence model can change the schedule.
+\item[Severity $M$:] the multiple by which one region's carbon spikes in a rare grid emergency ($M=3$ is a tripling); the crossover $M^\star$ is where robustness starts to pay.
+\item[Value of the stochastic solution (VSS):] how much planning against the full uncertainty distribution beats committing to a single point forecast; here it is near zero.
+\item[Comonotone:] the strongest possible coupling between regions, used as a worst-case upper bound.
+\item[Mahalanobis distance:] a distance that weights directions by the carbon covariance, so it accounts for how regions move together.
+\item[Tail dependence ($\chiU,\chiL$):] whether regions hit their dirtiest (or cleanest) hours at the same time, a joint-extreme effect plain correlation can miss.
 \end{description}
 
 % ===================== 2. LITERATURE REVIEW =====================
@@ -1172,7 +1178,8 @@ migration-limited recourse, hedging day-ahead forecast error. By
 Proposition~\ref{prop:meandom}'s logic the mean dominates under nominal carbon, and
 indeed robust $\approx$ deterministic there: the DRO buys no mean reduction (a
 price-of-robustness result, not an emissions win). The value of the stochastic solution
-is near zero at best. In the rolling online evaluation (Table~\ref{tab:online}) the
+(VSS, how much planning against the full uncertainty distribution beats committing to a
+single forecast) is near zero at best. In the rolling online evaluation (Table~\ref{tab:online}) the
 robust controller's out-of-sample $\CVaR_{0.95}$ is statistically indistinguishable from
 the deterministic one on the US West ($+0.28\%$, 95\% CI $[-0.65,+1.16]$) and Eastern
 ($+0.04\%$, $[-0.10,+0.25]$) grids, but is significantly \emph{worse} on the Diversified
@@ -1225,7 +1232,7 @@ stays hedged while the risk-neutral one is burned when its favoured region spike
 \paragraph{Real grids stay below the crossover.} The synthetic multiplier overstates
 real risk, and a data-grounded test confirms the crossover does not activate. On the
 \emph{joint} (portfolio) axis the crossover lives on, the worst realized day reaches only
-$1.3$--$1.9\times$ the portfolio mean across the three grids (Western $1.34\times$,
+$1.3$--$1.9\times$ (joint portfolio axis) the portfolio mean across the three grids (Western $1.34\times$,
 Eastern $1.29\times$, Diversified $1.89\times$; archived in
 \texttt{carbon\_ceiling.csv}), well below $M^\star\approx3$. Per-region \emph{relative}
 swings can be larger on very clean grids (BPAT $5.1\times$, Ontario $2.6\times$), but

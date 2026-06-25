@@ -132,7 +132,7 @@ cp .env.example .env        # add ELECTRICITY_MAPS_TOKEN
 pytest tests/               # 194 tests should pass
 ```
 
-**Solvers:** HiGHS (LP / CVaR-SAA) and CLARABEL/ECOS/SCS (SOCP), all free and in the
+**Solvers:** CLARABEL/SCS (SOCP); HiGHS (LP / CVaR-SAA), all free and in the
 dev extras. Gurobi is *not* required.
 
 **Data licence:** carbon intensity is from Electricity Maps under a
