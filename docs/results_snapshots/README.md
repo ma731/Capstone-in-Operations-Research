@@ -45,6 +45,9 @@ gap_ci_lo, gap_ci_hi, detectable`. Positive gap = joint covariance beats shuffle
   (the M* reconciliation). `.venv\Scripts\python -m scripts.run_carbon_ceiling`.
 - `part4_online_<date>.csv` = **RQ3** rolling online robust-vs-deterministic per grid
   (the disclosed adverse Diversified result). `.venv\Scripts\python -m scripts.run_part4_online`.
+- `dro_tail_sensitivity_<date>.csv` = **RQ3** robust-vs-deterministic online gap at deeper
+  tail levels (CVaR_0.90/0.95/0.99 and the worst day); confirms the null holds in the deep
+  tail. `.venv\Scripts\python -m scripts.run_dro_tail_sensitivity`.
 
 Regenerate any of these with
 `.venv\Scripts\python -m scripts.run_case_experiment --region-set <case> [flags]`.

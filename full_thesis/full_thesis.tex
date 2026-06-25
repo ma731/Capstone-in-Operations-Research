@@ -212,6 +212,27 @@ Section~\ref{sec:conclusion} concludes with the practitioner decision rule and f
 work, and Appendix~\ref{app:programme} records the five-part programme's status and
 horizon.
 
+\subsection{A note on terminology}
+For readability the main technical terms are glossed in plain language here; the precise
+definitions follow in Section~\ref{sec:method}.
+\begin{description}[leftmargin=1.4em,itemsep=1pt]
+\item[Distributionally robust optimization (DRO):] planning against the worst-case carbon
+distribution within a set of plausible distributions around the data, rather than
+trusting a single point forecast.
+\item[$\CVaR_{0.95}$ (Conditional Value-at-Risk):] the average emissions on the worst
+$5\%$ of days; a tail-risk measure, not the average day.
+\item[Second-order cone program (SOCP):] the convex problem the scheduler reduces to,
+solved to global optimality in a fraction of a second.
+\item[Shuffled-marginals test:] re-fitting the scheduler with the cross-region link
+destroyed but each region's own pattern intact, so the difference isolates the value of
+spatial correlation.
+\item[Mean-ablation:] levelling the regions' average carbon so the only signal left to
+exploit is the cross-region structure; it reveals whether the dependence is real but
+masked by the mean field.
+\item[Mean-dominance (Proposition~\ref{prop:meandom}):] an a-priori bound showing the
+average carbon field caps how much any dependence model can change the schedule.
+\end{description}
+
 % ===================== 2. LITERATURE REVIEW =====================
 \section{Literature Review}\label{sec:lit}
 
@@ -1270,6 +1291,16 @@ rule rather than softening it: under nominal conditions robustness is at best fr
 can actively hurt, so it is worth buying only when emergencies past the crossover are
 expected.
 
+\paragraph{The null holds in the deep tail.} A robust controller is a tail hedge, so a
+natural objection is that $\CVaR_{0.95}$ understates its value for a more tail-averse
+operator. We re-evaluated the same online controllers at progressively deeper risk
+levels, from $\CVaR_{0.90}$ through $\CVaR_{0.99}$ to the single worst day (the
+\texttt{dro\_tail\_sensitivity} snapshot). The gap stays immaterial at every level: none
+of the twelve grid-by-metric cells shows a statistically significant robust improvement,
+and on the Diversified grid robustness stays worse. The mean-dominance ceiling therefore
+holds beyond the headline tail level; day-ahead robustness does not earn its keep even
+for a maximally tail-averse operator.
+
 Robustness earns its keep only in the tail. Modelling rare grid-emergency events (with
 probability $0.1$ per day a region's carbon scales by a severity $M$), the robust
 commitment's advantage over the risk-neutral one grows with $M$: zero at $M=1$, turning
@@ -2215,7 +2246,7 @@ Section & Result & Archived source\\
 \ref{sec:res-crossover} & Crossover, realized severity &
 \texttt{part3\_\{emergency,real\_emergency\}\_..}, \texttt{carbon\_ceiling\_..}\\
 \ref{sec:res-crossover} & Online robust (Table~\ref{tab:online}) &
-\texttt{part4\_online\_..}\\
+\texttt{part4\_online\_..}, \texttt{dro\_tail\_sensitivity\_..}\\
 \bottomrule
 \end{tabular}
 \end{table}
