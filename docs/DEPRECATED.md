@@ -28,7 +28,8 @@ the committed configuration that produced a result can always be re-read.
 | `scripts/run_shuffled_marginals_taskc_experiment.py` | The commit-locked Task C run; its config is the pre-registration of record. Reproduced by `run_case_experiment.py --region-set taskc`. |
 | `scripts/run_shuffled_marginals_taskA_experiment.py` | The locked Task A (California/Nevada) run. |
 | `scripts/calibrate_taskA_regimes.py`, `scripts/calibrate_es_pt_fr_regimes.py` | Per-panel regime calibrations referenced in `docs/decisions.md`. |
-| `scripts/toy_validation*.py` | Standalone supervisor-meeting demos (self-contained; do not import project algorithms). |
+| `scripts/toy_validation.py` | Standalone supervisor-meeting demo: fully self-contained, does not import project algorithms. |
+| `scripts/toy_validation_taskA.py` | Task A supervisor demo. Note: unlike the base `toy_validation.py`, this one *does* import real repo functions (`src.models.algorithm_1` etc.), so it is not self-contained. |
 
 ## Superseded (retained for history; prefer the canonical runner)
 
@@ -37,3 +38,15 @@ the committed configuration that produced a result can always be re-read.
 | `scripts/run_shuffled_marginals_experiment.py` | `run_case_experiment.py` (was the Task A utilization-sweep harness). |
 | `scripts/run_shuffled_marginals_components_experiment.py` | `run_case_experiment.py`. |
 | `scripts/run_shuffled_marginals_es_pt_fr_experiment.py` | `run_case_experiment.py` (Iberia panel). |
+
+## Other live runners (rigor sweeps and figure generators)
+
+This index focuses on the Phase 1/2 experiment runners. Several additional runners
+are live and canonical but were not classified above; they generate rigor sweeps and
+the snapshots/figures the theses cite:
+`run_carbon_ceiling.py` (data-grounded severity ceiling, the M≈1.4 number),
+`run_crossover_sensitivity.py`, `run_robust_transfer_value.py`,
+`run_transfer_value_curve.py`, `run_dro_tail_sensitivity.py`,
+`run_dayahead_savings.py`, `run_copula_experiment.py` companions, and
+`recompute_correlations_4zone.py`. The `plot_*.py` scripts are figure generators
+(one per figure) and are all live.

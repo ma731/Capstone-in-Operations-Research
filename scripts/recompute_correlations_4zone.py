@@ -11,8 +11,10 @@ Writes (creates dirs if missing):
     docs/snippets/table_hourly.tex      - Table 3 (4 representative hours)
     docs/snippets/table_seasonal.tex    - Table 4 (DJF/MAM/JJA/SON)
     docs/stratified_results.txt         - full 24h breakdown + seasonal dump
-    figures/correlation_by_hour.pdf     - refreshed two-panel figure
-    figures/correlation_by_hour.png     - PNG sibling for quick view
+    figures/correlation_by_hour_4zone.pdf  - refreshed two-panel figure
+    figures/correlation_by_hour_4zone.png  - PNG sibling for quick view
+    (distinct "_4zone" stem so this does not collide with the single-axis
+     figure written by src.analysis.plots.plot_correlation_by_hour)
 
 Also prints all numbers to stdout for verification before pasting snippets.
 """
@@ -281,10 +283,10 @@ for ax, pairs, title in [
 axes[0].set_ylabel("Pearson correlation of hourly CI")
 axes[0].set_ylim(0, 1)
 fig.tight_layout()
-fig.savefig(FIGURES_DIR / "correlation_by_hour.pdf", bbox_inches="tight")
-fig.savefig(FIGURES_DIR / "correlation_by_hour.png", dpi=150, bbox_inches="tight")
+fig.savefig(FIGURES_DIR / "correlation_by_hour_4zone.pdf", bbox_inches="tight")
+fig.savefig(FIGURES_DIR / "correlation_by_hour_4zone.png", dpi=150, bbox_inches="tight")
 plt.close(fig)
-print(f"Refreshed figure: {FIGURES_DIR / 'correlation_by_hour.pdf'} (+ .png)")
+print(f"Refreshed figure: {FIGURES_DIR / 'correlation_by_hour_4zone.pdf'} (+ .png)")
 
 
 # --- 5. Stratified results dump -------------------------------------------

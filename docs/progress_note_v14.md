@@ -182,7 +182,7 @@ residual-space agreement on a positive spatial effect.
 
 ---
 
-## 7. Hand-back to planning-Claude
+## 7. Planning hand-back
 
 1. **Side-by-side tables** (§4) + **binding margins** (§3): Iberia replicates the
    California null. Both grids: spatial gap a few hundredths of a percent, no

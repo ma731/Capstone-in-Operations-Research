@@ -65,12 +65,14 @@ Robust Modeling Pay in Carbon-Aware Data-Center Scheduling?\par}
 {\large June 2026\par}
 \vfill
 \begin{minipage}{0.9\textwidth}\small
-\textbf{AI Use Declaration.} Generative AI tools (Anthropic Claude) were used as a
+\textbf{AI Use Declaration.} Generative AI tools were used as a
 research and engineering assistant under the author's direction: for code
 implementation support, experiment orchestration, literature triage, and drafting
 assistance. All research questions, modelling decisions, experimental designs, and
 interpretations are the author's, developed with the supervisor; all results were
-produced by version-controlled, pre-registered code reviewed by the author, and all
+produced by version-controlled code reviewed by the author (with the Phase~1--2
+falsification protocol pre-registered; the Part~3 transfer and emergency-crossover
+sweeps are exploratory extensions, not part of that pre-registration), and all
 text was reviewed and edited by the author.
 \end{minipage}
 \end{titlepage}
@@ -94,11 +96,11 @@ sophistication. Using a Mahalanobis--Wasserstein DRO solved as a second-order co
 program, a pre-registered shuffled-marginals falsification test across three real
 US/Canada grids spanning the dependence spectrum (the US West, an Ontario-anchored
 Eastern belt, and an engineered solar/wind/hydro portfolio), with an Iberia--France
-anchor, returns a replicated \textbf{null}: encoding spatial covariance adds below
+anchor, returns a replicated \textbf{null}: encoding cross-region covariance adds below
 $0.4\%$ of $\CVaR$, surviving Ledoit--Wolf shrinkage, removing each region's average
 daily pattern (residualization),
 Benjamini--Hochberg correction, walk-forward validation, and a per-cell equivalence
-test. A mean-ablation shows the covariance signal is genuine but masked by the mean
+test. A mean-leveling test shows the covariance signal is genuine but masked by the mean
 field (a mean-dominance bound), and a tail-dependence analysis shows the residual
 dependence is non-elliptical and upper-tail independent, hence invisible to
 covariance-based ambiguity sets; a copula appendix confirms even the maximal coupling
@@ -134,9 +136,15 @@ growing rapidly with AI workloads \citep{iea2024}. Unlike most industrial loads,
 compute is unusually \emph{flexible}: many batch and training workloads can be
 delayed by hours or moved between sites with little loss of utility. This movement is
 \emph{logical}, jobs relocate over the network between an operator's data centers, and
-does not require the regions' power grids to be physically interconnected; spatial
+does not require the regions' power grids to be physically interconnected; cross-region
 correlation of carbon intensity therefore matters as information for the scheduler, not
-as an electrical constraint. Because the
+as an electrical constraint.\footnote{We use ``spatial'' throughout in the sense of
+\emph{across the operator's geographically separate regions} (sites), as in the standard
+spatial-versus-temporal load-shifting distinction. The dependence we study is the
+cross-region statistical correlation of carbon intensity, driven by shared weather and
+generation; it is not distance-decay spatial autocorrelation (e.g.\ Moran's $I$ or a
+variogram) and not an electrical coupling of the grids, which need not be interconnected.}
+Because the
 carbon intensity of grid electricity varies strongly by hour and by region, driven by wind, solar, hydro availability, and demand, this flexibility lets a
 data-center operator act as a grid-aware participant, deferring work from dirty
 hours to clean ones \citep{radovanovic2022,wiesner2021}. Google's carbon-intelligent
@@ -153,10 +161,10 @@ formulations treat each region's carbon intensity essentially in isolation. Yet
 carbon intensities of electrically interconnected regions co-move: weather fronts
 traverse neighbouring balancing areas, and shared solar fleets create synchronized
 clean periods. It is therefore natural to model carbon intensity as a stochastic
-\emph{vector} with a full spatial covariance, the extension studied here.
+\emph{vector} with a full cross-region covariance, the extension studied here.
 
 \subsection{Problem statement and research questions}
-Each modelling layer, spatial covariance, distributional robustness, and richer
+Each modelling layer, cross-region covariance, distributional robustness, and richer
 copulas, adds estimation and computational cost, and is worthwhile only if it buys
 measurably better schedules. The literature has assumed, rather than measured, that
 this sophistication pays. This thesis builds the scheduler and measures the value of
@@ -166,7 +174,7 @@ each layer directly.
 \item[RQ1.] How much can a day-ahead carbon-aware migration scheduler cut daily
 $\CVaR_{0.95}$ emissions relative to carbon-aware scheduling without inter-region
 transfer, and which lever drives the saving?
-\item[RQ2.] When does adding passive modelling complexity (spatial covariance, or a
+\item[RQ2.] When does adding passive modelling complexity (cross-region covariance, or a
 non-elliptical copula) improve out-of-sample tail emissions, and at what cost?
 \item[RQ3.] When does robustifying against day-ahead forecast error pay over
 deterministic transfer, and do real grids ever reach that regime? What decision rule
@@ -189,9 +197,9 @@ spatial-dependence assumption (correlations are genuine, $0.7$--$0.8$) from its
 place carbon intensity itself in a Mahalanobis--Wasserstein ball as a correlated
 cross-region vector and isolate the marginal value of that coupling via a
 shuffled-marginals falsification test. (iii)~\emph{A screening rule} for when passive
-dependence modelling cannot help, certified from three independent directions: an
+dependence modelling cannot help, supported from three independent directions: an
 a-priori SOCP gap-bound (Proposition~\ref{prop:meandom}) before any data is touched; a
-mean-ablation showing the covariance signal is genuine but masked by the mean field;
+mean-leveling test showing the covariance signal is genuine but masked by the mean field;
 and a tail-dependence/comonotone-copula argument showing even the maximal coupling
 recovers nothing. A dimensionless condition $\Delta$ (Section~\ref{sec:condition})
 generalises the screen beyond carbon, reported as a coarse ordinal indicator (it does
@@ -229,24 +237,31 @@ horizon.
 For readability the main technical terms are glossed in plain language here; the precise
 definitions follow in Section~\ref{sec:method}.
 \begin{description}[leftmargin=1.4em,itemsep=1pt]
+\item[Carbon intensity:] how dirty the electricity is at a given hour and place (grams of CO$_2$ per kWh); it swings with how much wind, solar, and hydro are on the grid.
 \item[Distributionally robust optimization (DRO):] planning against the worst-case carbon
 distribution within a set of plausible distributions around the data, rather than
-trusting a single point forecast.
+trusting a single point forecast. Like packing for weather a little worse than the forecast.
+\item[Wasserstein distance / ball:] a way to measure how far apart two probability distributions are (the cheapest cost of reshaping one into the other). The Wasserstein \emph{ball} of radius $\varepsilon$ is the set of all distributions within that distance of the data, every future close enough to what we observed to be worth hedging.
 \item[$\CVaR_{0.95}$ (Conditional Value-at-Risk):] the average emissions on the worst
 $5\%$ of days; a tail-risk measure, not the average day.
 \item[Second-order cone program (SOCP):] the convex problem the scheduler reduces to,
 solved to global optimality in a fraction of a second.
+\item[Mahalanobis distance:] a distance that weights directions by the carbon covariance, so it accounts for how regions move together. Like measuring distance on a stretched map where correlated regions sit closer.
+\item[Copula:] the part of a joint distribution that captures only how regions move together, with each region's own behaviour stripped out.
+\item[Comonotone:] the strongest possible copula, all regions rising and falling in perfect lockstep; used as a worst-case upper bound.
+\item[Tail dependence ($\chiU,\chiL$):] whether regions hit their dirtiest ($\chiU$) or cleanest ($\chiL$) hours at the same time, a joint-extreme effect plain correlation can miss.
+\item[Residualization:] removing each region's predictable hour-of-day (or day-to-day) average so the analysis works only on the genuine surprises, not the routine daily cycle.
 \item[Shuffled-marginals test:] re-fitting the scheduler with the cross-region link
 destroyed but each region's own pattern intact, so the difference isolates the value of
-spatial correlation.
-\item[Mean-ablation (the mean-leveling test):] we deliberately level each region's average carbon so the only signal left is the cross-region structure; it reveals whether the dependence is real but masked by the mean field. (``Ablation'' is the machine-learning term for removing one component to measure its effect.)
+cross-region correlation.
+\item[Mean-leveling test:] we deliberately flatten each region's average carbon level (so the only signal left is the cross-region co-movement) and re-run the scheduler. It shows whether that cross-region structure is genuinely useful but normally hidden behind the much larger differences in average carbon.
 \item[Mean-dominance (Proposition~\ref{prop:meandom}):] an a-priori bound showing the
 average carbon field caps how much any dependence model can change the schedule.
+\item[Out-of-sample / walk-forward:] scoring a plan only on data it never trained on (out-of-sample); walk-forward is the rolling version, train on earlier years and test on a later untouched one, mimicking real deployment.
+\item[Equivalence test (TOST):] a test that affirmatively shows an effect is smaller than a chosen materiality margin, turning ``we found nothing'' into ``any effect this large is ruled out.''
 \item[Severity $M$:] the multiple by which one region's carbon spikes in a rare grid emergency ($M=3$ is a tripling); the crossover $M^\star$ is where robustness starts to pay.
 \item[Value of the stochastic solution (VSS):] how much planning against the full uncertainty distribution beats committing to a single point forecast; here it is near zero.
-\item[Comonotone:] the strongest possible coupling between regions, used as a worst-case upper bound.
-\item[Mahalanobis distance:] a distance that weights directions by the carbon covariance, so it accounts for how regions move together.
-\item[Tail dependence ($\chiU,\chiL$):] whether regions hit their dirtiest (or cleanest) hours at the same time, a joint-extreme effect plain correlation can miss.
+\item[Transfer budget ($\Phi$):] how much compute may migrate between regions; $\Phi=0$ is the honest no-transfer baseline, and raising it delivers the headline savings.
 \end{description}
 
 % ===================== 2. LITERATURE REVIEW =====================
@@ -325,7 +340,7 @@ Google and in recent studies \citep{radovanovic2022,wiesner2021}. The natural ex
 is \emph{spatial} shifting (migration toward clean regions), and the
 distributed-computing literature finds spatial shifting dominates temporal shifting in
 potential \citep{wiesner2021}, independently motivating the transfer channel studied
-here. Yet the value of \emph{modelling} that spatial structure (via spatial covariance,
+here. Yet the value of \emph{modelling} that spatial structure (via cross-region covariance,
 copulas, or distributional robustness) has been \emph{assumed}, not measured. The DRO
 literature applies sophisticated ambiguity sets to uncertain vectors without isolating
 the marginal value of the cross-coordinate dependence they encode, and neither
@@ -356,7 +371,7 @@ earlier panels corroborating) serve as replications; three nested constraint reg
 guard against the result being an
 artifact of a particular feasible-set geometry; a robustness battery (estimators,
 multiple-testing correction, walk-forward) guards against statistical artifacts; and
-two further experiments (mean-ablation; tail dependence) identify the mechanism.
+two further experiments (mean-leveling test; tail dependence) identify the mechanism.
 Throughout, a pre-registration discipline removes analyst degrees of freedom.
 
 \subsection{The scheduling problem}
@@ -395,7 +410,7 @@ hour index $t$), \eqref{eq:obj} is the second-order cone program
 solved to global optimality (CLARABEL). The radius $\varepsilon$ interpolates from
 the deterministic LP ($\varepsilon=0$) to increasingly conservative schedules.
 
-\paragraph{Where spatial correlation enters.}
+\paragraph{Where cross-region correlation enters.}
 Partitioning $\hat\Sigma$ into $T\times T$ blocks $\Sigma_{rs}$ by region pair, the
 quadratic form splits as
 \begin{equation}
@@ -547,10 +562,13 @@ gap} is the difference between the two arms,
 \end{equation}
 positive when the joint covariance helps. The test is a screening tool: built to
 detect a spatial benefit if one exists, it isolates the \emph{value} of passive
-covariance modelling from the \emph{validity} of spatial correlation in the data, and
+covariance modelling from the \emph{validity} of cross-region correlation in the data, and
 validates the mean-dominance bound (Proposition~\ref{prop:meandom}).
 Figure~\ref{fig:pipeline} sketches the pipeline and Algorithm~\ref{alg:protocol}
-gives the full protocol.
+gives the full protocol. The recipe is generic: hold the optimizer fixed, perturb
+exactly one modelling object, pre-register the analysis, and read off that object's
+marginal out-of-sample tail value; only the perturbed object (here the cross-region
+covariance) changes when the same protocol is applied to another stochastic program.
 
 \begin{figure}[t]
 \centering
@@ -649,7 +667,7 @@ Benjamini--Hochberg correction at $q=0.05$ \citep{benjamini1995}; a walk-forward
 refit (train 2021--2023, test 2024) checks temporal stability; a log-denser
 $\varepsilon$ grid checks grid sensitivity.
 
-\paragraph{Mean-ablation (RQ3, mechanism).} To test whether the mean field masks the
+\paragraph{The mean-leveling test (RQ3, mechanism).} To test whether the mean field masks the
 covariance, the mean used for \emph{scheduling} is transformed while evaluation
 stays on real emissions: \textsc{level} equalizes regional time-averages (keeping
 hour-of-day shape); \textsc{flat} sets a constant mean, making the mean term
@@ -739,9 +757,10 @@ x$ is the per-cell cap and $u$ the utilization, and $\lVert\Sigma^{\mathrm{off}}
 \rVert_2$ the spectral norm of the destroyed cross-region blocks), its right-hand
 side is $7.4\%$ (Eastern US--Canada), $9.6\%$ (Diversified) and $12.7\%$ (Western
 US) of $\CVaR_{0.95}$; the realized gaps (Table~\ref{tab:gaps}) never exceed
-$0.23\%$, two orders of magnitude smaller. The theorem therefore bounds the spatial
-gap by a loose, non-binding worst-case certificate (right-hand side $7.4$--$12.7\%$ of
-$\CVaR$, two orders of magnitude above the realized gaps) \emph{before any experiment
+$0.23\%$, more than an order of magnitude smaller (a factor of $30$--$55$ across the
+three grids). The theorem therefore bounds the spatial gap by a loose, non-binding
+worst-case certificate (right-hand side $7.4$--$12.7\%$ of $\CVaR$, $30$--$55\times$ the
+realized gaps) \emph{before any experiment
 is run}, and the
 experiments then pin it far below that cap. What the bound buys is not tightness but
 structure: the spatial gap is governed by $\varepsilon$ and the cross-region block
@@ -754,7 +773,7 @@ purpose is to bound the gap \emph{before} the experiment, not to predict it. The
 \emph{tight} ceiling is measured, not bounded: the comonotone arm of
 Section~\ref{sec:res-copula} realizes the supremum over copulas, and across scenario
 seeds its gain is centred on zero with $|\Lambda|\lesssim0.1\%$ of $\CVaR_{0.95}$, at
-the sampling-noise floor. The mean-ablation of Section~\ref{sec:res-ablation}
+the sampling-noise floor. The mean-leveling test of Section~\ref{sec:res-ablation}
 bounds the same quantity from a second, independent angle. Both put $\Lambda$ an
 order of magnitude below the schedule's mean-driven value; hence the mean field pins
 the schedule and the dependence model, elliptical or not, is immaterial. The prediction that even Clayton cannot recover material
@@ -769,7 +788,7 @@ commodity laptop). The cost is in the \emph{number} of instances, not their size
 one region-set experiment solves $3\text{ regimes}\times3\,\alpha\times2\text{
 arms}\times(6\,\varepsilon\times5\text{ folds}+1\text{ test read})=558$ SOCPs, and
 the full Phase 1 battery (region sets $\times$ \{sample, Ledoit--Wolf, seasonal,
-AR(1), two ablations, walk-forward, fine grid\}) is on the order of $10^4$ SOCP
+AR(1), two mean-leveling settings, walk-forward, fine grid\}) is on the order of $10^4$ SOCP
 solves; Phase 2 adds $3\times3\times3\times4=108$ CVaR-SAA LPs. Total wall-clock for
 the entire study is under two hours on one core, so reproduction is cheap.
 
@@ -799,7 +818,7 @@ and $0.37$ (CISO--BPAT), mean $\bar r\approx0.2$. It is therefore the low,
 \emph{mixed-correlation} end of the US cases, one near-zero edge and two moderate ones,
 a diversified generation mix rather than a uniformly decoupled grid. This distinction
 matters later: heterogeneous, partly low correlation is \emph{diversifiable} structure
-(it drives the largest mean-ablation signal, Section~\ref{sec:res-ablation}), whereas
+(it drives the largest mean-leveling test signal, Section~\ref{sec:res-ablation}), whereas
 the US West's strong but \emph{uniform} correlation is common-mode and offers no hedge.
 Figure~\ref{fig:heatmaps} shows the residual
 correlation matrices; overlay plots of standardized intensity (archived with the
@@ -922,7 +941,7 @@ genuinely engaged (it is paying for robustness, not collapsing to the nominal
 problem) and the two arms still coincide. A null in which CV had selected
 $\varepsilon^\star=0$ would be uninformative (robustification switched off, so the
 arms must match by construction); here the robustification is demonstrably on and
-the spatial covariance still buys nothing. This is the first regime in the project
+the cross-region covariance still buys nothing. This is the first regime in the project
 where the DRO is consistently active, which is precisely what makes the null
 informative rather than vacuous. Figure~\ref{fig:cvcurve} shows the cross-validation
 curves directly: validation $\CVaR_{0.95}$ dips to an interior minimum at a
@@ -937,7 +956,7 @@ $\CVaR_{0.95}$ (relative to the nominal $\varepsilon=0$ problem) against the
 Wasserstein radius $\varepsilon$, for the joint (solid) and shuffled (dashed)
 covariances. Cross-validation selects an interior $\varepsilon^\star$ (circled),
 not $\varepsilon=0$, so the robustification is on; the two curves coincide, so the
-spatial covariance changes nothing. Large $\varepsilon$ is over-conservative.}
+cross-region covariance changes nothing. Large $\varepsilon$ is over-conservative.}
 \label{fig:cvcurve}
 \end{figure}
 
@@ -997,7 +1016,7 @@ value from it.}
 \includegraphics[width=\textwidth]{../figures/finding.pdf}
 \caption{The Phase 1 finding. \textbf{A:} spatial gap vs.\ mean residual
 cross-region correlation; value does not track correlation anywhere on the
-spectrum. \textbf{B:} mean-ablation; in the covariance-only world (constant
+spectrum. \textbf{B:} mean-leveling test; in the covariance-only world (constant
 scheduling mean) the joint covariance pays off by up to $+1.46\%$, proving the
 spatial signal is real but \emph{masked} by the mean carbon field, not absent.}
 \label{fig:finding}
@@ -1028,7 +1047,7 @@ that passes the pre-registered agreement rule (positive and sign-stable across
 both residual estimators). The largest battery value anywhere, $+0.179\%$ (AR(1),
 Eastern US--Canada, $\alpha=0.30$), appears \emph{only} under AR(1) and not under the
 seasonal estimator, so the rule rejects it. Benjamini--Hochberg correction at
-$q=0.05$ across all 144 non-ablation cells (four grid-runs, the three primary grids
+$q=0.05$ across all 144 real-data cells (four grid-runs, the three primary grids
 plus the locked Task~C replication, each at $3\text{ regimes}\times3\,\alpha=9$ cells
 under the four covariance estimators \{sample, Ledoit--Wolf, seasonal, AR(1)\}:
 $4\times9\times4=144$) leaves that same already-rejected cell as the largest
@@ -1103,7 +1122,7 @@ being harder to estimate rather than the cross-structure being valueless. The tw
 arms are conditioned to the same order (ridge-regularized $\kappa\approx
 1.1$--$1.6\times10^5$ for the joint covariance, $0.4$--$0.8\times10^5$ for the
 shuffled, the joint arm somewhat higher as expected for the richer model). The
-mean-ablation of Section~\ref{sec:res-ablation} is the decisive control: it reuses
+mean-leveling test of Section~\ref{sec:res-ablation} is the decisive control: it reuses
 the \emph{same} joint $\Sigma$ at the \emph{same} conditioning and, removing only
 the mean field, the covariance recovers up to $+1.46\%$. Estimation conditioning
 therefore cannot be what suppresses the spatial value; the mean field is.
@@ -1158,7 +1177,10 @@ smallest margin each grid still clears (its largest $\lvert\text{gap}\rvert+
 $0.10\%$ for Western US, but $\Delta^\star=0.31\%$ for the adversarial Diversified
 grid. Equivalence at the $0.4\%$ economic margin therefore holds everywhere with
 room to spare on the two interconnected grids, and only narrowly on the engineered
-low, heterogeneous-correlation portfolio. That last caveat does not threaten the thesis: the
+low, heterogeneous-correlation portfolio. Equivalently, the conclusion holds for any
+materiality margin $\Delta\ge0.31\%$; the $0.4\%$ figure is fixed a priori from the
+economic grounding of Section~\ref{sec:practical}, not reverse-engineered to clear the
+test. That last caveat does not threaten the thesis: the
 Diversified gap is \emph{negative}, so the one grid where equivalence is hardest to
 assert is precisely the one where the joint covariance \emph{hurts} rather than adds
 value.
@@ -1199,13 +1221,13 @@ Western US   & 0.043 & 0.066 & 0.017 & 0.028\\
 \end{tabular}
 \end{table}
 
-\subsection{Mean-ablation: the covariance is masked, not worthless
+\subsection{Why the covariance is masked: the mean-leveling test
 (RQ3)}\label{sec:res-ablation}
 The ablation isolates the cause (Table~\ref{tab:ablation},
-Figure~\ref{fig:finding}B). Under \textsc{level} ablation (regional
+Figure~\ref{fig:finding}B). Under the \textsc{level} setting (regional
 time-averages equalized, hour-of-day shape kept) every gap is unchanged to
 three decimals: the \emph{between-region} mean differences are not what masks the
-covariance. Under \textsc{flat} ablation (constant scheduling mean, the
+covariance. Under the \textsc{flat} setting (constant scheduling mean, the
 covariance-only world) the joint covariance suddenly pays: up to $+1.46\%$ in
 Diversified and $+0.41\%$ in Eastern US--Canada, all BH-significant, and CV no
 longer collapses both arms onto the same schedule. The spatial signal in the
@@ -1217,9 +1239,15 @@ correlation is \emph{common-mode}, all five zones move together, so destroying
 cross-dependence changes no scheduling decision. Positive correlation is
 non-diversifiable risk: there is no hedge for a DRO to find.
 
+The flat-setting result doubles as the test's \emph{positive control}: in a world
+constructed so the dependence layer \emph{should} pay, the same protocol fires (up to
+$+1.46\%$), whereas on the real data it reads zero. That contrast is what licenses the
+main null as a true negative, a genuine absence of value, rather than a test too blunt to
+detect it.
+
 \begin{table}[t]
 \centering\small
-\caption{Mean-ablation: spatial gap range (\%) across the nine cells per case.
+\caption{Mean-leveling test: spatial gap range (\%) across the nine cells per case.
 \textsc{level} (equalize regional time-averages) leaves the null untouched;
 \textsc{flat} (constant scheduling mean $=$ covariance-only world) reveals genuine
 spatial value except where correlation is common-mode (Western US).}
@@ -1310,8 +1338,9 @@ single forecast) is near zero at best. In the rolling online evaluation (Table~\
 robust controller's out-of-sample $\CVaR_{0.95}$ is statistically indistinguishable from
 the deterministic one on the US West ($+0.28\%$, 95\% CI $[-0.65,+1.16]$) and Eastern
 ($+0.04\%$, $[-0.10,+0.25]$) grids, but is significantly \emph{worse} on the Diversified
-grid ($-10.34\%$, $[-18.3,-4.4]$): hedging forecast error when no emergency is present
-costs tail performance where the regions are weakly coupled. This sharpens the decision
+grid ($-10.34\%$, $[-18.3,-4.4]$, a single representative seed; the four-seed mean is a
+milder but still negative $-4.4\%$, Section~\ref{sec:online}): hedging forecast error when
+no emergency is present costs tail performance where the regions are weakly coupled. This sharpens the decision
 rule rather than softening it: under nominal conditions robustness is at best free and
 can actively hurt, so it is worth buying only when emergencies past the crossover are
 expected.
@@ -1328,14 +1357,17 @@ for a maximally tail-averse operator.
 
 Robustness earns its keep only in the tail. Modelling rare grid-emergency events (with
 probability $0.1$ per day a region's carbon scales by a severity $M$), the robust
-commitment's advantage over the risk-neutral one grows with $M$: zero at $M=1$, turning
-materially and significantly positive near $M^\star\approx3$ on the US West and
-Diversified grids, and reaching $+8.4\%$ of $\CVaR_{0.95}$ at $M=4$ on the US West
-(Figure~\ref{fig:crossover}). The crossover is grid-specific and seed-sensitive: on the
-Eastern grid the robust gain crosses statistical significance earlier (near
-$M\approx1.5$) but stays below $0.4\%$ of $\CVaR_{0.95}$, inside the nominal no-value
-band, so $M^\star\approx3$ is the materially relevant threshold. The robust schedule
-stays hedged while the risk-neutral one is burned when its favoured region spikes.
+commitment's advantage over the risk-neutral one grows with $M$. Across four
+independent emergency-scenario seeds the crossover survives on the strongly correlated
+US West grid only: the gain is $-0.4\%$ at $M=1$, $+0.6\%$ (all four seeds) at $M=2$, and
+$+4.4\%$ of $\CVaR_{0.95}$ on average (s.d.\ $3.4\%$, three of four seeds) at $M=4$
+(Figure~\ref{fig:crossover}). On the Eastern and Diversified grids the gain hovers near
+zero with unstable sign and does not survive multi-seed testing, so the single-seed
+positives there are scenario-seed noise (Section~\ref{sec:transfer} gives the full
+four-seed treatment). The crossover is therefore real but grid-specific and only
+marginally significant (US West, one-sided), with $M^\star\approx3$ the materially
+relevant threshold. The robust schedule stays hedged while the risk-neutral one is
+burned when its favoured region spikes.
 
 \paragraph{Real grids stay below the crossover.} The synthetic multiplier overstates
 real risk, and a data-grounded test confirms the crossover does not activate. On the
@@ -1362,7 +1394,9 @@ full multi-seed treatment and the data-grounded emergency model behind this verd
 \includegraphics[width=0.8\textwidth]{../figures/crossover.pdf}
 \caption{The price-of-robustness crossover. Robust-minus-risk-neutral $\CVaR_{0.95}$
 advantage against emergency severity $M$. The materially relevant crossover is
-$M^\star\approx3$ (grid-specific); realized joint severity stays at $1.3$--$1.9\times$
+$M^\star\approx3$ (grid-specific); the plotted curves are single representative seeds,
+and the multi-seed treatment of Section~\ref{sec:transfer} shows the crossover is
+sign-stable only on the US West grid. Realized joint severity stays at $1.3$--$1.9\times$
 and the robust commitment does not pay on real top-$5\%$ emergency days, so robustness
 does not activate on observed data. Rule: deploy deterministic transfer; robustify only
 if you expect $M>M^\star$.}
@@ -1378,12 +1412,12 @@ scheduling. Carbon intensity \emph{is} spatially correlated where the literature
 expects it to be (Section~\ref{sec:res-corr}), and the DRO machinery \emph{is}
 active (CV selects $\varepsilon^\star=1$ almost everywhere). What the experiment
 falsifies is the specific hypothesis that encoding that correlation in a
-covariance-based ambiguity set improves robust scheduling. The mean-ablation
+covariance-based ambiguity set improves robust scheduling. The mean-leveling test
 result (Section~\ref{sec:res-ablation}) is what licenses the stronger claim: the
 covariance signal is genuine and, in a covariance-only world, worth up to
 $1.46\%$ of tail emissions; it is simply dominated by the diurnal mean carbon
 field in the problem as actually posed. A reader could otherwise dismiss the null
-as ``the data had no signal''; the ablation shows the signal is present but
+as ``the data had no signal''; the mean-leveling test shows the signal is present but
 \emph{subordinate}. This is the central intellectual contribution: a clean
 separation of \emph{validity} of a modelling assumption from its \emph{value}.
 
@@ -1441,10 +1475,10 @@ bandwidth exists):} deterministic inter-region transfer, the dominant spatial le
 Section~\ref{sec:res-transfer}). This channel needs accurate per-region mean forecasts
 and transfer-capacity planning, not dependence estimation; the saving is driven by the
 spatial \emph{mean} (at each hour one region is cleanest on average) and is therefore
-deterministic. \textbf{Layer 3 (skip):} spatial covariance or copula modelling. Both
+deterministic. \textbf{Layer 3 (skip):} cross-region covariance or copula modelling. Both
 the Mahalanobis covariance ball and the richer Clayton copula add below $0.4\%$ of
 $\CVaR_{0.95}$ and are mildly counterproductive in the diversification-friendly case
-(the joint estimator fits noise). The signal is genuine (mean-ablation recovers up to
+(the joint estimator fits noise). The signal is genuine (mean-leveling test recovers up to
 $+1.46\%$ in a covariance-only world) but masked by the within-day mean carbon field
 (Proposition~\ref{prop:meandom}). \textbf{Layer 4 (conditional):} robustify the
 transfer against day-ahead forecast error only if grid-emergency severity realistically
@@ -1459,6 +1493,18 @@ $\approx460{,}000\,\text{tCO}_2$/yr), the transfer lever is worth on the order o
 \$$1.7$M per year at \$$80/\text{tCO}_2$, while the spatial-covariance channel is
 about \$$37{,}000$ per year and not reliably positive. The value worth pursuing lives
 in the transfer decision and the mean forecast, not the second moment.
+
+\paragraph{What the protocol buys, beyond this problem.} The value-pricing protocol
+(fix the optimizer, perturb one modelling object, pre-register, measure out-of-sample
+tail value) transfers to any correlated-uncertainty stochastic program: it lets a
+practitioner decide \emph{empirically} whether a dependence, robustness, or
+richer-ambiguity layer earns its estimation and compute cost. Two cheap checks come
+first and can save the experiment outright: the mean-dominance bound
+(Proposition~\ref{prop:meandom}) flags, before any data is touched, when the mean field
+is large enough that no covariance layer can move the schedule materially, and the
+positive-control check confirms the test can detect value when value exists. Together
+they turn ``is this layer worth modelling?'' from a matter of faith into a checkable,
+pre-registered measurement.
 
 \subsection{Limitations}
 Five bound the claims. \emph{(i)~Representative schedule.} We evaluate one
@@ -1667,7 +1713,8 @@ forecast is good enough that hedging its error buys nothing. On the engineered
 low-correlation Diversified grid robustness is not merely neutral but
 \emph{counterproductive}: its realised CVaR is \emph{worse across every seed}, by
 $4.4\%$ on average over four seeds (range $-1.1$ to $-8.5\%$ at $S{=}40$; the single
-representative run of Table~\ref{tab:online} sits at the severe end, $-10.3\%$), with
+representative run of Table~\ref{tab:online} is more extreme than that spread at
+$-10.3\%$), with
 the mean already capturing the placement value (the grid's
 genuine but \emph{masked} covariance structure, Section~\ref{sec:res-ablation},
 surfaces only once the mean is removed), the CVaR hedge has nothing left to exploit
@@ -1692,8 +1739,8 @@ neutral-to-harmful online absent a tail event, is therefore stable.
 (\texttt{run\_part4\_online.py}). Robust gap (\%, positive $=$ robust better) with a
 $95\%$ \emph{day} bootstrap (which, by the argument of Section~\ref{sec:res-copula},
 does not capture scenario-draw variance; the four-seed sweep of
-Section~\ref{sec:testing} does). The Diversified $-10.3\%$ is this seed's value and
-lies at the severe end of the four-seed spread (mean $-4.4\%$, range $-1.1$ to
+Section~\ref{sec:testing} does). The Diversified $-10.3\%$ is this seed's value and is
+more extreme than the four-seed $S{=}40$ spread (mean $-4.4\%$, range $-1.1$ to
 $-8.5\%$); the qualitative verdicts are seed-stable.}
 \label{tab:online}
 \begin{tabular}{lccc}
@@ -1770,9 +1817,9 @@ necessary rather than optional. $\Delta$'s value is therefore twofold. As a
 \emph{negative filter} it would rule out dependence cheaply on any problem with
 $\Delta\ll1$. As a \emph{regime indicator} it tracks where dependence becomes
 material: a mean-flattening sweep ($\kappa:1\!\to\!0$) shrinks $M$ and raises $\Delta$
-(Figure~\ref{fig:part5}), and the pre-registered ablation confirms the empirical
+(Figure~\ref{fig:part5}), and the pre-registered mean-leveling test confirms the empirical
 dependence value rises with it, from $\approx0$ on the real grids to $+1.46\%$ in the
-fully mean-ablated world (Section~\ref{sec:res-ablation}).
+fully mean-leveled world (Section~\ref{sec:res-ablation}).
 
 To test that link in the \emph{interior}, not only at the two endpoints, we re-solved
 the shuffled-marginals DRO at intermediate flattenings
@@ -1783,10 +1830,10 @@ $\kappa\to0$ (from $\approx0$ to $+0.24\%$), tracking $\Delta$ as the condition
 predicts. On the \emph{engineered} heterogeneous Diversified grid the relationship
 is \emph{non-monotone}: at intermediate flattening the joint covariance first
 \emph{fits noise} (the gap dips negative, the same pathology as the Phase-1 result that
-it hurts there) and the genuine signal surfaces only at full ablation ($+0.67\%$ at
+it hurts there) and the genuine signal surfaces only at full leveling ($+0.67\%$ at
 $\kappa{=}0$ here). This interior sweep uses the R3 reference feasible set, so its
 $\kappa{=}0$ endpoint is not numerically identical to the $+1.46\%$ of the
-pre-registered ablation (a different, tighter feasible set); what transfers is the
+pre-registered mean-leveling test (a different, tighter feasible set); what transfers is the
 \emph{direction}, dependence value emerging as the mean is removed, not the exact
 value. The interior therefore confirms $\Delta$ as a \emph{coarse, ordinal} indicator,
 correct in
@@ -1838,9 +1885,9 @@ Diversified        & $83{,}627$  & $54{,}086$  & $1.55$\\
 \centering
 \includegraphics[width=0.82\textwidth]{../figures/part5_delta.pdf}
 \caption{Part 5. The mean-dominance ratio $\Delta=B/M$ along a mean-flattening sweep
-($\kappa=1$ real grid $\to$ $\kappa\to0$ mean-ablated). $\Delta$ rises monotonically
+($\kappa=1$ real grid $\to$ $\kappa\to0$ mean-leveled). $\Delta$ rises monotonically
 as the mean weakens, tracking the empirical dependence value ($\approx0$ on real grids,
-$+1.46\%$ ablated); the shaded band marks the $\Delta<1$ region where dependence is
+$+1.46\%$ fully leveled); the shaded band marks the $\Delta<1$ region where dependence is
 provably immaterial.}
 \label{fig:part5}
 \end{figure}
@@ -1941,7 +1988,7 @@ would miss exactly the constraint \emph{interactions} that matter. The many
 experiment files are not constraint-by-constraint tests of the model; they are
 \emph{independent attempts to falsify a single hypothesis} from different angles,
 shuffled covariance, copulas, estimators, residualization, walk-forward, tightness
-and tail-level sweeps, mean-ablation. Each file attacks the same null from a new
+and tail-level sweeps, mean-leveling test. Each file attacks the same null from a new
 direction, and the null survives all of them. Modular software tests and modular
 falsification angles are both deliberate; constraint-by-constraint \emph{model}
 validation is deliberately avoided.
@@ -1970,7 +2017,7 @@ robustness is immaterial on the correlated grids (its sign flips with the foreca
 counterproductive on the structureless one, the closed-loop echo of the passive null. Part~5 abstracts the whole pattern into a single
 dimensionless ratio $\Delta=B/M$ that orders the regimes: dependence can matter only
 where the mean field is weak relative to the residual structure, a condition this
-problem fails by a wide margin and the mean-ablated world satisfies (recovering
+problem fails by a wide margin and the mean-leveled world satisfies (recovering
 $+1.46\%$). The unifying statement is therefore not ``spatial structure is useless''
 but the sharper ``\emph{distributional robustness and cross-coordinate dependence earn
 their cost exactly when, and only when, the mean field stops being a reliable guide},''
@@ -2023,8 +2070,8 @@ seasonal and AR(1) residualization, Benjamini--Hochberg correction over 144 cell
 walk-forward validation, the full tail range from $\CVaR_{0.90}$ to $\CVaR_{0.99}$,
 and a per-cell equivalence test (Sections~\ref{sec:res-gap}--\ref{sec:res-robust}).
 The DRO is genuinely engaged (CV selects $\varepsilon^\star=1$ in nearly every cell),
-so this is an \emph{active} null: the robustification is on and the spatial covariance
-still adds nothing. A mean-ablation proves the covariance signal is real ($+1.46\%$ in
+so this is an \emph{active} null: the robustification is on and the cross-region covariance
+still adds nothing. A mean-leveling test proves the covariance signal is real ($+1.46\%$ in
 a covariance-only world) but \emph{masked} by the within-day mean carbon field
 (Section~\ref{sec:res-ablation}). A tail-dependence analysis shows the residual
 dependence is non-elliptical, upper-tail-independent, and radially asymmetric
@@ -2033,8 +2080,8 @@ dependence is non-elliptical, upper-tail-independent, and radially asymmetric
 built for that asymmetry still recovers no material value (Appendix~\ref{app:copula}).
 Proposition~\ref{prop:meandom} (mean-dominance) explains why: the translation
 invariance of CVaR makes the dependence model second-order to the mean field. The
-screening rule is that passive sophistication cannot pay where the mean dominates, and
-the mean demonstrably dominates here.
+screening rule is that passive sophistication cannot pay where the diurnal mean field
+dominates cross-region dependence, the regime that holds on every grid studied here.
 
 \textbf{RQ3: When does robustifying against forecast error pay over deterministic
 transfer, and do real grids reach that regime?} The robust two-stage commitment with
@@ -2063,7 +2110,7 @@ robustness-checked null on whether spatial dependence improves carbon-aware DRO
 scheduling, holding across multiple real grids \emph{and} across the dependence
 hierarchy from covariance ball to elliptical and lower-tail copulas;
 (3)~a mechanistic explanation (formalized as a mean-dominance bound
-(Proposition~\ref{prop:meandom}) and demonstrated by mean-ablation) that
+(Proposition~\ref{prop:meandom}) and demonstrated by the mean-leveling test) that
 explains the null rather than merely reporting it; (4)~a fully reproducible,
 version-controlled, CI-tested pipeline (194 tests) with archived license-safe
 summary tables for every reported number; (5)~an \emph{active transfer channel}
@@ -2250,7 +2297,7 @@ Goldilocks-calibrated on training data alone (bind fraction $0.28$--$0.37$).
 where \texttt{<case>} is one of the internal region-set keys \texttt{us\_west}
 (Western US), \texttt{taskc} (Eastern US--Canada), or \texttt{us\_hetero}
 (Diversified), and flags select the estimator (\texttt{--shrinkage},
-\texttt{--residualize}), mean-ablation (\texttt{--ablate-mean}), walk-forward
+\texttt{--residualize}), mean-leveling test (\texttt{--ablate-mean}), walk-forward
 (\texttt{--test-year}), or grid density (\texttt{--eps-grid}). Snapshot files are
 named \texttt{<case>\_regimes\_<date>[\_<variant>].csv}, and the snapshot
 \texttt{README} maps each to its source command.
@@ -2380,7 +2427,7 @@ across five scenario seeds shows the gap is sampling noise, ranging from $-0.08\
 $+0.10\%$ and centred on zero (mean $+0.01\%$; Figure~\ref{fig:converge}). Even the
 maximal copula's leverage $\Lambda$ sits at the scenario-sampling \emph{noise floor},
 $|\Lambda|\lesssim0.1\%$ of $\CVaR_{0.95}$ and statistically indistinguishable from
-zero. This measurement is \emph{independent} of the mean-ablation, so it pins $\Lambda$
+zero. This measurement is \emph{independent} of the mean-leveling test, so it pins $\Lambda$
 without circularity: no copula, not even the maximal one, recovers material value.
 
 \begin{table}[h]
@@ -2480,7 +2527,7 @@ protocol that separates assumption validity from value.
 \item \textbf{Modelling.} Specified the Mahalanobis--Wasserstein DRO scheduling
 model and its SOCP reformulation, the constraint regimes (including the variable
 carbon-coupled capacity constraint adapted from the SoCC'25 formulation), and the
-mean-ablation and tail-dependence diagnostics.
+mean-leveling test and tail-dependence diagnostics.
 \item \textbf{Data and implementation.} Assembled the multi-grid carbon-intensity
 and temperature panels, implemented the full experimental pipeline, the robustness
 battery, the Benjamini--Hochberg correction, and the figures, under

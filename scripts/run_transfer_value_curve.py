@@ -25,6 +25,7 @@ import numpy as np
 import pandas as pd
 
 from src.analysis.metrics import cvar_upper_tail, per_day_emissions
+from src.analysis.plotstyle import GOLD, NAVY, SAGE, apply_style
 from src.analysis.stratified_correlations import DISPLAY_NAME, REGION_SETS
 from src.data.electricitymaps import load_all_zones, to_wide
 from src.models.covariance import build_daily_panel
@@ -59,10 +60,11 @@ def run_grid(grid):
     return curve
 
 
-COLORS = {"us_west": "#0E2A52", "taskc": "#E69F00", "us_hetero": "#4A7C59"}
+COLORS = {"us_west": NAVY, "taskc": GOLD, "us_hetero": SAGE}
 
 
 def main():
+    apply_style()
     print("Transfer-value curve: out-of-sample CVaR_0.95 reduction vs the Phi=0 "
           "carbon-aware baseline, by transfer budget (fraction of daily workload).\n")
     rows, curves = [], {}
@@ -84,23 +86,22 @@ def main():
 
     # centerpiece figure: CVaR reduction over Phi=0 vs transfer budget
     Path("figures").mkdir(exist_ok=True)
-    fig, ax = plt.subplots(figsize=(7.2, 4.6))
+    fig, ax = plt.subplots(figsize=(7.2, 4.6), constrained_layout=True)
     for g in GRIDS:
         fr = [c[0] * 100 for c in curves[g]]
         sv = [c[1] for c in curves[g]]
         ax.plot(fr, sv, "-o", lw=2.4, ms=6, color=COLORS[g], label=DISPLAY_NAME.get(g, g))
         ax.scatter([fr[0]], [sv[0]], s=70, facecolor="white",
                    edgecolor=COLORS[g], zorder=5, lw=2)
-    ax.set_xlabel("transfer budget (% of daily workload that may migrate)", fontsize=11)
-    ax.set_ylabel(r"out-of-sample CVaR$_{0.95}$ reduction vs $\Phi=0$ [%]", fontsize=11)
+    ax.set_xlabel("transfer budget (% of daily workload that may migrate)")
+    ax.set_ylabel(r"out-of-sample CVaR$_{0.95}$ reduction vs $\Phi=0$ [%]")
     ax.set_title(r"Active transfer cuts tail emissions over the $\Phi=0$ baseline, "
-                 "and saturates early", fontsize=12, color="#0E2A52")
-    ax.legend(frameon=False, fontsize=10, loc="lower right")
+                 "and saturates early")
+    ax.legend(frameon=False, loc="lower right")
     ax.grid(alpha=0.25)
     ax.spines[["top", "right"]].set_visible(False)
-    fig.tight_layout()
     for ext in ("png", "pdf"):
-        fig.savefig(f"figures/transfer_value_curve.{ext}", dpi=200, bbox_inches="tight")
+        fig.savefig(f"figures/transfer_value_curve.{ext}", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print(f"Wrote {csv} and figures/transfer_value_curve.png")
 

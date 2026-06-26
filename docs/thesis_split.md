@@ -109,9 +109,15 @@ Risk key: **safe-polish** (low risk) · **needs-care** (verify numbers/claims) �
 
 ## E. Risk flags (explicit checks)
 
-### E-i. DELETED Iberia (es_pt_fr) snapshots vs. still-cited numbers — **CONFIRMED GAP**
+### E-i. DELETED Iberia (es_pt_fr) snapshots vs. still-cited numbers — **RESOLVED 2026-06-18**
 
-There is **no `es_pt_fr` snapshot** in `docs/results_snapshots/` or in the live `results/`
+> **RESOLVED.** The 7 `es_pt_fr_regimes_2026-06-05*.csv` snapshots (and their generator
+> scripts) were restored to `docs/results_snapshots/` on 2026-06-18 (see HANDOFF §5 and
+> D1 #3 above). Every cited Iberia number traces to a snapshot again. The original gap
+> description is kept below for history.
+
+The original (now-fixed) finding: there was **no `es_pt_fr` snapshot** in
+`docs/results_snapshots/` or in the live `results/`
 directory (both fully listed — only `taskA`, `taskC`/`us_west`/`us_hetero`/`taskc`, copula,
 and Part 3/4/5 files remain). The snapshots README still documents `es_pt_fr` as a valid
 case, but the files are gone. **Both theses still cite Iberia–France numbers:**

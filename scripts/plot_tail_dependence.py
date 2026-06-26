@@ -29,6 +29,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
+from src.analysis.plotstyle import apply_style  # noqa: E402
 from src.analysis.stratified_correlations import DISPLAY_NAME, REGION_SETS  # noqa: E402
 from src.analysis.tail_dependence import (  # noqa: E402
     chi_upper_curve,
@@ -45,7 +46,7 @@ def _save(fig, stem: str) -> list[Path]:
     out = []
     for ext in ("pdf", "png"):
         p = FIGDIR / f"{stem}.{ext}"
-        fig.savefig(p, dpi=200, bbox_inches="tight")
+        fig.savefig(p, dpi=300, bbox_inches="tight")
         out.append(p)
     return out
 
@@ -63,6 +64,8 @@ def main() -> None:
     ap.add_argument("--q", type=float, default=0.95,
                     help="Tail quantile for the summary table (default 0.95).")
     args = ap.parse_args()
+
+    apply_style()
 
     cfg = REGION_SETS[args.region_set]
     zones, tz = cfg["zones"], cfg["tz"]
@@ -84,8 +87,9 @@ def main() -> None:
              for i in range(len(zones)) for j in range(i + 1, len(zones))]
     ncol = min(3, len(pairs))
     nrow = int(np.ceil(len(pairs) / ncol))
-    fig, axes = plt.subplots(nrow, ncol, figsize=(4.2 * ncol, 3.4 * nrow),
-                             squeeze=False, sharex=True, sharey=True)
+    fig, axes = plt.subplots(nrow, ncol, figsize=(4.4 * ncol, 3.6 * nrow),
+                             squeeze=False, sharex=True, sharey=True,
+                             constrained_layout=True)
     for k, (a, b) in enumerate(pairs):
         ax = axes[k // ncol][k % ncol]
         emp, gau = chi_upper_curve(resid, a, b, q_grid)
@@ -101,7 +105,7 @@ def main() -> None:
             ax.set_xlabel("tail quantile q")
     for k in range(len(pairs), nrow * ncol):  # hide unused axes
         axes[k // ncol][k % ncol].axis("off")
-    axes[0][0].legend(frameon=False, fontsize=8, loc="upper left")
+    axes[0][0].legend(frameon=False, fontsize=9, loc="upper left")
     fig.suptitle(f"Upper-tail dependence vs Gaussian benchmark: {DISPLAY_NAME.get(args.region_set, args.region_set)} "
                  "(residual CI, 2021-2025)\nshaded = structure the covariance DRO "
                  "cannot see", fontsize=11)

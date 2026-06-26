@@ -61,6 +61,19 @@ def load_csv(path: Path) -> pd.DataFrame:
     # Rename verbose columns to snake_case
     df = df.rename(columns=COLUMN_RENAME)
 
+    # Verify the rename actually landed. The source headers contain a Unicode
+    # subscript-two (the "2" in gCO2eq); a header mismatch would otherwise
+    # leave the original column names in place and surface as a cryptic
+    # KeyError far downstream. Fail loudly here instead.
+    required = {"timestamp_utc", "ci_direct", "ci_lifecycle", "cfe_pct"}
+    missing = required - set(df.columns)
+    if missing:
+        raise ValueError(
+            f"{path.name}: expected columns missing after rename: {sorted(missing)}. "
+            f"Got {list(df.columns)}. Check the CSV header (esp. the Unicode "
+            f"subscript in 'gCO₂eq/kWh')."
+        )
+
     # Parse timestamps to proper UTC datetime
     df["timestamp_utc"] = pd.to_datetime(df["timestamp_utc"], utc=True)
 
@@ -101,10 +114,14 @@ def load_zone(
 
     if years is not None:
         years_set = set(years)
+        # Match the data-year token specifically (the year sits right before the
+        # granularity suffix, e.g. "...US-CAL-CISO-2024-hourly.csv"). The older
+        # `f"-{y}-" in name` test could in principle also hit the snapshot date
+        # in the filename prefix; anchoring on the suffix avoids that.
         files = [
             f
             for f in files
-            if any(f"-{y}-" in f.name for y in years_set)
+            if any(f.name.endswith(f"-{y}-{granularity}.csv") for y in years_set)
         ]
 
     if not files:

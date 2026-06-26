@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 from src.analysis.metrics import cvar_upper_tail, per_day_emissions  # noqa: E402
+from src.analysis.plotstyle import GOLD, NAVY, RUST, SAGE, apply_style  # noqa: E402
 from src.analysis.stratified_correlations import DISPLAY_NAME, REGION_SETS  # noqa: E402
 from src.analysis.tail_dependence import residualize_hour_of_day  # noqa: E402
 from src.data.electricitymaps import load_all_zones, to_wide  # noqa: E402
@@ -26,7 +27,6 @@ from src.models.covariance import build_daily_panel  # noqa: E402
 from src.models.cvar_saa import solve_cvar_saa  # noqa: E402
 
 FIG = Path("figures")
-NAVY, GOLD, RUST, SAGE = "#1F3B63", "#E69F00", "#B3402F", "#4A7C59"
 
 # Approximate geographic centroids (lon, lat) per Electricity Maps zone.
 COORD = {
@@ -53,7 +53,7 @@ def _resid_corr(zones, tz):
 
 
 def fig_map():
-    fig, ax = plt.subplots(figsize=(11, 6.4))
+    fig, ax = plt.subplots(figsize=(11, 6.4), constrained_layout=True)
     for case in ("us_west", "taskc", "us_hetero"):
         cfg = REGION_SETS[case]
         zones, tz = list(cfg["zones"]), cfg["tz"]
@@ -74,7 +74,7 @@ def fig_map():
         for z in zones:
             x, y = COORD[z]
             ax.annotate(_short(z), (x, y), textcoords="offset points",
-                        xytext=(6, 5), fontsize=8, color="0.15", zorder=4)
+                        xytext=(6, 5), fontsize=9, color="0.15", zorder=4)
     ax.set_xlabel("longitude")
     ax.set_ylabel("latitude")
     ax.set_xlim(-127, -71)
@@ -100,7 +100,7 @@ def fig_scenario_tail(case="taskc"):
     kw = dict(alpha=np.full(R, 0.5), ramp=np.full(R, 15.0),
               deferral_windows=[(0, 7, 0.20)])
     arms = {"independence": NAVY, "clayton": RUST, "comonotone": GOLD}
-    fig, ax = plt.subplots(figsize=(9, 5))
+    fig, ax = plt.subplots(figsize=(9, 5), constrained_layout=True)
     for kind, col in arms.items():
         m = fit_copula(kind, train)
         scen = generate_scenarios(m, 1000, seed=20260613)
@@ -117,7 +117,6 @@ def fig_scenario_tail(case="taskc"):
                  "emission distributions and their $\\mathrm{CVaR}_{0.95}$ (dotted) coincide",
                  fontsize=11)
     ax.grid(alpha=0.3, lw=0.5)
-    fig.tight_layout()
     _save(fig, "scenario_tail")
 
 
@@ -135,7 +134,7 @@ def fig_convergence(case="taskc"):
               deferral_windows=[(0, 7, 0.20)])
     S_grid = [250, 500, 1000, 2000, 4000]
     seeds = [20260613, 1, 2, 3, 7]
-    fig, ax = plt.subplots(figsize=(8, 4.6))
+    fig, ax = plt.subplots(figsize=(8, 4.6), constrained_layout=True)
     mi = fit_copula("independence", train)
     mc = fit_copula("comonotone", train)
     means, los, his = [], [], []
@@ -167,7 +166,6 @@ def fig_convergence(case="taskc"):
                  fontsize=11)
     ax.legend(frameon=False, fontsize=9, loc="upper right")
     ax.grid(alpha=0.3, lw=0.5)
-    fig.tight_layout()
     _save(fig, "scenario_convergence")
 
 
@@ -175,12 +173,13 @@ def _save(fig, stem):
     FIG.mkdir(exist_ok=True)
     for ext in ("pdf", "png"):
         p = FIG / f"{stem}.{ext}"
-        fig.savefig(p, dpi=200, bbox_inches="tight")
+        fig.savefig(p, dpi=300, bbox_inches="tight")
         print(f"  wrote {p}")
     plt.close(fig)
 
 
 def main():
+    apply_style()
     fig_map()
     fig_scenario_tail("taskc")
     fig_convergence("taskc")

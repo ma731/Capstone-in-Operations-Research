@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
+from src.analysis.plotstyle import apply_style  # noqa: E402
 from src.analysis.stratified_correlations import REGION_SETS  # noqa: E402
 from src.analysis.tail_dependence import residualize_hour_of_day  # noqa: E402
 from src.data.electricitymaps import load_all_zones, to_wide  # noqa: E402
@@ -45,8 +46,9 @@ def mean_residual_corr(case: str) -> float:
 
 
 def main() -> None:
+    apply_style()
     FIG.mkdir(parents=True, exist_ok=True)
-    fig, (axA, axB) = plt.subplots(1, 2, figsize=(13, 5.2))
+    fig, (axA, axB) = plt.subplots(1, 2, figsize=(13.5, 5.6), constrained_layout=True)
 
     # --- Panel A: gap vs correlation strength ---
     for case in CASES:
@@ -61,14 +63,13 @@ def main() -> None:
     axA.annotate("correlation spans 0 $\\rightarrow$ 0.5,\nvalue stays at 0",
                  xy=(0.30, 0.0), xytext=(0.30, -0.15), ha="center", fontsize=8.5,
                  color="navy", arrowprops=dict(arrowstyle="->", color="navy", lw=1))
-    axA.text(0.12, -0.21, "negative = joint\ncovariance hurts", fontsize=7,
+    axA.text(0.12, -0.21, "negative = joint\ncovariance hurts", fontsize=9,
              color="C2", ha="center")
     axA.set_xlim(-0.05, 0.65)
     axA.set_xlabel("mean residual cross-region correlation  (weak $\\rightarrow$ strong)")
     axA.set_ylabel("spatial gap (shuf $-$ joint) $\\mathrm{CVaR}_{0.95}$  [%]")
-    axA.set_title("A. Spatial value does NOT track correlation", fontsize=10)
-    axA.legend(frameon=False, fontsize=8, loc="lower right")
-    axA.grid(alpha=0.3, lw=0.5)
+    axA.set_title("A. Spatial value does not track correlation", fontsize=12)
+    axA.legend(frameon=False, fontsize=9, loc="lower right")
 
     # --- Panel B: mean-ablation (real vs covariance-only) ---
     xs = np.arange(len(CASES))
@@ -84,22 +85,20 @@ def main() -> None:
         axB.text(i - 0.2, r + 0.02, f"{r:.2f}", ha="center", fontsize=8)
         axB.text(i + 0.2, c + 0.02, f"{c:.2f}", ha="center", fontsize=8)
     axB.set_xticks(xs)
-    axB.set_xticklabels([c.replace("\n", " ") for c in (LABEL[c] for c in CASES)], fontsize=8)
+    axB.set_xticklabels([c.replace("\n", " ") for c in (LABEL[c] for c in CASES)], fontsize=9)
     axB.set_ylabel("spatial gap $\\mathrm{CVaR}_{0.95}$  [%]")
     axB.set_title("B. The covariance is masked, not worthless\n"
-                  "(remove the mean $\\rightarrow$ joint covariance pays off)", fontsize=10)
-    axB.legend(frameon=False, fontsize=8, loc="upper right")
-    axB.grid(alpha=0.3, axis="y", lw=0.5)
+                  "(remove the mean $\\rightarrow$ joint covariance pays off)", fontsize=12)
+    axB.legend(frameon=False, fontsize=9, loc="upper right")
     axB.annotate("Western US exception:\nstrong common-mode corr,\nno value even isolated",
-                 xy=(2.2, 0.02), xytext=(1.55, 0.9), fontsize=7, color="C0",
-                 arrowprops=dict(arrowstyle="->", color="C0", lw=0.8))
+                 xy=(2.2, 0.02), xytext=(1.5, 0.85), fontsize=9, color="C0",
+                 arrowprops=dict(arrowstyle="->", color="C0", lw=0.9))
 
-    fig.suptitle("Phase 1: carbon correlation is real, but adds no robust scheduling "
-                 "value — because the mean field dominates", fontsize=12)
-    fig.tight_layout(rect=[0, 0, 1, 0.95])
+    fig.suptitle("Carbon correlation is real, but adds no robust scheduling value: "
+                 "the mean field dominates", fontsize=14, fontweight="bold")
     for ext in ("pdf", "png"):
         p = FIG / f"finding.{ext}"
-        fig.savefig(p, dpi=200, bbox_inches="tight")
+        fig.savefig(p, dpi=300)
         print(f"  wrote {p}")
     plt.close(fig)
 

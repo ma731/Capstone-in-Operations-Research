@@ -23,6 +23,7 @@ matplotlib.use("Agg")  # headless-safe
 import matplotlib.pyplot as plt  # noqa: E402
 import pandas as pd  # noqa: E402
 
+from src.analysis.plotstyle import apply_style  # noqa: E402
 from src.analysis.stratified_correlations import DISPLAY_NAME, REGION_SETS  # noqa: E402
 from src.data.electricitymaps import load_all_zones, to_wide  # noqa: E402
 
@@ -34,7 +35,7 @@ def _save(fig, stem: str) -> list[Path]:
     out = []
     for ext in ("pdf", "png"):
         p = FIGDIR / f"{stem}.{ext}"
-        fig.savefig(p, dpi=200, bbox_inches="tight")
+        fig.savefig(p, dpi=300, bbox_inches="tight")
         out.append(p)
     return out
 
@@ -47,6 +48,7 @@ def _short(name: str) -> str:
 
 def _heatmap(ax, corr: pd.DataFrame, title: str, show_y: bool = True):
     labels = [_short(c) for c in corr.columns]
+    ax.grid(False)
     im = ax.imshow(corr.values, vmin=0, vmax=1, cmap="viridis")
     ax.set_xticks(range(len(corr)))
     ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=9)
@@ -71,6 +73,8 @@ def main() -> None:
     ap.add_argument("--winter-week", default="2024-01-15")
     args = ap.parse_args()
 
+    apply_style()
+
     cfg = REGION_SETS[args.region_set]
     zones, tz = cfg["zones"], cfg["tz"]
     wide = to_wide(load_all_zones(zones))[zones]
@@ -81,10 +85,9 @@ def main() -> None:
     resid = loc.groupby(loc.index.hour).transform(lambda s: s - s.mean()).corr()
 
     # --- Figure 1: correlation heatmaps (raw vs residual) ---
-    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.8))
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5.2), constrained_layout=True)
     _heatmap(axes[0], raw, "Raw hourly correlation", show_y=True)
     im = _heatmap(axes[1], resid, "Residual (hour-of-day mean removed)", show_y=False)
-    fig.subplots_adjust(wspace=0.12)
     cbar = fig.colorbar(im, ax=axes, shrink=0.85, label="Pearson $r$", pad=0.02)
     fig.suptitle(f"Cross-region carbon-intensity correlation: {DISPLAY_NAME.get(args.region_set, args.region_set)} "
                  f"(2021–2025)", fontsize=13)
@@ -94,7 +97,8 @@ def main() -> None:
 
     # --- Figure 2: standardized CI overlay, summer & winter week ---
     z = (loc - loc.mean()) / loc.std()
-    fig, axes = plt.subplots(2, 1, figsize=(11, 7), sharey=True)
+    fig, axes = plt.subplots(2, 1, figsize=(11, 7.4), sharey=True,
+                             constrained_layout=True)
     for ax, (start, lab) in zip(
         axes,
         [(args.summer_week, f"Summer week ({args.summer_week})"),
@@ -107,8 +111,9 @@ def main() -> None:
         ax.set_title(lab, fontsize=10)
         ax.set_ylabel("CI (z-score)")
         ax.grid(alpha=0.3, linewidth=0.5)
-    axes[0].legend(ncol=len(zones), frameon=False, fontsize=8,
-                   loc="upper center", bbox_to_anchor=(0.5, 1.28))
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, ncol=len(zones), frameon=False, fontsize=9,
+               loc="outside lower center")
     fig.suptitle(f"Standardized carbon intensity: {DISPLAY_NAME.get(args.region_set, args.region_set)} "
                  "(shared shape => spatial correlation)", fontsize=12)
     for p in _save(fig, f"ci_overlay_{args.region_set}"):

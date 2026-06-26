@@ -232,7 +232,7 @@ class TestPerRegionTemporalShuffle:
 
     def test_rejects_non_3d(self):
         with pytest.raises(ValueError, match="3-D"):
-            per_region_temporal_shuffle(np.zeros((10, 4)))
+            per_region_temporal_shuffle(np.zeros((10, 4)), rng=np.random.default_rng(0))
 
 
 # =============================================================================

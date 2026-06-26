@@ -20,7 +20,7 @@ df = pd.read_csv("docs/results_snapshots/part3_emergency_2026-06-15.csv")
 COL = {"us_west": NAVY, "taskc": GOLD, "us_hetero": SAGE}
 NAME = {"us_west": "Western US", "taskc": "Eastern US–Canada", "us_hetero": "Diversified"}
 
-fig, ax = plt.subplots(figsize=(7.6, 4.8))
+fig, ax = plt.subplots(figsize=(7.6, 4.8), constrained_layout=True)
 
 # "robustness pays" region (past the sharp crossover ~M=3)
 ax.axvspan(3.0, 4.05, color="#eef4ef", zorder=0)
@@ -47,11 +47,10 @@ ax.legend(loc="upper left", title="grid")
 # the honesty bound: real emergencies sit in the no-value zone
 ax.annotate(
     "Real (data-grounded) emergencies\nstay here: robust gain $\\leq$ 0",
-    xy=(1.05, -0.15), xytext=(1.5, -2.6), fontsize=10, color=RUST,
+    xy=(1.05, -0.15), xytext=(1.55, 3.6), fontsize=10, color=RUST,
     ha="left", va="top",
     arrowprops=dict(arrowstyle="->", color=RUST, lw=1.3))
 ax.scatter([1.0], [0.0], s=80, color=RUST, zorder=5, marker="X")
 
-fig.tight_layout()
 save(fig, "crossover")
 print("wrote figures/crossover.png/.pdf")

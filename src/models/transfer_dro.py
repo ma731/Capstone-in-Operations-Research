@@ -23,13 +23,34 @@ import cvxpy as cp
 import numpy as np
 
 
-def _executed(x, f):
-    """Executed load y = x + inflow(into r) - outflow(out of r) from flows f[r,s,t]."""
-    return x + cp.sum(f, axis=0) - cp.sum(f, axis=1)
+def _build_flows(R, T):
+    """Inter-region flow variables as a list of R 2-D matrices.
+
+    ``f[i]`` is an ``(R, T)`` nonneg variable with ``f[i][j, t]`` the load moved
+    from region ``i`` to region ``j`` at hour ``t``. This is mathematically
+    identical to a single ``(R, R, T)`` tensor, but keeping every CVXPY variable
+    2-D avoids the slower SCIPY backend CVXPY falls back to for >2-D expressions
+    (and the UserWarning it emits on every solve).
+
+    Returns ``(f, self_loops, total_f)``: the flow list, the no-self-loop
+    constraints ``f[i][i, :] == 0``, and the scalar total relocated load.
+    """
+    f = [cp.Variable((R, T), nonneg=True) for _ in range(R)]
+    self_loops = [f[i][i, :] == 0 for i in range(R)]
+    total_f = sum(cp.sum(f[i]) for i in range(R))
+    return f, self_loops, total_f
 
 
-def _no_self_loops(f, R):
-    return [f[r, r, :] == 0 for r in range(R)]
+def _executed(base, f):
+    """Executed load ``y = base + inflow - outflow`` from a flow list ``f``.
+
+    ``inflow[r] = sum_i f[i][r, :]`` (load sent into r) and
+    ``outflow[r] = sum_j f[r][j, :]`` (load sent out of r). ``base`` is the placed
+    load ``x`` (a Variable) or a fixed commitment (an ndarray)."""
+    R = len(f)
+    inflow = cp.vstack([sum(f[i][r, :] for i in range(R)) for r in range(R)])
+    outflow = cp.vstack([cp.sum(f[r], axis=0) for r in range(R)])
+    return base + inflow - outflow
 
 
 def _pick_solver(prefer):
@@ -55,21 +76,21 @@ def solve_transfer_dro(
     schedule (R,T) and ``transfer_used`` the total relocated work."""
     R, T = rho_bar.shape
     x = cp.Variable((R, T), nonneg=True)
-    f = cp.Variable((R, R, T), nonneg=True)
+    f, self_loops, total_f = _build_flows(R, T)
     y = _executed(x, f)
     obj = cp.sum(cp.multiply(rho_bar, y))
     if epsilon:
         y_vec = cp.hstack([y[r, :] for r in range(R)])
         obj = obj + epsilon * cp.norm(L.T @ y_vec, 2)
     if lam:
-        obj = obj + lam * cp.sum(f)
+        obj = obj + lam * total_f
     cons = [cp.sum(x, axis=1) == workloads, y >= 0, y <= ceiling,
-            cp.sum(f) <= transfer_budget] + _no_self_loops(f, R)
+            total_f <= transfer_budget] + self_loops
     prob = cp.Problem(cp.Minimize(obj), cons)
     prob.solve(solver=_pick_solver(solver))
     if x.value is None:
         raise RuntimeError(f"transfer DRO solve failed: {prob.status}")
-    return np.asarray(y.value), float(cp.sum(f).value)
+    return np.asarray(y.value), float(total_f.value)
 
 
 def two_stage_commit(
@@ -90,14 +111,14 @@ def two_stage_commit(
         raise ValueError("risk must be 'mean' or 'cvar'")
     S, R, T = scenarios.shape
     x = cp.Variable((R, T), nonneg=True)
-    f = [cp.Variable((R, R, T), nonneg=True) for _ in range(S)]
     cons = [cp.sum(x, axis=1) == workloads]
     costs = []
     for s in range(S):
-        y = _executed(x, f[s])
-        cons += [y >= 0, y <= ceiling, cp.sum(f[s]) <= transfer_budget]
-        cons += _no_self_loops(f[s], R)
-        costs.append(cp.sum(cp.multiply(scenarios[s], y)) + lam * cp.sum(f[s]))
+        f_s, self_loops_s, total_f_s = _build_flows(R, T)
+        y = _executed(x, f_s)
+        cons += [y >= 0, y <= ceiling, total_f_s <= transfer_budget]
+        cons += self_loops_s
+        costs.append(cp.sum(cp.multiply(scenarios[s], y)) + lam * total_f_s)
     if risk == "mean":
         obj = sum(costs) / S
     else:
@@ -124,12 +145,12 @@ def recourse_cost(
     """Best costly transfer for a realized carbon field given a fixed commitment;
     returns the realized cost (carbon + migration)."""
     R, T = rho.shape
-    f = cp.Variable((R, R, T), nonneg=True)
-    y = commitment + cp.sum(f, axis=0) - cp.sum(f, axis=1)
-    cons = [y >= 0, y <= ceiling, cp.sum(f) <= transfer_budget] + _no_self_loops(f, R)
-    cost = cp.sum(cp.multiply(rho, y)) + lam * cp.sum(f)
+    f, self_loops, total_f = _build_flows(R, T)
+    y = _executed(commitment, f)
+    cons = [y >= 0, y <= ceiling, total_f <= transfer_budget] + self_loops
+    cost = cp.sum(cp.multiply(rho, y)) + lam * total_f
     prob = cp.Problem(cp.Minimize(cost), cons)
     prob.solve(solver=_pick_solver(solver))
-    if f.value is None:
+    if f[0].value is None:
         raise RuntimeError(f"recourse solve failed: {prob.status}")
     return float(cost.value)

@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 from src.analysis.metrics import cvar_upper_tail, per_day_emissions  # noqa: E402
+from src.analysis.plotstyle import NAVY, RUST, apply_style  # noqa: E402
 from src.analysis.stratified_correlations import REGION_SETS  # noqa: E402
 from src.data.electricitymaps import load_all_zones, to_wide  # noqa: E402
 from src.models.algorithm_2b_mahalanobis import solve_mahalanobis_dro  # noqa: E402
@@ -29,7 +30,6 @@ from src.models.covariance import (  # noqa: E402
 )
 
 FIG = Path("figures")
-NAVY, RUST = "#1F3B63", "#B3402F"
 CASES = ("us_west", "taskc", "us_hetero")
 TITLE = {"us_west": "Western US", "taskc": "Eastern US–Canada", "us_hetero": "Diversified"}
 EPS = [0.0, 0.1, 1.0, 10.0, 100.0, 1000.0]
@@ -66,7 +66,8 @@ def cv_curve(train, shuffle, region_order):
 
 
 def main() -> None:
-    fig, axes = plt.subplots(1, 3, figsize=(13, 4.3))
+    apply_style()
+    fig, axes = plt.subplots(1, 3, figsize=(13.5, 4.6), constrained_layout=True)
     xs = np.arange(len(EPS))
     for ax, case in zip(axes, CASES):
         cfg = REGION_SETS[case]
@@ -90,7 +91,7 @@ def main() -> None:
                     fontsize=12)
         ax.axhline(0, color="0.6", lw=0.8, ls=":")
         ax.set_xticks(xs)
-        ax.set_xticklabels([f"{e:g}" for e in EPS], fontsize=8)
+        ax.set_xticklabels([f"{e:g}" for e in EPS], fontsize=9)
         ax.set_xlabel("Wasserstein radius $\\varepsilon$", fontsize=9)
         ax.set_title(TITLE[case], fontsize=10)
         if case == "us_west":
@@ -101,11 +102,10 @@ def main() -> None:
     fig.suptitle("The DRO genuinely engages: CV picks a non-trivial "
                  "$\\varepsilon^\\star$, and the joint and shuffled curves coincide "
                  "(the active null)", fontsize=12)
-    fig.tight_layout(rect=[0, 0, 1, 0.94])
     FIG.mkdir(exist_ok=True)
     for ext in ("pdf", "png"):
         p = FIG / f"cv_curve.{ext}"
-        fig.savefig(p, dpi=200, bbox_inches="tight")
+        fig.savefig(p, dpi=300, bbox_inches="tight")
         print(f"  wrote {p}")
     plt.close(fig)
 

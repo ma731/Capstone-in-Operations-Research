@@ -19,9 +19,10 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
+from src.analysis.plotstyle import NAVY, RUST, apply_style  # noqa: E402
+
 FIG = Path("figures")
 SNAP = Path("docs/results_snapshots")
-NAVY, GOLD, RUST, SAGE = "#1F3B63", "#E69F00", "#B3402F", "#4A7C59"
 CASES = ("us_west", "taskc", "us_hetero")
 TITLE = {"us_west": "Western US  (CA/NV/AZ)", "taskc": "Eastern US–Canada  (Ontario belt)",
          "us_hetero": "Diversified  (solar/wind/hydro)"}
@@ -37,7 +38,9 @@ ARMS = [
 
 
 def main() -> None:
-    fig, axes = plt.subplots(1, 3, figsize=(13.5, 4.6), sharex=True)
+    apply_style()
+    fig, axes = plt.subplots(1, 3, figsize=(14, 4.8), sharex=True,
+                             constrained_layout=True)
     for ax, case in zip(axes, CASES):
         ax.axvspan(-0.1, 0.1, color="0.85", alpha=0.8, zorder=0)
         ax.axvline(0, color="0.35", lw=1.1, zorder=1)
@@ -59,14 +62,13 @@ def main() -> None:
         ax.set_xlim(-0.35, 0.35)
         ax.grid(axis="x", alpha=0.3, lw=0.5)
     axes[0].text(0.0, len(ARMS) - 0.35, "materiality band $\\pm0.1\\%$",
-                 ha="center", fontsize=8, color="0.4")
+                 ha="center", fontsize=9, color="0.4")
     fig.suptitle("The null is robust: every estimator and stress test leaves the "
                  "spatial gap inside the no-value band", fontsize=12)
-    fig.tight_layout(rect=[0, 0, 1, 0.95])
     FIG.mkdir(exist_ok=True)
     for ext in ("pdf", "png"):
         p = FIG / f"robustness.{ext}"
-        fig.savefig(p, dpi=200, bbox_inches="tight")
+        fig.savefig(p, dpi=300)
         print(f"  wrote {p}")
     plt.close(fig)
 

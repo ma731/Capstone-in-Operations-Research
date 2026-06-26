@@ -122,11 +122,13 @@ class MahalanobisDROResult:
 
 
 def _select_solver(requested: Optional[str]) -> Optional[str]:
-    """Pick a conic solver, preferring CLARABEL > ECOS > SCS if installed.
+    """Pick a conic solver: the first installed of CLARABEL, ECOS, SCS.
 
-    Returns the requested solver unchanged if non-None. Returns None to
-    delegate to CVXPY's default if none of the preferred conic solvers
-    are available.
+    This is a one-time static choice (preference order CLARABEL > ECOS > SCS),
+    NOT a runtime retry: the chosen solver is used once and the caller raises
+    if it returns a non-optimal status. Returns the requested solver unchanged
+    if non-None. Returns None to delegate to CVXPY's default if none of the
+    preferred conic solvers are installed.
     """
     if requested is not None:
         return requested
@@ -179,8 +181,10 @@ def solve_mahalanobis_dro(
         region_order: zone identifiers in row-major order matching the R
             axis of rho_bar, L, and ceiling. Length must equal R. Default
             is the 4-zone REGION_ORDER from covariance.py.
-        solver: optional CVXPY solver name. If None, prefers CLARABEL,
-            falls back to ECOS, then SCS, then CVXPY default.
+        solver: optional CVXPY solver name. If None, selects the first
+            installed of CLARABEL, ECOS, SCS (else the CVXPY default). This
+            is a one-time selection, not a retry on failure: if the chosen
+            solver returns a non-optimal status the solve raises RuntimeError.
         n_samples: provenance only; passed through to the result for
             record-keeping.
 

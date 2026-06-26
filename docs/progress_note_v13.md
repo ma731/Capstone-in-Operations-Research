@@ -204,7 +204,7 @@ covariance estimator.
 
 ---
 
-## 8. Hand-back to planning-Claude
+## 8. Planning hand-back
 
 1. **Null tables** (§5) and **robustness tables** (§6): the spatial gap is ≤0.06 %
    everywhere, not robustly detectable, and disagrees in sign across residual

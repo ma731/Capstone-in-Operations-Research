@@ -3,7 +3,7 @@
 Reconstructs, for each regime x alpha, the deterministic (epsilon=0) schedule
 on the FULL training data and reports which constraints bind and by how much,
 plus a Goldilocks 'can the DRO still move' probe (||x_eps - x_0||_1 vs total
-work). This is the binding-margin half of the hand-back to planning-Claude.
+work). This is the binding-margin half of the planning hand-back.
 
 Reads only training data + the locked config; does not touch the test set and
 does not re-score emissions, so it is safe to run any number of times.

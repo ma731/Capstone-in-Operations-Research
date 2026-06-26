@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Price of Sophistication: Explained Simply</title>
+<style>
+  :root{
+    --navy:#0E2A52; --navy2:#1F3B63; --gold:#E69F00; --sage:#4A7C59;
+    --rust:#B3402F; --ink:#16202E; --muted:#5b6675; --line:#e3e8f0;
+    --tint:#f4f7fc; --bg:#fbfcfe; --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65; font-size:17px; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:820px; margin:0 auto; padding:0 22px}
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif; color:var(--navy); line-height:1.25}
+  header.hero{
+    background:linear-gradient(160deg,var(--navy) 0%,var(--navy2) 70%,#274a78 100%);
+    color:#fff; padding:64px 0 52px; border-bottom:4px solid var(--gold);
+  }
+  header.hero h1{color:#fff; font-size:2.15rem; margin:0 0 10px}
+  header.hero .sub{font-size:1.12rem; color:#d7e2f2; max-width:680px}
+  header.hero .meta{margin-top:22px; font-size:.93rem; color:#aebfd8; letter-spacing:.02em}
+  .pill{display:inline-block; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25);
+        color:#eaf1fb; font-size:.78rem; padding:4px 11px; border-radius:999px; margin:3px 6px 3px 0}
+  nav.toc{background:var(--tint); border:1px solid var(--line); border-radius:12px; padding:18px 22px; margin:34px 0}
+  nav.toc strong{color:var(--navy); font-size:.85rem; letter-spacing:.08em; text-transform:uppercase}
+  nav.toc ol{margin:10px 0 0; padding-left:20px; columns:2; column-gap:30px}
+  nav.toc a{color:var(--navy2); text-decoration:none}
+  nav.toc a:hover{text-decoration:underline; color:var(--gold)}
+  section{padding:30px 0; border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:none}
+  h2{font-size:1.55rem; margin:0 0 6px}
+  h2 .num{color:var(--gold); font-size:1.0rem; font-family:inherit; margin-right:10px}
+  h3{font-size:1.12rem; margin:24px 0 4px}
+  p{margin:12px 0}
+  .lead{font-size:1.12rem; color:#2a3850}
+  .muted{color:var(--muted)}
+  strong{color:var(--navy2)}
+  .cards{display:grid; grid-template-columns:1fr; gap:16px; margin:20px 0}
+  .card{background:var(--card); border:1px solid var(--line); border-left:5px solid var(--gold);
+        border-radius:10px; padding:18px 20px; box-shadow:0 1px 3px rgba(20,40,80,.04)}
+  .card h3{margin-top:0; color:var(--navy)}
+  .card .verdict{font-size:.82rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase}
+  .v-pay{color:var(--sage)} .v-skip{color:var(--rust)} .v-cond{color:var(--gold)}
+  .callout{background:var(--tint); border:1px solid var(--line); border-radius:10px; padding:16px 20px; margin:20px 0}
+  .callout.key{border-left:5px solid var(--navy); background:#eef3fb}
+  .callout.note{border-left:5px solid var(--sage); background:#f1f7f3}
+  .bignum{font-family:Georgia,serif; font-size:1.5rem; color:var(--navy); font-weight:700}
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:8px; background:#fff}
+  figcaption{font-size:.88rem; color:var(--muted); margin-top:8px; text-align:left}
+  .gloss{display:grid; grid-template-columns:1fr; gap:0; margin:18px 0; border:1px solid var(--line); border-radius:10px; overflow:hidden}
+  .gloss .row{padding:14px 18px; border-bottom:1px solid var(--line)}
+  .gloss .row:last-child{border-bottom:none}
+  .gloss .row:nth-child(odd){background:#fbfcfe}
+  .gloss .term{font-weight:700; color:var(--navy); font-family:Georgia,serif}
+  .gloss .term .tag{font-family:inherit; font-weight:400; font-size:.78rem; color:var(--gold); margin-left:8px}
+  .qa{margin:16px 0}
+  .qa .q{font-weight:700; color:var(--navy2)}
+  .qa .a{margin:4px 0 16px}
+  table.layers{width:100%; border-collapse:collapse; margin:18px 0; font-size:.95rem}
+  table.layers th,table.layers td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top}
+  table.layers th{background:var(--navy); color:#fff; font-weight:600}
+  table.layers tr:nth-child(even) td{background:#fbfcfe}
+  footer{padding:40px 0 70px; color:var(--muted); font-size:.9rem}
+  code{background:#eef1f6; padding:1px 6px; border-radius:5px; font-size:.9em; color:var(--navy2)}
+  @media(max-width:600px){nav.toc ol{columns:1} header.hero h1{font-size:1.7rem}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>The Price of Sophistication</h1>
+    <div class="sub">When do spatial and robust models actually pay in carbon-aware
+    data-center scheduling? A plain-language walkthrough of the whole project, and every
+    technical term explained in human words.</div>
+    <div class="meta">
+      <span class="pill">Research Capstone · Operations Research</span>
+      <span class="pill">IE School of Science &amp; Technology · 2026</span><br>
+      Marco Ortiz Togashi &nbsp;·&nbsp; Supervisor: Prof. Bissan Ghaddar
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc">
+    <strong>On this page</strong>
+    <ol>
+      <li><a href="#plain">In one paragraph</a></li>
+      <li><a href="#question">The big question</a></li>
+      <li><a href="#answers">The three answers</a></li>
+      <li><a href="#how">How it was tested</a></li>
+      <li><a href="#headline">The honest headline</a></li>
+      <li><a href="#spatial">A note on "spatial"</a></li>
+      <li><a href="#contribution">The contribution</a></li>
+      <li><a href="#enables">Why it matters</a></li>
+      <li><a href="#glossary">Plain-English glossary</a></li>
+      <li><a href="#defense">Defense quick-answers</a></li>
+    </ol>
+  </nav>
+
+  <section id="plain">
+    <h2><span class="num">01</span>In one paragraph</h2>
+    <p class="lead">Data centers run a lot of flexible work (think model training and batch
+    jobs) that can wait a few hours or run in a different region. Electricity is "cleaner"
+    at some hours and places than others, because wind, solar, and hydro come and go. A
+    carbon-aware scheduler moves compute toward the clean hours and clean regions to cut
+    emissions.</p>
+    <p>The field already does this. The interesting question is <strong>how fancy the model
+    needs to be</strong>. This project builds a real day-ahead scheduler and then prices three
+    optional layers of sophistication, one at a time: (1) letting jobs migrate between
+    regions, (2) modelling how regions' carbon levels move together, and (3) hedging against
+    forecast error with distributionally robust optimization. The result is a clean
+    separation: <strong>one layer pays, two mostly do not.</strong></p>
+  </section>
+
+  <section id="question">
+    <h2><span class="num">02</span>The big question</h2>
+    <p>Every extra layer of modelling costs something: more data to estimate, more compute,
+    more things that can go wrong. It is only worth it if it buys measurably better
+    schedules. The literature mostly <em>assumed</em> that richer models help. This thesis
+    <em>measures</em> it directly, and asks a value-first question: once you have a working
+    scheduler, which extra layer is worth its price?</p>
+    <p>The yardstick throughout is <strong>CVaR&#8320;.&#8320;&#8325;</strong>: the average
+    emissions on the worst 5% of days. We care about the bad days, not the average day,
+    because that is what a risk-averse operator wants to protect against.</p>
+  </section>
+
+  <section id="answers">
+    <h2><span class="num">03</span>The three answers</h2>
+    <div class="cards">
+      <div class="card">
+        <div class="verdict v-pay">RQ1 · the lever that pays</div>
+        <h3>Letting compute move between regions</h3>
+        <p>Active inter-region migration cuts worst-day emissions by <strong>4.0% to
+        9.9%</strong> over a like-for-like no-transfer baseline (Western 4.0%, Eastern 9.9%,
+        Diversified 9.0%). The driver is simple: at each hour, one region is cleanest
+        <em>on average</em>, so you ship work there. This is the headline saving, and it does
+        not need any fancy dependence model.</p>
+        <p class="muted">Honest footnote: the migration mechanism itself is established
+        practice in carbon-aware computing. The contribution is the careful, like-for-like
+        measurement of what it is worth.</p>
+      </div>
+      <div class="card">
+        <div class="verdict v-skip">RQ2 · the layer to skip</div>
+        <h3>Modelling how regions co-move (covariance, copulas)</h3>
+        <p>Across grids spanning the full range from near-independent to strongly correlated,
+        modelling the joint structure adds <strong>essentially zero</strong> (below 0.4% of
+        CVaR), and it survives a full battery of robustness checks. The co-movement is real,
+        but it is <em>dwarfed</em> by the differences in average carbon, and the part that
+        varies is the wrong shape for this kind of model to use.</p>
+      </div>
+      <div class="card">
+        <div class="verdict v-cond">RQ3 · the conditional option</div>
+        <h3>Hedging forecast error with robust optimization</h3>
+        <p>Distributional robustness only starts to pay once a rare emergency makes a region's
+        carbon spike by about <strong>3&times;</strong> (the crossover M&#8902;&#8776;3). Real
+        worst-case emergencies across 17 zones only reach about <strong>1.4&times;</strong>,
+        so on observed conditions the simpler deterministic scheduler wins. Even at high
+        severity the crossover survives careful multi-seed testing on only one grid, and only
+        marginally.</p>
+      </div>
+    </div>
+    <div class="callout key">
+      <strong>The practitioner rule:</strong> deploy a per-region scheduler plus an active
+      inter-region transfer channel (that captures the value); treat a richer dependence
+      model and a robust layer as conditional options, not free wins.
+    </div>
+  </section>
+
+  <section id="how">
+    <h2><span class="num">04</span>How it was tested</h2>
+    <p>Two clean experiments carry the argument. Both keep the optimizer fixed and change
+    exactly one thing, so any difference is attributable to that one thing.</p>
+
+    <h3>The shuffled-marginals test (does dependence add value?)</h3>
+    <p>Fit the scheduler twice: once with the real cross-region links intact, and once with
+    those links destroyed but each region's own pattern left perfectly intact. Compare the
+    worst-day emissions. The difference is the value of the cross-region structure. It came
+    out at essentially zero, and the whole thing was <strong>pre-registered</strong> (the
+    analysis plan was locked in version control before the test data was ever read), so the
+    result cannot be massaged after the fact.</p>
+
+    <h3>The mean-leveling test (is the null real, or is the test just blind?)</h3>
+    <p>This is the clever safeguard. We deliberately flatten each region's average carbon
+    level, so the only signal left is the cross-region co-movement, and re-run. In this
+    constructed world the dependence layer <em>does</em> pay (up to +1.46%). That is the
+    test's <strong>positive control</strong>: it proves the test can detect value when value
+    exists. So the zero we measure on real data is a genuine "no", not a blunt instrument
+    that cannot see anything.</p>
+
+    <figure>
+      <img src="figures/finding.png" alt="Two-panel summary: spatial value does not track correlation; the covariance is masked, not worthless">
+      <figcaption><strong>The finding in one figure.</strong> Left: the value of cross-region
+      structure stays at zero no matter how correlated the regions are. Right: in the
+      mean-leveled "covariance-only" world the same structure suddenly pays, proving the
+      signal is real but normally hidden behind the average-carbon field.</figcaption>
+    </figure>
+  </section>
+
+  <section id="headline">
+    <h2><span class="num">05</span>The honest headline</h2>
+    <p>This project is unusual in that its central result is a <em>careful null</em>: a
+    rigorous "this fancier thing does not actually help here", reported honestly rather than
+    hidden. That is harder to attack than an inflated positive, and it is paired with a real,
+    measured saving (the transfer lever) and a clear decision rule.</p>
+    <figure>
+      <img src="figures/crossover.png" alt="Robust advantage versus emergency severity, with the crossover near M=3">
+      <figcaption><strong>When does robustness pay?</strong> The robust scheduler only pulls
+      ahead once emergencies get severe (around a 3&times; carbon spike). Real grids sit far
+      to the left of that line, in the region where the simple plan is already best.</figcaption>
+    </figure>
+  </section>
+
+  <section id="spatial">
+    <h2><span class="num">06</span>A note on the word "spatial"</h2>
+    <div class="callout note">
+      <p style="margin-top:0">"Spatial" here means <strong>across the operator's
+      geographically separate regions (sites)</strong>, exactly as in the standard
+      <em>spatial-versus-temporal</em> load-shifting distinction (move work to a cleaner
+      place vs. a cleaner hour).</p>
+      <p style="margin-bottom:0">It does <strong>not</strong> mean distance-based spatial
+      autocorrelation (no Moran's <em>I</em>, no variograms, no distance-decay), and it is
+      <strong>not</strong> an electrical coupling of the grids, which need not be connected
+      at all. The dependence we study is just the ordinary statistical
+      <strong>cross-region correlation</strong> of carbon intensity, driven by shared weather
+      and shared generation. The thesis says "cross-region correlation" for the statistic and
+      reserves "spatial" for the across-locations decision.</p>
+    </div>
+  </section>
+
+  <section id="contribution">
+    <h2><span class="num">07</span>The real contribution</h2>
+    <p>The most novel and most defensible part is not any one equation (those are standard
+    tools). It is a <strong>reusable recipe for pricing a modelling layer</strong>, plus the
+    discipline that makes its answer trustworthy:</p>
+    <ol>
+      <li><strong>Separate validity from value.</strong> The cross-region correlations are
+      genuinely real (0.7 to 0.8). That does <em>not</em> mean modelling them helps the
+      decision. The thesis measures the two separately, and they come apart.</li>
+      <li><strong>The value-pricing protocol.</strong> Fix the optimizer, perturb exactly one
+      modelling object, pre-register, and read off its marginal worst-day value. Only the
+      perturbed object changes when you apply it to a different problem, so the recipe
+      transfers to any correlated-uncertainty optimization, not just carbon.</li>
+      <li><strong>A cheap pre-screen.</strong> A simple ratio (how big the average-carbon
+      swings are versus the co-movement) flags, before touching any data, when a dependence
+      layer cannot possibly matter.</li>
+    </ol>
+    <p>Together these turn "is this layer worth modelling?" from a matter of faith into a
+    checkable, pre-registered measurement.</p>
+  </section>
+
+  <section id="enables">
+    <h2><span class="num">08</span>Why it matters (what it enables)</h2>
+    <p>For a practitioner, the four-layer decision rule says where to spend effort and where
+    not to:</p>
+    <table class="layers">
+      <tr><th>Layer</th><th>What it is</th><th>Verdict</th></tr>
+      <tr><td><strong>1</strong></td><td>Per-region carbon-aware scheduling (shift work to clean hours)</td><td class="v-pay">Deploy always</td></tr>
+      <tr><td><strong>2</strong></td><td>Active inter-region transfer (ship work to clean regions)</td><td class="v-pay">Deploy if you can migrate (this is the 4–9.9%)</td></tr>
+      <tr><td><strong>3</strong></td><td>Modelling the joint covariance / copula</td><td class="v-skip">Skip (adds ≈0)</td></tr>
+      <tr><td><strong>4</strong></td><td>Robustifying against forecast error</td><td class="v-cond">Only if you expect severe emergencies</td></tr>
+    </table>
+    <p>In money terms, for an Eastern US–Canada facility the transfer lever is worth on the
+    order of <span class="bignum">$1.7M/yr</span> in avoided carbon, while the
+    covariance-modelling channel is about $37,000/yr and not even reliably positive. The
+    value lives in the transfer decision and the mean forecast, not the second moment.</p>
+  </section>
+
+  <section id="glossary">
+    <h2><span class="num">09</span>Plain-English glossary</h2>
+    <p class="muted">Every technical term in the thesis, in human words, with an everyday
+    analogy where it helps.</p>
+    <div class="gloss">
+      <div class="row"><span class="term">Carbon intensity</span>: how dirty the electricity is right now, in grams of CO&#8322; per kilowatt-hour. It swings hour by hour and region by region with how much wind, solar, and hydro are on the grid.</div>
+      <div class="row"><span class="term">Carbon-aware scheduling</span>: deciding when and where to run flexible jobs so they land in the cleanest hours and regions.</div>
+      <div class="row"><span class="term">Day-ahead</span>: committing tomorrow's plan today, using a forecast, because in practice you cannot wait for each hour to arrive.</div>
+      <div class="row"><span class="term">CVaR&#8320;.&#8320;&#8325; <span class="tag">how bad the bad days are</span></span>: Conditional Value-at-Risk: the average emissions across the worst 5% of days, not the average over all days.</div>
+      <div class="row"><span class="term">DRO <span class="tag">robust planning</span></span>: distributionally robust optimization: instead of trusting one forecast, optimize against the worst plausible forecast in a whole cloud of them. Like packing for weather a little worse than predicted.</div>
+      <div class="row"><span class="term">Wasserstein ball</span>: the "cloud of plausible futures": all the probability distributions within a chosen distance of the data. The radius (epsilon) is the single dial for how cautious the plan is.</div>
+      <div class="row"><span class="term">Mahalanobis distance</span>: a distance that accounts for how regions move together, so two correlated regions count as "closer". Like measuring distance on a stretched map.</div>
+      <div class="row"><span class="term">SOCP</span>: second-order cone program: a well-behaved convex problem that solvers crack fast and to a guaranteed best answer. The robust scheduler reduces to one.</div>
+      <div class="row"><span class="term">Copula</span>: the part of a joint distribution that captures only how variables move together, with each one's own behaviour stripped out.</div>
+      <div class="row"><span class="term">Comonotone copula</span>: the most extreme coupling possible: every region rising and falling in perfect lockstep. Used as a worst-case ceiling: if even perfect synchrony adds nothing, nothing weaker will.</div>
+      <div class="row"><span class="term">Tail dependence (&chi;<sub>L</sub>, &chi;<sub>U</sub>)</span>: whether regions hit their extremes at the same time. Here regions sync up when <em>clean</em> but decouple when <em>dirty</em>, an effect plain correlation cannot see, and the wrong way round for a risk-averse scheduler.</div>
+      <div class="row"><span class="term">Cross-region correlation</span>: the ordinary statistical correlation between regions' carbon-intensity series (see the note on "spatial" above). Real here, at 0.7 to 0.8.</div>
+      <div class="row"><span class="term">Residualization</span>: removing each region's predictable daily pattern so the analysis works only on the genuine surprises, not the routine day-night cycle.</div>
+      <div class="row"><span class="term">Shuffled-marginals test</span>: fit the scheduler twice, once with the real cross-region links and once with them destroyed but each region's own pattern intact, then compare worst-day emissions. The difference is the value of the cross-region structure.</div>
+      <div class="row"><span class="term">Mean-leveling test <span class="tag">the positive control</span></span>: deliberately flatten each region's average carbon and re-run, so the only signal left is the co-movement. It shows the structure <em>can</em> pay in a constructed world, which proves the real-data "zero" is a true negative, not a blind test.</div>
+      <div class="row"><span class="term">Mean-dominance</span>: the central reason for the null: the swing in average carbon is so much larger than the cross-region co-movement that any covariance or copula model can only move the schedule by a provably tiny amount.</div>
+      <div class="row"><span class="term">Out-of-sample / walk-forward</span>: scoring a plan only on data it never trained on; walk-forward is the rolling version (train on earlier years, test on a later untouched one), mimicking real deployment.</div>
+      <div class="row"><span class="term">Equivalence test (TOST)</span>: a test that affirmatively shows an effect is smaller than a chosen materiality margin, turning "we found nothing" into "any effect this large is ruled out".</div>
+      <div class="row"><span class="term">Severity M and the crossover M&#8902;</span>: M is how many times worse carbon spikes in a rare emergency (M = 3 is a tripling). M&#8902; &#8776; 3 is where the robust layer starts to beat the simple plan; real emergencies only reach about M = 1.4.</div>
+      <div class="row"><span class="term">Value of the stochastic solution (VSS)</span>: how much you gain by planning against the full spread of uncertainty rather than a single best-guess forecast. Here it is near zero.</div>
+      <div class="row"><span class="term">Transfer budget (&Phi;)</span>: the dial for how much compute may migrate between regions. &Phi; = 0 is the honest no-transfer baseline; turning it up delivers the 4–9.9% saving.</div>
+    </div>
+  </section>
+
+  <section id="defense">
+    <h2><span class="num">10</span>Defense quick-answers</h2>
+    <p class="muted">Short, clear answers to the questions an examiner is most likely to ask.</p>
+    <div class="qa">
+      <div class="q">"What is M, and what is the 1.4?"</div>
+      <div class="a">M is the multiple by which a region's carbon intensity spikes in a rare grid
+      emergency: M = 3 means three times dirtier than normal. The robust layer only earns its
+      keep above about M = 3. When we measure the worst real emergencies across 17 zones, the
+      joint severity only reaches about 1.4&times;, well short of where robustness would pay.</div>
+
+      <div class="q">"What is the mean-leveling test?"</div>
+      <div class="a">We artificially flatten each region's average carbon so the only thing left
+      is how the regions move together, then re-run the scheduler. It is a controlled check:
+      if the cross-region structure ever pays, it pays here, and it does (+1.46%). That is why
+      we can say the real-data null is a true "no value", not a test too blunt to see it.</div>
+
+      <div class="q">"Isn't a null result just a failure?"</div>
+      <div class="a">No. It is a specification finding: a precise, pre-registered statement that
+      a popular extra layer does not pay here, backed by a positive control and a money-valued
+      decision rule. It saves practitioners from estimating models that cannot help.</div>
+
+      <div class="q">"Is 'spatial correlation' the right term?"</div>
+      <div class="a">We use "cross-region correlation" for the statistic, and reserve "spatial"
+      for the across-locations decision (spatial vs temporal shifting). It is deliberately not
+      distance-based spatial autocorrelation (Moran's I) and not an electrical coupling of the
+      grids.</div>
+
+      <div class="q">"What is genuinely new?"</div>
+      <div class="a">A reusable, pre-registered protocol for pricing any single modelling layer
+      in a stochastic program, separating whether an assumption is <em>true</em> from whether
+      it is <em>useful</em>, applied to carbon scheduling and certified with a cheap a-priori
+      pre-screen and a positive control.</div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Generated as a plain-language companion to <code>thesis/capstone_thesis.pdf</code>.
+    Figures are the publication versions under <code>figures/</code>; keep this file in the
+    repository folder so they display. Every number here traces to an archived snapshot in
+    <code>docs/results_snapshots/</code>.</p>
+    <p>&copy; 2026 Marco Ortiz Togashi · Research Capstone in Operations Research · IE School of Science &amp; Technology.</p>
+  </footer>
+
+</div>
+</body>
+</html>

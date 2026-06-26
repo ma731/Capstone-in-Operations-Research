@@ -24,6 +24,8 @@ from typing import Optional
 import cvxpy as cp
 import numpy as np
 
+from src.models.transfer_dro import _build_flows, _executed
+
 
 def seasonal_forecast(train_panel: np.ndarray) -> np.ndarray:
     """Hour-of-day mean carbon field (R,T) from the training panel (N,R,T)."""
@@ -42,11 +44,11 @@ def _commit(forecast, ceiling, workloads, transfer_budget, *, scenarios=None,
     Returns the committed executed schedule y (R,T)."""
     R, T = forecast.shape
     x = cp.Variable((R, T), nonneg=True)
-    f = cp.Variable((R, R, T), nonneg=True)
-    y = x + cp.sum(f, axis=0) - cp.sum(f, axis=1)
+    f, self_loops, total_f = _build_flows(R, T)
+    y = _executed(x, f)
     cons = [cp.sum(x, axis=1) == workloads, y >= 0, y <= ceiling,
-            cp.sum(f) <= transfer_budget] + [f[r, r, :] == 0 for r in range(R)]
-    migrate = lam * cp.sum(f)
+            total_f <= transfer_budget] + self_loops
+    migrate = lam * total_f
     if scenarios is None:
         obj = cp.sum(cp.multiply(forecast, y)) + migrate
     else:

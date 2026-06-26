@@ -340,7 +340,7 @@ def block_diagonal_by_region(cov: np.ndarray, R: int, T: int) -> np.ndarray:
 
 def per_region_temporal_shuffle(
     panel: np.ndarray,
-    rng: Optional[np.random.Generator] = None,
+    rng: np.random.Generator,
 ) -> np.ndarray:
     """Permute days independently within each region.
 
@@ -359,8 +359,10 @@ def per_region_temporal_shuffle(
 
     Args:
         panel: (N, R, T) daily panel.
-        rng: numpy Generator; pass an explicit seeded Generator for
-            reproducibility. Defaults to a fresh default_rng() per call.
+        rng: numpy Generator, REQUIRED. Pass an explicit seeded Generator so
+            the shuffle is reproducible. There is deliberately no default: an
+            implicit unseeded Generator would make any experiment that calls
+            this silently irreproducible across runs.
 
     Returns:
         (N, R, T) shuffled panel; each region's data is independently
@@ -372,8 +374,6 @@ def per_region_temporal_shuffle(
     panel = np.asarray(panel)
     if panel.ndim != 3:
         raise ValueError(f"Expected 3-D (N, R, T) array, got shape {panel.shape}")
-    if rng is None:
-        rng = np.random.default_rng()
     N, R, T = panel.shape
     result = np.empty_like(panel)
     for r in range(R):

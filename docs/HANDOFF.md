@@ -1,6 +1,6 @@
 # Handoff — Carbon DRO Capstone
 
-_Last updated: 2026-06-20. Latest commit: `c7e4399` on `main`._
+_Last updated: 2026-06-26. Latest commit: `d783b65` on `main`._
 
 This file is the single place to get oriented fast. For the regular-vs-extended
 content split and the prioritized improvement lists, see [`thesis_split.md`](thesis_split.md).
@@ -109,7 +109,7 @@ figure. An earlier draft's "4.7–10.1%" / "8–11 percentage-point" numbers wer
 
 ```bash
 # from repo root, venv at .venv (Python 3.12.4)
-.venv/Scripts/python -m pytest -q                 # 198 tests should pass
+.venv/Scripts/python -m pytest -q                 # 194 tests should pass
 
 # thesis (run from the thesis dir)
 cd thesis && latexmk -pdf -interaction=nonstopmode capstone_thesis.tex

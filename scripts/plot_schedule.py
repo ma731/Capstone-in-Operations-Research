@@ -17,6 +17,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
+from src.analysis.plotstyle import GOLD, NAVY, RUST, SAGE, apply_style  # noqa: E402
 from src.analysis.stratified_correlations import DISPLAY_NAME, REGION_SETS  # noqa: E402
 from src.data.electricitymaps import load_all_zones, to_wide  # noqa: E402
 from src.models.algorithm_2b_mahalanobis import solve_mahalanobis_dro  # noqa: E402
@@ -26,7 +27,6 @@ from src.models.covariance import (  # noqa: E402
 )
 
 FIG = Path("figures")
-NAVY, GOLD, RUST, SAGE = "#00338D", "#E8A33D", "#0098E0", "#4A7C59"
 
 
 def _short(z: str) -> str:
@@ -38,6 +38,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--region-set", choices=tuple(REGION_SETS), default="us_west")
     args = ap.parse_args()
+    apply_style()
     cfg = REGION_SETS[args.region_set]
     zones, tz = list(cfg["zones"]), cfg["tz"]
 
@@ -60,8 +61,9 @@ def main() -> None:
                                epsilon=1.0, **kw).schedule
 
     ncol = R
-    fig, axes = plt.subplots(1, ncol, figsize=(4.7 * ncol, 3.9),
-                             sharey=True, squeeze=False)
+    fig, axes = plt.subplots(1, ncol, figsize=(4.7 * ncol, 4.3),
+                             sharey=True, squeeze=False,
+                             constrained_layout=True)
     hours = np.arange(T)
     for r in range(R):
         ax = axes[0][r]
@@ -76,30 +78,29 @@ def main() -> None:
         ax.step(hours, xs[r], where="mid", color=RUST, lw=1.4, zorder=3,
                 label="load (shuffled $\\Sigma$)")
         ax.axvspan(-0.5, 7.5, color=SAGE, alpha=0.08, zorder=0)
-        ax.set_title(_short(zones[r]), fontsize=10)
-        ax.set_xlabel("hour", fontsize=8)
+        ax.set_title(_short(zones[r]), fontsize=11)
+        ax.set_xlabel("hour", fontsize=10)
         ax.set_xlim(-0.5, T - 0.5)
         ax.set_ylim(0, 55)
         ax2.set_ylim(0, np.nanmax(rho_bar) * 1.1)
         if r == 0:
-            ax.set_ylabel("scheduled load [MW]", fontsize=9)
+            ax.set_ylabel("scheduled load [MW]", fontsize=10)
         ax2.set_yticks([])
         ax2.spines["right"].set_visible(False)
-        ax.tick_params(labelsize=7)
+        ax.tick_params(labelsize=9)
     # combined legend: load (joint/shuffled) + the gold carbon backdrop
     from matplotlib.lines import Line2D
     h1, l1 = axes[0][0].get_legend_handles_labels()
     h1 = h1 + [Line2D([0], [0], color=GOLD, lw=2.6)]
     l1 = l1 + ["carbon intensity (mean field)"]
-    fig.legend(h1, l1, frameon=False, loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.02))
-    fig.suptitle(f"Joint vs.\\ shuffled-covariance schedules are visually "
+    fig.legend(h1, l1, frameon=False, loc="outside lower center", ncol=3)
+    fig.suptitle(f"Joint vs. shuffled-covariance schedules are visually "
                  f"indistinguishable ({DISPLAY_NAME.get(args.region_set, args.region_set)}): the spatial null, seen "
                  f"directly. Load (bars) tracks the low-carbon hours.", fontsize=11)
-    fig.tight_layout(rect=[0, 0, 1, 0.94])
     FIG.mkdir(exist_ok=True)
     for ext in ("pdf", "png"):
         p = FIG / f"schedule_{args.region_set}.{ext}"
-        fig.savefig(p, dpi=200, bbox_inches="tight")
+        fig.savefig(p, dpi=300)
         print(f"  wrote {p}")
     plt.close(fig)
 

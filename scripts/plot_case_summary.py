@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
+from src.analysis.plotstyle import apply_style  # noqa: E402
 from src.analysis.stratified_correlations import REGION_SETS  # noqa: E402
 from src.analysis.tail_dependence import (  # noqa: E402
     residualize_hour_of_day,
@@ -51,8 +52,9 @@ def _latest_baseline_csv(case: str) -> Path | None:
 
 
 def main() -> None:
+    apply_style()
     FIGDIR.mkdir(parents=True, exist_ok=True)
-    fig, axes = plt.subplots(1, 3, figsize=(16, 4.8))
+    fig, axes = plt.subplots(1, 3, figsize=(17, 5.2), constrained_layout=True)
 
     # --- Panel A: spatial gap +- CI (CI is absolute; convert to % of shuf_CVaR
     #     to match gap_pct) ---
@@ -74,9 +76,9 @@ def main() -> None:
     ax.axhline(0, color="0.3", lw=1)
     ax.set_ylabel("spatial gap (shuf - joint) CVaR$_{0.95}$  [% of shuf]")
     ax.set_title("A. Spatial value of the joint covariance\n(all cells on zero = the null)",
-                 fontsize=10)
+                 fontsize=11)
     ax.set_xticks([])
-    ax.legend(frameon=False, fontsize=8, loc="upper right")
+    ax.legend(frameon=False, fontsize=9, loc="upper right")
     ax.grid(alpha=0.3, axis="y", lw=0.5)
 
     # --- Panels B & C: tail dependence (computed live, residual series) ---
@@ -95,10 +97,10 @@ def main() -> None:
 
     axB.axhline(0, color="0.3", lw=1)
     axB.set_xticks(range(len(CASES)))
-    axB.set_xticklabels([c.replace("us_", "") for c in CASES], fontsize=8)
+    axB.set_xticklabels([c.replace("us_", "") for c in CASES], fontsize=9)
     axB.set_ylabel(r"$\chi_U$ excess (empirical $-$ Gaussian)")
     axB.set_title("B. Dirty-tail co-movement the DRO misses\n(<= 0 = nothing missed)",
-                  fontsize=10)
+                  fontsize=11)
     axB.grid(alpha=0.3, axis="y", lw=0.5)
 
     lim = 0.6
@@ -107,17 +109,16 @@ def main() -> None:
     axC.set_xlabel(r"$\chi_U$  (dirty together)")
     axC.set_ylabel(r"$\chi_L$  (clean together)")
     axC.set_title("C. Radial asymmetry (above line = non-elliptical)\nclean-together "
-                  "> dirty-together", fontsize=10)
-    axC.legend(frameon=False, fontsize=7, loc="lower right")
+                  "> dirty-together", fontsize=11)
+    axC.legend(frameon=False, fontsize=9, loc="lower right")
     axC.grid(alpha=0.3, lw=0.5)
 
     fig.suptitle("Phase 1 spatial-DRO summary: covariance adds no value (A); "
                  "the tails are non-elliptical, not covariance-shaped (B, C)",
-                 fontsize=12)
-    fig.tight_layout(rect=[0, 0, 1, 0.95])
+                 fontsize=13)
     for ext in ("pdf", "png"):
         p = FIGDIR / f"case_summary.{ext}"
-        fig.savefig(p, dpi=200, bbox_inches="tight")
+        fig.savefig(p, dpi=300)
         print(f"  wrote {p}")
     plt.close(fig)
 

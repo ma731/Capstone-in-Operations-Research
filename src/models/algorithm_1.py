@@ -13,6 +13,8 @@ from typing import Optional
 import cvxpy as cp
 import numpy as np
 
+from src.models.feasible_set import build_feasible_constraints
+
 
 @dataclass
 class ScheduleResult:
@@ -189,70 +191,18 @@ def schedule_deterministic_coupled(
         raise ValueError("carbon_intensity must be non-negative")
 
     x = cp.Variable((R, T), nonneg=True)
-    constraints = [x <= ceil_arr]
-
-    x_flex = None
-    alpha_arr = None
-    if alpha is not None:
-        alpha_arr = np.asarray(alpha, dtype=float).reshape(R)
-        if ((alpha_arr < 0) | (alpha_arr > 1)).any():
-            raise ValueError("alpha must lie in [0, 1]")
-        p_shape = np.full((R, T), 1.0 / T) if intraday_shape is None \
-            else np.asarray(intraday_shape, dtype=float)
-        if p_shape.shape != (R, T):
-            raise ValueError(f"intraday_shape must be (R, T) = ({R}, {T})")
-        inflex_base = (alpha_arr * W)[:, None] * p_shape
-        x_flex = cp.Variable((R, T), nonneg=True)
-        constraints += [x == inflex_base + x_flex]
-        for r in range(R):
-            constraints += [cp.sum(x_flex[r, :]) == (1.0 - alpha_arr[r]) * W[r]]
-    else:
-        inflex_base = None
-        for r in range(R):
-            constraints += [cp.sum(x[r, :]) == W[r]]
-
-    if p_max is not None:
-        for t in range(T):
-            constraints += [cp.sum(x[:, t]) <= p_max]
-
-    if ramp is not None:
-        ramp_arr = np.asarray(ramp, dtype=float).reshape(R)
-        for r in range(R):
-            for t in range(1, T):
-                constraints += [cp.abs(x[r, t] - x[r, t - 1]) <= ramp_arr[r]]
-
-    # 3a: windowed-demand (deferral-deadline) on the flexible work.
-    if deferral_windows is not None:
-        if x_flex is None:
-            raise ValueError(
-                "deferral_windows requires the flex split (pass alpha)."
-            )
-        for (t1, t2, gamma) in deferral_windows:
-            if not (0 <= t1 <= t2 < T):
-                raise ValueError(f"deferral window ({t1},{t2}) out of range [0,{T-1}]")
-            if not (0.0 <= gamma <= 1.0):
-                raise ValueError(f"deferral gamma must lie in [0,1], got {gamma}")
-            for r in range(R):
-                flex_r = (1.0 - alpha_arr[r]) * W[r]
-                constraints += [cp.sum(x_flex[r, t1:t2 + 1]) >= gamma * flex_r]
-
-    # 3b: temperature-coupled thermal (PUE) effective-power cap.
-    pue = None
-    if temperature is not None:
-        if bar_P is None:
-            raise ValueError("temperature given but bar_P is None")
-        temp_arr = np.asarray(temperature, dtype=float)
-        if temp_arr.shape != (R, T):
-            raise ValueError(f"temperature must be (R, T) = ({R}, {T})")
-        pue = pue0 + kappa * np.maximum(temp_arr - t_set, 0.0)
-        constraints += [cp.multiply(pue, x) <= bar_P]
-
-    # 3d: carbon budget -- cap nominal carbon <rho, x> <= B. rho is data, so this
-    # is a single linear constraint and the program stays an LP.
-    if carbon_budget is not None:
-        if carbon_budget < 0:
-            raise ValueError(f"carbon_budget must be non-negative, got {carbon_budget}")
-        constraints += [cp.sum(cp.multiply(rho, x)) <= carbon_budget]
+    # Delegate the feasible set to the single shared builder so this baseline,
+    # the Phase 1 DRO, and the Phase 2 CVaR scheduler optimize over the exact
+    # same region X. This function used to re-implement the constraints inline,
+    # which had begun to drift from feasible_set (e.g. the intraday-shape
+    # row-sum check); routing through the builder removes that drift.
+    constraints, x_flex = build_feasible_constraints(
+        x, W, ceil_arr,
+        p_max=p_max, alpha=alpha, intraday_shape=intraday_shape, ramp=ramp,
+        deferral_windows=deferral_windows, temperature=temperature,
+        pue0=pue0, kappa=kappa, t_set=t_set, bar_P=bar_P,
+        carbon_budget=carbon_budget, rho_bar=rho,
+    )
 
     problem = cp.Problem(cp.Minimize(cp.sum(cp.multiply(rho, x))), constraints)
     problem.solve(solver=solver)
@@ -260,6 +210,22 @@ def schedule_deterministic_coupled(
         raise RuntimeError(f"Solver returned status {problem.status}")
 
     x_val = np.asarray(x.value, dtype=float)
+
+    # Recompute the small derived quantities the binding-diagnostics block below
+    # reports on (the constraints themselves now live in feasible_set).
+    alpha_arr = None
+    inflex_base = None
+    if alpha is not None:
+        alpha_arr = np.asarray(alpha, dtype=float).reshape(R)
+        p_shape = (np.full((R, T), 1.0 / T) if intraday_shape is None
+                   else np.asarray(intraday_shape, dtype=float))
+        inflex_base = (alpha_arr * W)[:, None] * p_shape
+    pue = None
+    if temperature is not None:
+        pue = pue0 + kappa * np.maximum(
+            np.asarray(temperature, dtype=float) - t_set, 0.0
+        )
+
     binding = {}
     if p_max is not None:
         agg = x_val.sum(axis=0)

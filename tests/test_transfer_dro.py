@@ -75,3 +75,31 @@ def test_invalid_risk_raises():
     scen = rho[None]
     with pytest.raises(ValueError):
         two_stage_commit(scen, wl, ceil, transfer_budget=1.0, risk="bogus")
+
+
+def test_transfer_value_headline_matches_snapshot():
+    """Pin the RQ1 headline (4.0-9.9% CVaR_0.95 reduction over the Phi=0 baseline)
+    to its archived, license-safe snapshot so a code change cannot silently drift
+    the reported number. Source of truth:
+    docs/results_snapshots/part3_transfer_value_2026-06-15.csv, produced by
+    scripts/run_part3_transfer_value.py."""
+    import csv
+    from pathlib import Path
+
+    snap = (Path(__file__).resolve().parents[1] / "docs" / "results_snapshots"
+            / "part3_transfer_value_2026-06-15.csv")
+    rows = {r["grid"]: r for r in csv.DictReader(snap.open())}
+
+    expected_1dp = {"us_west": 4.0, "taskc": 9.9, "us_hetero": 9.0}
+    for grid, headline in expected_1dp.items():
+        r = rows[grid]
+        red = float(r["reduction_pct"])
+        assert round(red, 1) == headline, f"{grid}: reduction_pct {red} != {headline}"
+        # Internal consistency: reduction_pct = (no_transfer - transfer)/no_transfer.
+        c0, cT = float(r["cvar_no_transfer"]), float(r["cvar_transfer"])
+        assert cT < c0, f"{grid}: transfer did not reduce CVaR"
+        assert abs((c0 - cT) / c0 * 100.0 - red) < 1e-6
+
+    reds = [float(rows[g]["reduction_pct"]) for g in expected_1dp]
+    assert abs(min(reds) - 4.0) < 0.05   # published lower bound
+    assert abs(max(reds) - 9.9) < 0.05   # published upper bound

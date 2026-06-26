@@ -15,8 +15,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
+from src.analysis.plotstyle import apply_style, NAVY, GOLD, RUST, SAGE  # noqa: E402
+
 FIG = Path("figures")
-NAVY, GOLD, RUST, SAGE = "#1F3B63", "#E69F00", "#B3402F", "#4A7C59"
 
 # (a) transfer-budget savings (out-of-sample CVaR reduction vs no transfer)
 GRIDS = ["Western US", "Eastern US–Canada", "Diversified"]
@@ -32,8 +33,10 @@ COL = {"Western US": NAVY, "Diversified": SAGE}
 
 
 def main():
+    apply_style()
     FIG.mkdir(exist_ok=True)
-    fig, (axA, axB) = plt.subplots(1, 2, figsize=(12.5, 4.7))
+    fig, (axA, axB) = plt.subplots(1, 2, figsize=(13.0, 5.0),
+                                   constrained_layout=True)
 
     # Panel A: transfer unlocks savings
     x = np.arange(len(GRIDS))
@@ -56,10 +59,10 @@ def main():
     for g, gain in GAIN.items():
         axB.plot(M, gain, "-o", color=COL[g], lw=2.2, ms=6, label=g)
     axB.axvline(3.0, color="0.5", ls="--", lw=1)
-    axB.text(3.05, 7.2, "crossover\n($M^\\star\\approx3$)", fontsize=8, color="0.4")
+    axB.text(3.05, 7.2, "crossover\n($M^\\star\\approx3$)", fontsize=9, color="0.4")
     axB.axvline(1.4, color=RUST, ls=":", lw=1.2)
-    axB.text(1.45, -0.9, "real grids reach\nonly $M\\approx1.4$", fontsize=8, color=RUST)
-    axB.text(3.4, 5.0, "robustness\npays", fontsize=8, color=SAGE)
+    axB.text(1.45, -0.9, "real grids reach\nonly $M\\approx1.4$", fontsize=9, color=RUST)
+    axB.text(3.4, 5.0, "robustness\npays", fontsize=9, color=SAGE)
     axB.set_xlabel("grid-emergency severity $M$ (carbon spike multiplier)", fontsize=9)
     axB.set_ylabel("robust commitment gain over\nrisk-neutral  $\\mathrm{CVaR}_{0.95}$  [%]",
                    fontsize=9)
@@ -71,10 +74,9 @@ def main():
 
     fig.suptitle("Preliminary Phase 3: active transfer unlocks spatial value, and "
                  "robustness crosses over under grid-emergency tail risk", fontsize=12)
-    fig.tight_layout(rect=[0, 0, 1, 0.93])
     for ext in ("pdf", "png"):
         p = FIG / f"part3_preliminary.{ext}"
-        fig.savefig(p, dpi=200, bbox_inches="tight")
+        fig.savefig(p, dpi=300)
         print(f"  wrote {p}")
     plt.close(fig)
 
