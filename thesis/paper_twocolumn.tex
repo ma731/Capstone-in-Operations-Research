@@ -80,7 +80,7 @@ tested against real data-grounded
 worst-tail emergencies across 17 zones, that crossover never activates. The thesis
 contributes a working scheduler with honest savings, a screening rule for when
 passive dependence modelling fails, and a price-of-robustness decision rule with a
-tested, data-grounded bound, all under 194 unit tests, with the Phase~1--2 falsification protocol pre-registered (the stylised-emergency crossover of RQ3 is a calibrated stress test, not part of the pre-registration).
+tested, data-grounded bound, all under 199 unit tests, with the Phase~1--2 falsification protocol pre-registered (the stylised-emergency crossover of RQ3 is a calibrated stress test, not part of the pre-registration).
     \end{abstract}
     \vspace{1.4em}
   \end{@twocolumnfalse}
@@ -159,7 +159,7 @@ decision rule} with a data-grounded, falsified crossover: robustification pays o
 past an emergency-severity crossover $M^\star\approx3$ that realized severity
 ($1.3$--$1.9\times$; Winter Storm Uri $1.3\times$) never reaches, stated as the rule
 plus its tested bound, not a universal impossibility. (v)~\emph{A reproducible,
-validated pipeline}: pre-registration, $194$ unit tests, a small-instance model
+validated pipeline}: pre-registration, $199$ unit tests, a small-instance model
 validation, a robustness battery, Benjamini--Hochberg correction, and per-cell TOST
 equivalence tests that affirmatively reject any effect above the $0.4\%$ materiality
 margin.
@@ -704,7 +704,7 @@ reproduction is cheap.
 
 \subsection{Reproducibility}\label{sec:repro}
 All code is version-controlled (private repository, continuous-integration test
-suite, $194$ unit tests, including a feasible-set equivalence test pinning the
+suite, $199$ unit tests total ($186$ run in CI; the 13 Electricity Maps integration tests need licensed data and are excluded from CI), including a feasible-set equivalence test pinning the
 Phase 2 CVaR scheduler to the Phase 1 constraint set); experiment configurations
 are commit-locked before test-set evaluation; bootstrap and scenario seeds are
 fixed; and every number reported in
@@ -720,7 +720,7 @@ The premise holds. After removing each zone's hour-of-day mean,
 cross-region correlations of carbon intensity in the two electrically coupled
 US/Canada cases are strong and survive de-seasonalization: in the US West,
 CISO--NEVP $0.78$ and CISO--LDWP $0.72$ (shared solar resource and weather across
-WECC); in the Ontario--Eastern belt, CA-ON--NYISO $0.73$ and MISO--PJM $0.70$
+the Western Interconnection); in the Ontario--Eastern belt, CA-ON--NYISO $0.73$ and MISO--PJM $0.70$
 (weather fronts traversing the Eastern Interconnection). The engineered portfolio is
 the low, \emph{heterogeneous} end, not a zero-correlation grid: its residual pairs span
 $0.00$ (ERCOT--BPAT), $0.29$ (CISO--ERCOT) and $0.37$ (CISO--BPAT), mean
@@ -741,12 +741,12 @@ cannot be attributed to an absence of correlation in the data.
 \includegraphics[width=0.48\textwidth]{../figures/ci_corr_heatmap_taskc.pdf}
 \caption{Residual (hour-of-day-removed) cross-region correlation of hourly carbon
 intensity, 2021--2025. Left: US West (CISO, BANC, LDWP, NEVP, AZPS). Right:
-Ontario--Eastern belt (CA-ON, NYISO, MISO, PJM). Spatial correlation is strong and
+Ontario--Eastern belt (CA-ON, NYISO, MISO, PJM). Cross-region correlation is strong and
 genuine in both, the assumption motivating spatial DRO is empirically valid.}
 \label{fig:heatmaps}
 \end{figure*}
 
-The geography matches the physics: the US West forms one tightly-coupled WECC
+The geography matches the physics: the US West forms one tightly-coupled Western Interconnection
 cluster, the Ontario--Eastern belt another along the Eastern Interconnection, while
 the engineered portfolio spans the continent with mixed edges, one near-zero and two
 moderate, by construction.
@@ -828,8 +828,8 @@ throughout).
 
 Crucially, this is a null of the \emph{strong} kind. In all three pre-registered
 cases cross-validation \emph{chooses} a non-trivial ambiguity radius:
-$\varepsilon^\star=1$ in every one of the 27 cells for Eastern US--Canada and
-Diversified, and in 25 of 27 for Western US. The DRO is therefore
+$\varepsilon^\star=1$ in all nine cells for both Eastern US--Canada and
+Diversified, and in seven of nine for Western US (25 of the 27 cells overall). The DRO is therefore
 genuinely engaged (it is paying for robustness, not collapsing to the nominal
 problem) and the two arms still coincide. A null in which CV had selected
 $\varepsilon^\star=0$ would be uninformative (robustification switched off, so the
@@ -1024,7 +1024,7 @@ $\mathrm{SE}=0.005$--$0.039\%$ of $\CVaR_{0.95}$ across the three primary grids
 2.80\,\mathrm{SE}=0.015$--$0.11\%$. The test therefore had the power to detect a
 spatial advantage \emph{an order of magnitude below} a $\approx1\%$ materiality
 threshold (the smallest gap a practitioner would act on; by the economic grounding
-of Section~\ref{sec:practical} this is $\approx0.4\%$ of the energy bill), and
+of Section~\ref{sec:practical} this is $\approx0.4\%$ of $\CVaR_{0.95}$), and
 roughly the same order as the per-cell gaps themselves, yet no sign-stable positive
 gap of even this size survives. The null is a genuine absence
 of usable spatial value, not a test too blunt to see one.
@@ -1388,7 +1388,7 @@ covariance (second-moment) ambiguity set by construction; Phase 2
 (Appendix~\ref{app:copula}) extends the test to non-elliptical (Clayton) and maximal
 (comonotone) copulas, but a full copula-\emph{ambiguity} Wasserstein DRO in the
 Fan--Ji--Lejeune sense remains future work. \emph{(iv)~Geographic scope and the limit of generalization.} The region sets span
-WECC, the Eastern Interconnection, and Iberia--France across the dependence
+the Western Interconnection, the Eastern Interconnection, and Iberia--France across the dependence
 spectrum, but grids with different generation mixes (e.g.\ hydro-thermal systems
 with strong seasonal storage) remain untested. More fundamentally, the result
 generalizes only to grids where the diurnal mean field dominates residual
@@ -1471,7 +1471,7 @@ carbon-aware DRO scheduling, holding across multiple real grids and across the
 dependence hierarchy from covariance ball to elliptical and lower-tail copulas; (4)~a
 mechanistic explanation (formalized as the mean-dominance bound Proposition~\ref{prop:meandom}
 and demonstrated by mean-ablation) that explains the null and supplies the screening
-rule; and (5)~a fully reproducible, version-controlled, CI-tested pipeline (194 tests)
+rule; and (5)~a fully reproducible, version-controlled, CI-tested pipeline (199 tests total, 186 run in CI)
 with archived license-safe summary tables for every reported number.
 
 \subsection{Future work}
@@ -1601,8 +1601,8 @@ with $S$; the $\pm0.1\%$ no-value band is shaded.}
 \end{figure}
 
 \paragraph{Repository and environment.} All code lives in a private,
-version-controlled repository with a continuous-integration suite ($194$ unit
-tests; the Electricity-Maps integration test is excluded from CI as it requires
+version-controlled repository with a continuous-integration suite ($186$ unit
+tests run in CI of $199$ total; the 13 Electricity Maps integration tests are excluded from CI as they require
 licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL
 for the second-order cone program and HiGHS for deterministic LP baselines. Exact
 dependency versions are pinned in a tracked \texttt{requirements-lock.txt}

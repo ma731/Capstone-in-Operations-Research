@@ -127,7 +127,7 @@ for ax, (title, x, rho, pagg, note) in zip(axes, panels):
     ax.set_xlabel("hour of horizon"); ax.set_xticks(hours)
     ax.set_ylim(0, P_AGG * 1.18)
     ax.text(0.5, -0.34, note, transform=ax.transAxes, ha="center", va="top",
-            fontsize=8.5, color="#444", style="italic")
+            fontsize=9.5, color="#444", style="italic")
 
 axes[0].set_ylabel("energy allocated (MWh)")
 from matplotlib.lines import Line2D
@@ -140,12 +140,12 @@ legend_handles = [
     Line2D([], [], color="#6b4f12", lw=1.4, ls=(0, (4, 2)), marker="s", ms=2.5,
            label="carbon R2"),
 ]
-axes[0].legend(handles=legend_handles, loc="upper right", frameon=False, fontsize=7)
+axes[0].legend(handles=legend_handles, loc="upper left", frameon=False, fontsize=9)
 fig.suptitle("Full-model validation on a two-region instance: the schedule responds "
              "as anticipated, across regions, to input perturbations",
              fontsize=12.5, color=NAVY, y=1.04)
 plt.tight_layout()
 plt.savefig(OUTPUT_DIR / "model_validation.pdf", bbox_inches="tight")
-plt.savefig(OUTPUT_DIR / "model_validation.png", bbox_inches="tight", dpi=150)
+plt.savefig(OUTPUT_DIR / "model_validation.png", bbox_inches="tight", dpi=300)
 plt.close()
 print(f"\n  wrote {(OUTPUT_DIR / 'model_validation.pdf').resolve()}")

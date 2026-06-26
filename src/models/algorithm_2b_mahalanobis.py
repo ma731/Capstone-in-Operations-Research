@@ -133,6 +133,9 @@ def _select_solver(requested: Optional[str]) -> Optional[str]:
     if requested is not None:
         return requested
     installed = set(cp.installed_solvers())
+    # HIGHS is deliberately not a candidate here: the epsilon*||L^T x||_2 penalty
+    # makes this a second-order cone program, which HIGHS (LP/QP only) cannot
+    # solve. HIGHS is used for the CVaR-SAA linear program in cvar_saa.py instead.
     for candidate in ("CLARABEL", "ECOS", "SCS"):
         if candidate in installed:
             return candidate

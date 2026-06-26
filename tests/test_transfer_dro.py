@@ -65,9 +65,14 @@ def test_two_stage_solves_and_commits():
 def test_recourse_cost_feasible_and_bounded():
     rho, L, wl, ceil = _setup()
     x = np.full_like(rho, wl[0] / rho.shape[1])     # flat commitment
-    c = recourse_cost(x, rho, ceil, transfer_budget=2.0 * wl.sum(), lam=1.0)
-    # cost must be at least the cheapest possible carbon placement (lower bound)
-    assert np.isfinite(c) and c > 0
+    lam, budget = 1.0, 2.0 * wl.sum()
+    c = recourse_cost(x, rho, ceil, transfer_budget=budget, lam=lam)
+    # Flows conserve work (sum y = sum commitment = total work W), so the realized
+    # cost is bounded below by placing all work in the cheapest cell, and above by
+    # the dirtiest placement plus the worst-case migration penalty.
+    W = wl.sum()
+    assert np.isfinite(c)
+    assert rho.min() * W <= c <= rho.max() * W + lam * budget
 
 
 def test_invalid_risk_raises():

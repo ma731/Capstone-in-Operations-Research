@@ -62,7 +62,7 @@ def main() -> None:
         ax.set_xlim(-0.35, 0.35)
         ax.grid(axis="x", alpha=0.3, lw=0.5)
     axes[0].text(0.0, len(ARMS) - 0.35, "materiality band $\\pm0.1\\%$",
-                 ha="center", fontsize=9, color="0.4")
+                 ha="center", fontsize=10, color="0.3")
     fig.suptitle("The null is robust: every estimator and stress test leaves the "
                  "spatial gap inside the no-value band", fontsize=12)
     FIG.mkdir(exist_ok=True)

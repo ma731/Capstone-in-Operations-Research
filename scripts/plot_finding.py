@@ -59,9 +59,9 @@ def main() -> None:
     axA.axhline(0, color="0.3", lw=1.2, zorder=1)
     axA.axhspan(-0.05, 0.05, color="0.82", alpha=0.6, zorder=0)
     axA.text(0.62, 0.02, "no-value band\n($\\pm$0.05%)", ha="right", va="bottom",
-             fontsize=7.5, color="0.4")
+             fontsize=9, color="0.3")
     axA.annotate("correlation spans 0 $\\rightarrow$ 0.5,\nvalue stays at 0",
-                 xy=(0.30, 0.0), xytext=(0.30, -0.15), ha="center", fontsize=8.5,
+                 xy=(0.30, 0.0), xytext=(0.30, -0.15), ha="center", fontsize=9,
                  color="navy", arrowprops=dict(arrowstyle="->", color="navy", lw=1))
     axA.text(0.12, -0.21, "negative = joint\ncovariance hurts", fontsize=9,
              color="C2", ha="center")
@@ -82,8 +82,8 @@ def main() -> None:
     axB.bar(xs + 0.2, cov_only, 0.4, label="covariance-only (mean removed)",
             color=[COLOR[c] for c in CASES])
     for i, (r, c) in enumerate(zip(real, cov_only)):
-        axB.text(i - 0.2, r + 0.02, f"{r:.2f}", ha="center", fontsize=8)
-        axB.text(i + 0.2, c + 0.02, f"{c:.2f}", ha="center", fontsize=8)
+        axB.text(i - 0.2, r + 0.02, f"{r:.2f}", ha="center", fontsize=9)
+        axB.text(i + 0.2, c + 0.02, f"{c:.2f}", ha="center", fontsize=9)
     axB.set_xticks(xs)
     axB.set_xticklabels([c.replace("\n", " ") for c in (LABEL[c] for c in CASES)], fontsize=9)
     axB.set_ylabel("spatial gap $\\mathrm{CVaR}_{0.95}$  [%]")

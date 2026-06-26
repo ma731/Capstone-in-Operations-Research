@@ -33,3 +33,7 @@ osqp==1.1.2
 scikit-learn==1.9.0   # sklearn.covariance.LedoitWolf -- Ledoit-Wolf robustness column
 seaborn==0.13.2       # figure styling
 requests==2.34.2      # Open-Meteo temperature fetch
+
+# This lockfile freezes only the runtime numeric/solver stack. To run the test
+# suite ("pytest tests/"), also install the dev extras ("pip install -e .[dev]"),
+# which provide pytest.

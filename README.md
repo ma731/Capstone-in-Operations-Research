@@ -6,7 +6,7 @@ layer of modelling sophistication actually buys.
 **Research Capstone in Operations Research · IE School of Science & Technology · 2026**
 **Student:** Marco Ortiz Togashi · **Supervisor:** Prof. Bissan Ghaddar
 
-`194 passing unit tests` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to an archived snapshot`
+`199 passing unit tests` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to an archived snapshot`
 
 ---
 
@@ -128,9 +128,7 @@ The fastest check needs no API token and no license:
 
 ```bash
 pytest tests/ -q
-# expected: 194 passed in roughly 20s. A handful of benign CVXPY
-# "Defaulting to the SCIPY backend" warnings from the 3-D transfer
-# variable are expected and harmless.
+# expected: 199 passed in ~20s. The suite runs clean (no warnings).
 ```
 
 The experiments themselves:
@@ -171,7 +169,7 @@ last digits can shift if a different solver build is selected.
 │   │                    #   transfer_dro (Part 3), online_transfer (Part 4), covariance
 │   └── analysis/        # stratified_correlations, tail_dependence, metrics, plots
 ├── scripts/             # experiment runners + plotting (see docs/DEPRECATED.md for status)
-├── tests/               # 194 pytest unit tests (CI on push/PR)
+├── tests/               # 199 pytest unit tests (CI on push/PR)
 ├── thesis/              # capstone_thesis.{tex,pdf} (the graded report)
 ├── full_thesis/         # extended write-up (full_thesis.pdf, Parts 3-5 in body)
 ├── poster/              # A0 conference poster (build_v*.js -> poster_capstone_v*.pdf; v24 canonical)
@@ -211,7 +209,7 @@ uv venv && uv pip install -e ".[dev]"
 # or: python -m venv .venv && pip install -e ".[dev]"
 
 cp .env.example .env        # add ELECTRICITY_MAPS_TOKEN (only needed to re-fetch raw data)
-pytest tests/               # 194 tests should pass
+pytest tests/               # 199 tests should pass
 ```
 
 **Solvers (all free, all in the default install):** HiGHS for the LP and CVaR-SAA
@@ -294,7 +292,7 @@ Short version of the heavy jargon. The thesis carries a fuller glossary in an ap
   adversarial review) made the findings *more conservative, not larger*: the value
   concentrates in the deterministic transfer lever, with the dependence and robust
   layers priced as conditional rather than free.
-- **Code:** 194 unit tests, CI on push/PR; every reported number traces to an
+- **Code:** 199 unit tests, CI on push/PR; every reported number traces to an
   archived, license-safe snapshot in `docs/results_snapshots/`.
 
 ## Key references

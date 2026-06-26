@@ -67,7 +67,7 @@ def _daily_summary(panel: np.ndarray) -> np.ndarray:
 
 
 def _kendall_tau(x: np.ndarray, y: np.ndarray) -> float:
-    """O(n^2) Kendall's tau-b for modest n (we have ~1460 train days)."""
+    """O(n^2) Kendall's tau-a for modest n (we have ~1460 train days)."""
     n = len(x)
     sx = np.sign(x[:, None] - x[None, :])
     sy = np.sign(y[:, None] - y[None, :])
@@ -78,12 +78,12 @@ def _kendall_tau(x: np.ndarray, y: np.ndarray) -> float:
     return num / den if den > 0 else 0.0
 
 
-def fit_copula(kind: str, train_panel: np.ndarray, dates=None) -> CopulaModel:
+def fit_copula(kind: str, train_panel: np.ndarray) -> CopulaModel:
     """Fit one of the nested dependence models on the training panel.
 
     Parameters
     ----------
-    kind : {"independence", "gaussian", "clayton"}
+    kind : {"independence", "gaussian", "clayton", "comonotone"}
     train_panel : (N, R, T) training daily carbon panels.
     """
     if kind not in KINDS:

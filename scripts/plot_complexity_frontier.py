@@ -14,7 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
-from src.analysis.plotstyle import apply_style, NAVY, GOLD, SAGE, MUTED, RUST, save
+from src.analysis.plotstyle import apply_style, NAVY, GOLD, SAGE, MUTED, INK, RUST, save
 
 apply_style()
 
@@ -56,8 +56,8 @@ ax.set_title("The complexity-value frontier: one jump (transfer), then flat",
 # annotations: the jump and the plateau
 ax.text(2.0, 2.35, 16.6, "active transfer\n= the lever", color=RUST, fontsize=10,
         ha="center", weight="bold")
-ax.text(4.0, 0.0, 14.6, "joint cov / DRO / copula\nadd ~nothing", color=MUTED,
-        fontsize=9.5, ha="center")
+ax.text(4.0, 0.0, 16.4, "joint cov / DRO / copula\nadd ~nothing", color=INK,
+        fontsize=10, ha="center")
 
 ax.view_init(elev=22, azim=-58)
 ax.grid(True)

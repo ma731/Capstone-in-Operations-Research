@@ -118,10 +118,10 @@ rolling-horizon problem under forecast error (Section~\ref{sec:online}), and
 generalises the mean-dominance bound into a dimensionless problem-class condition
 (Section~\ref{sec:condition}); a dedicated chapter (Section~\ref{sec:testing})
 documents the validation behind every claim: small-instance model checks, a
-pre-registered protocol, and a $194$-test software suite. The thesis contributes a
+pre-registered protocol, and a $199$-test software suite. The thesis contributes a
 working scheduler with honest savings, a screening rule for when passive dependence
 modelling fails, and a price-of-robustness decision rule with a tested, data-grounded
-bound, all under 194 unit tests, with the Phase~1--2 falsification protocol pre-registered (the stylised-emergency crossover of RQ3 is a calibrated stress test, not part of the pre-registration).
+bound, all under 199 unit tests, with the Phase~1--2 falsification protocol pre-registered (the stylised-emergency crossover of RQ3 is a calibrated stress test, not part of the pre-registration).
 \end{abstract}
 \newpage
 \tableofcontents
@@ -209,7 +209,7 @@ crossover, taken online as a rolling-horizon controller (Section~\ref{sec:online
 robustification pays only past an emergency-severity crossover $M^\star\approx3$ that
 realized severity ($1.3$--$1.9\times$; Winter Storm Uri $1.3\times$) never reaches,
 stated as the rule plus its tested bound, not a universal impossibility. (v)~\emph{A
-reproducible, validated pipeline} (Section~\ref{sec:testing}): pre-registration, $194$
+reproducible, validated pipeline} (Section~\ref{sec:testing}): pre-registration, $199$
 unit tests, a small-instance model validation, a robustness battery,
 Benjamini--Hochberg correction, and per-cell TOST equivalence tests that affirmatively
 reject any effect above the $0.4\%$ materiality margin.
@@ -667,14 +667,14 @@ Benjamini--Hochberg correction at $q=0.05$ \citep{benjamini1995}; a walk-forward
 refit (train 2021--2023, test 2024) checks temporal stability; a log-denser
 $\varepsilon$ grid checks grid sensitivity.
 
-\paragraph{The mean-leveling test (RQ3, mechanism).} To test whether the mean field masks the
+\paragraph{The mean-leveling test (RQ2, mechanism).} To test whether the mean field masks the
 covariance, the mean used for \emph{scheduling} is transformed while evaluation
 stays on real emissions: \textsc{level} equalizes regional time-averages (keeping
 hour-of-day shape); \textsc{flat} sets a constant mean, making the mean term
 constant under fixed demand, a covariance-only world in which any joint-vs-shuf
 difference is attributable purely to the spatial blocks.
 
-\paragraph{Tail dependence (RQ3, structural).} For each region pair we estimate
+\paragraph{Tail dependence (RQ2, structural).} For each region pair we estimate
 the upper and lower tail-dependence coefficients
 $\chiU(q)=\Pr(U>q,V>q)/(1-q)$ and $\chiL(p)=\Pr(U<p,V<p)/p$ on rank
 pseudo-observations of residual intensity, comparing $\chiU$ at $q=0.95$ with the
@@ -794,7 +794,7 @@ the entire study is under two hours on one core, so reproduction is cheap.
 
 \subsection{Reproducibility}\label{sec:repro}
 All code is version-controlled (private repository, continuous-integration test
-suite, $194$ unit tests, including a feasible-set equivalence test pinning the
+suite, $199$ unit tests, including a feasible-set equivalence test pinning the
 Phase 2 CVaR scheduler to the Phase 1 constraint set); experiment configurations
 are commit-locked before test-set evaluation; bootstrap and scenario seeds are
 fixed; and every number reported in
@@ -810,7 +810,7 @@ The premise holds. After removing each zone's hour-of-day mean,
 cross-region correlations of carbon intensity in the two electrically coupled
 US/Canada cases are strong and survive de-seasonalization: in the US West,
 CISO--NEVP $0.78$ and CISO--LDWP $0.72$ (shared solar resource and weather across
-WECC); in the Ontario--Eastern belt, CA-ON--NYISO $0.73$ and MISO--PJM $0.70$
+the Western Interconnection); in the Ontario--Eastern belt, CA-ON--NYISO $0.73$ and MISO--PJM $0.70$
 (weather fronts traversing the Eastern Interconnection). The engineered portfolio
 behaves as designed, but the design is \emph{heterogeneity}, not zero correlation: its
 three residual pairs span $-0.01$ (ERCOT--BPAT, wind vs.\ hydro), $0.29$ (CISO--ERCOT)
@@ -834,14 +834,14 @@ cannot be attributed to an absence of correlation in the data.
 \includegraphics[width=0.48\textwidth]{../figures/ci_corr_heatmap_taskc.pdf}
 \caption{Residual (hour-of-day-removed) cross-region correlation of hourly carbon
 intensity, 2021--2025. Left: US West (CISO, BANC, LDWP, NEVP, AZPS). Right:
-Ontario--Eastern belt (CA-ON, NYISO, MISO, PJM). Spatial correlation is strong and
+Ontario--Eastern belt (CA-ON, NYISO, MISO, PJM). Cross-region correlation is strong and
 genuine in both, the assumption motivating spatial DRO is empirically valid.}
 \label{fig:heatmaps}
 \end{figure}
 
 Figure~\ref{fig:map} places the three grids geographically and draws each
 within-grid residual correlation as a weighted edge. The picture matches the
-physics: the US West forms one tightly-coupled WECC cluster, the Ontario--Eastern
+physics: the US West forms one tightly-coupled Western Interconnection cluster, the Ontario--Eastern
 belt another along the Eastern Interconnection, while the engineered portfolio
 spans the continent with deliberately \emph{mixed} edges, one near-zero and two
 moderate, by construction.
@@ -935,8 +935,8 @@ throughout).
 
 Crucially, this is a null of the \emph{strong} kind. In all three pre-registered
 cases cross-validation \emph{chooses} a non-trivial ambiguity radius:
-$\varepsilon^\star=1$ in every one of the 27 cells for Eastern US--Canada and
-Diversified, and in 25 of 27 for Western US. The DRO is therefore
+$\varepsilon^\star=1$ in all nine cells for both Eastern US--Canada and
+Diversified, and in seven of nine for Western US (25 of the 27 cells overall). The DRO is therefore
 genuinely engaged (it is paying for robustness, not collapsing to the nominal
 problem) and the two arms still coincide. A null in which CV had selected
 $\varepsilon^\star=0$ would be uninformative (robustification switched off, so the
@@ -1148,7 +1148,7 @@ $\mathrm{SE}=0.005$--$0.039\%$ of $\CVaR_{0.95}$ across the three primary grids
 2.80\,\mathrm{SE}=0.015$--$0.11\%$. The test therefore had the power to detect a
 spatial advantage \emph{an order of magnitude below} a $\approx1\%$ materiality
 threshold (the smallest gap a practitioner would act on; by the economic grounding
-of Section~\ref{sec:practical} this is $\approx0.4\%$ of the energy bill), and
+of Section~\ref{sec:practical} this is $\approx0.4\%$ of $\CVaR_{0.95}$), and
 roughly the same order as the per-cell gaps themselves, yet no sign-stable positive
 gap of even this size survives. The null is a genuine absence
 of usable spatial value, not a test too blunt to see one.
@@ -1222,7 +1222,7 @@ Western US   & 0.043 & 0.066 & 0.017 & 0.028\\
 \end{table}
 
 \subsection{Why the covariance is masked: the mean-leveling test
-(RQ3)}\label{sec:res-ablation}
+(RQ2)}\label{sec:res-ablation}
 The ablation isolates the cause (Table~\ref{tab:ablation},
 Figure~\ref{fig:finding}B). Under the \textsc{level} setting (regional
 time-averages equalized, hour-of-day shape kept) every gap is unchanged to
@@ -1264,7 +1264,7 @@ Western US   & $-0.005\ldots+0.043$ & unchanged & $-0.04\ldots+0.00$\\
 \end{table}
 
 \subsection{Tail dependence: the structure is non-elliptical
-(RQ3)}\label{sec:res-tails}
+(RQ2)}\label{sec:res-tails}
 Table~\ref{tab:tails} reports residual tail-dependence at $q=0.95$ for
 representative pairs. Two findings. \emph{First}, the upper tail is empirically at
 or below the Gaussian benchmark everywhere (excess $-0.18$ to $+0.04$): in the
@@ -1521,7 +1521,7 @@ covariance (second-moment) ambiguity set by construction; Phase 2
 (Appendix~\ref{app:copula}) extends the test to non-elliptical (Clayton) and maximal
 (comonotone) copulas, but a full copula-\emph{ambiguity} Wasserstein DRO in the
 Fan--Ji--Lejeune sense remains future work. \emph{(iv)~Geographic scope and the limit of generalization.} The region sets span
-WECC, the Eastern Interconnection, and Iberia--France across the dependence
+the Western Interconnection, the Eastern Interconnection, and Iberia--France across the dependence
 spectrum, but grids with different generation mixes (e.g.\ hydro-thermal systems
 with strong seasonal storage) remain untested. More fundamentally, the result
 generalizes only to grids where the diurnal mean field dominates residual
@@ -1927,7 +1927,7 @@ multiple-testing correction (Benjamini--Hochberg over the pre-registered $144$-c
 family) guards the discovery rate.
 
 \subsection{The software test suite}\label{sec:testing-suite}
-The implementation carries a $194$-test suite run under continuous integration on
+The implementation carries a 199-test suite (186 run under continuous integration) on
 every push. The tests pin the components the results depend on: a \emph{feasible-set
 equivalence} test ties the Phase~2 $\CVaR$-SAA scheduler to the Phase~1 constraint
 set so the two phases optimise over the same $\mathcal X$; $\CVaR$ correctness tests
@@ -1950,7 +1950,7 @@ budget, plus a guard rejecting an invalid risk argument. The Part~4 online contr
 (\texttt{online\_transfer.py}, Section~\ref{sec:online}) and the Part~5 ratio
 computation are likewise unit-tested, the former for work conservation and feasible
 realised cost across the rolling loop, the latter for the mean-value-range and
-flattening operators against hand-computed cases, bringing the suite to $194$ tests.
+flattening operators against hand-computed cases, bringing the suite to $199$ tests.
 What remains preliminary about Parts~3--5 is therefore the experimental protocol and
 calibration, not the optimisation: every reported number rests on validated code.
 
@@ -2089,7 +2089,7 @@ migration-limited recourse buys a small CVaR tail reduction at a mean premium (t
 value of the stochastic solution is near zero), a classic price-of-robustness result:
 robustness earns value only in the tail. When grid-emergency severity is modelled as a
 rare ($0.1$/day) multiplicative scaling $M$ of carbon intensity, the robust schedule
-outperforms the risk-neutral one only past a crossover $M^\star\approx3$
+materially outperforms the risk-neutral one only past a crossover $M^\star\approx3$
 (Section~\ref{sec:res-crossover}). On the joint (portfolio) severity axis the crossover
 lives on, realized joint severity stayed at $1.3$--$1.9\times$ the portfolio mean across
 the three grids, well below $M^\star$; per-region relative swings reach $5\times$ (BPAT)
@@ -2112,7 +2112,7 @@ hierarchy from covariance ball to elliptical and lower-tail copulas;
 (3)~a mechanistic explanation (formalized as a mean-dominance bound
 (Proposition~\ref{prop:meandom}) and demonstrated by the mean-leveling test) that
 explains the null rather than merely reporting it; (4)~a fully reproducible,
-version-controlled, CI-tested pipeline (194 tests) with archived license-safe
+version-controlled, CI-tested pipeline (199 tests) with archived license-safe
 summary tables for every reported number; (5)~an \emph{active transfer channel}
 (Section~\ref{sec:transfer}) that recovers $4.0$--$9.9\%$ of $\CVaR_{0.95}$ over the
 $\Phi=0$ baseline \emph{deterministically}, the positive resolution the null predicts, while showing
@@ -2269,9 +2269,9 @@ with $S$; the $\pm0.1\%$ no-value band is shaded.}
 \end{figure}
 
 \paragraph{Repository and environment.} All code lives in a private,
-version-controlled repository with a continuous-integration suite ($194$ unit
-tests; the Electricity-Maps integration test is excluded from CI as it requires
-licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL
+version-controlled repository with a continuous-integration suite (199 unit
+tests in total; CI runs 186, excluding the 13 Electricity Maps integration tests
+that require licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL
 for the second-order cone program and HiGHS for deterministic LP baselines. Exact
 dependency versions are pinned in a tracked \texttt{requirements-lock.txt}
 (CLARABEL~0.11.1, HiGHS/highspy~1.14.0, CVXPY~1.9.1, NumPy~2.4.6, SciPy~1.17.1;

@@ -90,17 +90,16 @@ then isolate the value of \emph{passive} sophistication. Using a Mahalanobis--Wa
 program, a pre-registered shuffled-marginals falsification test across three real
 US/Canada grids spanning the dependence spectrum (the US West, an Ontario-anchored
 Eastern belt, and an engineered solar/wind/hydro portfolio), with an Iberia--France
-anchor, returns a replicated \textbf{null}: encoding cross-region covariance adds below
-$0.4\%$ of $\CVaR$, surviving Ledoit--Wolf shrinkage, removing each region's average
-daily pattern (residualization),
-Benjamini--Hochberg correction, walk-forward validation, and a per-cell equivalence
-test. A mean-leveling test shows the covariance signal is genuine but masked by the mean
+anchor, returns a replicated \textbf{null}. The encoded cross-region covariance adds
+below $0.4\%$ of $\CVaR_{0.95}$, and the null survives Ledoit--Wolf shrinkage, removing
+each region's average daily pattern (residualization), Benjamini--Hochberg correction,
+walk-forward validation, and a per-cell equivalence test. A mean-leveling test shows the covariance signal is genuine but masked by the mean
 field (a mean-dominance bound), and a tail-dependence analysis shows the residual
 dependence is non-elliptical and upper-tail independent, hence invisible to
 covariance-based ambiguity sets; a one-paragraph copula appendix confirms even the
 maximal coupling recovers nothing. Finally we ask when robustness itself pays.
 Following the price of robustness of Bertsimas and Sim, a DRO over day-ahead forecast
-error buys a small worst-day ($\CVaR$) tail reduction at a mean premium, with a value
+error buys a small worst-day ($\CVaR_{0.95}$) tail reduction at a mean premium, with a value
 of the stochastic solution near zero, and pays over deterministic transfer only past
 an emergency-severity crossover $M^\star\approx3$ (with $M$ the multiple by which a
 region's carbon intensity spikes in a rare grid emergency, so $M=3$ is a tripling);
@@ -108,7 +107,7 @@ tested against real data-grounded
 worst-tail emergencies across 17 zones, that crossover never activates. The thesis
 contributes a working scheduler with honest savings, a screening rule for when
 passive dependence modelling fails, and a price-of-robustness decision rule with a
-tested, data-grounded bound, all under 194 unit tests, with the Phase~1--2 falsification
+tested, data-grounded bound, all under 199 unit tests, with the Phase~1--2 falsification
 protocol pre-registered (the stylised-emergency crossover of RQ3 is a calibrated stress
 test, not part of the pre-registration).
 \end{abstract}
@@ -195,7 +194,7 @@ decision rule} with a data-grounded, falsified crossover: robustification pays o
 past an emergency-severity crossover $M^\star\approx3$ that realized severity
 ($1.3$--$1.9\times$; Winter Storm Uri $1.3\times$) never reaches, stated as the rule
 plus its tested bound, not a universal impossibility. (v)~\emph{A reproducible,
-validated pipeline}: pre-registration, $194$ unit tests, a small-instance model
+validated pipeline}: pre-registration, $199$ unit tests, a small-instance model
 validation, a robustness battery, Benjamini--Hochberg correction, and per-cell TOST
 equivalence tests that affirmatively reject any effect above the $0.4\%$ materiality
 margin.
@@ -608,14 +607,14 @@ Benjamini--Hochberg correction at $q=0.05$ \citep{benjamini1995}; a walk-forward
 refit (train 2021--2023, test 2024) checks temporal stability; a log-denser
 $\varepsilon$ grid checks grid sensitivity.
 
-\paragraph{The mean-leveling test (RQ3, mechanism).} To test whether the mean field masks the
+\paragraph{The mean-leveling test (RQ2, mechanism).} To test whether the mean field masks the
 covariance, the mean used for \emph{scheduling} is transformed while evaluation
 stays on real emissions: \textsc{level} equalizes regional time-averages (keeping
 hour-of-day shape); \textsc{flat} sets a constant mean, making the mean term
 constant under fixed demand, a covariance-only world in which any joint-vs-shuf
 difference is attributable purely to the spatial blocks.
 
-\paragraph{Tail dependence (RQ3, structural).} For each region pair we estimate
+\paragraph{Tail dependence (RQ2, structural).} For each region pair we estimate
 the upper and lower tail-dependence coefficients
 $\chiU(q)=\Pr(U>q,V>q)/(1-q)$ and $\chiL(p)=\Pr(U<p,V<p)/p$ on rank
 pseudo-observations of residual intensity, comparing $\chiU$ at $q=0.95$ with the
@@ -689,14 +688,17 @@ bound $\max_{x}\lVert x\rVert_2=\bar x\sqrt{R\,T\,u}$ and $\lVert\Sigma^{\mathrm
 side is $7.4\%$ (Eastern US--Canada), $9.6\%$ (Diversified) and $12.7\%$ (Western
 US) of $\CVaR_{0.95}$; the realized gaps (Table~\ref{tab:gaps}) never exceed
 $0.23\%$, more than an order of magnitude smaller (a factor of $30$--$55$ across the
-three grids). The bound holds \emph{before any experiment
+three grids). The certificate is evaluated at the base per-cell cap $\bar x=50$; under the
+variable-capacity regime~3c, where the ceiling rises to $x_{\max}=75$, the same
+work-conservation argument enlarges it by only $\sqrt{x_{\max}/\bar x}\approx1.22$, still
+well over an order of magnitude above the realized gaps. The bound holds \emph{before any experiment
 is run}; what it buys is not tightness but structure, since the gap is governed by
 $\varepsilon$ and the cross-region block norm and forced to zero in the
 no-robustification and no-cross-structure limits. We keep the a-priori form
 deliberately (substituting the realized $\lVert x^\star\rVert_2$ would tighten it but
 make it post-hoc). The \emph{tight} ceiling is measured, not
 bounded: the comonotone arm of Section~\ref{sec:res-copula} realizes the supremum
-over copulas, and across scenario seeds its gain is centred on zero with
+over copulas, and across scenario seeds its gain (the comonotone ceiling $\Lambda$) is centred on zero with
 $|\Lambda|\lesssim0.1\%$ of $\CVaR_{0.95}$; the mean-leveling test of
 Section~\ref{sec:res-ablation} bounds the same quantity independently. Both put
 $\Lambda$ an order of magnitude below the schedule's mean-driven value, so the mean
@@ -711,7 +713,7 @@ yet the whole study runs in under two hours on one core.
 
 \subsection{Reproducibility}\label{sec:repro}
 All code is version-controlled (private repository, continuous-integration test
-suite, $194$ unit tests, including a feasible-set equivalence test pinning the
+suite, $199$ unit tests, including a feasible-set equivalence test pinning the
 Phase 2 CVaR scheduler to the Phase 1 constraint set); experiment configurations
 are commit-locked before test-set evaluation; bootstrap and scenario seeds are
 fixed; and every number reported in
@@ -727,7 +729,7 @@ The premise holds. After removing each zone's hour-of-day mean,
 cross-region correlations of carbon intensity in the two electrically coupled
 US/Canada cases are strong and survive de-seasonalization: in the US West,
 CISO--NEVP $0.78$ and CISO--LDWP $0.72$ (shared solar resource and weather across
-WECC); in the Ontario--Eastern belt, CA-ON--NYISO $0.73$ and MISO--PJM $0.70$
+the Western Interconnection); in the Ontario--Eastern belt, CA-ON--NYISO $0.73$ and MISO--PJM $0.70$
 (weather fronts traversing the Eastern Interconnection). The engineered portfolio is
 the low, \emph{heterogeneous} end rather than a zero-correlation grid: its residual pairs span
 $0.00$ (ERCOT--BPAT), $0.29$ (CISO--ERCOT) and $0.37$ (CISO--BPAT), mean
@@ -747,7 +749,7 @@ cannot be attributed to an absence of correlation in the data.
 \includegraphics[width=0.48\textwidth]{../figures/ci_corr_heatmap_taskc.pdf}
 \caption{Residual (hour-of-day-removed) cross-region correlation of hourly carbon
 intensity, 2021--2025. Left: US West (CISO, BANC, LDWP, NEVP, AZPS). Right:
-Ontario--Eastern belt (CA-ON, NYISO, MISO, PJM). Spatial correlation is strong and
+Ontario--Eastern belt (CA-ON, NYISO, MISO, PJM). Cross-region correlation is strong and
 genuine in both, the assumption motivating spatial DRO is empirically valid.}
 \label{fig:heatmaps}
 \end{figure}
@@ -791,14 +793,10 @@ Figure~\ref{fig:frontier} places every model class on a single complexity--value
 frontier (carbon-blind, deterministic per-region, robust per-region, deterministic
 transfer, robust transfer). Deterministic transfer dominates; the passive
 covariance and copula layers add no height (Sections~\ref{sec:res-gap}--\ref{sec:res-copula})
-and robust transfer pays only in the tail (Section~\ref{sec:res-crossover}). Three forces
-make the transfer saving mean-driven and keep passive covariance from adding to
-it: the within-day swing of mean intensity dwarfs the residual covariance; the
-strongest correlation (US West) is common-mode and offers no hedge; and the
-empirical upper tail de-couples ($\chiU$ at or below Gaussian) while the co-movement
-that exists is in the \emph{clean} tail ($\chiL>\chiU$), which a risk-averse scheduler
-is not protecting against and an elliptical ball cannot encode. The mechanism is
-developed in Section~\ref{sec:res-mech}.
+and robust transfer pays only in the tail (Section~\ref{sec:res-crossover}). Three
+forces, developed in Section~\ref{sec:res-mech}, make the transfer saving mean-driven
+and keep passive covariance from adding to it: the magnitude of the diurnal mean swing,
+common-mode (non-diversifiable) correlation, and a decoupled dirty tail.
 
 \begin{figure}[t]
 \centering
@@ -829,8 +827,8 @@ throughout).
 
 This is a null of the \emph{strong} kind. In all three pre-registered
 cases cross-validation \emph{chooses} a non-trivial ambiguity radius:
-$\varepsilon^\star=1$ in every one of the 27 cells for Eastern US--Canada and
-Diversified, and in 25 of 27 for Western US. The DRO is therefore
+$\varepsilon^\star=1$ in all nine cells for both Eastern US--Canada and
+Diversified, and in seven of nine for Western US (25 of the 27 cells overall). The DRO is therefore
 genuinely engaged (it is paying for robustness, not collapsing to the nominal
 problem) and the two arms still coincide. Had CV selected
 $\varepsilon^\star=0$ the null would be uninformative, with the arms matching by
@@ -966,7 +964,7 @@ days): the paired-bootstrap standard error rises to $0.15\%$ for Western US (vs
 $\le0.04\%$ at $\beta=0.90$), so that grid's largest point estimate ($+0.14\%$) is
 within one standard error of zero. The apparent widening at the deepest tail is
 sampling noise. This sweep is descriptive, \emph{outside}
-the pre-registered $144$-cell FDR family of Table~\ref{tab:robust}; no sweep cell is
+the pre-registered $144$-cell false-discovery-rate (FDR) family of Table~\ref{tab:robust}; no sweep cell is
 both positive and materially large (every detectable cell is negative or below the
 $0.4\%$ margin), so none would survive correction as a discovery.
 
@@ -1020,7 +1018,7 @@ $\mathrm{SE}=0.005$--$0.039\%$ of $\CVaR_{0.95}$ across the three primary grids
 2.80\,\mathrm{SE}=0.015$--$0.11\%$. The test therefore had the power to detect a
 spatial advantage \emph{an order of magnitude below} a $\approx1\%$ materiality
 threshold (the smallest gap a practitioner would act on; by the economic grounding
-of Section~\ref{sec:practical}, $\approx0.4\%$ of the energy bill), and
+of Section~\ref{sec:practical}, $\approx0.4\%$ of $\CVaR_{0.95}$), and
 roughly the same order as the per-cell gaps themselves, yet no sign-stable positive
 gap of even this size survives. The null is a genuine absence
 of usable spatial value, not a test too blunt to see it.
@@ -1092,7 +1090,7 @@ Western US   & 0.043 & 0.066 & 0.017 & 0.028\\
 \end{table}
 
 \subsection{Why the covariance is masked: the mean-leveling test
-(RQ3)}\label{sec:res-ablation}
+(RQ2)}\label{sec:res-ablation}
 The mean-leveling test isolates the cause (Table~\ref{tab:ablation},
 Figure~\ref{fig:finding}B). Under the \textsc{level} setting (regional
 time-averages equalized, hour-of-day shape kept) every gap is unchanged to
@@ -1134,7 +1132,7 @@ Western US   & $-0.005\ldots+0.043$ & unchanged & $-0.04\ldots+0.00$\\
 \end{table}
 
 \subsection{Tail dependence: the structure is non-elliptical
-(RQ3)}\label{sec:res-tails}
+(RQ2)}\label{sec:res-tails}
 Table~\ref{tab:tails} reports residual tail-dependence at $q=0.95$ for
 representative pairs. Two findings. \emph{First}, the upper tail is empirically at
 or below the Gaussian benchmark everywhere (excess $-0.18$ to $+0.04$): in the
@@ -1404,7 +1402,7 @@ covariance (second-moment) ambiguity set by construction; Phase 2
 (Appendix~\ref{app:copula}) extends the test to non-elliptical (Clayton) and maximal
 (comonotone) copulas, but a full copula-\emph{ambiguity} Wasserstein DRO in the
 Fan--Ji--Lejeune sense remains future work. \emph{(iv)~Geographic scope and the limit of generalization.} The region sets span
-WECC, the Eastern Interconnection, and Iberia--France across the dependence
+the Western Interconnection, the Eastern Interconnection, and Iberia--France across the dependence
 spectrum, but grids with different generation mixes (e.g.\ hydro-thermal systems
 with strong seasonal storage) remain untested. The result
 generalizes only to grids where the diurnal mean field dominates residual
@@ -1463,7 +1461,7 @@ migration-limited recourse buys a small CVaR tail reduction at a mean premium (t
 value of the stochastic solution is near zero), a classic price-of-robustness result:
 robustness earns value only in the tail. When grid-emergency severity is modelled as a
 rare ($0.1$/day) multiplicative scaling $M$ of carbon intensity, the robust schedule
-outperforms the risk-neutral one only past a crossover $M^\star\approx3$
+materially outperforms the risk-neutral one only past a crossover $M^\star\approx3$
 (Section~\ref{sec:res-crossover}). On the joint (portfolio) severity axis the crossover
 lives on, the worst realized day reached only $1.3$--$1.9\times$ the portfolio mean
 across the three grids, well below $M^\star$; per-region relative swings reach $5\times$
@@ -1487,7 +1485,7 @@ carbon-aware DRO scheduling, holding across multiple real grids and the
 dependence hierarchy from covariance ball to elliptical and lower-tail copulas; (4)~a
 mechanistic explanation (the mean-dominance bound Proposition~\ref{prop:meandom},
 demonstrated by the mean-leveling test) for the null, which supplies the screening
-rule; and (5)~a reproducible, version-controlled, CI-tested pipeline (194 tests)
+rule; and (5)~a reproducible, version-controlled, CI-tested pipeline (199 tests)
 with archived license-safe summary tables for every reported number.
 
 \subsection{Future work}
@@ -1608,9 +1606,9 @@ with $S$; the $\pm0.1\%$ no-value band is shaded.}
 \end{figure}
 
 \paragraph{Repository and environment.} All code lives in a private,
-version-controlled repository with a continuous-integration suite ($194$ unit
-tests; the Electricity-Maps integration test is excluded from CI as it requires
-licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL
+version-controlled repository with a continuous-integration suite ($199$ unit
+tests in total; CI runs $186$, excluding the 13 Electricity-Maps integration tests that
+require licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL
 for the second-order cone program and HiGHS for deterministic LP baselines. Exact
 dependency versions are pinned in a tracked \texttt{requirements-lock.txt}
 (CLARABEL~0.11.1, HiGHS/highspy~1.14.0, CVXPY~1.9.1, NumPy~2.4.6, SciPy~1.17.1;
@@ -1810,7 +1808,7 @@ risk-neutral one is burned when its favoured region spikes.
 \caption{Transfer module validation. \textbf{A:} active transfer reduces out-of-sample
 $\CVaR_{0.95}$ by $4.0$--$9.9\%$ over the $\Phi=0$ baseline. \textbf{B:} the severity
 crossover, the robust (CVaR-hedged) commitment's advantage over the risk-neutral one
-as grid-emergency severity $M$ grows; it turns positive only past $M^\star\approx3$.
+as grid-emergency severity $M$ grows; it turns materially positive only past $M^\star\approx3$.
 The same numbers are reported and interpreted in the body
 (Section~\ref{sec:res-crossover}).}
 \label{fig:phase3}

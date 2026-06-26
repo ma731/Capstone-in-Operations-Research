@@ -24,7 +24,7 @@ from typing import Optional
 import cvxpy as cp
 import numpy as np
 
-from src.models.transfer_dro import _build_flows, _executed
+from src.models.transfer_dro import _build_flows, _executed, _pick_solver
 
 
 def seasonal_forecast(train_panel: np.ndarray) -> np.ndarray:
@@ -59,7 +59,7 @@ def _commit(forecast, ceiling, workloads, transfer_budget, *, scenarios=None,
         cons += [z[s] >= costs[s] - tau for s in range(S)]
         obj = tau + cp.sum(z) / ((1.0 - beta) * S) + migrate
     prob = cp.Problem(cp.Minimize(obj), cons)
-    prob.solve(solver=solver or cp.HIGHS)
+    prob.solve(solver=_pick_solver(solver))
     if y.value is None:
         raise RuntimeError(f"online commit failed: {prob.status}")
     return np.asarray(y.value)
