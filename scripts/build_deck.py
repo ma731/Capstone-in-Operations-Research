@@ -301,9 +301,9 @@ _bullets(s, 8.4, 1.7, 4.3, 4.8, [
 # ---- 8. Why the screening rule holds: mechanism ----
 s = content("Why covariance cannot add value", 8)
 _bullets(s, 0.7, 1.5, 6.1, 4.6, [
-    ("Mean-ablation: flatten the mean field and the covariance suddenly pays, up to "
+    ("The mean-leveling test: flatten the mean field and the covariance suddenly pays, up to "
      "+1.46%.", RUST, True),
-    ("So the spatial signal is real, but masked by the within-day mean carbon field.", None, False),
+    ("So the cross-region signal is real, but masked by the within-day mean carbon field.", None, False),
     ("Residual dependence is also non-elliptical and upper-tail independent, "
      "invisible to a covariance ball.", None, False),
     ("We checked richer dependence models (Gaussian, Clayton, comonotone): they add "
@@ -394,7 +394,7 @@ _bullets(s, 0.7, 1.5, 6.1, 4.9, [
     ("The null survives Ledoit-Wolf shrinkage, residualization, and "
      "Benjamini-Hochberg correction across cells.", None, False),
     ("Walk-forward out-of-sample validation and a per-cell equivalence test.", None, False),
-    ("194 unit tests in CI; bootstrap confidence intervals on every gap.", NAVY, True),
+    ("199 unit tests (186 in CI); bootstrap confidence intervals on every gap.", NAVY, True),
     ("Pre-registered, version-controlled, with archived summary tables for every "
      "reported number.", None, False),
 ], size=18, gap=14, lead="A pre-registered battery")
@@ -422,7 +422,7 @@ _bullets(s, 0.7, 1.5, 11.9, 4.9, [
      "mean-dominance bound that says why.", None, False),
     ("A price-of-robustness decision rule with a tested, data-grounded bound "
      "(M near 1.4 below M* near 3).", None, False),
-    ("A reproducible, pre-registered pipeline under 194 unit tests.", NAVY, True),
+    ("A reproducible, pre-registered pipeline under 199 unit tests.", NAVY, True),
 ], size=19, gap=15, lead="What this thesis delivers")
 
 # ---- 16. The decision rule recap + thanks ----

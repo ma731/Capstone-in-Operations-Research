@@ -82,15 +82,15 @@ const mcGut=0.55,mcW=(mainW-2*mcGut)/3,mcX=[mainX,mainX+mcW+mcGut,mainX+2*(mcW+m
 const colBot=32.6;
 function sideHead(y,kicker,head){T(kicker,sbX,y,sbW,0.46,{fs:19,bold:true,color:C.goldD,cs:2.5});hr(sbX,y+0.5,sbW,C.gold);T(head,sbX,y+0.64,sbW,0.8,{fs:22,bold:true,color:C.navy,lsm:1.02});return y+1.42;}
 let cy=sideHead(top,"BACKGROUND","The promise");
-T([N("Modern compute is "),B("flexible"),N(": training and batch jobs shift in time and across data-center sites, so deferring work to "),B("cleaner hours and regions"),N(" lowers operational carbon. Across 2021 to 2025 neighbouring grids move strongly together, so spatial structure looks like free signal a robust scheduler could turn into savings. "),{text:"Question: can measured spatial correlation actually lower out-of-sample carbon?",options:{bold:true,color:C.navy}}],sbX,cy,sbW,2.5,{fs:18,lsm:1.16}); cy+=2.55;
+T([N("Modern compute is "),B("flexible"),N(": training and batch jobs shift in time and across data-center sites, so deferring work to "),B("cleaner hours and regions"),N(" lowers operational carbon. Across 2021 to 2025 neighbouring grids move strongly together, so spatial structure looks like free signal a robust scheduler could turn into savings. "),{text:"Question: can measured cross-region correlation actually lower out-of-sample carbon?",options:{bold:true,color:C.navy}}],sbX,cy,sbW,2.5,{fs:18,lsm:1.16}); cy+=2.55;
 cy=sideHead(cy,"DATA & SETUP","What goes in");
 T([{text:"Electricity Maps",options:{bold:true,color:C.navy}},N(" hourly carbon intensity, 2021 to 2025 ("),{text:"43,824 obs/zone",options:{bold:true,color:C.navy}},N("); train 2021 to 2024, single "),{text:"locked 2025 test",options:{bold:true,color:C.navy}},N(". Three US and Canadian grids spanning weak to strong residual correlation (up to 0.78). Facility: R zones × 24 h, 50 MW cap, "),{text:"80% utilization",options:{bold:true,color:C.navy}},N(", 15 MW/h ramp, deferral window 0 to 7 h, inflexible fraction 30 to 75%.")],sbX,cy,sbW,2.6,{fs:17,lsm:1.14}); cy+=2.65;
 cy=sideHead(cy,"METHOD","How it is built");
 T([N("A "),B("Mahalanobis Wasserstein DRO"),N(", a second-order cone program in "),B("CVXPY (Clarabel/HiGHS)"),N(", minimizing "),B("CVaR"),N(" of carbon cost ("),CT("Rockafellar and Uryasev 2000"),N("):")],sbX,cy,sbW,1.5,{fs:17,lsm:1.16}); cy+=1.5;
 cy+=figAsp(FIG+"dro_equation.png",sbX,cy,sbW,A.droeq)+0.12;
-T([N("Cross-region value enters "),{text:"only through the off-diagonal blocks of Σ",options:{bold:true,color:C.navy}},N("; the pre-registered "),B("shuffled-marginals test"),N(" zeroes exactly those blocks. We add copula and tail checks, mean ablations, and walk-forward validation to 2025.")],sbX,cy,sbW,1.85,{fs:17,lsm:1.15}); cy+=1.9;
+T([N("Cross-region value enters "),{text:"only through the off-diagonal blocks of Σ",options:{bold:true,color:C.navy}},N("; the pre-registered "),B("shuffled-marginals test"),N(" zeroes exactly those blocks. We add copula and tail checks, mean-leveling tests, and walk-forward validation to 2025.")],sbX,cy,sbW,1.85,{fs:17,lsm:1.15}); cy+=1.9;
 cy=sideHead(cy,"RIGOR","Why you can trust a null");
-[["194","unit tests, CI on every push"],["27","cells where TOST confirms a null effect"],["1","mean-dominance theorem bounding the gap"]].forEach((d,i)=>{const ry=cy+i*0.82;
+[["199","unit tests, CI on every push"],["27","cells where TOST confirms a null effect"],["1","mean-dominance theorem bounding the gap"]].forEach((d,i)=>{const ry=cy+i*0.82;
   if(i>0) rect(sbX,ry-0.04,sbW,0.012,C.line);
   T(d[0],sbX+0.02,ry,1.5,0.78,{fs:33,bold:true,color:C.cer,align:"left",valign:"middle"});
   T(d[1],sbX+1.65,ry,sbW-1.65,0.78,{fs:16,bold:true,color:C.navy,align:"left",valign:"middle",lsm:1.02});});
@@ -138,7 +138,7 @@ cy+=scap([N("Gaussian, Clayton, even the comonotone (maximal) copula: "),{text:"
  T([{text:"THE VERDICT   ",options:{bold:true,color:C.navy,cs:1}},{text:"across every estimator and test, the out-of-sample spatial value is statistically indistinguishable from zero.",options:{bold:true,color:C.navy}}],bx+0.34,cy,mcW-0.62,vH,{fs:16.5,valign:"middle",lsm:1.06});}
 // COL 3 - THE MECHANISM
 bx=mcX[2]; colHead(bx,"STEP 03   THE MECHANISM","Why does it add nothing? The mean field holds it.");
-T([N("Mean ablation isolates the cause. Hold the covariance fixed and flatten the mean field, and the same spatial structure now pays "),B("+1.46%"),N(". The signal is real but masked by a dominant mean, not absent.")],bx,introY,mcW,2.3,{fs:19,lsm:1.16});
+T([N("The mean-leveling test isolates the cause. Hold the covariance fixed and flatten the mean field, and the same cross-region structure now pays "),B("+1.46%"),N(". The signal is real but masked by a dominant mean, not absent.")],bx,introY,mcW,2.3,{fs:19,lsm:1.16});
 cy=figTop;
 cy+=figAsp(FIG+"carbon_landscape.png",bx,cy,mcW,A.landscape)+0.1;
 cy+=scap([N("The "),{text:"dominant mean carbon field",options:{bold:true,color:C.navy}},N(": the schedule follows this terrain; the spatial covariance is a thin ripple on top (≤1.46%).")],bx,cy,mcW)+0.2;
