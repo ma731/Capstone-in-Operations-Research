@@ -1007,53 +1007,31 @@ essentially nothing.
 \subsection{The null survives a pre-committed robustness battery
 (RQ2)}\label{sec:res-robust}
 Table~\ref{tab:robust} summarizes. Re-estimating the covariance with Ledoit--Wolf
-shrinkage, seasonal residuals, or AR(1) residuals never produces a spatial effect
-that passes the pre-committed agreement rule (positive and sign-stable across
-both residual estimators). The largest battery value anywhere, $+0.179\%$ (AR(1),
-Eastern US--Canada, $\alpha=0.30$), appears \emph{only} under AR(1) and not under the
-seasonal estimator, so the rule rejects it. Benjamini--Hochberg correction at
-$q=0.05$ across all 144 real-data cells ($4$ grid-runs $\times\,9$
-regime-$\alpha$ cells $\times\,4$ covariance estimators) leaves that same
-already-rejected cell as the largest surviving positive gap; nothing material
-survives both filters.
-A walk-forward refit (train 2021--2023, test 2024) reproduces the null out of
-time: maximum absolute gap $0.036\%$ (Eastern US--Canada), $0.028\%$
-(Western US), $0.217\%$ (Diversified, again negative); an
-11-point log-denser $\varepsilon$ grid changes no gap at the reported precision.
-A \emph{constraint-tightness} sensitivity probes the most plausible route to
-spatial value: tripling the ramp limit's tightness ($\Delta_r=5$ vs $15$ MW/h) strips
-the schedule's freedom to track the mean field, yet the null is unmoved (maximum
-absolute gap $0.028\%$ Western US, $0.044\%$ Eastern US--Canada, $0.169\%$
-Diversified; all sign-flipping, $\varepsilon^\star=1$ retained). The covariance does
-not begin to pay even when the mean's pull is mechanically curtailed. A
-\emph{utilization} sweep makes the same point through the workload: packing the
-facility from $80\%$ to $95\%$ strips almost all scheduling freedom, yet the gap only
-\emph{shrinks} ($0.017\%$ Western US, $0.048\%$ Eastern US--Canada, $0.071\%$
-Diversified), and at a loose $50\%$ it stays immaterial ($\le0.25\%$);
-$\varepsilon^\star=1$ throughout the $\{50,80,95\}\%$ range. Figure~\ref{fig:robust} collects the
-covariance-estimator and temporal battery: across all six arms and three grids,
-every spatial gap sits inside the no-value band.
+shrinkage, seasonal residuals, or AR(1) residuals never produces a spatial effect that
+passes the pre-committed agreement rule (positive and sign-stable across both residual
+estimators); the largest battery value anywhere, $+0.179\%$ (AR(1), Eastern,
+$\alpha=0.30$), appears only under AR(1) and is rejected. Benjamini--Hochberg correction at
+$q=0.05$ across all 144 real-data cells leaves that same already-rejected cell as the
+largest surviving positive gap, so nothing material survives both filters. The null also
+reproduces out of time (walk-forward train 2021--2023 / test 2024, maximum gap $0.217\%$ on
+the Diversified grid, again negative), under an 11-point denser $\varepsilon$ grid, and
+under two stress tests that strip the schedule's freedom to track the mean field, a
+$3\times$ tighter ramp and a $50$--$95\%$ utilization sweep: in every case the gap stays
+immaterial and sign-flipping with $\varepsilon^\star=1$ retained, and the covariance does
+not begin to pay even when the mean's pull is mechanically curtailed.
+Figure~\ref{fig:robust} collects the battery: across all six arms and three grids, every
+spatial gap sits inside the no-value band.
 
 \paragraph{Tail level: the null holds from $\CVaR_{0.90}$ to $\CVaR_{0.99}$.}
-The primary read fixes the tail at $\beta=0.95$. Because the residual co-movement
-lives in the \emph{clean} tail (Section~\ref{sec:res-tails}), the natural worry is
-that spatial value might surface only at a deeper risk level. Re-running the full
-pipeline (cross-validated $\varepsilon$, single 2025 read) at
-$\beta\in\{0.90,0.95,0.99\}$ rejects this (Table~\ref{tab:cvarsweep}). The DRO stays
-engaged ($\varepsilon^\star=1$ almost everywhere) and the gap stays immaterial at
-every level. Probing the deepest tail widens the magnitudes slightly but never to
-materiality: the largest \emph{positive} gap anywhere is $+0.14\%$ (Western US,
-$\beta=0.99$), still a third of the $0.4\%$ margin and not sign-stable, while in the
-adversarial Diversified grid the joint covariance becomes \emph{more} negative at
-$\beta=0.99$ ($-0.36\%$, i.e.\ it hurts), exactly as the noise-fitting account
-predicts. The $\beta=0.99$ estimates are necessarily noisier (the tail thins to a handful of
-days): the paired-bootstrap standard error rises to $0.15\%$ for Western US (vs
-$\le0.04\%$ at $\beta=0.90$), so that grid's largest point estimate ($+0.14\%$) is
-within one standard error of zero. The apparent widening at the deepest tail is
-sampling noise. This sweep is descriptive, \emph{outside}
-the pre-committed $144$-cell false-discovery-rate (FDR) family of Table~\ref{tab:robust}; no sweep cell is
-both positive and materially large (every detectable cell is negative or below the
-$0.4\%$ margin), so none would survive correction as a discovery.
+Because the residual co-movement lives in the \emph{clean} tail
+(Section~\ref{sec:res-tails}), spatial value might in principle surface only at a deeper
+risk level. Re-running the full pipeline at $\beta\in\{0.90,0.95,0.99\}$ rejects this
+(Table~\ref{tab:cvarsweep}): the DRO stays engaged and the gap stays immaterial throughout.
+The largest positive gap anywhere is $+0.14\%$ (Western US, $\beta=0.99$), a third of the
+margin and within one paired-bootstrap standard error of zero, while on the Diversified
+grid the joint covariance becomes \emph{more} negative ($-0.36\%$, i.e.\ it hurts), as the
+noise-fitting account predicts. This sweep is descriptive, outside the pre-committed
+144-cell FDR family, and no cell is both positive and materially large.
 
 \begin{table}[h]
 \centering\small
@@ -1096,67 +1074,30 @@ excursions are negative (the joint covariance mildly hurts).}
 \label{fig:robust}
 \end{figure}
 
-\paragraph{Statistical power: the null is not an underpowered test.} A null is only
-as strong as the test's ability to reject it, so we quantify that ability directly.
-The paired day-bootstrap gives a standard error on the spatial gap of
-$\mathrm{SE}=0.005$--$0.039\%$ of $\CVaR_{0.95}$ across the three primary grids
-(Table~\ref{tab:power}). The minimum spatial benefit detectable at $80\%$ power
-(two-sided, $\alpha=0.05$) is $\mathrm{MDE}=(z_{0.975}+z_{0.80})\,\mathrm{SE}=
-2.80\,\mathrm{SE}=0.015$--$0.11\%$. The test therefore had the power to detect a
-spatial advantage \emph{an order of magnitude below} a $\approx1\%$ materiality
-threshold (the smallest gap a practitioner would act on; by the economic grounding
-of Section~\ref{sec:practical}, $\approx0.4\%$ of $\CVaR_{0.95}$), and
-roughly the same order as the per-cell gaps themselves, yet no sign-stable positive
-gap of even this size survives. The null is a genuine absence
-of usable spatial value, not a test too blunt to see it.
+\paragraph{Statistical power: the null is not an underpowered test.} The paired
+day-bootstrap gives a standard error on the spatial gap of
+$\mathrm{SE}=0.005$--$0.039\%$ of $\CVaR_{0.95}$ across the three grids, so the minimum
+benefit detectable at $80\%$ power ($\alpha=0.05$, two-sided) is
+$\mathrm{MDE}_{80}=2.80\,\mathrm{SE}=0.015$--$0.11\%$, an order of magnitude below the
+$0.4\%$ materiality margin and about the size of the per-cell gaps themselves. Yet no
+sign-stable positive gap of even this size survives: the null is a genuine absence of
+usable spatial value, not a test too blunt to see it.
 
 \paragraph{Equivalence: the absence of a material effect is itself significant.}
-Power bounds the effect the test \emph{could} have missed; an equivalence test makes
-the complementary, affirmative claim that a material effect is \emph{absent}. We
-apply the two-one-sided-tests (TOST) procedure \citep{schuirmann1987,lakens2018}
-\emph{per cell}, using each cell's own paired-bootstrap standard error (recovered
-from its $95\%$ gap interval), against the economic materiality margin
-$\Delta=0.4\%$ of $\CVaR_{0.95}$ (Section~\ref{sec:practical}; the $\approx1\%$
-practitioner threshold is looser still), testing
-$H_0\!:\lvert\text{gap}\rvert\ge\Delta$ against $H_1\!:\lvert\text{gap}\rvert<\Delta$.
-All $27$ cells across the three grids are equivalent: every $90\%$ confidence
-interval lies strictly inside $(-\Delta,+\Delta)$. The binding cell is the
-adversarial Diversified case (gap $=-0.233\%$, cell $\mathrm{SE}=0.046\%$), which
-still clears both one-sided tests, $z=(\Delta-\lvert\text{gap}\rvert)/\mathrm{SE}
-=3.7$ ($p=1.3\times10^{-4}$); every other cell gives $z\ge7$. We therefore do not
-merely fail to detect a spatial benefit but statistically reject one larger than the
-materiality threshold, in either direction, cell by cell, the strongest form a null
-can take.
+Power bounds the effect the test \emph{could} have missed; an equivalence test makes the
+affirmative claim that a material effect is \emph{absent}. Applying the two-one-sided-tests
+(TOST) procedure \citep{schuirmann1987,lakens2018} per cell, against the economic
+materiality margin $\Delta=0.4\%$ of $\CVaR_{0.95}$ (Section~\ref{sec:practical}), all $27$
+cells are equivalent: every $90\%$ interval lies strictly inside $(-\Delta,+\Delta)$. The
+binding cell is the adversarial Diversified case (gap $=-0.233\%$, $\mathrm{SE}=0.046\%$),
+which still clears both one-sided tests ($z=3.7$, $p=1.3\times10^{-4}$); every other cell
+gives $z\ge7$. We therefore do not merely fail to detect a spatial benefit but
+statistically reject one larger than the materiality threshold, cell by cell. The margin is
+fixed a priori from the economic grounding, not reverse-engineered: equivalence holds for
+any $\Delta\ge0.31\%$, with room to spare on the two interconnected grids and only narrowly
+on the engineered portfolio, where the binding gap is \emph{negative}, so the grid where
+equivalence is hardest to assert is the one where covariance \emph{hurts} rather than adds.
 
-The claim is threshold-sensitive, so we state where it breaks: the smallest margin
-each grid still clears (its largest $\lvert\text{gap}\rvert+1.645\,\mathrm{SE}$) is
-$\Delta^\star=0.05\%$ (Eastern US--Canada) and $0.10\%$ (Western US), but $0.31\%$ for
-the adversarial Diversified grid. Equivalence at the $0.4\%$ economic margin thus holds
-with room to spare on the two interconnected grids and only narrowly on the engineered
-portfolio. Equivalently, the conclusion holds for any materiality margin
-$\Delta\ge0.31\%$; the $0.4\%$ figure is fixed a priori from the economic grounding of
-Section~\ref{sec:practical}, not reverse-engineered to clear the test. That caveat does
-not threaten the thesis: the
-Diversified gap is \emph{negative}, so the grid where equivalence is hardest to
-assert is the one where the joint covariance \emph{hurts} rather than adds value.
-
-\begin{table}[h]
-\centering\small
-\caption{Statistical power of the spatial-gap test. SE is the paired-bootstrap
-standard error of the gap; $\mathrm{MDE}_{80}=2.80\,\mathrm{SE}$ is the smallest
-true gap detectable at $80\%$ power ($\alpha=0.05$, two-sided). All are well below
-the $\approx1\%$ materiality threshold.}
-\label{tab:power}
-\begin{tabular}{lcc}
-\toprule
-Grid & SE (\% $\CVaR_{0.95}$) & $\mathrm{MDE}_{80}$ (\%)\\
-\midrule
-Western US        & 0.036 & 0.10\\
-Eastern US--Canada & 0.005 & 0.015\\
-Diversified       & 0.039 & 0.11\\
-\bottomrule
-\end{tabular}
-\end{table}
 
 \begin{table}[t]
 \centering\small
@@ -1176,16 +1117,13 @@ Western US   & 0.043 & 0.066 & 0.017 & 0.028\\
 \end{tabular}
 \end{table}
 
-\paragraph{The null survives a serial-dependence bootstrap.} The paired bootstrap above
-resamples days independently, yet $\CVaR_{0.95}$ averages the year's worst ${\approx}12$
-days, and those cluster under multi-day weather events, so an independent-day scheme can
-understate the standard error. Re-estimating the spatial-gap intervals with a moving-block
-bootstrap that resamples contiguous runs of days ($L=7$ and $L=14$;
-the \texttt{block\_bootstrap} snapshot) inflates the standard error by $9$--$44\%$, as
-expected, but every grid's gap interval still lies well within the $0.4\%$ materiality
-margin (widest bound $0.22\%$). The equivalence conclusion is therefore not an artifact of
-the independence assumption: the gaps sit an order of magnitude below materiality, with
-room to spare even after the serial-dependence correction.
+\paragraph{The null survives a serial-dependence bootstrap.} Because $\CVaR_{0.95}$ averages
+the year's worst ${\approx}12$ days, which cluster under multi-day weather, an
+independent-day bootstrap can understate the standard error. Re-estimating the gap
+intervals with a moving-block bootstrap ($L=7,14$ days; the \texttt{block\_bootstrap}
+snapshot) widens the standard error by $9$--$44\%$ yet leaves every grid's interval well
+within the $0.4\%$ margin (widest bound $0.22\%$), so the equivalence conclusion is not an
+artifact of the independence assumption.
 
 \subsection{Why the covariance is masked: the mean-leveling test
 (RQ2)}\label{sec:res-ablation}
@@ -1438,41 +1376,27 @@ transfer; robustify only if you expect $M>M^\star$.}
 \section{Discussion}\label{sec:discussion}
 
 \subsection{What the null means, and what it does not}
-The result is a \emph{specification} finding, not a failure of carbon-aware
-scheduling. Carbon intensity \emph{is} spatially correlated where the literature
-expects it to be (Section~\ref{sec:res-corr}), and the DRO machinery \emph{is}
-active (CV selects $\varepsilon^\star=1$ almost everywhere). What the experiment
-falsifies is the specific hypothesis that encoding that correlation in a
-covariance-based ambiguity set improves robust scheduling. The mean-leveling test
-result (Section~\ref{sec:res-ablation}) is what licenses the stronger claim: the
-covariance signal is genuine and, in a covariance-only world, worth up to
-$1.46\%$ of tail emissions; it is dominated by the diurnal mean carbon
-field in the problem as posed. A reader could otherwise dismiss the null
-as ``the data had no signal''; the mean-leveling test shows the signal is present but
-subordinate. The central contribution is a clean
-separation of the \emph{validity} of a modelling assumption from its \emph{value}.
+The result is a \emph{specification} finding, not a failure of carbon-aware scheduling.
+Carbon intensity \emph{is} spatially correlated (Section~\ref{sec:res-corr}) and the DRO
+\emph{is} active ($\varepsilon^\star=1$ almost everywhere); what the experiment falsifies is
+that encoding that correlation in a covariance-based ambiguity set improves robust
+scheduling. The mean-leveling test licenses the stronger reading: the signal is genuine
+(worth up to $1.46\%$ in a covariance-only world) but subordinate to the diurnal mean
+field, so the null is ``present but dominated'', not ``no signal''. The central
+contribution is the clean separation of an assumption's \emph{validity} from its
+\emph{value}.
 
 \subsection{Why the mean dominates: a mechanism}\label{sec:res-mech}
-Three forces compound. (i)~\emph{Magnitude.} The within-day swing of mean carbon
-intensity (night-to-noon ratios of two-to-fourfold in solar-heavy grids) dwarfs
-the residual covariance, so the optimal schedule is driven almost entirely by
-\emph{when} each region is clean on average; the second-order covariance term
-moves decisions only at the margin. (ii)~\emph{Common-mode correlation.} Where
-correlation is strongest (US West), it is positive and shared across all zones, so
-the risk is common rather than diversifiable. Diversification value requires offsetting
-fluctuations; positively co-moving regions offer no hedge, so destroying the
-cross-blocks (the shuffled arm) changes nothing. (iii)~\emph{Wrong tail.} Robust
-tail scheduling cares about joint \emph{dirty} excursions, but the empirical
-upper tail is close to independent ($\chiU$ at or below Gaussian), while the
-co-movement that does exist is in the \emph{clean} tail ($\chiL>\chiU$), which is
-the regime a risk-averse scheduler need not protect against and a radial
-asymmetry an elliptical ball cannot encode in any case. The covariance is therefore both
-masked (dominated by the mean) and, for its varying part, mis-shaped
-(non-elliptical). The same mechanism surfaces operationally: when these
-grids are scheduled under tightening geographic and ramp constraints, the binding
-dimension is geographic flexibility rather than temporal smoothing, again locating
-the value in \emph{where} each region is clean on average rather than in second-order
-co-movement.
+Three forces compound. (i)~\emph{Magnitude}: the within-day swing of mean intensity
+(two-to-fourfold in solar-heavy grids) dwarfs the residual covariance, so the schedule is
+driven by \emph{when} each region is clean on average and the second-order term moves
+decisions only at the margin. (ii)~\emph{Common-mode correlation}: where correlation is
+strongest (US West) it is positive and shared, so the risk is common rather than
+diversifiable, and destroying the cross-blocks changes nothing. (iii)~\emph{Wrong tail}:
+the empirical upper (dirty) tail is close to independent while the co-movement sits in the
+\emph{clean} tail ($\chiL>\chiU$), a regime a risk-averse scheduler need not protect and a
+radial asymmetry an elliptical ball cannot encode. The covariance is thus both masked
+(dominated by the mean) and, for its varying part, mis-shaped (non-elliptical).
 
 \subsection{Relation to prior work}
 The finding refines rather than contradicts the carbon-aware DRO literature.
@@ -1588,69 +1512,46 @@ already-immaterial robustness premium; quantifying that is future work.
 \section{Conclusions}\label{sec:conclusion}
 
 \subsection{Answers to the research questions}
-\textbf{RQ1: How much can the day-ahead migration scheduler save, and which lever
-dominates?} Active inter-region migration cuts out-of-sample $\CVaR_{0.95}$ emissions
-by $4.0$--$9.9\%$ over the
-carbon-aware no-transfer baseline ($\Phi=0$) across three real US/Canada grids
-(Section~\ref{sec:res-transfer}). The dominant lever is the spatial \emph{mean}: at
-each hour one region is cleanest on average, and migration ships work there, making
-the saving deterministic and independent of any dependence model. This aligns with
-the carbon-computing literature, which finds spatial shifting dominates temporal
-shifting \citep{wiesner2021,radovanovic2022}.
+\textbf{RQ1: how much can the scheduler save, and which lever dominates?} Active
+inter-region migration cuts out-of-sample $\CVaR_{0.95}$ by $4.0$--$9.9\%$ over the
+no-transfer ($\Phi=0$) baseline across the three grids (Section~\ref{sec:res-transfer}).
+The lever is the spatial \emph{mean}: one region is cleanest on average and migration
+ships work there, so the saving is deterministic and needs no dependence model.
 
-\textbf{RQ2: When does adding passive modelling complexity improve tail emissions?}
-Never, on the grids we tested. Across the dependence spectrum (the US West to the
-engineered diversified portfolio) the out-of-sample $\CVaR_{0.95}$ spatial gap stays
-below $0.4\%$ and is not sign-stable. The null survives Ledoit--Wolf shrinkage,
-seasonal and AR(1) residualization, Benjamini--Hochberg correction over 144 cells,
-walk-forward validation, the full tail range from $\CVaR_{0.90}$ to $\CVaR_{0.99}$,
-and a per-cell equivalence test (Sections~\ref{sec:res-gap}--\ref{sec:res-robust}).
-The DRO is genuinely engaged (CV selects $\varepsilon^\star=1$ in nearly every cell),
-so this is an \emph{active} null: the robustification is on and the cross-region covariance
-still adds nothing. A mean-leveling test proves the covariance signal is real ($+1.46\%$ in
-a covariance-only world) but \emph{masked} by the within-day mean carbon field
-(Section~\ref{sec:res-ablation}). A tail-dependence analysis shows the residual
-dependence is non-elliptical, upper-tail-independent, and radially asymmetric
-($\chiL>\chiU$), hence structurally invisible to a covariance-based ambiguity set
-(Section~\ref{sec:res-tails}). Replacing the covariance ball with a Clayton copula
-built for that asymmetry still recovers no material value (Appendix~\ref{app:copula}).
-Proposition~\ref{prop:meandom} (mean-dominance) explains why: the translation
-invariance of CVaR makes the dependence model second-order to the mean field. The
-screening rule is that passive sophistication cannot pay where the diurnal mean field
-dominates cross-region dependence, the regime that holds on every grid studied here.
+\textbf{RQ2: when does passive modelling complexity improve tail emissions?} Not on any
+grid we tested. The out-of-sample spatial gap stays below the $0.4\%$ materiality margin
+and is not sign-stable, and the null survives shrinkage, seasonal and AR(1)
+residualization, Benjamini--Hochberg correction over 144 cells, walk-forward to
+2022--2024, the full $\CVaR_{0.90}$--$\CVaR_{0.99}$ range, a serial-dependence block
+bootstrap, a per-cell equivalence test, and a swap to a covariance-amplifying objective
+(Sections~\ref{sec:res-gap}--\ref{sec:res-swap}). It is an \emph{active} null: the DRO is
+engaged ($\varepsilon^\star=1$ almost everywhere) yet covariance adds nothing. The
+mean-leveling test proves the signal is real ($+1.46\%$ in a covariance-only world) but
+masked by the mean field; the tail dependence is non-elliptical, so a covariance ball
+cannot see it, and a Clayton copula recovers nothing.
+Proposition~\ref{prop:meandom} explains why: the translation invariance of CVaR makes
+dependence second-order to the mean. The screening rule: passive sophistication cannot pay
+where the diurnal mean field dominates cross-region dependence.
 
-\textbf{RQ3: When does robustifying against forecast error pay over deterministic
-transfer, and do real grids reach that regime?} The robust two-stage commitment with
-migration-limited recourse buys a small CVaR tail reduction at a mean premium (the
-value of the stochastic solution is near zero), a classic price-of-robustness result:
-robustness earns value only in the tail. When grid-emergency severity is modelled as a
-rare ($0.1$/day) multiplicative scaling $M$ of carbon intensity, the robust schedule
-materially outperforms the risk-neutral one only past a crossover $M^\star\approx3$
-(Section~\ref{sec:res-crossover}). On the joint (portfolio) severity axis the crossover
-lives on, the worst realized day reached only $1.3$--$1.9\times$ the portfolio mean
-across the three grids, well below $M^\star$; per-region relative swings reach $5\times$
-(BPAT) on near-zero carbon bases but do not move the portfolio tail. Decisively, on real
-top-$5\%$ emergency days the robust commitment did not pay (its $\CVaR_{0.95}$ gain was
-negative or within noise on every grid), so the robust layer's promised value is
-characterized but unrealized on observed data. We claim no universal carbon-ceiling
-impossibility, only the tested one: across the zones and real emergencies we have,
-deterministic transfer dominated. Robustness remains a conditional
-option for operators with a concrete, defensible emergency model.
+\textbf{RQ3: when does robustifying pay, and do real grids reach that regime?} The robust
+two-stage commitment buys a small tail reduction at a mean premium (value of the
+stochastic solution near zero) and materially beats the risk-neutral schedule only past an
+emergency-severity crossover $M^\star\approx3$ (Section~\ref{sec:res-crossover}). Realized
+joint severity reached only $1.3$--$1.9\times$ the portfolio mean, and on real top-$5\%$
+emergency days the robust commitment did not pay, so the layer's value is characterized
+but unrealized on observed data. We claim no universal impossibility, only the tested one;
+robustness remains a conditional option given a concrete emergency model.
 
 \subsection{Contributions}
-This thesis contributes to carbon-aware scheduling and robust optimization: (1)~a
-working day-ahead migration scheduler saving $4.0$--$9.9\%$ over the
-$\Phi=0$ baseline, with a layered decision rule for each modelling layer; (2)~a
-pre-committed falsification methodology (shuffled-marginals, extended to
-copula-coupled resampling) that separates the \emph{validity} of a spatial
-modelling assumption from its \emph{value}, transferable to any correlated-uncertainty
-DRO; (3)~a replicated, robustness-checked null on whether spatial dependence improves
-carbon-aware DRO scheduling, holding across multiple real grids and the
-dependence hierarchy from covariance ball to elliptical and lower-tail copulas; (4)~a
-mechanistic explanation (the mean-dominance bound Proposition~\ref{prop:meandom},
-demonstrated by the mean-leveling test) for the null, which supplies the screening
-rule; and (5)~a reproducible, version-controlled, CI-tested pipeline (202 tests)
-with archived license-safe summary tables for every reported number.
+In summary, the thesis contributes: (1)~a working day-ahead migration scheduler saving
+$4.0$--$9.9\%$ over the $\Phi=0$ baseline with a layered decision rule; (2)~a
+pre-committed, falsification-based methodology separating the \emph{validity} of a spatial
+modelling assumption from its \emph{value}, transferable to any correlated-uncertainty DRO;
+(3)~a replicated, robustness-checked null on whether spatial dependence improves
+carbon-aware DRO scheduling, across real grids and the covariance-to-copula hierarchy;
+(4)~a mechanistic explanation (the mean-dominance bound, demonstrated by the mean-leveling
+test) that supplies the screening rule; and (5)~a reproducible, CI-tested pipeline (202
+tests) with archived summary tables for every reported number.
 
 \subsection{Future work}
 Phase 2 settled the immediate question, whether a copula that sees the asymmetry
