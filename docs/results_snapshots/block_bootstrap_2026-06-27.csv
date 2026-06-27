@@ -1,0 +1,10 @@
+grid,block_length,gap_pct,ci_lo_pct,ci_hi_pct,se_ratio_vs_iid,within_margin
+us_west,1,0.0351,0.0102,0.0656,1.0,True
+us_west,7,0.0351,0.0133,0.0773,1.149,True
+us_west,14,0.0351,0.0127,0.0899,1.344,True
+taskc,1,-0.0,-0.0,0.0,1.0,True
+taskc,7,-0.0,-0.0,0.0,1.336,True
+taskc,14,-0.0,-0.0,0.0,1.438,True
+us_hetero,1,-0.1354,-0.2043,-0.0288,1.0,True
+us_hetero,7,-0.1354,-0.2152,-0.0206,1.094,True
+us_hetero,14,-0.1354,-0.2183,-0.029,1.086,True

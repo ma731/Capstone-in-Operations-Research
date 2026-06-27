@@ -51,12 +51,18 @@ gap_ci_lo, gap_ci_hi, detectable`. Positive gap = joint covariance beats shuffle
   tail levels (CVaR_0.90/0.95/0.99 and the worst day); confirms the null holds in the deep
   tail. `.venv\Scripts\python -m scripts.run_dro_tail_sensitivity`.
 - `risk_measure_swap_<date>.csv` = **RQ2** generality probe: re-measures the
-  joint-vs-shuffled gap under a non-coherent **mean-variance** objective (and the coherent
-  mean-std DRO reference), to show the spatial null is not an artifact of CVaR's
-  translation invariance. Columns: `grid, objective, param, param_value, sched_diff_pct,
-  cvar_gap_pct, oos_std_gap_pct, is_std_gap_pct, var_over_mean, boot_gap_pct, boot_lo_pct,
-  boot_hi_pct`; `cvar_gap_pct` = (shuffled - joint)/joint OOS CVaR_0.95, positive = modelling
-  covariance helps. `.venv\Scripts\python -m scripts.run_risk_measure_swap`.
+  joint-vs-shuffled gap under a **mean-variance** objective (a variance penalty that
+  amplifies covariance, vs the standard-deviation penalty that dampens it), to show the
+  spatial null is not an artifact of the robust scheduler's objective. Columns: `grid,
+  objective, param, param_value, sched_diff_pct, cvar_gap_pct, oos_std_gap_pct,
+  is_std_gap_pct, var_over_mean, boot_gap_pct, boot_lo_pct, boot_hi_pct`; `cvar_gap_pct` =
+  (shuffled - joint)/joint OOS CVaR_0.95, positive = modelling covariance helps.
+  `.venv\Scripts\python -m scripts.run_risk_measure_swap`.
+- `block_bootstrap_<date>.csv` = **RQ2** serial-dependence check: re-bootstraps the spatial
+  gap with a moving-block scheme (block length 1/7/14 days) so the worst-day clustering is
+  respected. The block SE is 9-44% wider than iid, but every gap stays within the 0.4%
+  materiality margin (widest bound 0.22%), so the equivalence null is not an artifact of the
+  independent-day bootstrap. `.venv\Scripts\python -m scripts.run_block_bootstrap_check`.
 
 Regenerate any of these with
 `.venv\Scripts\python -m scripts.run_case_experiment --region-set <case> [flags]`.

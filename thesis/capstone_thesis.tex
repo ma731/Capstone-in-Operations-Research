@@ -1175,6 +1175,17 @@ Western US   & 0.043 & 0.066 & 0.017 & 0.028\\
 \end{tabular}
 \end{table}
 
+\paragraph{The null survives a serial-dependence bootstrap.} The paired bootstrap above
+resamples days independently, yet $\CVaR_{0.95}$ averages the year's worst ${\approx}12$
+days, and those cluster under multi-day weather events, so an independent-day scheme can
+understate the standard error. Re-estimating the spatial-gap intervals with a moving-block
+bootstrap that resamples contiguous runs of days ($L=7$ and $L=14$;
+the \texttt{block\_bootstrap} snapshot) inflates the standard error by $9$--$44\%$, as
+expected, but every grid's gap interval still lies well within the $0.4\%$ materiality
+margin (widest bound $0.22\%$). The equivalence conclusion is therefore not an artifact of
+the independence assumption: the gaps sit an order of magnitude below materiality, with
+room to spare even after the serial-dependence correction.
+
 \subsection{Why the covariance is masked: the mean-leveling test
 (RQ2)}\label{sec:res-ablation}
 The mean-leveling test isolates the cause (Table~\ref{tab:ablation},
@@ -1759,7 +1770,7 @@ with $S$; the $\pm0.1\%$ no-value band is shaded.}
 
 \paragraph{Repository and environment.} All code lives in a private,
 version-controlled repository with a continuous-integration suite ($202$ unit
-tests in total; CI runs $186$, excluding the 13 Electricity-Maps integration tests that
+tests in total; CI runs $189$, excluding the 13 Electricity-Maps integration tests that
 require licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL
 for the second-order cone program and HiGHS for deterministic LP baselines. Exact
 dependency versions are pinned in a tracked \texttt{requirements-lock.txt}
@@ -1803,10 +1814,14 @@ Section & Result & Archived source\\
 \ref{sec:res-gap} & Spatial gaps (Table~\ref{tab:gaps}) &
 \texttt{\{case\}\_regimes\_2026-06-10.csv}\\
 \ref{sec:res-robust} & Robustness (Table~\ref{tab:robust}) &
-\texttt{\{case\}\_..\_\{lw,seasonal,ar1,ty2024\}.csv}\\
+\texttt{\{case\}\_..\_\{lw,seasonal,ar1,ty2022,ty2023,ty2024\}.csv}\\
 \ref{sec:res-robust} & BH correction & \texttt{bh\_correction.csv}\\
 \ref{sec:res-ablation} & Mean-leveling test (Table~\ref{tab:ablation}) &
 \texttt{\{case\}\_..\_ablate-\{level,flat\}.csv}\\
+\ref{sec:res-swap} & Risk-measure swap (Table~\ref{tab:swap}) &
+\texttt{risk\_measure\_swap\_2026-06-27.csv}\\
+\ref{sec:res-robust} & Serial-dependence (block) bootstrap &
+\texttt{block\_bootstrap\_2026-06-27.csv}\\
 \ref{sec:res-corr},\ref{sec:res-tails} & CA/Iberia panels &
 \texttt{taskA\_..\, es\_pt\_fr\_..\,csv}\\
 \ref{sec:res-transfer} & Transfer value, curve &
