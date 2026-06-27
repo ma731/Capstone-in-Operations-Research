@@ -51,8 +51,9 @@
 {\large Master in Business Analytics \& Data Science\par}
 {\large Research Capstone in Operations Research\par}
 \vspace{2.2cm}
-{\Large\bfseries The Price of Sophistication: When Do Spatial and\par
-Robust Modeling Pay in Carbon-Aware Data-Center Scheduling?\par}
+{\Large\bfseries The Price of Sophistication: A Pre-Registered\par
+Falsification Test for When Spatial and Robust Modelling Pay\par
+in Carbon-Aware Data-Center Scheduling\par}
 \vspace{0.5cm}
 {\large A Day-Ahead Migration Scheduler and a Complexity--Value Decision Rule\par}
 \vspace{0.3cm}
@@ -74,6 +75,19 @@ produced by version-controlled code reviewed by the author (with the Phase~1--2
 falsification protocol pre-registered; the Part~3 transfer and emergency-crossover
 sweeps are exploratory extensions, not part of that pre-registration), and all
 text was reviewed and edited by the author.
+\end{minipage}
+
+\vspace{0.6cm}
+\begin{minipage}{0.9\textwidth}\small
+\textbf{Ethics Statement.} This research involves no human subjects, personal data, or
+animal experimentation, and required no ethics-board approval. It uses only
+grid-level carbon-intensity estimates (Electricity Maps, under an academic licence that
+prohibits redistribution of the raw series, respected here) and public reanalysis
+weather data (Open-Meteo, CC-BY). The work is motivated by an environmental aim,
+reducing the carbon footprint of flexible compute, and the author reports the negative
+and adverse results (the dependence-modelling null and the cases where robustness loses)
+as candidly as the positive ones, to avoid overstating the value of the proposed
+methods. The author declares no conflicts of interest.
 \end{minipage}
 \end{titlepage}
 
@@ -118,10 +132,10 @@ rolling-horizon problem under forecast error (Section~\ref{sec:online}), and
 generalises the mean-dominance bound into a dimensionless problem-class condition
 (Section~\ref{sec:condition}); a dedicated chapter (Section~\ref{sec:testing})
 documents the validation behind every claim: small-instance model checks, a
-pre-registered protocol, and a $199$-test software suite. The thesis contributes a
+pre-registered protocol, and a $202$-test software suite. The thesis contributes a
 working scheduler with honest savings, a screening rule for when passive dependence
 modelling fails, and a price-of-robustness decision rule with a tested, data-grounded
-bound, all under 199 unit tests, with the Phase~1--2 falsification protocol pre-registered (the stylised-emergency crossover of RQ3 is a calibrated stress test, not part of the pre-registration).
+bound, all under 202 unit tests, with the Phase~1--2 falsification protocol pre-registered (the stylised-emergency crossover of RQ3 is a calibrated stress test, not part of the pre-registration).
 \end{abstract}
 \newpage
 \tableofcontents
@@ -209,7 +223,7 @@ crossover, taken online as a rolling-horizon controller (Section~\ref{sec:online
 robustification pays only past an emergency-severity crossover $M^\star\approx3$ that
 realized severity ($1.3$--$1.9\times$; Winter Storm Uri $1.3\times$) never reaches,
 stated as the rule plus its tested bound, not a universal impossibility. (v)~\emph{A
-reproducible, validated pipeline} (Section~\ref{sec:testing}): pre-registration, $199$
+reproducible, validated pipeline} (Section~\ref{sec:testing}): pre-registration, $202$
 unit tests, a small-instance model validation, a robustness battery,
 Benjamini--Hochberg correction, and per-cell TOST equivalence tests that affirmatively
 reject any effect above the $0.4\%$ materiality margin.
@@ -794,7 +808,7 @@ the entire study is under two hours on one core, so reproduction is cheap.
 
 \subsection{Reproducibility}\label{sec:repro}
 All code is version-controlled (private repository, continuous-integration test
-suite, $199$ unit tests, including a feasible-set equivalence test pinning the
+suite, $202$ unit tests, including a feasible-set equivalence test pinning the
 Phase 2 CVaR scheduler to the Phase 1 constraint set); experiment configurations
 are commit-locked before test-set evaluation; bootstrap and scenario seeds are
 fixed; and every number reported in
@@ -876,9 +890,13 @@ out-of-sample reduction is largest at a moderate budget (on the US West a $4.4\%
 near $10\%$ of daily workload) and settles to the reported $4.04\%$ plateau as the
 budget grows: at large budgets the deterministic schedule reallocates further toward the
 training-mean-cleanest region and slightly overfits out of sample, so we quote the
-conservative plateau as the headline rather than the peak. Section~\ref{sec:transfer}
-develops the full transfer DRO, its multi-seed validation, and a data-grounded
-emergency stress test.
+conservative plateau as the headline rather than the peak. One caveat fixes the right
+reading of this number: the saving is a \emph{gross spatial ceiling}. The transfer budget
+is set large enough not to bind and migration carries no per-unit, latency, or bandwidth
+cost, so $4.0$--$9.9\%$ bounds the value of \emph{perfect, costless} migration rather than
+netting out real interconnect economics; introducing a migration cost can only reduce it.
+Section~\ref{sec:transfer} develops the full transfer DRO, its multi-seed validation, and
+a data-grounded emergency stress test.
 
 \begin{figure}[t]
 \centering
@@ -1312,6 +1330,56 @@ Eastern US--Canada & CA-ON--NYISO & 0.73 & 0.38 & 0.42 & $-0.04$ & 0.31\\
 Eastern US--Canada & MISO--PJM    & 0.70 & 0.43 & 0.39 & $+0.04$ & 0.42\\
 Diversified & CISO--BPAT & 0.33 & 0.10 & 0.16 & $-0.06$ & 0.26\\
 Diversified & ERCOT--BPAT & 0.00 & 0.04 & 0.05 & $-0.02$ & 0.02\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{The null is not an artifact of the coherent objective
+(RQ2)}\label{sec:res-swap}
+Proposition~\ref{prop:meandom}'s mean-dominance argument leans on two structural facts:
+emissions are linear in the carbon vector, and $\CVaR$ is translation-invariant
+(cash-additive), so the deterministic mean separates from the dependence-bearing
+residual. A natural objection is that the null is then a property of the chosen risk
+measure rather than of carbon scheduling. We test this directly. Holding the data, the
+feasible set, and the out-of-sample metric fixed, we swap the coherent
+mean-standard-deviation DRO objective ($\min\langle\bar\rho,x\rangle+\varepsilon\sqrt{x^\top\Sigma x}$,
+the thesis) for a \emph{non-coherent} mean-variance objective
+($\min\langle\bar\rho,x\rangle+\lambda\,x^\top\Sigma x$), which is not cash-additive and
+hands the cross-region covariance an explicit quadratic term to act on, and re-run the
+shuffled-marginals falsification, sweeping the covariance weight $\lambda$ over four
+orders of magnitude (\texttt{risk\_measure\_swap} snapshot).
+
+The swap does not rescue covariance; it indicts it (Table~\ref{tab:swap}). Weighting the
+variance term up to $900\times$ the mean moves the schedule by up to $30\%$, so
+covariance genuinely enters the decision, yet the out-of-sample $\CVaR_{0.95}$ gap
+between joint and shuffled covariance stays below $1.5\%$ and sign-unstable, as under the
+coherent DRO (whose gap stays below $0.8\%$). At the weighting where the variance term
+balances the mean, the paired bootstrap interval excludes zero, but in the \emph{adverse}
+direction on two of three grids: modelling the joint covariance \emph{worsens}
+out-of-sample tail emissions by $1.5\%$ (Western) and $0.8\%$ (Diversified), and helps
+only trivially ($+0.11\%$) on the Eastern belt. Even out-of-sample standard deviation,
+the quantity mean-variance actually optimises, shows no robust covariance benefit, and
+in-sample variance reduction exceeds out-of-sample throughout, the signature of
+overfitting. The null is therefore not an artifact of CVaR's translation invariance:
+handed a non-coherent objective built to exploit it, the estimated cross-region
+dependence overfits and degrades the held-out tail. This strengthens the screening rule
+rather than bounding it.
+
+\begin{table}[t]
+\centering\small
+\caption{Risk-measure swap. Re-running the shuffled-marginals test under a non-coherent
+mean-variance objective, at the weight where the variance term balances the mean. The
+schedule moves materially, but the out-of-sample $\CVaR_{0.95}$ gap (modelling joint
+covariance minus shuffling it; positive means covariance helps) stays immaterial and is
+adverse on two grids. Paired bootstrap, $1000$ resamples.}
+\label{tab:swap}
+\begin{tabular}{lrrl}
+\toprule
+Grid & Schedule move & OOS $\CVaR_{0.95}$ gap & 95\% CI \\
+\midrule
+Western US         & $\sim$30\% & $-1.50\%$ & $[-1.92,\,-1.18]$ \\
+Eastern US--Canada & $\sim$20\% & $+0.11\%$ & $[+0.04,\,+0.19]$ \\
+Diversified        & $\sim$7\%  & $-0.84\%$ & $[-1.02,\,-0.63]$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1930,7 +1998,7 @@ multiple-testing correction (Benjamini--Hochberg over the pre-registered $144$-c
 family) guards the discovery rate.
 
 \subsection{The software test suite}\label{sec:testing-suite}
-The implementation carries a 199-test suite (186 run under continuous integration) on
+The implementation carries a 202-test suite (189 run under continuous integration) on
 every push. The tests pin the components the results depend on: a \emph{feasible-set
 equivalence} test ties the Phase~2 $\CVaR$-SAA scheduler to the Phase~1 constraint
 set so the two phases optimise over the same $\mathcal X$; $\CVaR$ correctness tests
@@ -1953,7 +2021,7 @@ budget, plus a guard rejecting an invalid risk argument. The Part~4 online contr
 (\texttt{online\_transfer.py}, Section~\ref{sec:online}) and the Part~5 ratio
 computation are likewise unit-tested, the former for work conservation and feasible
 realised cost across the rolling loop, the latter for the mean-value-range and
-flattening operators against hand-computed cases, bringing the suite to $199$ tests.
+flattening operators against hand-computed cases, bringing the suite to $202$ tests.
 What remains preliminary about Parts~3--5 is therefore the experimental protocol and
 calibration, not the optimisation: every reported number rests on validated code.
 
@@ -2115,7 +2183,7 @@ hierarchy from covariance ball to elliptical and lower-tail copulas;
 (3)~a mechanistic explanation (formalized as a mean-dominance bound
 (Proposition~\ref{prop:meandom}) and demonstrated by the mean-leveling test) that
 explains the null rather than merely reporting it; (4)~a fully reproducible,
-version-controlled, CI-tested pipeline (199 tests) with archived license-safe
+version-controlled, CI-tested pipeline (202 tests) with archived license-safe
 summary tables for every reported number; (5)~an \emph{active transfer channel}
 (Section~\ref{sec:transfer}) that recovers $4.0$--$9.9\%$ of $\CVaR_{0.95}$ over the
 $\Phi=0$ baseline \emph{deterministically}, the positive resolution the null predicts, while showing
@@ -2272,7 +2340,7 @@ with $S$; the $\pm0.1\%$ no-value band is shaded.}
 \end{figure}
 
 \paragraph{Repository and environment.} All code lives in a private,
-version-controlled repository with a continuous-integration suite (199 unit
+version-controlled repository with a continuous-integration suite (202 unit
 tests in total; CI runs 186, excluding the 13 Electricity Maps integration tests
 that require licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL
 for the second-order cone program and HiGHS for deterministic LP baselines. Exact

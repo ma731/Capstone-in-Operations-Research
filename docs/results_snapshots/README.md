@@ -48,6 +48,13 @@ gap_ci_lo, gap_ci_hi, detectable`. Positive gap = joint covariance beats shuffle
 - `dro_tail_sensitivity_<date>.csv` = **RQ3** robust-vs-deterministic online gap at deeper
   tail levels (CVaR_0.90/0.95/0.99 and the worst day); confirms the null holds in the deep
   tail. `.venv\Scripts\python -m scripts.run_dro_tail_sensitivity`.
+- `risk_measure_swap_<date>.csv` = **RQ2** generality probe: re-measures the
+  joint-vs-shuffled gap under a non-coherent **mean-variance** objective (and the coherent
+  mean-std DRO reference), to show the spatial null is not an artifact of CVaR's
+  translation invariance. Columns: `grid, objective, param, param_value, sched_diff_pct,
+  cvar_gap_pct, oos_std_gap_pct, is_std_gap_pct, var_over_mean, boot_gap_pct, boot_lo_pct,
+  boot_hi_pct`; `cvar_gap_pct` = (shuffled - joint)/joint OOS CVaR_0.95, positive = modelling
+  covariance helps. `.venv\Scripts\python -m scripts.run_risk_measure_swap`.
 
 Regenerate any of these with
 `.venv\Scripts\python -m scripts.run_case_experiment --region-set <case> [flags]`.

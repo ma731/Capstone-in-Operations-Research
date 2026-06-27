@@ -48,8 +48,9 @@
 {\large Master in Business Analytics \& Data Science\par}
 {\large Research Capstone in Operations Research\par}
 \vspace{2.2cm}
-{\Large\bfseries The Price of Sophistication: When Do Spatial and\par
-Robust Modeling Pay in Carbon-Aware Data-Center Scheduling?\par}
+{\Large\bfseries The Price of Sophistication: A Pre-Registered\par
+Falsification Test for When Spatial and Robust Modelling Pay\par
+in Carbon-Aware Data-Center Scheduling\par}
 \vspace{0.5cm}
 {\large A Day-Ahead Migration Scheduler and a Complexity--Value Decision Rule\par}
 \vspace{2.2cm}
@@ -69,6 +70,19 @@ produced by version-controlled code reviewed by the author (with the Phase~1--2
 falsification protocol pre-registered; the Part~3 transfer and emergency-crossover
 sweeps are exploratory extensions, not part of that pre-registration), and all
 text was reviewed and edited by the author.
+\end{minipage}
+
+\vspace{0.6cm}
+\begin{minipage}{0.9\textwidth}\small
+\textbf{Ethics Statement.} This research involves no human subjects, personal data, or
+animal experimentation, and required no ethics-board approval. It uses only
+grid-level carbon-intensity estimates (Electricity Maps, under an academic licence that
+prohibits redistribution of the raw series, respected here) and public reanalysis
+weather data (Open-Meteo, CC-BY). The work is motivated by an environmental aim,
+reducing the carbon footprint of flexible compute, and the author reports the negative
+and adverse results (the dependence-modelling null and the cases where robustness loses)
+as candidly as the positive ones, to avoid overstating the value of the proposed
+methods. The author declares no conflicts of interest.
 \end{minipage}
 \end{titlepage}
 
@@ -104,15 +118,54 @@ of the stochastic solution near zero, and pays over deterministic transfer only 
 an emergency-severity crossover $M^\star\approx3$ (with $M$ the multiple by which a
 region's carbon intensity spikes in a rare grid emergency, so $M=3$ is a tripling);
 tested against real data-grounded
-worst-tail emergencies across 17 zones, that crossover never activates. The thesis
+worst-tail emergencies across 17 zones, that crossover does not activate. The thesis
 contributes a working scheduler with honest savings, a screening rule for when
 passive dependence modelling fails, and a price-of-robustness decision rule with a
-tested, data-grounded bound, all under 199 unit tests, with the Phase~1--2 falsification
+tested, data-grounded bound, all under 202 unit tests, with the Phase~1--2 falsification
 protocol pre-registered (the stylised-emergency crossover of RQ3 is a calibrated stress
 test, not part of the pre-registration).
 \end{abstract}
 \newpage
 \tableofcontents
+\newpage
+
+\listoffigures
+\listoftables
+\newpage
+
+% ===================== NOMENCLATURE =====================
+\section*{Nomenclature}
+\addcontentsline{toc}{section}{Nomenclature}
+\noindent Symbols used throughout; plain-language glosses are in
+Appendix~\ref{app:glossary}.
+
+\smallskip
+\begin{tabular}{@{}ll@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+$R,\ T$ & number of regions; hours in the day-ahead horizon ($T=24$) \\
+$x\in\R^{R\times T}$ & schedule (compute allocated per region and hour) [MW] \\
+$y_{r,t}$ & executed load after inter-region migration [MW] \\
+$W_r$ & day-ahead workload to be served by region $r$ [MWh] \\
+$\rho\in\R^{R\times T}$ & uncertain carbon-intensity field [gCO$_2$eq/kWh] \\
+$\bar{\rho}$ & mean (forecast) carbon field; $\rho=\bar{\rho}+\xi$ \\
+$\xi$ & zero-mean carbon residual (the dependence-bearing part) \\
+$\Sigma$ & cross-region space--time covariance of $\rho$ ($RT\times RT$) \\
+$L$ & Cholesky factor, $LL^\top=\Sigma$ \\
+$\varepsilon$ & Wasserstein ambiguity radius (DRO ball size) \\
+$\eta$ & scale-adaptive ridge factor for $\Sigma$ \\
+$\alpha_r$ & inflexible fraction of region $r$'s workload \\
+$\Phi$ & inter-region transfer budget ($\Phi=0$ is the no-transfer baseline) \\
+$f_{r\to s,t}$ & migrated load from region $r$ to $s$ at hour $t$ [MW] \\
+$\CVaR_{\beta}$ & Conditional Value-at-Risk at level $\beta$ ($\beta=0.95$) \\
+$\tau$ & Value-at-Risk threshold in the CVaR program \\
+$M,\ M^\star$ & emergency severity multiple; the crossover severity \\
+$\chiL,\ \chiU$ & lower / upper tail-dependence coefficients \\
+$\Lambda$ & dependence leverage (comonotone minus diversified tail spread) \\
+$\mathrm{OPT}(\Sigma)$ & optimal robust value of the SOCP under covariance $\Sigma$ \\
+\bottomrule
+\end{tabular}
 \newpage
 
 % ===================== 1. INTRODUCTION =====================
@@ -169,35 +222,57 @@ deterministic transfer, and do real grids ever reach that regime? What decision 
 follows?
 \end{description}
 
+The value question for RQ2 was committed as a falsifiable, pre-registered hypothesis
+test before the held-out year was touched (Section~\ref{sec:test}):
+
+\smallskip
+\begin{center}
+\fbox{\begin{minipage}{0.94\textwidth}\small
+\textbf{Pre-registered hypotheses (Phase 1--2, RQ2).}\\[2pt]
+$H_1$ (modelling pays): encoding cross-region carbon dependence in the ambiguity set
+lowers out-of-sample $\CVaR_{0.95}$ by more than a $0.4\%$ materiality margin, relative
+to the dependence-destroyed (shuffled-marginals) model on the same feasible set.\\[2pt]
+$H_0$ (the spatial null): it does not; the out-of-sample spatial gap lies within
+$\pm0.4\%$.\\[2pt]
+\emph{Decision rule:} a per-cell equivalence test (TOST) that affirmatively rejects any
+effect beyond the margin, across the pre-registered grids and constraint regimes,
+supports $H_0$; a mean-leveling positive control must fire (detect value where value is
+constructed to exist) to license the null as a true negative rather than an
+underpowered test.
+\end{minipage}}
+\end{center}
+
 \subsection{Contributions}
-The thesis makes five contributions. (i)~\emph{A working day-ahead scheduler with
-honest, baseline-anchored savings}: active inter-region migration cuts out-of-sample
-$\CVaR_{0.95}$ by $4.0$--$9.9\%$ over the no-transfer ($\Phi=0$) baseline on the same
-feasible set across three real grids. The transfer mechanism follows established
-carbon-aware practice; the contribution is the $\Phi=0$-anchored measurement of its
-spatial value. (ii)~\emph{A pre-registered methodology for pricing modelling layers}:
-holding the optimization fixed and manipulating one object at a time, it measures the
-marginal out-of-sample $\CVaR$ value of each layer, and separates the \emph{validity}
-of the spatial-dependence assumption (correlations are genuine, $0.7$--$0.8$) from its
-\emph{value} to the decision (null). To our knowledge this is the first treatment to
-place carbon intensity itself in a Mahalanobis--Wasserstein ball as a correlated
-cross-region vector and isolate the marginal value of that coupling via a
-shuffled-marginals falsification test. (iii)~\emph{A screening rule} for when passive
-dependence modelling cannot help, supported from three independent directions: an
-a-priori SOCP gap-bound (Proposition~\ref{prop:meandom}) before any data is touched; a
-mean-leveling test showing the covariance signal is genuine but masked by the mean field;
-and a tail-dependence/comonotone-copula argument showing even the maximal coupling
-recovers nothing. We additionally outline, as a direction for future work, a
-dimensionless generalisation of this screen to other problem classes (it does not bind
-on the real grids, so the empirical falsification remains necessary here). (iv)~\emph{A price-of-robustness
-decision rule} with a data-grounded, falsified crossover: robustification pays only
-past an emergency-severity crossover $M^\star\approx3$ that realized severity
-($1.3$--$1.9\times$; Winter Storm Uri $1.3\times$) never reaches, stated as the rule
-plus its tested bound, not a universal impossibility. (v)~\emph{A reproducible,
-validated pipeline}: pre-registration, $199$ unit tests, a small-instance model
-validation, a robustness battery, Benjamini--Hochberg correction, and per-cell TOST
-equivalence tests that affirmatively reject any effect above the $0.4\%$ materiality
-margin.
+The thesis makes five contributions: two pre-registered and confirmatory (the day-ahead
+savings, RQ1, and the dependence null, RQ2), one methodological, one exploratory (the
+robustness crossover, RQ3), and one infrastructural. (i)~\emph{A working day-ahead
+scheduler with honest, baseline-anchored savings}: active inter-region migration cuts
+out-of-sample $\CVaR_{0.95}$ by $4.0$--$9.9\%$ over the no-transfer ($\Phi=0$) baseline on
+the same feasible set across three real grids (a gross spatial ceiling, reported before
+migration cost). The transfer mechanism follows established carbon-aware practice; the
+contribution is the $\Phi=0$-anchored measurement of its spatial value. (ii)~\emph{A
+pre-registered methodology for pricing modelling layers}: holding the optimization fixed
+and manipulating one object at a time, it measures the marginal out-of-sample $\CVaR$
+value of each layer, and separates the \emph{validity} of the spatial-dependence
+assumption (correlations are genuine, $0.7$--$0.8$) from its \emph{value} to the decision
+(null). To our knowledge this is the first treatment to place carbon intensity itself in a
+Mahalanobis--Wasserstein ball as a correlated cross-region vector and isolate the marginal
+value of that coupling via a shuffled-marginals falsification test. (iii)~\emph{A screening
+rule} for when passive dependence modelling cannot help, supported from four independent
+directions: an a-priori SOCP gap-bound (Proposition~\ref{prop:meandom}) before any data is
+touched; a mean-leveling positive control showing the covariance signal is genuine but
+masked by the mean field; a tail-dependence/comonotone-copula argument showing even the
+maximal coupling recovers nothing; and a risk-measure swap showing the null survives
+replacing the coherent objective with a non-coherent mean-variance one
+(Section~\ref{sec:res-swap}). (iv)~\emph{A price-of-robustness decision rule}, reported as
+an \emph{exploratory} extension outside the pre-registration, with a data-grounded,
+falsified crossover: robustification pays only past an emergency-severity crossover
+$M^\star\approx3$ that realized severity ($1.3$--$1.9\times$; Winter Storm Uri
+$1.3\times$) does not reach on observed data, stated as the rule plus its tested bound,
+not a universal impossibility. (v)~\emph{A reproducible, validated pipeline}:
+pre-registration, $202$ unit tests, a small-instance model validation, a robustness
+battery, Benjamini--Hochberg correction, and per-cell TOST equivalence tests that
+affirmatively reject any effect above the $0.4\%$ materiality margin.
 
 \subsection{Thesis structure}
 Section~\ref{sec:lit} reviews the carbon-aware scheduling and DRO literature and
@@ -713,7 +788,7 @@ yet the whole study runs in under two hours on one core.
 
 \subsection{Reproducibility}\label{sec:repro}
 All code is version-controlled (private repository, continuous-integration test
-suite, $199$ unit tests, including a feasible-set equivalence test pinning the
+suite, $202$ unit tests, including a feasible-set equivalence test pinning the
 Phase 2 CVaR scheduler to the Phase 1 constraint set); experiment configurations
 are commit-locked before test-set evaluation; bootstrap and scenario seeds are
 fixed; and every number reported in
@@ -774,7 +849,12 @@ out-of-sample reduction is largest at a moderate budget (on the US West a $4.4\%
 near $10\%$ of daily workload) and settles to the reported $4.04\%$ plateau as the
 budget grows: at large budgets the deterministic schedule reallocates further toward the
 training-mean-cleanest region and slightly overfits out of sample, so we quote the
-conservative plateau as the headline rather than the peak.
+conservative plateau as the headline rather than the peak. One caveat fixes the right
+reading of this number: the saving is a \emph{gross spatial ceiling}. The transfer
+budget is set large enough not to bind and migration carries no per-unit, latency, or
+bandwidth cost, so $4.0$--$9.9\%$ bounds the value of \emph{perfect, costless} migration
+rather than netting out real interconnect economics; introducing a migration cost can
+only reduce it (limitation~(i), Section~\ref{sec:limits}).
 
 \begin{figure}[t]
 \centering
@@ -1184,6 +1264,56 @@ Diversified & ERCOT--BPAT & 0.00 & 0.04 & 0.05 & $-0.02$ & 0.02\\
 \end{tabular}
 \end{table}
 
+\subsection{The null is not an artifact of the coherent objective
+(RQ2)}\label{sec:res-swap}
+Proposition~\ref{prop:meandom}'s mean-dominance argument leans on two structural facts:
+emissions are linear in the carbon vector, and $\CVaR$ is translation-invariant
+(cash-additive), so the deterministic mean separates from the dependence-bearing
+residual. A natural objection is that the null is then a property of the chosen risk
+measure rather than of carbon scheduling. We test this directly. Holding the data, the
+feasible set, and the out-of-sample metric fixed, we swap the coherent
+mean-standard-deviation DRO objective ($\min\langle\bar\rho,x\rangle+\varepsilon\sqrt{x^\top\Sigma x}$,
+the thesis) for a \emph{non-coherent} mean-variance objective
+($\min\langle\bar\rho,x\rangle+\lambda\,x^\top\Sigma x$), which is not cash-additive and
+hands the cross-region covariance an explicit quadratic term to act on, and re-run the
+shuffled-marginals falsification, sweeping the covariance weight $\lambda$ over four
+orders of magnitude (\texttt{risk\_measure\_swap} snapshot).
+
+The swap does not rescue covariance; it indicts it (Table~\ref{tab:swap}). Weighting the
+variance term up to $900\times$ the mean moves the schedule by up to $30\%$, so
+covariance genuinely enters the decision, yet the out-of-sample $\CVaR_{0.95}$ gap
+between joint and shuffled covariance stays below $1.5\%$ and sign-unstable, as under the
+coherent DRO (whose gap stays below $0.8\%$). At the weighting where the variance term
+balances the mean, the paired bootstrap interval excludes zero, but in the \emph{adverse}
+direction on two of three grids: modelling the joint covariance \emph{worsens}
+out-of-sample tail emissions by $1.5\%$ (Western) and $0.8\%$ (Diversified), and helps
+only trivially ($+0.11\%$) on the Eastern belt. Even out-of-sample standard deviation,
+the quantity mean-variance actually optimises, shows no robust covariance benefit, and
+in-sample variance reduction exceeds out-of-sample throughout, the signature of
+overfitting. The null is therefore not an artifact of CVaR's translation invariance:
+handed a non-coherent objective built to exploit it, the estimated cross-region
+dependence overfits and degrades the held-out tail. This strengthens the screening rule
+rather than bounding it.
+
+\begin{table}[t]
+\centering\small
+\caption{Risk-measure swap. Re-running the shuffled-marginals test under a non-coherent
+mean-variance objective, at the weight where the variance term balances the mean. The
+schedule moves materially, but the out-of-sample $\CVaR_{0.95}$ gap (modelling joint
+covariance minus shuffling it; positive means covariance helps) stays immaterial and is
+adverse on two grids. Paired bootstrap, $1000$ resamples.}
+\label{tab:swap}
+\begin{tabular}{lrrl}
+\toprule
+Grid & Schedule move & OOS $\CVaR_{0.95}$ gap & 95\% CI \\
+\midrule
+Western US         & $\sim$30\% & $-1.50\%$ & $[-1.92,\,-1.18]$ \\
+Eastern US--Canada & $\sim$20\% & $+0.11\%$ & $[+0.04,\,+0.19]$ \\
+Diversified        & $\sim$7\%  & $-0.84\%$ & $[-1.02,\,-0.63]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Richer dependence models confirm the screening rule (RQ2)}\label{sec:res-copula}
 If the covariance ball failed only because it is elliptical, a copula that encodes
 the empirical $\chiL>\chiU$ asymmetry should recover value. It does not. Re-running
@@ -1390,17 +1520,27 @@ positive-control check confirms the test can detect value when value exists. Tog
 they turn ``is this layer worth modelling?'' from a matter of faith into a checkable,
 pre-registered measurement.
 
-\subsection{Limitations}
-Six bound the claims. \emph{(i)~Representative schedule.} We evaluate one
-canonical workload (splittable load, ramp limits). A sharply different cost geometry
-could re-weight the covariance term. The constraint-tightness
-sensitivities (Section~\ref{sec:res-robust}) address the most plausible cases: a
-$3\times$ tighter ramp and a $50$--$95\%$ utilization sweep both leave the null
-intact. A qualitatively different objective (e.g.\ hard per-job deadlines) remains
+\subsection{Limitations}\label{sec:limits}
+Six bound the claims. \emph{(i)~Representative workload and costless migration.} We
+evaluate one canonical splittable workload with stylised, uniform per-region demand,
+not real operator traces, and the headline transfer saving is computed \emph{gross} of
+migration economics: no per-unit, latency, SLA, or network-bandwidth cost, and an
+unbinding transfer budget. It is therefore an upper bound on the value of migration,
+not a net operational figure; a positive migration cost can only reduce it. On the
+modelling side, a natural worry is that the spatial null is an artifact of the chosen
+objective (cost linear in carbon, and a translation-invariant CVaR);
+Section~\ref{sec:res-swap} tests this directly by swapping in a non-coherent
+mean-variance objective and finds the null robust. The constraint-tightness
+sensitivities (Section~\ref{sec:res-robust}) address the most plausible feasible-set
+variations: a $3\times$ tighter ramp and a $50$--$95\%$ utilization sweep both leave the
+null intact. A qualitatively different objective (e.g.\ hard per-job deadlines) remains
 untested.
-\emph{(ii)~Test horizon.} The primary read is a single held-out year (2025);
-walk-forward to 2024 reproduces the null, but multi-year rolling evaluation would
-strengthen external validity. \emph{(iii)~Dependence model.} The DRO uses a
+\emph{(ii)~Test horizon and non-stationarity.} The primary read is a single held-out
+year (2025); walk-forward to 2024 reproduces the null, but multi-year rolling evaluation
+would strengthen external validity. Grid carbon structure is also non-stationary:
+continued renewable build-out could raise cross-region correlation (shared solar) or
+volatility, so the ``real grids stay below the crossover'' reading is bounded by the
+period observed. \emph{(iii)~Dependence model.} The DRO uses a
 covariance (second-moment) ambiguity set by construction; Phase 2
 (Appendix~\ref{app:copula}) extends the test to non-elliptical (Clayton) and maximal
 (comonotone) copulas, but a full copula-\emph{ambiguity} Wasserstein DRO in the
@@ -1488,7 +1628,7 @@ carbon-aware DRO scheduling, holding across multiple real grids and the
 dependence hierarchy from covariance ball to elliptical and lower-tail copulas; (4)~a
 mechanistic explanation (the mean-dominance bound Proposition~\ref{prop:meandom},
 demonstrated by the mean-leveling test) for the null, which supplies the screening
-rule; and (5)~a reproducible, version-controlled, CI-tested pipeline (199 tests)
+rule; and (5)~a reproducible, version-controlled, CI-tested pipeline (202 tests)
 with archived license-safe summary tables for every reported number.
 
 \subsection{Future work}
@@ -1609,7 +1749,7 @@ with $S$; the $\pm0.1\%$ no-value band is shaded.}
 \end{figure}
 
 \paragraph{Repository and environment.} All code lives in a private,
-version-controlled repository with a continuous-integration suite ($199$ unit
+version-controlled repository with a continuous-integration suite ($202$ unit
 tests in total; CI runs $186$, excluding the 13 Electricity-Maps integration tests that
 require licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL
 for the second-order cone program and HiGHS for deterministic LP baselines. Exact
@@ -1841,22 +1981,16 @@ Figure~\ref{fig:phase3} rests on validated code. This is what makes promoting Pa
 to a rigorous study a matter of protocol and calibration, the steps below, rather
 than of rebuilding the machinery.
 
-\paragraph{The extension beyond this capstone.} These preliminary results are the
-opening of a planned five-part programme that continues well past the capstone. The
-capstone is Parts~1--2 (the covariance and copula nulls plus the mean-dominance
-bound). \textbf{Part~3}, sketched above, is the spatially-coupled transfer DRO, the active-decision algorithm and the tail-risk crossover, promoted to a rigorous,
-pre-registered study with calibrated emergencies and, ideally, affine decision rules
-for the recourse policy. \textbf{Part~4} takes the transfer model \emph{online}: a
-multistage / rolling-horizon robust controller in which forecasts arrive
-sequentially and demand and transmission are themselves uncertain, with a Wasserstein
-ball centred on a \emph{learned} forecast (learning-augmented DRO) and evaluated
-closed-loop on real operational traces, the deployable systems contribution.
-\textbf{Part~5} generalises the mean-dominance bound itself into a problem-class
-condition for \emph{when} cross-coordinate dependence can ever improve a robust
-allocation, of which carbon-aware scheduling is one instance and energy storage, EV
-fleets and spatial supply chains are others, the theory that turns the sequence
-into a research programme. The programme is detailed in the project's research
-roadmap; this appendix is only its first, deliberately preliminary, datapoint.
+\paragraph{Directions beyond this capstone.} Two extensions follow naturally and are
+left as future work. First, taking the transfer model \emph{online}: a rolling-horizon
+robust controller in which forecasts arrive sequentially and demand and transmission are
+themselves uncertain, with a Wasserstein ball centred on a learned forecast and evaluated
+closed-loop on real operational traces. Second, \emph{generalising} the mean-dominance
+bound into a problem-class condition for when cross-coordinate dependence can improve a
+robust allocation, of which carbon-aware scheduling is one instance among others (energy
+storage, EV fleets, spatial supply chains). Promoting the present Part~3 sketch to a
+rigorous, pre-registered study with a calibrated emergency model is the prerequisite for
+both. These directions are recorded in the project's research roadmap.
 
 \section{Glossary: plain-language terminology}\label{app:glossary}
 The main technical terms used in this thesis, glossed in plain language; the precise

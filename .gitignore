@@ -73,6 +73,8 @@ thesis/*.aux
 thesis/*.log
 thesis/*.out
 thesis/*.toc
+thesis/*.lof
+thesis/*.lot
 thesis/*.bbl
 thesis/*.blg
 
