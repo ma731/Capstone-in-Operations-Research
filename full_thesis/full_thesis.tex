@@ -125,7 +125,7 @@ solution near zero, and pays over deterministic transfer only past an
 emergency-severity crossover $M^\star\approx3$ (with $M$ the multiple by which a
 region's carbon intensity spikes in a rare grid emergency, so $M=3$ is a tripling);
 tested against real data-grounded
-worst-tail emergencies across 17 zones, that crossover never activates. This extended
+worst-tail emergencies across 17 zones, that crossover does not activate. This extended
 version develops the active transfer channel and its severity crossover directly in
 the main body (Section~\ref{sec:transfer}), takes the controller \emph{online} as a
 rolling-horizon problem under forecast error (Section~\ref{sec:online}), and
@@ -221,7 +221,7 @@ not bind on the real grids, so the empirical falsification remains necessary the
 (iv)~\emph{A price-of-robustness decision rule} with a data-grounded, falsified
 crossover, taken online as a rolling-horizon controller (Section~\ref{sec:online}):
 robustification pays only past an emergency-severity crossover $M^\star\approx3$ that
-realized severity ($1.3$--$1.9\times$; Winter Storm Uri $1.3\times$) never reaches,
+realized severity ($1.3$--$1.9\times$; Winter Storm Uri $1.3\times$) does not reach,
 stated as the rule plus its tested bound, not a universal impossibility. (v)~\emph{A
 reproducible, validated pipeline} (Section~\ref{sec:testing}): pre-commitment, $202$
 unit tests, a small-instance model validation, a robustness battery,

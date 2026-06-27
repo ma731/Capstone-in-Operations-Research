@@ -58,7 +58,7 @@ const mfY=tbY+tbH+0.5,mfH=1.55;
 
 // ================= KPI BAND =================
 const khY=mfY+mfH+0.5;
-T([N("Active inter-region migration cuts worst-case emissions "),{text:"4.0 to 9.9%",options:{bold:true,color:C.goldD}},N("; added "),{text:"sophistication",options:{bold:true,color:C.navy}},N(" (joint covariance, robustness) does not pay until a severity "),{text:"real grids never reach",options:{bold:true,color:C.navy}},N(".")],M,khY,UW,0.7,{fs:27,bold:true,color:C.ink,align:"center",valign:"middle"});
+T([N("Active inter-region migration cuts worst-case emissions "),{text:"4.0 to 9.9%",options:{bold:true,color:C.goldD}},N("; added "),{text:"sophistication",options:{bold:true,color:C.navy}},N(" (joint covariance, robustness) does not pay until a severity "),{text:"real grids have not reached",options:{bold:true,color:C.navy}},N(".")],M,khY,UW,0.7,{fs:27,bold:true,color:C.ink,align:"center",valign:"middle"});
 const kY=khY+0.85, kH=4.4, kg=0.4, tw4=(UW-3*kg)/4;
 function tile(i,num,numC,fill,label,kicker,big){const x=M+i*(tw4+kg);
   rect(x,kY,tw4,kH,fill,{shadow:true});
@@ -165,14 +165,14 @@ const pY=sbY2+sbBH+0.25,pH=2.85;
 rect(M,pY,UW,pH,C.goldT,{line:{color:C.gold,width:1.5}}); rect(M,pY,0.18,pH,C.gold);
 imgc(FIG+"schematic_transfer.png",M+0.5,pY+0.22,5.9,pH-0.44);
 T("THE PAYOFF",M+6.7,pY+0.4,UW-7.0,0.7,{fs:25,bold:true,color:C.goldD,cs:1});
-T([N("The value is in physically moving compute toward whichever grid is clean right now. An "),{text:"active inter-region transfer channel",options:{bold:true,color:C.goldD}},N(" cuts 4 to 10 percent of carbon, deterministically. The sophisticated layers (joint covariance, copulas, distributional robustness) add nothing until grid emergencies hit 3x severity, which real grids never reach. Deploy the simple migration scheduler; price robustness only if your grid faces genuine extremes.")],M+6.7,pY+1.2,UW-7.1,pH-1.35,{fs:19,color:C.goldD,lsm:1.16});
+T([N("The value is in physically moving compute toward whichever grid is clean right now. An "),{text:"active inter-region transfer channel",options:{bold:true,color:C.goldD}},N(" cuts 4 to 10 percent of carbon, deterministically. The sophisticated layers (joint covariance, copulas, distributional robustness) add nothing until grid emergencies hit 3x severity, which real grids have not reached. Deploy the simple migration scheduler; price robustness only if your grid faces genuine extremes.")],M+6.7,pY+1.2,UW-7.1,pH-1.35,{fs:19,color:C.goldD,lsm:1.16});
 const rY=pY+pH+0.25,rH=1.3;
 rect(M,rY,UW,rH,C.navyD); rect(M,rY,0.18,rH,C.gold);
 const qz=1.18, qx=W-M-qz-0.22, qy=rY+(rH-qz)/2;
 rect(qx-0.13,qy-0.13,qz+0.26,qz+0.26,C.white);
 imgc(FIG+"repo_qr.png",qx,qy,qz,qz,0);
 T("REPOSITORY\nDATA  ·  THESIS",qx-2.15,rY,1.9,rH,{fs:14,bold:true,color:C.cer,align:"right",valign:"middle",lsm:1.1,cs:1});
-T([{text:"RECOMMENDATION    ",options:{bold:true,color:C.gold,cs:2}},{text:"Deploy the deterministic migration scheduler; skip joint-covariance and copula modeling; price robustness only past a severity real grids never reach.",options:{bold:true,color:C.white}}],M+0.75,rY,UW-5.1,rH,{fs:25,align:"left",valign:"middle"});
+T([{text:"RECOMMENDATION    ",options:{bold:true,color:C.gold,cs:2}},{text:"Deploy the deterministic migration scheduler; skip joint-covariance and copula modeling; price robustness only past a severity real grids have not reached.",options:{bold:true,color:C.white}}],M+0.75,rY,UW-5.1,rH,{fs:25,align:"left",valign:"middle"});
 T([{text:"Marco Ortiz Togashi   ·   marco.ortiztogashi@student.ie.edu      |      Supervisor: Prof. Bissan Ghaddar      |      IE University, MS in Business Analytics & Data Science      |      Carbon data: Electricity Maps (academic licence)."}],M,rY+rH+0.2,UW,0.45,{fs:18,color:C.muted,align:"center"});
 T([{text:"References:  Hall et al. 2024 (carbon-aware DRO);  Mohajerin Esfahani and Kuhn 2018 (Wasserstein DRO);  Rockafellar and Uryasev 2000 (CVaR)."}],M,rY+rH+0.64,UW,0.45,{fs:18,italic:true,color:C.muted,align:"center"});
 

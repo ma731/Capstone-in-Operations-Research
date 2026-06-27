@@ -74,7 +74,7 @@ robust layer are conditional options, not free wins.
 |---|---|---|---|
 | **RQ1** | Does letting jobs move between regions cut worst-day emissions, and what drives the saving? | Yes, 4.0–9.9% over a like-for-like no-transfer baseline; the driver is the average carbon field, not dependence | the lever that pays |
 | **RQ2** | Does modelling how regions co-move (covariance, copulas) improve worst-day emissions? | No, the gap stays below 0.4% of CVaR and survives a full robustness battery | a screening rule for when to skip it |
-| **RQ3** | Does hedging forecast error with DRO pay over the plain scheduler, and do real grids reach that regime? | Only above a severity crossover near a tripling that real grids never reach (about 1.4x) | a conditional option, not a free win |
+| **RQ3** | Does hedging forecast error with DRO pay over the plain scheduler, and do real grids reach that regime? | Only above a severity crossover near a tripling that real grids have not reached (about 1.4x in the data) | a conditional option, not a free win |
 
 ## The three grids
 
