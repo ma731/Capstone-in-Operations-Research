@@ -142,8 +142,8 @@ T([N("The mean-leveling test isolates the cause. Hold the covariance fixed and f
 cy=figTop;
 cy+=figAsp(FIG+"carbon_landscape.png",bx,cy,mcW,A.landscape)+0.1;
 cy+=scap([N("The "),{text:"dominant mean carbon field",options:{bold:true,color:C.navy}},N(": the schedule follows this terrain; the spatial covariance is a thin ripple on top (≤1.46%).")],bx,cy,mcW)+0.2;
-cy+=figAsp(FIG+"certificate_canyon.png",bx,cy,mcW,A.canyon)+0.1;
-cy+=scap([N("The mean-dominance theorem caps the gap a-priori at "),{text:"7 to 13% of CVaR",options:{bold:true,color:C.navy}},N("; the realized gap never exceeds 0.23%, about 100x below its own bound.")],bx,cy,mcW)+0.16;
+cy+=figAsp(FIG+"positive_control.png",bx,cy,mcW,A.canyon)+0.1;
+cy+=scap([N("The "),{text:"positive control",options:{bold:true,color:C.navy}},N(": flatten each region's mean and the cross-region signal appears (Diversified "),{text:"+1.46%",options:{bold:true,color:C.goldD}},N("); in the real world it stays below the 0.4% line, so the null is a true negative.")],bx,cy,mcW)+0.16;
 {const rcH=colBot-cy; rect(bx,cy,mcW,rcH,C.blueT); rect(bx,cy,0.16,rcH,C.cer);
  T("THE NULL SURVIVES EVERY CHECK",bx+0.32,cy+0.22,mcW-0.55,0.5,{fs:18,bold:true,color:C.navy,cs:0.5});
  hr(bx+0.32,cy+0.78,mcW-0.64,C.cer);
