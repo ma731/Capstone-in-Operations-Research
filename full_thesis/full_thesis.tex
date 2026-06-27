@@ -109,8 +109,8 @@ then isolate the value of \emph{passive}
 sophistication. Using a Mahalanobis--Wasserstein DRO solved as a second-order cone
 program, a pre-committed shuffled-marginals falsification test across three real
 US/Canada grids spanning the dependence spectrum (the US West, an Ontario-anchored
-Eastern belt, and an engineered solar/wind/hydro portfolio), with an Iberia--France
-anchor, returns a replicated \textbf{null}: encoding cross-region covariance adds below
+Eastern belt, and an engineered solar/wind/hydro portfolio) returns a replicated
+\textbf{null}: encoding cross-region covariance adds below
 $0.4\%$ of $\CVaR$, surviving Ledoit--Wolf shrinkage, removing each region's average
 daily pattern (residualization),
 Benjamini--Hochberg correction, walk-forward validation, and a per-cell equivalence
@@ -658,10 +658,11 @@ clusters data centers within one interconnection). A realistic, globally dispers
 fleet looks instead like the heterogeneous portfolio, low and mixed correlation, so
 the practically relevant case is the one where diversification \emph{should} help
 most. The null holding at both ends is therefore stronger than a null on either alone.
-Two earlier panels
-corroborate: an \emph{Iberia--France} European set (ES, PT, FR), where residual
-correlation collapses to the diurnal cycle, and the California/Nevada subset of the
-US West before Phoenix was added at the supervisor's request. Temperature for
+A California/Nevada subset of the US West (before Phoenix was added at the supervisor's
+request) corroborates at the low-correlation end; an \emph{Iberia--France} European set,
+explored at the project's outset, is set aside as too weak a test (its residual
+correlation collapses to the diurnal cycle and the DRO does not consistently engage
+there), so the analysis rests on the US/Canada grids. Temperature for
 constraint 3b is hourly ERA5 2\,m air temperature (Open-Meteo), one load-weighted
 point per zone. The licensed raw data is never committed; derived summary tables
 are archived in the repository for traceability.
@@ -837,10 +838,11 @@ the US West's strong but \emph{uniform} correlation is common-mode and offers no
 Figure~\ref{fig:heatmaps} shows the residual
 correlation matrices; overlay plots of standardized intensity (archived with the
 code) confirm visible co-movement in summer and winter weeks for the coupled
-cases. Together with the corroborating panels, the California/Nevada subset
-($0.65$--$0.78$ within-state) and Iberia--France, the cases span the dependence
-spectrum from $\approx 0$ to $\approx 0.8$, so whatever the scheduling result, it
-cannot be attributed to an absence of correlation in the data.
+cases. Together with the corroborating California/Nevada subset
+($0.65$--$0.78$ within-state), the cases span the dependence
+spectrum from $\approx 0$ (the engineered Diversified portfolio) to $\approx 0.8$, so
+whatever the scheduling result, it cannot be attributed to an absence of correlation in
+the data.
 
 \begin{figure}[t]
 \centering
@@ -981,16 +983,15 @@ cross-region covariance changes nothing. Large $\varepsilon$ is over-conservativ
 \label{fig:cvcurve}
 \end{figure}
 
-The Iberia--France panel is the instructive contrast and the project's historical
-starting point. There the residual correlation is near zero, and CV does not even
-consistently engage the DRO: $\varepsilon^\star$ flickers between $0$, $0.1$, $1$
-and $10$ across cells, collapsing to $0$ in several. This is itself consistent with
-the thesis (where there is no cross-region structure, the machinery sees nothing
-worth robustifying) but it makes the Iberian null the \emph{weak} kind. We
-therefore retain it only as low-correlation, real-grid external validity, and rest
-the central claim on the US/Canada cases where the DRO is unambiguously on. The
-engineered Diversified portfolio supplies the DRO-active low-correlation null
-($\varepsilon^\star=1$ throughout, still no value) that Iberia, where
+The Iberia--France panel was the project's historical starting point, and it is
+instructive precisely because we \emph{set it aside}. There the residual correlation is
+near zero and CV does not even consistently engage the DRO: $\varepsilon^\star$ flickers
+between $0$, $0.1$, $1$ and $10$ across cells, collapsing to $0$ in several. With no
+cross-region structure the machinery sees nothing worth robustifying, which makes the
+Iberian null the \emph{weak} kind, a non-result rather than evidence. We therefore do not
+rely on it: the central claim rests entirely on the US/Canada cases where the DRO is
+unambiguously engaged, and the engineered Diversified portfolio supplies the DRO-active
+low-correlation null ($\varepsilon^\star=1$ throughout, still no value) that Iberia, where
 $\varepsilon^\star$ collapses to $0$, cannot.
 
 \begin{table}[t]
@@ -1607,9 +1608,9 @@ covariance (second-moment) ambiguity set by construction; Phase 2
 (Appendix~\ref{app:copula}) extends the test to non-elliptical (Clayton) and maximal
 (comonotone) copulas, but a full copula-\emph{ambiguity} Wasserstein DRO in the
 Fan--Ji--Lejeune sense remains future work. \emph{(iv)~Geographic scope and the limit of generalization.} The region sets span
-the Western Interconnection, the Eastern Interconnection, and Iberia--France across the dependence
-spectrum, but grids with different generation mixes (e.g.\ hydro-thermal systems
-with strong seasonal storage) remain untested. More fundamentally, the result
+the Western and Eastern Interconnections across the dependence spectrum (an Iberia--France
+set was explored but set aside as too weak a test), but grids with different generation
+mixes (e.g.\ hydro-thermal systems with strong seasonal storage) remain untested. More fundamentally, the result
 generalizes only to grids where the diurnal mean field dominates residual
 cross-region covariance: mean-dominance is an empirical regularity of carbon
 intensity (Section~\ref{sec:res-mech}), not a universal law, and a grid whose
