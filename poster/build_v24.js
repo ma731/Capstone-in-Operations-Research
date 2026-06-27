@@ -42,7 +42,7 @@ T("Real-time grid carbon, 2021 to 2025",W-M-4.75,tbY+2.12,4.7,0.45,{fs:16,color:
 T([{text:"Solved with ",options:{color:"BFD3EA"}},{text:"CVXPY · CLARABEL · HiGHS",options:{bold:true,color:C.white}}],W-M-4.75,tbY+2.62,4.7,0.45,{fs:15.5,align:"left"});
 const tx=M+5.35,tw=(W-M-5.35)-0.35-tx;
 T("CARBON-AWARE DATA-CENTER SCHEDULING",tx,tbY+0.42,tw,0.42,{fs:16.5,bold:true,color:C.gold,align:"center",cs:3});
-T("The Price of Sophistication: When Do Spatial and\nRobust Models Pay in Carbon-Aware Scheduling?",tx,tbY+0.88,tw,2.0,{fs:47,bold:true,color:C.white,align:"center",valign:"middle",lsm:1.0});
+T("The Price of Sophistication:\nA Pre-Registered Falsification Test for When Spatial and\nRobust Modelling Pay in Carbon-Aware Scheduling",tx,tbY+0.88,tw,2.0,{fs:35,bold:true,color:C.white,align:"center",valign:"middle",lsm:0.95});
 T("A day-ahead migration scheduler and a complexity-value decision rule",tx,tbY+2.92,tw,0.55,{fs:24,bold:true,italic:true,color:"E3EEFA",align:"center"});
 hr(tx+tw/2-1.6,tbY+3.5,3.2,C.gold);
 T([{text:"Marco Ortiz Togashi",options:{bold:true}},{text:"     |     Supervisor: Prof. Bissan Ghaddar     |     IE University, Master in Business Analytics & Data Science"}],tx,tbY+3.62,tw,0.55,{fs:20,color:C.white,align:"center"});
@@ -90,7 +90,7 @@ T([N("A "),B("Mahalanobis Wasserstein DRO"),N(", a second-order cone program in 
 cy+=figAsp(FIG+"dro_equation.png",sbX,cy,sbW,A.droeq)+0.12;
 T([N("Cross-region value enters "),{text:"only through the off-diagonal blocks of Σ",options:{bold:true,color:C.navy}},N("; the pre-registered "),B("shuffled-marginals test"),N(" zeroes exactly those blocks. We add copula and tail checks, mean-leveling tests, and walk-forward validation to 2025.")],sbX,cy,sbW,1.85,{fs:17,lsm:1.15}); cy+=1.9;
 cy=sideHead(cy,"RIGOR","Why you can trust a null");
-[["199","unit tests, CI on every push"],["27","cells where TOST confirms a null effect"],["1","mean-dominance theorem bounding the gap"]].forEach((d,i)=>{const ry=cy+i*0.82;
+[["202","unit tests, CI on every push"],["27","cells where TOST confirms a null effect"],["1","mean-dominance theorem bounding the gap"]].forEach((d,i)=>{const ry=cy+i*0.82;
   if(i>0) rect(sbX,ry-0.04,sbW,0.012,C.line);
   T(d[0],sbX+0.02,ry,1.5,0.78,{fs:33,bold:true,color:C.cer,align:"left",valign:"middle"});
   T(d[1],sbX+1.65,ry,sbW-1.65,0.78,{fs:16,bold:true,color:C.navy,align:"left",valign:"middle",lsm:1.02});});

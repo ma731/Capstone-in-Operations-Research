@@ -207,8 +207,8 @@ if logo.exists():
     _pic(s, logo, 0.95, 0.72, w=2.0)
 _text(s, 0.95, 2.42, 11.7, 2.4, [
     [("The Price of Sophistication", SERIF, 33, WHITE, True)],
-    [("When Do Spatial and Robust Models Pay in", SERIF, 25, WHITE, True)],
-    [("Carbon-Aware Data-Center Scheduling?", SERIF, 25, WHITE, True)],
+    [("A Pre-Registered Falsification Test for When Spatial", SERIF, 22, WHITE, True)],
+    [("and Robust Modelling Pay in Carbon-Aware Scheduling", SERIF, 22, WHITE, True)],
 ], line_spacing=1.04, space_after=8)
 _rect(s, 1.0, 4.92, 3.2, 0.05, GOLD)
 _text(s, 0.95, 5.12, 11.4, 0.8,
@@ -394,7 +394,7 @@ _bullets(s, 0.7, 1.5, 6.1, 4.9, [
     ("The null survives Ledoit-Wolf shrinkage, residualization, and "
      "Benjamini-Hochberg correction across cells.", None, False),
     ("Walk-forward out-of-sample validation and a per-cell equivalence test.", None, False),
-    ("199 unit tests (186 in CI); bootstrap confidence intervals on every gap.", NAVY, True),
+    ("202 unit tests (189 in CI); bootstrap confidence intervals on every gap.", NAVY, True),
     ("Pre-registered, version-controlled, with archived summary tables for every "
      "reported number.", None, False),
 ], size=18, gap=14, lead="A pre-registered battery")
@@ -422,7 +422,7 @@ _bullets(s, 0.7, 1.5, 11.9, 4.9, [
      "mean-dominance bound that says why.", None, False),
     ("A price-of-robustness decision rule with a tested, data-grounded bound "
      "(M near 1.4 below M* near 3).", None, False),
-    ("A reproducible, pre-registered pipeline under 199 unit tests.", NAVY, True),
+    ("A reproducible, pre-registered pipeline under 202 unit tests.", NAVY, True),
 ], size=19, gap=15, lead="What this thesis delivers")
 
 # ---- 16. The decision rule recap + thanks ----

@@ -1588,8 +1588,10 @@ $3\times$ tighter ramp and a $50$--$95\%$ utilization sweep both leave the null
 intact. A qualitatively different objective (e.g.\ hard per-job deadlines) remains
 untested.
 \emph{(ii)~Test horizon.} The primary read is a single held-out year (2025);
-walk-forward to 2024 reproduces the null, but multi-year rolling evaluation would
-strengthen external validity. \emph{(iii)~Dependence model.} The DRO uses a
+walk-forward to 2024, 2023, and 2022 (training only on the years before each) all
+reproduce the null, the largest spatial gap across the three earlier test years being
+$0.21\%$ of $\CVaR_{0.95}$ (well within the $0.4\%$ margin), though longer multi-year
+rolling evaluation would strengthen external validity further. \emph{(iii)~Dependence model.} The DRO uses a
 covariance (second-moment) ambiguity set by construction; Phase 2
 (Appendix~\ref{app:copula}) extends the test to non-elliptical (Clayton) and maximal
 (comonotone) copulas, but a full copula-\emph{ambiguity} Wasserstein DRO in the
