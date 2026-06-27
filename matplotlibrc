@@ -1,0 +1,5 @@
+# Project-level matplotlib config.
+# Embed figure text as TrueType (Type 42) rather than the default Type 3, so the
+# PDF figures are crisp in every viewer and their text stays selectable/searchable.
+pdf.fonttype: 42
+ps.fonttype: 42

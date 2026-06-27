@@ -11,6 +11,7 @@
 \let\openbox\relax
 \usepackage{newtxtext,newtxmath}        % Times New Roman text + math
 \usepackage[margin=1in]{geometry}
+\usepackage{microtype}                  % protrusion + font expansion: the professional polish
 \usepackage{setspace}\onehalfspacing    % 1.5 line spacing
 \usepackage{booktabs,array,enumitem,graphicx,xcolor,mathtools}
 \usepackage{algorithm}
@@ -20,6 +21,8 @@
 \definecolor{navy}{HTML}{1F3B63}
 \definecolor{rust}{HTML}{B3402F}
 \usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={The Price of Sophistication},
+            pdfauthor={Marco Ortiz Togashi}}
 \usepackage[numbers,sort&compress]{natbib}  % IEEE-style numeric citations
 
 \newtheorem{proposition}{Proposition}
@@ -85,6 +88,10 @@ as candidly as the positive ones, to avoid overstating the value of the proposed
 methods. The author declares no conflicts of interest.
 \end{minipage}
 \end{titlepage}
+
+% Front matter (abstract, contents, lists, nomenclature) numbered i, ii, iii ...;
+% the body resets to arabic page 1 at the Introduction.
+\pagenumbering{roman}
 
 % ===================== ABSTRACT =====================
 \begin{abstract}
@@ -168,6 +175,9 @@ $\mathrm{OPT}(\Sigma)$ & optimal robust value of the SOCP under covariance $\Sig
 \bottomrule
 \end{tabular}
 \newpage
+
+% Body begins here: arabic page 1.
+\pagenumbering{arabic}
 
 % ===================== 1. INTRODUCTION =====================
 \section{Introduction}\label{sec:intro}
