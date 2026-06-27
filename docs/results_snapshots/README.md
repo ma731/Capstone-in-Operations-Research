@@ -16,7 +16,7 @@ academic license does not apply.
 
 - **case:** `taskA` (CA/NV), `es_pt_fr` (Iberia), `taskc`/`us_west`/`us_hetero`
   (the three v15 cases). Lowercase `taskc` = generalized runner; `taskC` = the
-  locked pre-registered Task C script (same numbers).
+  locked pre-committed Task C script (same numbers).
 - **variant:** none = baseline; `seasonal`/`ar1` = residualized covariance;
   `lw` = Ledoit-Wolf shrinkage; `ablate-level`/`ablate-flat` = mean-ablation;
   `finegrid` = denser epsilon grid; `ty2022`/`ty2023`/`ty2024` = walk-forward

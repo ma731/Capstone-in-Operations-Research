@@ -48,7 +48,7 @@
 {\large Master in Business Analytics \& Data Science\par}
 {\large Research Capstone in Operations Research\par}
 \vspace{2.2cm}
-{\Large\bfseries The Price of Sophistication: A Pre-Registered\par
+{\Large\bfseries The Price of Sophistication: A Pre-Committed\par
 Falsification Test for When Spatial and Robust Modelling Pay\par
 in Carbon-Aware Data-Center Scheduling\par}
 \vspace{0.5cm}
@@ -67,8 +67,8 @@ implementation support, experiment orchestration, literature triage, and draftin
 assistance. All research questions, modelling decisions, experimental designs, and
 interpretations are the author's, developed with the supervisor; all results were
 produced by version-controlled code reviewed by the author (with the Phase~1--2
-falsification protocol pre-registered; the Part~3 transfer and emergency-crossover
-sweeps are exploratory extensions, not part of that pre-registration), and all
+falsification protocol pre-committed; the Part~3 transfer and emergency-crossover
+sweeps are exploratory extensions, not part of that pre-commitment), and all
 text was reviewed and edited by the author.
 \end{minipage}
 
@@ -96,12 +96,12 @@ and characterises the value of each layer. Over the honest baseline (carbon-awar
 scheduling with no inter-region transfer, $\Phi=0$, on the same feasible set), active
 migration cuts daily $\CVaR_{0.95}$ emissions by $4.0$--$9.9\%$ (Western $4.0\%$, Eastern $9.9\%$, Diversified $9.0\%$), and this deterministic transfer channel is the
 dominant lever; the carbon-computing literature independently finds spatial shifting
-dominates temporal shifting. This thesis introduces a pre-registered,
+dominates temporal shifting. This thesis introduces a pre-committed,
 falsification-based methodology for \emph{pricing} each modelling layer, separating the
 \emph{validity} of the spatial-dependence assumption (the cross-region carbon
 correlations are real) from its \emph{value} to the decision (a replicated null). We
 then isolate the value of \emph{passive} sophistication. Using a Mahalanobis--Wasserstein DRO solved as a second-order cone
-program, a pre-registered shuffled-marginals falsification test across three real
+program, a pre-committed shuffled-marginals falsification test across three real
 US/Canada grids spanning the dependence spectrum (the US West, an Ontario-anchored
 Eastern belt, and an engineered solar/wind/hydro portfolio), with an Iberia--France
 anchor, returns a replicated \textbf{null}. The encoded cross-region covariance adds
@@ -122,8 +122,8 @@ worst-tail emergencies across 17 zones, that crossover does not activate. The th
 contributes a working scheduler with honest savings, a screening rule for when
 passive dependence modelling fails, and a price-of-robustness decision rule with a
 tested, data-grounded bound, all under 202 unit tests, with the Phase~1--2 falsification
-protocol pre-registered (the stylised-emergency crossover of RQ3 is a calibrated stress
-test, not part of the pre-registration).
+protocol pre-committed (the stylised-emergency crossover of RQ3 is a calibrated stress
+test, not part of the pre-commitment).
 \end{abstract}
 \newpage
 \tableofcontents
@@ -223,13 +223,14 @@ deterministic transfer, and do real grids ever reach that regime? What decision 
 follows?
 \end{description}
 
-The value question for RQ2 was committed as a falsifiable, pre-registered hypothesis
-test before the held-out year was touched (Section~\ref{sec:test}):
+The value question for RQ2 was specified and commit-locked in version control as a
+falsifiable hypothesis test before the held-out 2025 year was evaluated (the
+``pre-committed'' design; Section~\ref{sec:test}):
 
 \smallskip
 \begin{center}
 \fbox{\begin{minipage}{0.94\textwidth}\small
-\textbf{Pre-registered hypotheses (Phase 1--2, RQ2).}\\[2pt]
+\textbf{Pre-committed hypotheses (Phase 1--2, RQ2).}\\[2pt]
 $H_1$ (modelling pays): encoding cross-region carbon dependence in the ambiguity set
 lowers out-of-sample $\CVaR_{0.95}$ by more than a $0.4\%$ materiality margin (the
 smallest tail saving an operator would act on), relative to the dependence-destroyed
@@ -238,7 +239,7 @@ $H_0$ (the spatial null): it does not; the out-of-sample spatial gap lies within
 $\pm0.4\%$.\\[2pt]
 \emph{Decision rule:} because one cannot simply accept a null, we test it by equivalence.
 The formal equivalence-test (TOST) null is that a material effect \emph{is} present
-($|\text{gap}|\ge0.4\%$); affirmatively rejecting it in every pre-registered grid and
+($|\text{gap}|\ge0.4\%$); affirmatively rejecting it in every pre-committed grid and
 constraint regime is what licenses the spatial null $H_0$. A mean-leveling positive
 control must succeed (detect value where value is constructed to exist) for the null to
 count as a true negative rather than an underpowered test.
@@ -246,7 +247,7 @@ count as a true negative rather than an underpowered test.
 \end{center}
 
 \subsection{Contributions}
-The thesis makes five contributions: one pre-registered and confirmatory (the dependence
+The thesis makes five contributions: one pre-committed and confirmatory (the dependence
 null, RQ2), one a baseline-anchored measurement (the day-ahead savings, RQ1), one
 methodological, one exploratory (the robustness crossover, RQ3), and one infrastructural. (i)~\emph{A working day-ahead
 scheduler with honest, baseline-anchored savings}: active inter-region migration cuts
@@ -254,7 +255,7 @@ out-of-sample $\CVaR_{0.95}$ by $4.0$--$9.9\%$ over the no-transfer ($\Phi=0$) b
 the same feasible set across three real grids (a gross spatial ceiling, reported before
 migration cost). The transfer mechanism follows established carbon-aware practice; the
 contribution is the $\Phi=0$-anchored measurement of its spatial value. (ii)~\emph{A
-pre-registered methodology for pricing modelling layers}: holding the optimization fixed
+pre-committed methodology for pricing modelling layers}: holding the optimization fixed
 and manipulating one object at a time, it measures the marginal out-of-sample $\CVaR$
 value of each layer, and separates the \emph{validity} of the spatial-dependence
 assumption (correlations are genuine, $0.7$--$0.8$) from its \emph{value} to the decision
@@ -268,12 +269,12 @@ masked by the mean field; a tail-dependence/comonotone-copula argument showing e
 maximal coupling recovers nothing; and a risk-measure swap showing the null survives
 replacing the standard-deviation penalty with a variance penalty built to favour
 covariance (Section~\ref{sec:res-swap}). (iv)~\emph{A price-of-robustness decision rule}, reported as
-an \emph{exploratory} extension outside the pre-registration, with a data-grounded,
+an \emph{exploratory} extension outside the pre-commitment, with a data-grounded,
 falsified crossover: robustification pays only past an emergency-severity crossover
 $M^\star\approx3$ that realized severity ($1.3$--$1.9\times$; Winter Storm Uri
 $1.3\times$) does not reach on observed data, stated as the rule plus its tested bound,
 not a universal impossibility. (v)~\emph{A reproducible, validated pipeline}:
-pre-registration, $202$ unit tests, a small-instance model validation, a robustness
+pre-commitment, $202$ unit tests, a small-instance model validation, a robustness
 battery, Benjamini--Hochberg correction, and per-cell TOST equivalence tests that
 affirmatively reject any effect above the $0.4\%$ materiality margin.
 
@@ -372,7 +373,7 @@ should not matter. Adjacent work finds simple carbon-aware heuristics capture mo
 attainable savings, with added sophistication offering little incremental
 benefit~\citep{bostandoost2024}, and the role of dependence structure in Wasserstein
 DRO has been studied abstractly~\citep{gao2017}; our wedge is the controlled,
-pre-registered, triangulated \emph{measurement} of the dependence layer's value. This
+pre-committed, triangulated \emph{measurement} of the dependence layer's value. This
 thesis fills that gap: we build a working day-ahead scheduler that actively migrates
 compute and measure the savings (RQ1), isolate the value of passive modelling
 sophistication via a falsification test with a mechanistic explanation (RQ2), and frame
@@ -393,7 +394,7 @@ replications; three nested constraint regimes guard against a result driven by a
 particular feasible-set geometry; a robustness battery (estimators, multiple-testing
 correction, walk-forward) guards against statistical artifacts; and two further
 experiments (mean-leveling test; tail dependence) identify the mechanism. A
-pre-registration discipline removes analyst degrees of freedom.
+pre-commitment discipline removes analyst degrees of freedom.
 
 \subsection{The scheduling problem}
 Compute is scheduled across $R$ regions over a $T=24$-hour day. The decision is
@@ -585,7 +586,7 @@ covariance modelling from the \emph{validity} of cross-region correlation in the
 checks the mean-dominance bound (Proposition~\ref{prop:meandom}).
 Figure~\ref{fig:pipeline} sketches the pipeline and Algorithm~\ref{alg:protocol}
 gives the full protocol. The recipe is generic: hold the optimizer fixed, perturb
-exactly one modelling object, pre-register the analysis, and read off that object's
+exactly one modelling object, pre-commit the analysis, and read off that object's
 marginal out-of-sample tail value; only the perturbed object (here the cross-region
 covariance) changes when the same protocol is applied to another stochastic program.
 
@@ -607,11 +608,11 @@ covariance) changes when the same protocol is applied to another stochastic prog
 \draw[->] (test)--(boot);
 \node[draw=rust!70, fill=rust!8, rounded corners=2pt, below=4mm of fit,
       text width=58mm, align=center, font=\scriptsize\itshape] (lock)
-      {pre-registration: configuration commit-locked before any test read
+      {pre-commitment: configuration commit-locked before any test read
        ($\texttt{--dry-run}$ runs CV only)};
 \draw[->, rust!70, dashed] (lock.north) -- (test.south);
 \end{tikzpicture}
-\caption{The pre-registered falsification pipeline. Cross-validation and schedule
+\caption{The pre-committed falsification pipeline. Cross-validation and schedule
 fitting touch only the training years; the 2025 test set is read once, after the
 configuration is commit-locked, and the spatial gap is read off a paired
 day-bootstrap.}
@@ -640,7 +641,7 @@ $\mathcal{E}=\{0,0.1,1,10,100,1000\}$
 \EndFor
 \State paired bootstrap (1000 resamples, fixed seed) on test days
 $\Rightarrow$ 95\% CI for the gap \eqref{eq:gap}
-\State \textbf{Pre-registration:} configuration commit-locked before any test
+\State \textbf{Pre-commitment:} configuration commit-locked before any test
 read; \texttt{--dry-run} gate runs CV only
 \end{algorithmic}
 \end{algorithm}
@@ -678,7 +679,7 @@ overlay plots of standardized intensity for summer and winter weeks.
 
 \paragraph{Robustness battery.} Every experiment is re-run with (i) Ledoit--Wolf
 shrinkage covariance \citep{ledoit2004}; (ii) covariance estimated from seasonal
-(monthly-mean) residuals; (iii) covariance from AR(1) residuals. A pre-registered
+(monthly-mean) residuals; (iii) covariance from AR(1) residuals. A pre-committed
 agreement rule counts a spatial effect only if positive and sign-stable across
 both residual estimators. Bootstrap $p$-values across all cells receive
 Benjamini--Hochberg correction at $q=0.05$ \citep{benjamini1995}; a walk-forward
@@ -839,7 +840,7 @@ comparator: carbon-aware scheduling with no inter-region transfer ($\Phi=0$), ea
 region scheduled by its own forecast. The transfer arm adds flows
 $f_{r\to s,t}\ge0$ under a budget $\Phi$. Unlike the Phase~1--2 falsification test, this
 transfer sweep and the emergency-severity crossover of Section~\ref{sec:res-crossover}
-are exploratory extensions reported outside the pre-registered protocol.
+are exploratory extensions reported outside the pre-committed protocol.
 
 Figure~\ref{fig:transfercurve} reports the saving against $\Phi$. Active transfer cuts
 out-of-sample $\CVaR_{0.95}$ by $4.0$--$9.9\%$ relative to the $\Phi=0$ baseline across
@@ -896,7 +897,7 @@ cumulative-versus-blind axis shown.}
 
 \subsection{The screening rule: passive covariance adds nothing (RQ2)}\label{sec:res-gap}
 Table~\ref{tab:gaps} reports the spatial gap \eqref{eq:gap} for the three
-pre-registered US/Canada cases: nine cells each (three constraint regimes $\times$
+pre-committed US/Canada cases: nine cells each (three constraint regimes $\times$
 three $\alpha$-levels), CV-selected $\varepsilon^\star$, single test read on 2025.
 The gap never exceeds a few tenths of one percent of test
 $\CVaR_{0.95}$ in either direction. Where the bootstrap calls a cell
@@ -911,7 +912,7 @@ the gap to four significant figures, so the sign instability is in the data, not
 solver.) The California/Nevada panel agrees (gaps in $[-0.012,+0.058]\%$, DRO active
 throughout).
 
-This is a null of the \emph{strong} kind. In all three pre-registered
+This is a null of the \emph{strong} kind. In all three pre-committed
 cases cross-validation \emph{chooses} a non-trivial ambiguity radius:
 $\varepsilon^\star=1$ in all nine cells for both Eastern US--Canada and
 Diversified, and in seven of nine for Western US (25 of the 27 cells overall). The DRO is therefore
@@ -1003,11 +1004,11 @@ are indistinguishable to the eye, both placing compute in the cleaner hours subj
 to the deadline and ramp constraints; destroying the cross-region covariance changes
 essentially nothing.
 
-\subsection{The null survives a pre-registered robustness battery
+\subsection{The null survives a pre-committed robustness battery
 (RQ2)}\label{sec:res-robust}
 Table~\ref{tab:robust} summarizes. Re-estimating the covariance with Ledoit--Wolf
 shrinkage, seasonal residuals, or AR(1) residuals never produces a spatial effect
-that passes the pre-registered agreement rule (positive and sign-stable across
+that passes the pre-committed agreement rule (positive and sign-stable across
 both residual estimators). The largest battery value anywhere, $+0.179\%$ (AR(1),
 Eastern US--Canada, $\alpha=0.30$), appears \emph{only} under AR(1) and not under the
 seasonal estimator, so the rule rejects it. Benjamini--Hochberg correction at
@@ -1050,7 +1051,7 @@ days): the paired-bootstrap standard error rises to $0.15\%$ for Western US (vs
 $\le0.04\%$ at $\beta=0.90$), so that grid's largest point estimate ($+0.14\%$) is
 within one standard error of zero. The apparent widening at the deepest tail is
 sampling noise. This sweep is descriptive, \emph{outside}
-the pre-registered $144$-cell false-discovery-rate (FDR) family of Table~\ref{tab:robust}; no sweep cell is
+the pre-committed $144$-cell false-discovery-rate (FDR) family of Table~\ref{tab:robust}; no sweep cell is
 both positive and materially large (every detectable cell is negative or below the
 $0.4\%$ margin), so none would survive correction as a discovery.
 
@@ -1160,7 +1161,7 @@ Diversified       & 0.039 & 0.11\\
 \begin{table}[t]
 \centering\small
 \caption{Robustness battery: maximum $|$gap$|$ (\%) per covariance estimator, and
-temporal walk-forward (test year 2024). No cell passes the pre-registered
+temporal walk-forward (test year 2024). No cell passes the pre-committed
 agreement rule (positive and sign-stable under both seasonal and AR(1)
 residualization).}
 \label{tab:robust}
@@ -1525,7 +1526,7 @@ about \$$37{,}000$ per year and not reliably positive. The value worth pursuing 
 in the transfer decision and the mean forecast, not the second moment.
 
 \paragraph{What the protocol buys, beyond this problem.} The value-pricing protocol
-(fix the optimizer, perturb one modelling object, pre-register, measure out-of-sample
+(fix the optimizer, perturb one modelling object, pre-commit, measure out-of-sample
 tail value) transfers to any correlated-uncertainty stochastic program: it lets a
 practitioner decide \emph{empirically} whether a dependence, robustness, or
 richer-ambiguity layer earns its estimation and compute cost. Two cheap checks come
@@ -1534,7 +1535,7 @@ first and can save the experiment outright: the mean-dominance bound
 is large enough that no covariance layer can move the schedule materially, and the
 positive-control check confirms the test can detect value when value exists. Together
 they turn ``is this layer worth modelling?'' from a matter of faith into a checkable,
-pre-registered measurement.
+pre-committed measurement.
 
 \subsection{Limitations}\label{sec:limits}
 Six bound the claims. \emph{(i)~Representative workload and costless migration.} We
@@ -1640,7 +1641,7 @@ option for operators with a concrete, defensible emergency model.
 This thesis contributes to carbon-aware scheduling and robust optimization: (1)~a
 working day-ahead migration scheduler saving $4.0$--$9.9\%$ over the
 $\Phi=0$ baseline, with a layered decision rule for each modelling layer; (2)~a
-pre-registered falsification methodology (shuffled-marginals, extended to
+pre-committed falsification methodology (shuffled-marginals, extended to
 copula-coupled resampling) that separates the \emph{validity} of a spatial
 modelling assumption from its \emph{value}, transferable to any correlated-uncertainty
 DRO; (3)~a replicated, robustness-checked null on whether spatial dependence improves
@@ -1781,7 +1782,7 @@ summary tables (CV-selected $\varepsilon$, test CVaR, spatial gaps, bootstrap CI
 BH $p$-values) are archived, so the non-redistribution academic licence is
 respected while every reported number remains traceable.
 
-\paragraph{Pre-registration protocol.} Each experiment follows commit-lock
+\paragraph{Pre-commitment protocol.} Each experiment follows commit-lock
 $\rightarrow$ dry-run $\rightarrow$ single test read. The full configuration
 (utilization $0.80$; $\alpha\in\{0.30,0.50,0.75\}$; $\varepsilon$ grid
 $\{0,0.1,1,10,100,1000\}$; $5$-fold blocked time-series CV; $1000$ bootstrap
@@ -1943,7 +1944,7 @@ lie beyond the capstone proper.}
 
 \medskip\noindent This appendix sketches where the line goes next, with
 \emph{preliminary, proof-of-concept} experiments. They are prototype-grade, a
-stylised grid-emergency stress model, modest scenario counts, no pre-registration, and a rigorous treatment is the subject of a follow-on study; we include them only because
+stylised grid-emergency stress model, modest scenario counts, no pre-commitment, and a rigorous treatment is the subject of a follow-on study; we include them only because
 they already complete the arc the capstone opened. The capstone showed that
 \emph{passive} spatial modelling adds no value because the mean dominates. The
 natural question is whether making the spatial structure an \emph{active decision}
@@ -1986,7 +1987,7 @@ carbon-aware scheduling under normal conditions (the mean dominates, whether the
 spatial structure is modelled passively or acted on actively), but becomes valuable
 precisely when rare tail events make the mean forecast unreliable. The value of
 robustness is thus a function of tail risk, the precise characterisation of which,
-together with a calibrated emergency model and a pre-registered evaluation, is the
+together with a calibrated emergency model and a pre-committed evaluation, is the
 agenda for the follow-on work.
 
 \paragraph{Implementation and validation.} These results are not throwaway script
@@ -2000,7 +2001,7 @@ flow variables $f_{r\to s,t}$ carry no self-loops and respect a transfer-capacit
 budget, and the two-stage program is solved as an LP per scenario with a shared
 CVaR epigraph. What remains \emph{preliminary} is therefore the experimental
 protocol, the stylised emergency model, the modest scenario counts, and the absence
-of pre-registration, not the optimization itself: the crossover of
+of pre-commitment, not the optimization itself: the crossover of
 Figure~\ref{fig:phase3} rests on validated code. This is what makes promoting Part~3
 to a rigorous study a matter of protocol and calibration, the steps below, rather
 than of rebuilding the machinery.
@@ -2013,7 +2014,7 @@ closed-loop on real operational traces. Second, \emph{generalising} the mean-dom
 bound into a problem-class condition for when cross-coordinate dependence can improve a
 robust allocation, of which carbon-aware scheduling is one instance among others (energy
 storage, EV fleets, spatial supply chains). Promoting the present Part~3 sketch to a
-rigorous, pre-registered study with a calibrated emergency model is the prerequisite for
+rigorous, pre-committed study with a calibrated emergency model is the prerequisite for
 both. These directions are recorded in the project's research roadmap.
 
 \section{Glossary: plain-language terminology}\label{app:glossary}
@@ -2059,7 +2060,7 @@ for all components of the work:
 
 \begin{itemize}[leftmargin=1.4em,itemsep=2pt]
 \item \textbf{Research design.} Formulated the three research questions, designed
-the shuffled-marginals falsification test, and specified the pre-registration
+the shuffled-marginals falsification test, and specified the pre-commitment
 protocol that separates assumption validity from value.
 \item \textbf{Modelling.} Specified the Mahalanobis--Wasserstein DRO scheduling
 model and its SOCP reformulation, the constraint regimes (including the variable

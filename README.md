@@ -1,4 +1,4 @@
-# The Price of Sophistication: a pre-registered falsification test for when spatial and robust modelling pay in carbon-aware data-center scheduling
+# The Price of Sophistication: a pre-committed falsification test for when spatial and robust modelling pay in carbon-aware data-center scheduling
 
 A working day-ahead migration scheduler, and an honest accounting of what each extra
 layer of modelling sophistication actually buys.
@@ -96,7 +96,7 @@ Corroborated by a California–Nevada subset (`taskA`) and an Iberia–France pa
   schedule is attributable to the objective and nothing else.
 - **Falsification:** the *shuffled-marginals* test, fit the schedule on the joint
   covariance vs. a block-diagonal one with all cross-region structure destroyed, and
-  compare out-of-sample $\mathrm{CVaR}_{0.95}$. Pre-registered: commit-lock,
+  compare out-of-sample $\mathrm{CVaR}_{0.95}$. Pre-committed: commit-lock,
   then dry-run, then a single test read on 2025.
 - **Transfer lever (Part 3):** inter-region load flows let compute migrate
   (`src/models/transfer_dro.py`); executed load is conserved by construction, and a

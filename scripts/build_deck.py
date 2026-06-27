@@ -207,7 +207,7 @@ if logo.exists():
     _pic(s, logo, 0.95, 0.72, w=2.0)
 _text(s, 0.95, 2.42, 11.7, 2.4, [
     [("The Price of Sophistication", SERIF, 33, WHITE, True)],
-    [("A Pre-Registered Falsification Test for When Spatial", SERIF, 22, WHITE, True)],
+    [("A Pre-Committed Falsification Test for When Spatial", SERIF, 22, WHITE, True)],
     [("and Robust Modelling Pay in Carbon-Aware Scheduling", SERIF, 22, WHITE, True)],
 ], line_spacing=1.04, space_after=8)
 _rect(s, 1.0, 4.92, 3.2, 0.05, GOLD)
@@ -395,9 +395,9 @@ _bullets(s, 0.7, 1.5, 6.1, 4.9, [
      "Benjamini-Hochberg correction across cells.", None, False),
     ("Walk-forward out-of-sample validation and a per-cell equivalence test.", None, False),
     ("202 unit tests (189 in CI); bootstrap confidence intervals on every gap.", NAVY, True),
-    ("Pre-registered, version-controlled, with archived summary tables for every "
+    ("Pre-committed, version-controlled, with archived summary tables for every "
      "reported number.", None, False),
-], size=18, gap=14, lead="A pre-registered battery")
+], size=18, gap=14, lead="A pre-committed battery")
 _pic(s, FIG / "robustness.png", 7.0, 1.7, max_w=5.7, max_h=4.6)
 
 # ---- 14. Limitations ----
@@ -422,7 +422,7 @@ _bullets(s, 0.7, 1.5, 11.9, 4.9, [
      "mean-dominance bound that says why.", None, False),
     ("A price-of-robustness decision rule with a tested, data-grounded bound "
      "(M near 1.4 below M* near 3).", None, False),
-    ("A reproducible, pre-registered pipeline under 202 unit tests.", NAVY, True),
+    ("A reproducible, pre-committed pipeline under 202 unit tests.", NAVY, True),
 ], size=19, gap=15, lead="What this thesis delivers")
 
 # ---- 16. The decision rule recap + thanks ----
@@ -448,7 +448,7 @@ _bullets(s, 0.7, 1.45, 6.1, 5.0, [
     ("Refit to a block-diagonal covariance: identical marginals, cross-region "
      "structure destroyed (shuffled).", None, False),
     ("Score both on out-of-sample CVaR(0.95) of daily emissions.", None, False),
-    ("Pre-registered: if spatial structure matters, the joint schedule must win. "
+    ("Pre-committed: if spatial structure matters, the joint schedule must win. "
      "It does not.", NAVY, True),
 ], size=18, gap=14, lead="Shuffled marginals")
 _pic(s, FIG / "schedule_us_west.png", 7.0, 1.6, max_w=5.7, max_h=4.6)
