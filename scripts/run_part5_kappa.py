@@ -1,7 +1,7 @@
 """run_part5_kappa.py -- Part 5, the intermediate validation.
 
 The Delta = B/M condition predicts dependence value should rise monotonically as the
-mean field is flattened. The pre-registered ablation gives only the two endpoints
+mean field is flattened. The pre-committed ablation gives only the two endpoints
 (kappa=1 real ~0%, kappa=0 flat +1.46% on the Diversified grid). Here we re-solve the
 shuffled-marginals DRO at *intermediate* flattenings kappa in {1,.75,.5,.25,0} and show
 the realised spatial gap climbs in lockstep with Delta -- a real interior datapoint,

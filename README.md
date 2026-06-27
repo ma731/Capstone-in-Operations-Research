@@ -168,19 +168,16 @@ last digits can shift if a different solver build is selected.
 │   │                    #   feasible_set (shared X), cvar_saa, copula_scenarios,
 │   │                    #   transfer_dro (Part 3), online_transfer (Part 4), covariance
 │   └── analysis/        # stratified_correlations, tail_dependence, metrics, plots
-├── scripts/             # experiment runners + plotting (see docs/DEPRECATED.md for status)
+├── scripts/             # experiment runners + plotting
 ├── tests/               # 202 pytest unit tests (CI on push/PR)
 ├── thesis/              # capstone_thesis.{tex,pdf} (the graded report)
 ├── full_thesis/         # extended write-up (full_thesis.pdf, Parts 3-5 in body)
-├── poster/              # A0 conference poster (build_v*.js -> poster_capstone_v*.pdf; v24 canonical)
+├── poster/              # A0 conference poster (build_v24.js -> poster_capstone_v24.pdf)
 ├── deck/                # capstone_defense.pptx (defense deck; built by scripts/build_deck.py)
 ├── docs/
-│   ├── decisions.md             # design-decision log
 │   ├── results_snapshots/       # archived summary CSVs (license-safe; every number traces here)
-│   ├── proposal_transfer_channel.md   # Part 3 (transfer DRO) proposal
-│   ├── progress_note_v*.md      # phase history (v16 = Phase 2 close-out)
-│   ├── HANDOFF.md / thesis_split.md   # orientation + content split
-│   └── DEPRECATED.md            # which scripts are canonical / superseded
+│   ├── snippets/                # paste-ready table/figure LaTeX snippets
+│   └── stratified_results.txt   # stratified-correlation results dump
 ├── data/raw/            # carbon CSVs (Electricity Maps, gitignored); temperature CSVs (Open-Meteo ERA5, committed, CC-BY)
 └── figures/             # generated plots, mostly gitignored; a few static figures
                          #   (correlation_by_hour/season, the IE logo) committed for the PDFs

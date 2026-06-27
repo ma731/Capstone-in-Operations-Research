@@ -407,7 +407,7 @@ def condition_number(cov: np.ndarray) -> float:
     return max_eig / min_eig
 
 
-# ---------- Ledoit-Wolf shrinkage estimation (v11 pre-registered test) ----------
+# ---------- Ledoit-Wolf shrinkage estimation (v11 pre-committed test) ----------
 # Statistical shrinkage, distinct from regularize_covariance (which adds a tiny
 # numerical ridge for invertibility only). Ledoit-Wolf returns the asymptotically
 # optimal convex combination (1-rho)*S + rho*F of the sample covariance S with a

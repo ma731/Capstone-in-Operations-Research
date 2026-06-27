@@ -19,7 +19,7 @@ See docs/decisions.md (Decision 8) and thesis/full_formulation.md (Task C, 3c).
 
 Scope guardrail: capacity is treated as DATA, not as a second stochastic vector.
 Making capacity stochastic would change the ambiguity set to (rho, capacity) and
-collide with the joint-uncertainty teammate's scope (Decision 2). Keep it data.
+collide with a separate joint load+carbon uncertainty model. Keep it data.
 """
 from __future__ import annotations
 

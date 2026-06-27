@@ -1,6 +1,6 @@
 """Task C: shuffled-marginals DRO experiment (Ontario + Eastern-Interconnection belt).
 
-DEPRECATED (kept as the locked, pre-registered Task C artifact): for new runs use
+DEPRECATED (kept as the locked, pre-committed Task C artifact): for new runs use
 scripts/run_case_experiment.py --region-set taskc (same machinery, parameterized).
 
 A THIRD region set, run through the SAME locked machinery as Tasks A/B (Algorithm
@@ -20,7 +20,7 @@ Differences vs Task A (everything else identical/locked):
   * The DRO SOCP is solved by CLARABEL (conic). HiGHS cannot do second-order cones;
     it is only for the deterministic LP baseline (scripts/solve_baseline.py).
 
-Pre-registration discipline (same as Task A):
+Pre-commitment discipline (same as Task A):
   1. Commit this script BEFORE running without --dry-run.
   2. --dry-run reports CV-selected epsilon* per (regime, alpha, Sigma) WITHOUT
      touching the 2025 test set.

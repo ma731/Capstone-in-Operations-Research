@@ -24,7 +24,7 @@ constraints bind LOOSELY -- active in some hours, not dominant. On the training
 panel the deadline binds for most regions, thermal binds ~25% of cells, and the
 DRO still reallocates ~25-30% of total work as epsilon grows (NOT frozen).
 
-Pre-registration discipline
+Pre-commitment discipline
 ---------------------------
   1. Lock this script via git commit BEFORE running without --dry-run.
   2. --dry-run reports CV-selected epsilon* per (regime, alpha, Sigma) without

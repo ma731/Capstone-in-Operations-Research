@@ -1,6 +1,6 @@
 """Calibration probe for the Task A constraint regimes (TRAINING DATA ONLY).
 
-Pre-registration transparency: this script documents HOW the deadline window
+Pre-commitment transparency: this script documents HOW the deadline window
 fraction (gamma) and the thermal effective-power bound (bar_P) were chosen so
 that constraints 3a/3b bind LOOSELY (active in some hours, not dominant) on the
 real 4-zone training panel. It NEVER touches the 2025 test set.

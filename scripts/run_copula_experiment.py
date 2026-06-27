@@ -1,4 +1,4 @@
-"""Phase 2 pre-registered experiment: does a non-elliptical copula recover the
+"""Phase 2 pre-committed experiment: does a non-elliptical copula recover the
 spatial scheduling value the covariance ball could not?
 
 For each (regime, alpha) cell we fit three nested dependence models on the
@@ -17,7 +17,7 @@ CVaR_0.95 of daily emissions. The reported *copula gaps* are
     gap_clayton_vs_gauss = CVaR(gaussian) - CVaR(clayton)    (does asymmetry add?)
 
 positive = the structured model reduces tail emissions. A paired day-bootstrap
-gives a 95% CI per gap. Pre-registration: config commit-locked; scenarios use a
+gives a 95% CI per gap. Pre-commitment: config commit-locked; scenarios use a
 fixed seed; the test panel is read once (``--dry-run`` does train-only).
 
 Usage:

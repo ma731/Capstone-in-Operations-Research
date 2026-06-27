@@ -21,7 +21,7 @@ training set and evaluated once on the held-out 2025 test set.  Bootstrap
 joint-minus-shuffled test CVaR gap, since with 362 test days the CVaR
 average (over the worst ~18 days) has non-trivial sampling variability.
 
-The pre-registration discipline this script supports is:
+The pre-commitment discipline this script supports is:
   1. Lock the script via git commit BEFORE running with `--dry-run` turned off.
   2. `--dry-run` reports CV-selected epsilon* values and CV curves without
      ever touching 2025; this is the methodological gate.
@@ -62,7 +62,7 @@ from src.models.covariance import (
 
 # ----------------------------------------------------------------------
 # Configuration (locked at commit time; do not edit after committing
-# before the test-set run -- that is the pre-registration discipline).
+# before the test-set run -- that is the pre-commitment discipline).
 # ----------------------------------------------------------------------
 
 UTILIZATION_LEVELS = (0.10, 0.30, 0.60, 0.80)

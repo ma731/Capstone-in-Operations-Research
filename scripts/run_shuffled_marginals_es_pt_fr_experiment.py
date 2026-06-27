@@ -23,7 +23,7 @@ Comparability guardrail: nothing structural diverges. If a future change forces
 a different metric / CV / bootstrap, STOP -- the side-by-side comparison is the
 point of this second case.
 
-Pre-registration (same as Task A): lock via git commit before the test run;
+Pre-commitment (same as Task A): lock via git commit before the test run;
 --dry-run reports CV epsilon* without touching 2025; real run reads 2025 once.
 
 Outputs: results/es_pt_fr_regimes_<UTC-date>.csv / .pkl

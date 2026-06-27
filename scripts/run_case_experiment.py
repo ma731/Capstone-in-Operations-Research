@@ -20,7 +20,7 @@ guaranteed to use identical machinery:
                           value appears anywhere, it should appear here.
 
 (Task C's run_shuffled_marginals_taskc_experiment.py remains as the locked,
-pre-registered Task C artifact; this runner reproduces its taskc numbers and
+pre-committed Task C artifact; this runner reproduces its taskc numbers and
 extends the identical protocol to the other two cases.)
 
 Regimes (nested):
@@ -34,7 +34,7 @@ it is only for the deterministic LP baseline (scripts/solve_baseline.py).
 NOTE: the 3c ceiling bounds (x_min, x_max) are PROVISIONAL (not yet Goldilocks-
 calibrated -- see docs/decisions.md Decision 8). Treat R2 as exploratory.
 
-Pre-registration discipline: --dry-run reports CV-selected epsilon* per
+Pre-commitment discipline: --dry-run reports CV-selected epsilon* per
 (regime, alpha, Sigma) WITHOUT touching the 2025 test set; commit before the
 real run; the test year is read exactly once, at the end.
 """
@@ -347,7 +347,7 @@ def main() -> int:
     ap.add_argument("--cvar-alpha", type=float, default=0.95,
                     help="Tail level for the CVaR metric and epsilon selection "
                          "(e.g. 0.90 or 0.99). Default 0.95 reproduces the "
-                         "pre-registered runs; other values get a filename suffix.")
+                         "pre-committed runs; other values get a filename suffix.")
     args = ap.parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
 

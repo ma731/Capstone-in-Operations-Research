@@ -18,7 +18,7 @@ training set and evaluated once on the held-out 2025 test set.  Bootstrap
 joint-minus-shuffled test CVaR gap, since with 362 test days the CVaR
 average (over the worst ~18 days) has non-trivial sampling variability.
 
-The pre-registration discipline this script supports is:
+The pre-commitment discipline this script supports is:
   1. Lock the script via git commit BEFORE running with `--dry-run` turned off.
   2. `--dry-run` reports CV-selected epsilon* values and CV curves without
      ever touching 2025; this is the methodological gate.
@@ -66,7 +66,7 @@ _LW_INTENSITIES: list[float] = []   # records Ledoit-Wolf rho values when shrink
 # Residualization flag, set from --residualize in main(). "none" | "seasonal" | "ar1".
 # When active, the COVARIANCE is estimated from forecast residuals (the
 # unpredictable part), while rho_bar (the scheduling mean field) and the scored
-# per-day emissions stay on RAW carbon intensity. This isolates the pre-registered
+# per-day emissions stay on RAW carbon intensity. This isolates the pre-committed
 # question: does cross-region correlation of the forecast ERRORS change the robust
 # schedule, where correlation of raw levels did not? Baselines (seasonal-naive,
 # AR(1)) are grounded in the carbon-intensity forecasting literature: Maji et al.
@@ -125,7 +125,7 @@ def apply_residual_baseline(panel: np.ndarray, dates, stats: dict) -> np.ndarray
 
 # ----------------------------------------------------------------------
 # Configuration (locked at commit time; do not edit after committing
-# before the test-set run -- that is the pre-registration discipline).
+# before the test-set run -- that is the pre-commitment discipline).
 # ----------------------------------------------------------------------
 
 # v11 components-on variant. Utilization is HELD FIXED at the one level where
@@ -476,7 +476,7 @@ def main():
         "--shrinkage",
         action="store_true",
         help="Use Ledoit-Wolf shrinkage covariance instead of sample+ridge. "
-        "Pre-registered test: does shrinkage widen the joint-vs-shuffled CVaR "
+        "Pre-committed test: does shrinkage widen the joint-vs-shuffled CVaR "
         "separation in CV? Run with --dry-run to keep the 2025 test set untouched.",
     )
     parser.add_argument(
@@ -484,7 +484,7 @@ def main():
         choices=("none", "seasonal", "ar1"),
         default="none",
         help="Estimate the covariance from forecast RESIDUALS instead of raw "
-        "carbon intensity (rho_bar and scored emissions stay raw). Pre-registered "
+        "carbon intensity (rho_bar and scored emissions stay raw). Pre-committed "
         "test: does cross-region correlation of forecast errors change the schedule "
         "where raw-level correlation did not? Agreement rule: an effect counts only "
         "if BOTH 'seasonal' and 'ar1' agree in direction. Run with --dry-run.",
