@@ -4,7 +4,7 @@ const OUT = "";
 const C={navy:"00338D",navyD:"002564",cer:"0098E0",cerT:"E6F4FC",white:"FFFFFF",ink:"1A1A1A",muted:"586173",
   line:"C9D2E0",gold:"E8A33D",goldT:"FAF1DF",goldD:"8A5C16",blueT:"EEF3FB"};
 const F="Palatino Linotype";
-const A={heat:2.17,bar:1.524,tail:1.99,cv:3.45,cop:2.55,map:1.66,sched:4.26,mech:1.72,transfer:2.00,vvc:1.55,canyon:1.62,network:1.507,usmap:1.645,droeq:2.752,landscape:1.57};
+const A={heat:2.17,bar:1.524,tail:1.99,cv:3.45,cop:2.55,map:1.66,sched:4.26,mech:1.72,transfer:2.00,vvc:1.55,canyon:1.62,network:1.507,usmap:1.645,droeq:2.752,landscape:1.57,frontier:2.454};
 const pres=new pptxgen(); pres.defineLayout({name:"A0",width:33.11,height:46.81}); pres.layout="A0";
 pres.author="Marco Ortiz Togashi"; pres.title="Carbon DRO capstone poster";
 const s=pres.addSlide(); s.background={color:C.white};
@@ -132,8 +132,8 @@ cy+=figCard(FIG+"finding_bar.png",bx,cy,mcW,A.bar)+0.1;
 cy+=scap([N("Real problem versus covariance-only: about zero unless the mean field is removed.")],bx,cy,mcW)+0.12;
 cy+=figCard(FIG+"cv_curve.png",bx,cy,mcW,A.cv)+0.1;
 cy+=scap([N("Cross-validation picks "),{text:"ε* = 1",options:{bold:true,color:C.navy}},N(": the optimizer truly robustifies, so the null is real.")],bx,cy,mcW)+0.12;
-cy+=figCard(FIG+"copula_result.png",bx,cy,mcW,A.cop)+0.1;
-cy+=scap([N("Gaussian, Clayton, even the comonotone (maximal) copula: "),{text:"every gain sits at the noise floor.",options:{bold:true,color:C.navy}}],bx,cy,mcW)+0.12;
+cy+=figCard(FIG+"complexity_frontier.png",bx,cy,mcW,A.frontier)+0.1;
+cy+=scap([N("Cumulative savings vs. carbon-blind "),{text:"jump once (transfer), then stay flat",options:{bold:true,color:C.navy}},N(": joint covariance, the robust DRO, and copulas (Gaussian, Clayton, comonotone) each add nothing.")],bx,cy,mcW)+0.12;
 {const vH=colBot-cy; rect(bx,cy,mcW,vH,C.cerT); rect(bx,cy,0.16,vH,C.cer);
  T([{text:"THE VERDICT   ",options:{bold:true,color:C.navy,cs:1}},{text:"across every estimator and test, the out-of-sample spatial value is statistically indistinguishable from zero.",options:{bold:true,color:C.navy}}],bx+0.34,cy,mcW-0.62,vH,{fs:16.5,valign:"middle",lsm:1.06});}
 // COL 3 - THE MECHANISM
