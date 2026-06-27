@@ -38,6 +38,7 @@
 \begin{document}
 
 % ===================== COVER PAGE =====================
+\pagestyle{empty}% no page number on cover (incl. any overflow page)
 \begin{titlepage}
 \centering
 % Official IE University logo. Drop the file at figures/ie_logo.pdf (vector
@@ -88,6 +89,7 @@ as candidly as the positive ones, to avoid overstating the value of the proposed
 methods. The author declares no conflicts of interest.
 \end{minipage}
 \end{titlepage}
+\pagestyle{plain}% restore page numbers for front matter
 
 % Front matter (abstract, contents, lists, nomenclature) numbered i, ii, iii ...;
 % the body resets to arabic page 1 at the Introduction.

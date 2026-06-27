@@ -20,7 +20,7 @@ df = pd.read_csv("docs/results_snapshots/part3_emergency_2026-06-15.csv")
 COL = {"us_west": NAVY, "taskc": GOLD, "us_hetero": SAGE}
 NAME = {"us_west": "Western US", "taskc": "Eastern US, Canada", "us_hetero": "Diversified"}
 # nudge the right-edge direct labels so they never collide vertically
-LABEL_DY = {"us_west": 0.0, "taskc": -0.35, "us_hetero": 0.35}
+LABEL_DY = {"us_west": 0.0, "taskc": -0.95, "us_hetero": 0.35}
 
 fig, ax = plt.subplots(figsize=(8.0, 5.0), constrained_layout=True)
 
@@ -66,7 +66,7 @@ ax.annotate(
     xy=(1.02, 0.45), xytext=(1.45, 11.6), fontsize=11.5, color=RUST,
     weight="bold", ha="left", va="top",
     arrowprops=dict(arrowstyle="->", color=RUST, lw=1.4,
-                    connectionstyle="arc3,rad=-0.12"))
+                    connectionstyle="arc3,rad=0.18"))
 ax.scatter([1.0], [0.0], s=90, color=RUST, zorder=5, marker="X")
 
 save(fig, "crossover")

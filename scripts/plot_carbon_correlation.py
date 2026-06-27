@@ -106,7 +106,7 @@ def main() -> None:
     resid = loc.groupby(loc.index.hour).transform(lambda s: s - s.mean()).corr()
 
     # --- Figure 1: correlation heatmaps (raw vs residual) ---
-    fig, axes = plt.subplots(1, 2, figsize=(11, 5.4), constrained_layout=True)
+    fig, axes = plt.subplots(1, 2, figsize=(11, 5.7), constrained_layout=True)
     _heatmap(axes[0], raw, "Raw hourly correlation", show_y=True)
     im = _heatmap(axes[1], resid, "Residual (hour-of-day mean removed)", show_y=False)
     cbar = fig.colorbar(im, ax=axes, shrink=0.82, pad=0.025)
@@ -116,7 +116,7 @@ def main() -> None:
     fig.suptitle(
         "Cross-region carbon-intensity correlation: "
         f"{DISPLAY_NAME.get(args.region_set, args.region_set)} (2021 to 2025)",
-        fontsize=SUPTITLE_FS, fontweight="bold", color=NAVY,
+        fontsize=SUPTITLE_FS, fontweight="bold", color=NAVY, y=1.06,
     )
     for p in _save(fig, f"ci_corr_heatmap_{args.region_set}"):
         print(f"  wrote {p}")
