@@ -85,66 +85,82 @@ for nm, x in [("baseline", x_base), ("carbon-perturbed", x_pert), ("cap-tightene
     print(f"     agg = [{', '.join(f'{v:4.1f}' for v in x.sum(0))}]  (cap {P_AGG:.0f})")
 
 # ----- figure --------------------------------------------------------------
-NAVY, GOLD, RUST, SAGE, CREAM = "#0c1e3e", "#b89535", "#8b3a0e", "#5d7a5a", "#faf7f0"
+NAVY, GOLD, RUST, SAGE, CREAM = "#0E2A52", "#E69F00", "#B3402F", "#4A7C59", "#FFFFFF"
 R2COL = "#7a9bb8"
 plt.rcParams.update({
     "font.family": "serif", "font.serif": ["Times", "DejaVu Serif"],
-    "font.size": 10, "axes.edgecolor": NAVY, "axes.labelcolor": NAVY,
+    "mathtext.fontset": "stix",
+    "font.size": 11.5, "axes.edgecolor": NAVY, "axes.labelcolor": NAVY,
+    "axes.linewidth": 0.9,
     "xtick.color": "#5a5a5a", "ytick.color": "#5a5a5a",
+    "xtick.labelsize": 10.5, "ytick.labelsize": 10.5,
     "axes.facecolor": CREAM, "figure.facecolor": CREAM, "savefig.facecolor": CREAM,
     "axes.spines.top": False, "axes.spines.right": False,
-    "axes.grid": True, "grid.color": "#c9bfa6", "grid.linestyle": ":",
-    "grid.linewidth": 0.5,
+    "axes.grid": True, "grid.color": "#dbe1ea", "grid.linestyle": ":",
+    "grid.linewidth": 0.5, "axes.axisbelow": True,
 })
 hours = np.arange(1, T + 1)
 panels = [
     ("A. Baseline", x_base, RHO0, P_AGG,
-     "regions 1--2 share the contested\nclean hours (4--5) under the cap"),
+     "regions 1 and 2 share the contested\nclean hours (4 to 5) under the cap"),
     ("B. Carbon perturbation", x_pert, rho_pert, P_AGG,
-     "region 1's clean window dirtied:\nit cedes 4--5 to region 2, spreads out"),
+     "region 1's clean window dirtied:\nit cedes hours 4 to 5 to region 2, spreads out"),
     ("C. Tighter shared cap ($14\\!\\to\\!11$)", x_cap, RHO0, 11.0,
      "less shared headroom:\nboth regions spread further in time"),
 ]
 
-fig, axes = plt.subplots(1, 3, figsize=(13.5, 4.2), sharey=True)
-for ax, (title, x, rho, pagg, note) in zip(axes, panels):
-    ax.bar(hours, x[0], width=0.64, color=NAVY, edgecolor="none", zorder=3,
-           label="region 1 load")
-    ax.bar(hours, x[1], width=0.64, bottom=x[0], color=R2COL, edgecolor="none",
-           zorder=3, label="region 2 load")
-    ax.axhline(pagg, color=RUST, ls="--", lw=1.2, alpha=0.85, zorder=4,
-               label=f"aggregate cap ({pagg:.0f})")
-    ax.axvspan(0.5, T_DEAD + 0.5, color=SAGE, alpha=0.07, zorder=0)
-    ax2 = ax.twinx()
-    ax2.plot(hours, rho[0], color=GOLD, lw=1.6, marker="o", ms=3, zorder=5,
-             label="carbon R1")
-    ax2.plot(hours, rho[1], color="#6b4f12", lw=1.4, ls=(0, (4, 2)), marker="s",
-             ms=2.5, zorder=5, label="carbon R2")
-    ax2.set_ylim(100, 470); ax2.grid(False); ax2.tick_params(axis="y", colors=GOLD)
-    if ax is axes[-1]:
-        ax2.set_ylabel("carbon intensity (kg/MWh)", color=GOLD)
-    ax.set_title(title, fontsize=11, color=NAVY, pad=8)
-    ax.set_xlabel("hour of horizon"); ax.set_xticks(hours)
-    ax.set_ylim(0, P_AGG * 1.18)
-    ax.text(0.5, -0.34, note, transform=ax.transAxes, ha="center", va="top",
-            fontsize=9.5, color="#444", style="italic")
+CARB2 = "#B3402F"   # brick-red for the region-2 carbon line (no brown)
 
-axes[0].set_ylabel("energy allocated (MWh)")
+fig, axes = plt.subplots(1, 3, figsize=(13.6, 4.9), sharey=True)
+for i, (ax, (title, x, rho, pagg, note)) in enumerate(zip(axes, panels)):
+    ax.bar(hours, x[0], width=0.66, color=NAVY, edgecolor="none", zorder=3)
+    ax.bar(hours, x[1], width=0.66, bottom=x[0], color=R2COL, edgecolor="none",
+           zorder=3)
+    ax.axhline(pagg, color="#3a4a5c", ls="--", lw=1.4, alpha=0.9, zorder=4)
+    ax.axvspan(0.5, T_DEAD + 0.5, color=SAGE, alpha=0.08, zorder=0)
+    ax2 = ax.twinx()
+    ax2.plot(hours, rho[0], color=GOLD, lw=1.8, marker="o", ms=3.5, zorder=5)
+    ax2.plot(hours, rho[1], color=CARB2, lw=1.5, ls=(0, (4, 2)), marker="s",
+             ms=3, zorder=5)
+    ax2.set_ylim(100, 470); ax2.grid(False)
+    # carbon intensity (right axis) labelled once, on the last panel only
+    if i == len(axes) - 1:
+        ax2.tick_params(axis="y", colors=GOLD, labelsize=10.5)
+        ax2.set_ylabel("carbon intensity (kg/MWh)", color=GOLD)
+        ax2.spines["right"].set_color(GOLD)
+    else:
+        ax2.tick_params(axis="y", length=0, labelleft=False, labelright=False)
+        ax2.set_yticklabels([])
+        ax2.spines["right"].set_visible(False)
+    ax2.spines["top"].set_visible(False)
+    ax.set_title(title, fontsize=12.5, color=NAVY, pad=10)
+    ax.set_xlabel("hour of horizon", fontsize=11.5)
+    ax.set_xticks(hours)
+    ax.set_ylim(0, P_AGG * 1.18)
+    ax.text(0.5, -0.22, note, transform=ax.transAxes, ha="center", va="top",
+            fontsize=11, color="#555", style="italic")
+
+axes[0].set_ylabel("energy allocated (MWh)", fontsize=11.5)
+
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 legend_handles = [
     Patch(color=NAVY, label="region 1 load"),
     Patch(color=R2COL, label="region 2 load"),
-    Line2D([], [], color=RUST, ls="--", lw=1.2, label="aggregate cap"),
-    Line2D([], [], color=GOLD, lw=1.6, marker="o", ms=3, label="carbon R1"),
-    Line2D([], [], color="#6b4f12", lw=1.4, ls=(0, (4, 2)), marker="s", ms=2.5,
-           label="carbon R2"),
+    Patch(facecolor=SAGE, alpha=0.18, edgecolor="none",
+          label="deferral window (to h6)"),
+    Line2D([], [], color="#3a4a5c", ls="--", lw=1.4, label="aggregate cap"),
+    Line2D([], [], color=GOLD, lw=1.8, marker="o", ms=3.5, label="carbon, R1"),
+    Line2D([], [], color=CARB2, lw=1.5, ls=(0, (4, 2)), marker="s", ms=3,
+           label="carbon, R2"),
 ]
-axes[0].legend(handles=legend_handles, loc="upper left", frameon=False, fontsize=9)
-fig.suptitle("Full-model validation on a two-region instance: the schedule responds "
-             "as anticipated, across regions, to input perturbations",
-             fontsize=12.5, color=NAVY, y=1.04)
-plt.tight_layout()
+fig.legend(handles=legend_handles, loc="lower center",
+           bbox_to_anchor=(0.5, 0.005), ncol=6, frameon=False, fontsize=10.8,
+           columnspacing=1.8, handlelength=2.0, handletextpad=0.6)
+fig.suptitle("Full-model validation on a two-region instance: the schedule "
+             "responds as anticipated, across regions, to input perturbations",
+             fontsize=13.5, color=NAVY, fontweight="bold", y=0.99)
+fig.subplots_adjust(left=0.055, right=0.93, top=0.87, bottom=0.33, wspace=0.10)
 plt.savefig(OUTPUT_DIR / "model_validation.pdf", bbox_inches="tight")
 plt.savefig(OUTPUT_DIR / "model_validation.png", bbox_inches="tight", dpi=300)
 plt.close()

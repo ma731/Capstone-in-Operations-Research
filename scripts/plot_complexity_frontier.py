@@ -38,21 +38,31 @@ GRIDS = [
 ]
 
 
+# Where to drop the direct end-of-line labels (nudged off the exact endpoints so the
+# near-tied Western/Eastern curves get a clear gap; colour does the matching).
+LABEL_Y = {"Western US": 10.7, "Eastern US-Canada": 13.0, "Diversified": 15.8}
+
+
 def render(figsize, fs, outfile, save_pdf=False):
     """Render the frontier at a given size/font scale to outfile (PNG, + PDF if asked)."""
-    fig, ax = plt.subplots(figsize=figsize)
+    fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
     x = np.arange(len(LAYERS))
 
-    ax.axvspan(1, 2, color=GOLD, alpha=0.10, zorder=0)
+    # Shade the one segment that matters (the transfer jump) and the flat tail.
+    ax.axvspan(1, 2, color=GOLD, alpha=0.12, zorder=0)
     ax.axvspan(2, len(LAYERS) - 1, color=MUTED, alpha=0.06, zorder=0)
 
     for name, color, vals in GRIDS:
-        ax.plot(x, vals, "-o", color=color, lw=fs["lw"], ms=fs["ms"], zorder=5, label=name)
+        ax.plot(x, vals, "-o", color=color, lw=fs["lw"], ms=fs["ms"],
+                mec="white", mew=fs["mew"], zorder=5)
+        # Direct labels in the empty margin to the right; no legend over the data.
+        ax.text(len(LAYERS) - 0.92, LABEL_Y[name], name, color=color,
+                fontsize=fs["leg"], va="center", ha="left", clip_on=False)
 
     ax.set_xticks(x)
     ax.set_xticklabels(LAYERS, fontsize=fs["tick"])
     ax.tick_params(axis="y", labelsize=fs["tick"])
-    ax.set_xlim(-0.25, len(LAYERS) - 0.7)
+    ax.set_xlim(-0.3, len(LAYERS) - 0.55)
     ax.set_ylim(0, 18)
     ax.set_ylabel("cumulative emissions saved vs. carbon-blind  [%]", fontsize=fs["label"])
     ax.set_xlabel("modelling and estimation complexity (layers added left to right)",
@@ -60,14 +70,15 @@ def render(figsize, fs, outfile, save_pdf=False):
     ax.set_title("The complexity-value frontier: one jump (transfer), then flat",
                  fontsize=fs["title"])
 
-    ax.annotate("active transfer\n= the lever", xy=(1.55, 7.8), xytext=(0.55, 16.4),
-                color=RUST, fontsize=fs["ann"], weight="bold", ha="left", va="top",
-                arrowprops=dict(arrowstyle="->", color=RUST, lw=1.6))
-    ax.text(4.0, 8.4, "+joint cov., +robust DRO, +copula\nadd $\\approx$ nothing (flat)",
-            color=INK, fontsize=fs["ann"], ha="center", va="center")
+    # The single takeaway: the one bold annotation, with a short arrow onto the jump.
+    ax.annotate("active transfer:\nthe lever", xy=(1.62, 8.6), xytext=(0.18, 15.2),
+                color=RUST, fontsize=fs["ann"], weight="bold", ha="left", va="center",
+                arrowprops=dict(arrowstyle="-|>", color=RUST, lw=fs["lw"] * 0.6,
+                                connectionstyle="arc3,rad=0.18", shrinkB=4))
+    # Secondary note, regular weight, in the empty space under the flat tail.
+    ax.text(3.55, 6.4, "+joint cov., +robust DRO, +copula\nadd $\\approx$ nothing (flat)",
+            color=MUTED, fontsize=fs["ann"], ha="center", va="center")
 
-    ax.legend(loc="lower right", frameon=False, fontsize=fs["leg"])
-    fig.tight_layout()
     out = Path(outfile)
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=300, bbox_inches="tight")
@@ -77,12 +88,12 @@ def render(figsize, fs, outfile, save_pdf=False):
     print(f"wrote {out}")
 
 
-# Thesis version (taller, embedded at ~0.74 textwidth).
-render((9.0, 5.4),
-       dict(lw=2.6, ms=7.5, tick=11, label=12.5, title=13.5, ann=10.5, leg=10.5),
+# Thesis version (compact so fonts stay legible when embedded at ~0.75 textwidth).
+render((7.4, 4.7),
+       dict(lw=2.6, ms=7.5, mew=1.0, tick=12.5, label=13.5, title=14.5, ann=12.0, leg=12.0),
        "figures/complexity_frontier.png", save_pdf=True)
 
 # Poster version (wider and short so it drops into a column slot; larger fonts).
-render((12.0, 5.0),
-       dict(lw=3.6, ms=11, tick=15.5, label=16.5, title=18.5, ann=14.5, leg=15.5),
+render((12.0, 5.4),
+       dict(lw=3.6, ms=11, mew=1.4, tick=15.5, label=16.5, title=18.5, ann=14.5, leg=15.5),
        "poster/figs/complexity_frontier.png", save_pdf=False)

@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 from src.analysis.metrics import cvar_upper_tail, per_day_emissions  # noqa: E402
-from src.analysis.plotstyle import NAVY, RUST, apply_style  # noqa: E402
+from src.analysis.plotstyle import MUTED, NAVY, RUST, apply_style  # noqa: E402
 from src.analysis.stratified_correlations import REGION_SETS  # noqa: E402
 from src.data.electricitymaps import load_all_zones, to_wide  # noqa: E402
 from src.models.algorithm_2b_mahalanobis import solve_mahalanobis_dro  # noqa: E402
@@ -67,7 +67,8 @@ def cv_curve(train, shuffle, region_order):
 
 def main() -> None:
     apply_style()
-    fig, axes = plt.subplots(1, 3, figsize=(13.5, 4.6), constrained_layout=True)
+    fig, axes = plt.subplots(1, 3, figsize=(13.6, 5.0), sharex=True,
+                             constrained_layout=True)
     xs = np.arange(len(EPS))
     for ax, case in zip(axes, CASES):
         cfg = REGION_SETS[case]
@@ -80,28 +81,37 @@ def main() -> None:
         # normalize to the eps=0 (nominal) value, in %
         cj = 100 * (cj / cj[0] - 1)
         cs = 100 * (cs / cs[0] - 1)
-        ax.plot(xs, cj, "-o", color=NAVY, lw=2, ms=6, label="joint $\\Sigma$")
-        ax.plot(xs, cs, "--s", color=RUST, lw=1.6, ms=5, mfc="none",
-                label="shuffled $\\Sigma$")
+        ax.plot(xs, cs, "--s", color=RUST, lw=1.8, ms=6, mfc="white",
+                mec=RUST, mew=1.4, label="shuffled $\\Sigma$ (spatial null)",
+                zorder=3)
+        ax.plot(xs, cj, "-o", color=NAVY, lw=2.6, ms=6.5,
+                label="joint $\\Sigma$", zorder=4)
+        # mark the CV-optimal radius
         star = int(np.argmin(cj))
-        ax.scatter([star], [cj[star]], s=180, facecolors="none",
-                   edgecolors=NAVY, lw=2, zorder=5)
+        ax.scatter([star], [cj[star]], s=240, facecolors="none",
+                   edgecolors=NAVY, lw=2.2, zorder=6)
         ax.annotate("$\\varepsilon^\\star$", (star, cj[star]),
-                    textcoords="offset points", xytext=(6, 10), color=NAVY,
-                    fontsize=12)
-        ax.axhline(0, color="0.6", lw=0.8, ls=":")
+                    textcoords="offset points", xytext=(-11, 15),
+                    ha="right", va="bottom", color=NAVY,
+                    fontsize=15, fontweight="bold", zorder=7)
+        ax.axhline(0, color=MUTED, lw=0.9, ls=(0, (1, 2)), zorder=1)
+        ax.margins(x=0.06)
         ax.set_xticks(xs)
-        ax.set_xticklabels([f"{e:g}" for e in EPS], fontsize=9)
-        ax.set_xlabel("Wasserstein radius $\\varepsilon$", fontsize=9)
-        ax.set_title(TITLE[case], fontsize=10)
-        if case == "us_west":
-            ax.set_ylabel("CV validation $\\mathrm{CVaR}_{0.95}$\n"
-                          "(\\% vs.\\ nominal $\\varepsilon{=}0$)", fontsize=9)
-        ax.legend(frameon=False, fontsize=9, loc="upper left")
-        ax.grid(alpha=0.3, lw=0.5)
-    fig.suptitle("The DRO genuinely engages: CV picks a non-trivial "
-                 "$\\varepsilon^\\star$, and the joint and shuffled curves coincide "
-                 "(the active null)", fontsize=12)
+        ax.set_xticklabels([f"{e:g}" for e in EPS])
+        ax.set_xlabel("Wasserstein radius $\\varepsilon$")
+        ax.set_title(TITLE[case], pad=8)
+        ax.grid(False, axis="x")
+
+    axes[0].set_ylabel(
+        "CV out-of-sample $\\mathrm{CVaR}_{0.95}$\n"
+        "(% vs. nominal $\\varepsilon = 0$)")
+    axes[0].legend(loc="upper left", frameon=False, handlelength=2.4,
+                   borderaxespad=0.4, fontsize=11)
+
+    fig.suptitle(
+        "The DRO genuinely engages: CV selects a non-trivial $\\varepsilon^\\star$,\n"
+        "and the joint and shuffled $\\Sigma$ curves coincide (the active null)",
+        fontsize=15, fontweight="bold", color=NAVY)
     FIG.mkdir(exist_ok=True)
     for ext in ("pdf", "png"):
         p = FIG / f"cv_curve.{ext}"

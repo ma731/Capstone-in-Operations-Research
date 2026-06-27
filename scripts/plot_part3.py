@@ -15,7 +15,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
-from src.analysis.plotstyle import apply_style, NAVY, GOLD, RUST, SAGE  # noqa: E402
+from src.analysis.plotstyle import (  # noqa: E402
+    apply_style, NAVY, GOLD, RUST, SAGE, INK, LINE,
+)
 
 FIG = Path("figures")
 
@@ -35,45 +37,58 @@ COL = {"Western US": NAVY, "Diversified": SAGE}
 def main():
     apply_style()
     FIG.mkdir(exist_ok=True)
-    fig, (axA, axB) = plt.subplots(1, 2, figsize=(13.0, 5.0),
+    fig, (axA, axB) = plt.subplots(1, 2, figsize=(13.0, 5.6),
                                    constrained_layout=True)
 
-    # Panel A: transfer unlocks savings
+    # ---- Panel A: transfer unlocks savings ----
     x = np.arange(len(GRIDS))
-    axA.bar(x, SAVINGS, 0.55, color=[NAVY, RUST, SAGE])
+    axA.bar(x, SAVINGS, 0.62, color=[NAVY, RUST, SAGE], zorder=3)
     for i, v in enumerate(SAVINGS):
-        axA.text(i, v + 0.15, f"{v:.1f}%", ha="center", fontsize=10, fontweight="bold")
+        axA.text(i, v + 0.25, f"{v:.1f}%", ha="center", va="bottom",
+                 fontsize=13, color=INK)
     axA.set_xticks(x)
-    axA.set_xticklabels(GRIDS, fontsize=9)
-    axA.set_ylabel("out-of-sample $\\mathrm{CVaR}_{0.95}$ reduction\nvs.\\ no transfer  [%]",
-                   fontsize=9)
+    axA.set_xticklabels(GRIDS, fontsize=12)
+    axA.set_ylabel("Out-of-sample $\\mathrm{CVaR}_{0.95}$ reduction"
+                   " vs. no transfer  [%]")
     axA.set_ylim(0, 12)
-    axA.set_title("A. Active transfer unlocks spatial value\n"
-                  "(the value the passive null left on the table)", fontsize=10)
-    axA.grid(axis="y", alpha=0.3, lw=0.5)
+    axA.set_title("A.  Active transfer unlocks spatial value")
+    axA.grid(axis="y", color=LINE, alpha=0.7, lw=0.8)
+    axA.margins(x=0.08)
 
-    # Panel B: the tail-risk crossover
-    axB.axhline(0, color="0.35", lw=1.1)
-    axB.axhspan(-0.5, 0, color="#fbeeec", alpha=0.7, zorder=0)
-    axB.axhspan(0, 9, color="#eef4ef", alpha=0.6, zorder=0)
+    # ---- Panel B: the tail-risk crossover ----
+    axB.set_xlim(0.78, 4.62)
+    axB.set_ylim(-1.4, 9.6)
+    axB.axhspan(-1.4, 0, color="#fbeeec", alpha=0.7, zorder=0)
+    axB.axhspan(0, 9.6, color="#eef4ef", alpha=0.6, zorder=0)
+    axB.axhline(0, color="0.45", lw=1.0, zorder=1)
+
     for g, gain in GAIN.items():
-        axB.plot(M, gain, "-o", color=COL[g], lw=2.2, ms=6, label=g)
-    axB.axvline(3.0, color="0.5", ls="--", lw=1)
-    axB.text(3.05, 7.2, "crossover\n($M^\\star\\approx3$)", fontsize=9, color="0.4")
-    axB.axvline(1.4, color=RUST, ls=":", lw=1.2)
-    axB.text(1.45, -0.9, "real grids reach\nonly $M\\approx1.4$", fontsize=9, color=RUST)
-    axB.text(3.4, 5.0, "robustness\npays", fontsize=9, color=SAGE)
-    axB.set_xlabel("grid-emergency severity $M$ (carbon spike multiplier)", fontsize=9)
-    axB.set_ylabel("robust commitment gain over\nrisk-neutral  $\\mathrm{CVaR}_{0.95}$  [%]",
-                   fontsize=9)
-    axB.set_title("B. When does robustness pay? The tail-risk crossover\n"
-                  "(crossover at $M^\\star\\approx3$; real grids reach only $M\\approx1.4$)",
-                  fontsize=10)
-    axB.legend(frameon=False, fontsize=9, loc="upper left")
-    axB.grid(alpha=0.3, lw=0.5)
+        axB.plot(M, gain, "-o", color=COL[g], lw=2.4, ms=6.5, zorder=4)
+    # direct labels at the right ends, no legend needed
+    axB.text(4.08, GAIN["Western US"][-1], " Western US", va="center",
+             ha="left", fontsize=12, color=NAVY)
+    axB.text(4.08, GAIN["Diversified"][-1], " Diversified", va="center",
+             ha="left", fontsize=12, color=SAGE)
 
-    fig.suptitle("Preliminary Phase 3: active transfer unlocks spatial value, and "
-                 "robustness crosses over under grid-emergency tail risk", fontsize=12)
+    # crossover marker
+    axB.axvline(3.0, color="0.5", ls="--", lw=1.0, zorder=1)
+    axB.text(3.0, 9.25, "crossover  $M^{\\star}\\!\\approx\\!3$", ha="center",
+             va="top", fontsize=11, color="0.35")
+    # operating range of real grids
+    axB.axvline(1.4, color=RUST, ls=":", lw=1.4, zorder=1)
+    axB.text(1.46, -1.05, "real grids reach\nonly $M\\approx1.4$", ha="left",
+             va="bottom", fontsize=11, color=RUST)
+    # single bold takeaway, in the empty upper-left band
+    axB.text(1.0, 6.6, "Robustness pays\nonly in the deep tail", ha="left",
+             va="center", fontsize=12.5, fontweight="bold", color=NAVY)
+
+    axB.set_xlabel("Grid-emergency severity $M$  (carbon-spike multiplier)")
+    axB.set_ylabel("Robust commitment gain over"
+                   " risk-neutral, $\\mathrm{CVaR}_{0.95}$  [%]")
+    axB.set_title("B.  When does robustness pay?")
+    axB.set_xticks(M)
+    axB.grid(axis="y", color=LINE, alpha=0.7, lw=0.8)
+
     for ext in ("pdf", "png"):
         p = FIG / f"part3_preliminary.{ext}"
         fig.savefig(p, dpi=300)

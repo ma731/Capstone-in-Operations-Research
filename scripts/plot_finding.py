@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-from src.analysis.plotstyle import apply_style  # noqa: E402
+from src.analysis.plotstyle import GOLD, MUTED, NAVY, SAGE, apply_style  # noqa: E402
 from src.analysis.stratified_correlations import REGION_SETS  # noqa: E402
 from src.analysis.tail_dependence import residualize_hour_of_day  # noqa: E402
 from src.data.electricitymaps import load_all_zones, to_wide  # noqa: E402
@@ -32,7 +32,7 @@ from src.data.electricitymaps import load_all_zones, to_wide  # noqa: E402
 CASES = ("us_hetero", "taskc", "us_west")
 LABEL = {"us_hetero": "Diversified\n(solar/wind/hydro)", "taskc": "Eastern US–Canada\n(Ontario+belt)",
          "us_west": "Western US\n(CA/NV/AZ)"}
-COLOR = {"us_hetero": "C2", "taskc": "C1", "us_west": "C0"}
+COLOR = {"us_hetero": SAGE, "taskc": GOLD, "us_west": NAVY}
 RES = Path("results")
 FIG = Path("figures")
 
@@ -48,28 +48,41 @@ def mean_residual_corr(case: str) -> float:
 def main() -> None:
     apply_style()
     FIG.mkdir(parents=True, exist_ok=True)
-    fig, (axA, axB) = plt.subplots(1, 2, figsize=(13.5, 5.6), constrained_layout=True)
+    # readable annotation sizes that survive embedding at ~0.75 text width
+    NOTE = 11
+    fig, (axA, axB) = plt.subplots(1, 2, figsize=(13.5, 5.8), constrained_layout=True)
+    fig.set_constrained_layout_pads(w_pad=0.12, h_pad=0.06, wspace=0.04)
 
     # --- Panel A: gap vs correlation strength ---
     for case in CASES:
         x = mean_residual_corr(case)
         gp = pd.read_csv(RES / f"{case}_regimes_2026-06-10.csv")["gap_pct"].to_numpy()
-        axA.scatter(np.full_like(gp, x), gp, color=COLOR[case], s=40, alpha=0.85,
-                    zorder=3, label=LABEL[case].replace("\n", " "))
-    axA.axhline(0, color="0.3", lw=1.2, zorder=1)
-    axA.axhspan(-0.05, 0.05, color="0.82", alpha=0.6, zorder=0)
-    axA.text(0.62, 0.02, "no-value band\n($\\pm$0.05%)", ha="right", va="bottom",
-             fontsize=9, color="0.3")
-    axA.annotate("correlation spans 0 $\\rightarrow$ 0.5,\nvalue stays at 0",
-                 xy=(0.30, 0.0), xytext=(0.30, -0.15), ha="center", fontsize=9,
-                 color="navy", arrowprops=dict(arrowstyle="->", color="navy", lw=1))
-    axA.text(0.12, -0.21, "negative = joint\ncovariance hurts", fontsize=9,
-             color="C2", ha="center")
-    axA.set_xlim(-0.05, 0.65)
+        axA.scatter(np.full_like(gp, x), gp, color=COLOR[case], s=58, alpha=0.9,
+                    edgecolors="white", linewidths=0.6, zorder=3,
+                    label=LABEL[case].replace("\n", " "))
+    axA.axhspan(-0.05, 0.05, color=SAGE, alpha=0.10, zorder=0)
+    axA.axhline(0, color=MUTED, lw=1.1, zorder=1)
+    # band label parked in the empty left edge, inside the band, off the data
+    axA.text(-0.03, 0.031, "no-value band  ($\\pm0.05\\%$)", ha="left", va="center",
+             fontsize=NOTE - 0.5, color=MUTED)
+    # takeaway: high correlation, still zero value (points to the right-hand clusters)
+    axA.annotate("correlation reaches $0.5$,\nspatial value stays at $0$",
+                 xy=(0.52, 0.005), xytext=(0.40, -0.135), ha="center", va="top",
+                 fontsize=NOTE, color=NAVY,
+                 arrowprops=dict(arrowstyle="->", color=NAVY, lw=1.2,
+                                 connectionstyle="arc3,rad=-0.15"))
+    # the low-correlation case has the largest spread (and can go negative)
+    axA.annotate("low correlation, largest spread:\njoint covariance can even hurt",
+                 xy=(0.219, -0.205), xytext=(0.255, -0.185), ha="left", va="center",
+                 fontsize=NOTE, color=SAGE,
+                 arrowprops=dict(arrowstyle="->", color=SAGE, lw=1.1))
+    axA.set_xlim(-0.06, 0.66)
+    axA.set_ylim(-0.27, 0.10)
     axA.set_xlabel("mean residual cross-region correlation  (weak $\\rightarrow$ strong)")
     axA.set_ylabel("spatial gap (shuf $-$ joint) $\\mathrm{CVaR}_{0.95}$  [%]")
-    axA.set_title("A. Spatial value does not track correlation", fontsize=12)
-    axA.legend(frameon=False, fontsize=9, loc="lower right")
+    axA.set_title("A. Spatial value does not track correlation")
+    axA.legend(loc="lower right", fontsize=NOTE, handletextpad=0.4,
+               borderaxespad=0.6, labelspacing=0.5)
 
     # --- Panel B: mean-ablation (real vs covariance-only) ---
     xs = np.arange(len(CASES))
@@ -78,24 +91,33 @@ def main() -> None:
         real.append(pd.read_csv(RES / f"{case}_regimes_2026-06-10.csv")["gap_pct"].abs().median())
         f = RES / f"{case}_regimes_2026-06-10_ablate-flat.csv"
         cov_only.append(pd.read_csv(f)["gap_pct"].clip(lower=0).max())
-    axB.bar(xs - 0.2, real, 0.4, label="real problem (mean present)", color="0.6")
+    axB.bar(xs - 0.2, real, 0.4, label="real problem (mean present)",
+            color="0.78", edgecolor="white", linewidth=0.6, zorder=2)
     axB.bar(xs + 0.2, cov_only, 0.4, label="covariance-only (mean removed)",
-            color=[COLOR[c] for c in CASES])
+            color=[COLOR[c] for c in CASES], edgecolor="white", linewidth=0.6,
+            zorder=2)
     for i, (r, c) in enumerate(zip(real, cov_only)):
-        axB.text(i - 0.2, r + 0.02, f"{r:.2f}", ha="center", fontsize=9)
-        axB.text(i + 0.2, c + 0.02, f"{c:.2f}", ha="center", fontsize=9)
+        axB.text(i - 0.2, r + 0.03, f"{r:.2f}", ha="center", va="bottom",
+                 fontsize=NOTE, color=MUTED)
+        axB.text(i + 0.2, c + 0.03, f"{c:.2f}", ha="center", va="bottom",
+                 fontsize=NOTE, color=COLOR[CASES[i]])
     axB.set_xticks(xs)
-    axB.set_xticklabels([c.replace("\n", " ") for c in (LABEL[c] for c in CASES)], fontsize=9)
+    axB.set_xticklabels([LABEL[c] for c in CASES], fontsize=NOTE)
+    axB.set_ylim(0, 1.65)
     axB.set_ylabel("spatial gap $\\mathrm{CVaR}_{0.95}$  [%]")
     axB.set_title("B. The covariance is masked, not worthless\n"
-                  "(remove the mean $\\rightarrow$ joint covariance pays off)", fontsize=12)
-    axB.legend(frameon=False, fontsize=9, loc="upper right")
-    axB.annotate("Western US exception:\nstrong common-mode corr,\nno value even isolated",
-                 xy=(2.2, 0.02), xytext=(1.5, 0.85), fontsize=9, color="C0",
-                 arrowprops=dict(arrowstyle="->", color="C0", lw=0.9))
+                  "remove the mean field, and joint covariance pays off")
+    axB.legend(loc="upper right", fontsize=NOTE, handletextpad=0.5,
+               borderaxespad=0.6, labelspacing=0.5)
+    axB.annotate("Western US exception:\nstrong common-mode correlation,\n"
+                 "no value even in isolation",
+                 xy=(2.2, 0.05), xytext=(1.62, 0.62), ha="center", va="center",
+                 fontsize=NOTE, color=NAVY,
+                 arrowprops=dict(arrowstyle="->", color=NAVY, lw=1.1,
+                                 connectionstyle="arc3,rad=0.2"))
 
     fig.suptitle("Carbon correlation is real, but adds no robust scheduling value: "
-                 "the mean field dominates", fontsize=14, fontweight="bold")
+                 "the mean field dominates", fontsize=16, fontweight="bold")
     for ext in ("pdf", "png"):
         p = FIG / f"finding.{ext}"
         fig.savefig(p, dpi=300)
