@@ -154,7 +154,8 @@ $\xi$ & zero-mean carbon residual (the dependence-bearing part) \\
 $\Sigma$ & cross-region space--time covariance of $\rho$ ($RT\times RT$) \\
 $L$ & Cholesky factor, $LL^\top=\Sigma$ \\
 $\varepsilon$ & Wasserstein ambiguity radius (DRO ball size) \\
-$\eta$ & scale-adaptive ridge factor for $\Sigma$ \\
+$\eta$ & epigraph (cone) variable in the second-order cone program \\
+$\lambda$ & covariance weight in the mean-variance stress objective (Sec.~\ref{sec:res-swap}) \\
 $\alpha_r$ & inflexible fraction of region $r$'s workload \\
 $\Phi$ & inter-region transfer budget ($\Phi=0$ is the no-transfer baseline) \\
 $f_{r\to s,t}$ & migrated load from region $r$ to $s$ at hour $t$ [MW] \\
@@ -230,22 +231,24 @@ test before the held-out year was touched (Section~\ref{sec:test}):
 \fbox{\begin{minipage}{0.94\textwidth}\small
 \textbf{Pre-registered hypotheses (Phase 1--2, RQ2).}\\[2pt]
 $H_1$ (modelling pays): encoding cross-region carbon dependence in the ambiguity set
-lowers out-of-sample $\CVaR_{0.95}$ by more than a $0.4\%$ materiality margin, relative
-to the dependence-destroyed (shuffled-marginals) model on the same feasible set.\\[2pt]
+lowers out-of-sample $\CVaR_{0.95}$ by more than a $0.4\%$ materiality margin (the
+smallest tail saving an operator would act on), relative to the dependence-destroyed
+(shuffled-marginals) model on the same feasible set.\\[2pt]
 $H_0$ (the spatial null): it does not; the out-of-sample spatial gap lies within
 $\pm0.4\%$.\\[2pt]
-\emph{Decision rule:} a per-cell equivalence test (TOST) that affirmatively rejects any
-effect beyond the margin, across the pre-registered grids and constraint regimes,
-supports $H_0$; a mean-leveling positive control must fire (detect value where value is
-constructed to exist) to license the null as a true negative rather than an
-underpowered test.
+\emph{Decision rule:} because one cannot simply accept a null, we test it by equivalence.
+The formal equivalence-test (TOST) null is that a material effect \emph{is} present
+($|\text{gap}|\ge0.4\%$); affirmatively rejecting it in every pre-registered grid and
+constraint regime is what licenses the spatial null $H_0$. A mean-leveling positive
+control must succeed (detect value where value is constructed to exist) for the null to
+count as a true negative rather than an underpowered test.
 \end{minipage}}
 \end{center}
 
 \subsection{Contributions}
-The thesis makes five contributions: two pre-registered and confirmatory (the day-ahead
-savings, RQ1, and the dependence null, RQ2), one methodological, one exploratory (the
-robustness crossover, RQ3), and one infrastructural. (i)~\emph{A working day-ahead
+The thesis makes five contributions: one pre-registered and confirmatory (the dependence
+null, RQ2), one a baseline-anchored measurement (the day-ahead savings, RQ1), one
+methodological, one exploratory (the robustness crossover, RQ3), and one infrastructural. (i)~\emph{A working day-ahead
 scheduler with honest, baseline-anchored savings}: active inter-region migration cuts
 out-of-sample $\CVaR_{0.95}$ by $4.0$--$9.9\%$ over the no-transfer ($\Phi=0$) baseline on
 the same feasible set across three real grids (a gross spatial ceiling, reported before
@@ -263,8 +266,8 @@ directions: an a-priori SOCP gap-bound (Proposition~\ref{prop:meandom}) before a
 touched; a mean-leveling positive control showing the covariance signal is genuine but
 masked by the mean field; a tail-dependence/comonotone-copula argument showing even the
 maximal coupling recovers nothing; and a risk-measure swap showing the null survives
-replacing the coherent objective with a non-coherent mean-variance one
-(Section~\ref{sec:res-swap}). (iv)~\emph{A price-of-robustness decision rule}, reported as
+replacing the standard-deviation penalty with a variance penalty built to favour
+covariance (Section~\ref{sec:res-swap}). (iv)~\emph{A price-of-robustness decision rule}, reported as
 an \emph{exploratory} extension outside the pre-registration, with a data-grounded,
 falsified crossover: robustification pays only past an emergency-severity crossover
 $M^\star\approx3$ that realized severity ($1.3$--$1.9\times$; Winter Storm Uri
@@ -1264,44 +1267,46 @@ Diversified & ERCOT--BPAT & 0.00 & 0.04 & 0.05 & $-0.02$ & 0.02\\
 \end{tabular}
 \end{table}
 
-\subsection{The null is not an artifact of the coherent objective
+\subsection{The null survives a different risk objective
 (RQ2)}\label{sec:res-swap}
-Proposition~\ref{prop:meandom}'s mean-dominance argument leans on two structural facts:
-emissions are linear in the carbon vector, and $\CVaR$ is translation-invariant
-(cash-additive), so the deterministic mean separates from the dependence-bearing
-residual. A natural objection is that the null is then a property of the chosen risk
-measure rather than of carbon scheduling. We test this directly. Holding the data, the
-feasible set, and the out-of-sample metric fixed, we swap the coherent
-mean-standard-deviation DRO objective ($\min\langle\bar\rho,x\rangle+\varepsilon\sqrt{x^\top\Sigma x}$,
-the thesis) for a \emph{non-coherent} mean-variance objective
-($\min\langle\bar\rho,x\rangle+\lambda\,x^\top\Sigma x$), which is not cash-additive and
-hands the cross-region covariance an explicit quadratic term to act on, and re-run the
-shuffled-marginals falsification, sweeping the covariance weight $\lambda$ over four
-orders of magnitude (\texttt{risk\_measure\_swap} snapshot).
+A natural objection is that the null is a property of the particular objective we
+optimise rather than of carbon scheduling. The robust scheduler penalises the
+\emph{standard deviation} of emissions, $\varepsilon\sqrt{x^\top\Sigma x}$, a square root
+that \emph{dampens} the cross-region covariance, so perhaps an objective that weighted the
+covariance more heavily would let it pay. We test this directly. Holding the data, the
+feasible set, and the out-of-sample metric fixed, we replace the standard-deviation
+penalty with a raw \emph{variance} penalty, $\lambda\,x^\top\Sigma x$ (a Markowitz-style
+mean-variance objective), a quadratic that \emph{amplifies} the covariance instead of
+dampening it and so gives it its strongest chance to help. We then re-run the
+shuffled-marginals falsification, sweeping the covariance weight $\lambda$ from negligible
+up to the point where the variance term is about $900\times$ the mean term
+(\texttt{risk\_measure\_swap} snapshot).
 
-The swap does not rescue covariance; it indicts it (Table~\ref{tab:swap}). Weighting the
-variance term up to $900\times$ the mean moves the schedule by up to $30\%$, so
-covariance genuinely enters the decision, yet the out-of-sample $\CVaR_{0.95}$ gap
-between joint and shuffled covariance stays below $1.5\%$ and sign-unstable, as under the
-coherent DRO (whose gap stays below $0.8\%$). At the weighting where the variance term
-balances the mean, the paired bootstrap interval excludes zero, but in the \emph{adverse}
-direction on two of three grids: modelling the joint covariance \emph{worsens}
-out-of-sample tail emissions by $1.5\%$ (Western) and $0.8\%$ (Diversified), and helps
-only trivially ($+0.11\%$) on the Eastern belt. Even out-of-sample standard deviation,
-the quantity mean-variance actually optimises, shows no robust covariance benefit, and
-in-sample variance reduction exceeds out-of-sample throughout, the signature of
-overfitting. The null is therefore not an artifact of CVaR's translation invariance:
-handed a non-coherent objective built to exploit it, the estimated cross-region
-dependence overfits and degrades the held-out tail. This strengthens the screening rule
-rather than bounding it.
+Even with the covariance amplified, modelling it does not pay (Table~\ref{tab:swap}). At
+the weight where the variance term balances the mean, the schedule shifts by up to $30\%$
+of compute relative to the no-covariance (shuffled) schedule, so the covariance genuinely
+drives the decision, yet using the joint covariance is no better out of sample than
+shuffling it away, and is in fact \emph{adverse} on two of three grids: the joint
+covariance \emph{worsens} the held-out $\CVaR_{0.95}$ tail by $1.5\%$ (Western) and
+$0.8\%$ (Diversified) and helps only trivially ($+0.11\%$) on the Eastern belt. Even
+out-of-sample standard deviation, the quantity this objective actually targets, shows no
+robust covariance benefit, and in-sample variance reduction exceeds out-of-sample
+throughout, the classic signature of fitting estimation noise. These adverse gaps do not
+overturn the spatial null; they reinforce it: modelling the cross-region covariance
+\emph{hurts} the held-out tail because the estimated dependence does not generalise. The
+null is therefore not an artifact of the robust scheduler's objective: handed an objective
+built to exploit covariance, the estimated dependence overfits and degrades the tail. This
+strengthens the screening rule rather than bounding it.
 
 \begin{table}[t]
 \centering\small
-\caption{Risk-measure swap. Re-running the shuffled-marginals test under a non-coherent
-mean-variance objective, at the weight where the variance term balances the mean. The
-schedule moves materially, but the out-of-sample $\CVaR_{0.95}$ gap (modelling joint
-covariance minus shuffling it; positive means covariance helps) stays immaterial and is
-adverse on two grids. Paired bootstrap, $1000$ resamples.}
+\caption{Risk-measure swap. Re-running the shuffled-marginals test under a mean-variance
+objective (a variance penalty that amplifies covariance), at the weight where the variance
+term balances the mean. The
+schedule moves materially, but the out-of-sample $\CVaR_{0.95}$ gap (shuffling minus
+modelling joint covariance, per Eq.~\eqref{eq:gap}; positive means covariance helps)
+delivers no material benefit and is materially adverse on two of three grids. Paired
+bootstrap, $1000$ resamples.}
 \label{tab:swap}
 \begin{tabular}{lrrl}
 \toprule
@@ -1526,11 +1531,13 @@ evaluate one canonical splittable workload with stylised, uniform per-region dem
 not real operator traces, and the headline transfer saving is computed \emph{gross} of
 migration economics: no per-unit, latency, SLA, or network-bandwidth cost, and an
 unbinding transfer budget. It is therefore an upper bound on the value of migration,
-not a net operational figure; a positive migration cost can only reduce it. On the
-modelling side, a natural worry is that the spatial null is an artifact of the chosen
-objective (cost linear in carbon, and a translation-invariant CVaR);
-Section~\ref{sec:res-swap} tests this directly by swapping in a non-coherent
-mean-variance objective and finds the null robust. The constraint-tightness
+not a net operational figure; a positive migration cost can only reduce it. Bandwidth and
+latency costs for splittable batch jobs are, however, modest relative to the carbon
+avoided, so the conservative $4.0\%$ plateau is likely to survive realistic migration
+costs, though we do not quantify this. On the modelling side, a natural worry is that the
+spatial null is an artifact of the chosen objective; Section~\ref{sec:res-swap} tests this
+directly by swapping the standard-deviation penalty for a variance penalty that favours
+covariance, and finds the null robust. The constraint-tightness
 sensitivities (Section~\ref{sec:res-robust}) address the most plausible feasible-set
 variations: a $3\times$ tighter ramp and a $50$--$95\%$ utilization sweep both leave the
 null intact. A qualitatively different objective (e.g.\ hard per-job deadlines) remains
@@ -2021,6 +2028,9 @@ average carbon field caps how much any dependence model can change the schedule.
 \item[Severity $M$:] the multiple by which one region's carbon spikes in a rare grid emergency ($M=3$ is a tripling); the crossover $M^\star$ is where robustness starts to pay.
 \item[Value of the stochastic solution (VSS):] how much planning against the full uncertainty distribution beats committing to a single point forecast; here it is near zero.
 \item[Transfer budget ($\Phi$):] how much compute may migrate between regions; $\Phi=0$ is the honest no-transfer baseline, and raising it delivers the headline savings.
+\item[Mean-variance objective:] penalising the spread (variance) of emissions directly, Markowitz-style, instead of the worst-case tail; used here only as a stress test that deliberately gives the cross-region covariance its best chance to help.
+\item[Positive control:] a deliberately built case where the effect being tested truly exists (here, the mean-leveling world), used to confirm the test can detect value when value is present, so a null elsewhere is a real absence and not a blind test.
+\item[Translation invariance:] a property of CVaR whereby adding a fixed amount to every outcome raises the risk number by exactly that amount, so a known average carbon level cancels out; this is why the mean field, not the dependence, drives the schedule.
 \end{description}
 
 \section*{Annex A: Individual Contribution Statement}\label{app:ics}

@@ -1334,44 +1334,46 @@ Diversified & ERCOT--BPAT & 0.00 & 0.04 & 0.05 & $-0.02$ & 0.02\\
 \end{tabular}
 \end{table}
 
-\subsection{The null is not an artifact of the coherent objective
+\subsection{The null survives a different risk objective
 (RQ2)}\label{sec:res-swap}
-Proposition~\ref{prop:meandom}'s mean-dominance argument leans on two structural facts:
-emissions are linear in the carbon vector, and $\CVaR$ is translation-invariant
-(cash-additive), so the deterministic mean separates from the dependence-bearing
-residual. A natural objection is that the null is then a property of the chosen risk
-measure rather than of carbon scheduling. We test this directly. Holding the data, the
-feasible set, and the out-of-sample metric fixed, we swap the coherent
-mean-standard-deviation DRO objective ($\min\langle\bar\rho,x\rangle+\varepsilon\sqrt{x^\top\Sigma x}$,
-the thesis) for a \emph{non-coherent} mean-variance objective
-($\min\langle\bar\rho,x\rangle+\lambda\,x^\top\Sigma x$), which is not cash-additive and
-hands the cross-region covariance an explicit quadratic term to act on, and re-run the
-shuffled-marginals falsification, sweeping the covariance weight $\lambda$ over four
-orders of magnitude (\texttt{risk\_measure\_swap} snapshot).
+A natural objection is that the null is a property of the particular objective we
+optimise rather than of carbon scheduling. The robust scheduler penalises the
+\emph{standard deviation} of emissions, $\varepsilon\sqrt{x^\top\Sigma x}$, a square root
+that \emph{dampens} the cross-region covariance, so perhaps an objective that weighted the
+covariance more heavily would let it pay. We test this directly. Holding the data, the
+feasible set, and the out-of-sample metric fixed, we replace the standard-deviation
+penalty with a raw \emph{variance} penalty, $\lambda\,x^\top\Sigma x$ (a Markowitz-style
+mean-variance objective), a quadratic that \emph{amplifies} the covariance instead of
+dampening it and so gives it its strongest chance to help. We then re-run the
+shuffled-marginals falsification, sweeping the covariance weight $\lambda$ from negligible
+up to the point where the variance term is about $900\times$ the mean term
+(\texttt{risk\_measure\_swap} snapshot).
 
-The swap does not rescue covariance; it indicts it (Table~\ref{tab:swap}). Weighting the
-variance term up to $900\times$ the mean moves the schedule by up to $30\%$, so
-covariance genuinely enters the decision, yet the out-of-sample $\CVaR_{0.95}$ gap
-between joint and shuffled covariance stays below $1.5\%$ and sign-unstable, as under the
-coherent DRO (whose gap stays below $0.8\%$). At the weighting where the variance term
-balances the mean, the paired bootstrap interval excludes zero, but in the \emph{adverse}
-direction on two of three grids: modelling the joint covariance \emph{worsens}
-out-of-sample tail emissions by $1.5\%$ (Western) and $0.8\%$ (Diversified), and helps
-only trivially ($+0.11\%$) on the Eastern belt. Even out-of-sample standard deviation,
-the quantity mean-variance actually optimises, shows no robust covariance benefit, and
-in-sample variance reduction exceeds out-of-sample throughout, the signature of
-overfitting. The null is therefore not an artifact of CVaR's translation invariance:
-handed a non-coherent objective built to exploit it, the estimated cross-region
-dependence overfits and degrades the held-out tail. This strengthens the screening rule
-rather than bounding it.
+Even with the covariance amplified, modelling it does not pay (Table~\ref{tab:swap}). At
+the weight where the variance term balances the mean, the schedule shifts by up to $30\%$
+of compute relative to the no-covariance (shuffled) schedule, so the covariance genuinely
+drives the decision, yet using the joint covariance is no better out of sample than
+shuffling it away, and is in fact \emph{adverse} on two of three grids: the joint
+covariance \emph{worsens} the held-out $\CVaR_{0.95}$ tail by $1.5\%$ (Western) and
+$0.8\%$ (Diversified) and helps only trivially ($+0.11\%$) on the Eastern belt. Even
+out-of-sample standard deviation, the quantity this objective actually targets, shows no
+robust covariance benefit, and in-sample variance reduction exceeds out-of-sample
+throughout, the classic signature of fitting estimation noise. These adverse gaps do not
+overturn the spatial null; they reinforce it: modelling the cross-region covariance
+\emph{hurts} the held-out tail because the estimated dependence does not generalise. The
+null is therefore not an artifact of the robust scheduler's objective: handed an objective
+built to exploit covariance, the estimated dependence overfits and degrades the tail. This
+strengthens the screening rule rather than bounding it.
 
 \begin{table}[t]
 \centering\small
-\caption{Risk-measure swap. Re-running the shuffled-marginals test under a non-coherent
-mean-variance objective, at the weight where the variance term balances the mean. The
-schedule moves materially, but the out-of-sample $\CVaR_{0.95}$ gap (modelling joint
-covariance minus shuffling it; positive means covariance helps) stays immaterial and is
-adverse on two grids. Paired bootstrap, $1000$ resamples.}
+\caption{Risk-measure swap. Re-running the shuffled-marginals test under a mean-variance
+objective (a variance penalty that amplifies covariance), at the weight where the variance
+term balances the mean. The
+schedule moves materially, but the out-of-sample $\CVaR_{0.95}$ gap (shuffling minus
+modelling joint covariance, per Eq.~\eqref{eq:gap}; positive means covariance helps)
+delivers no material benefit and is materially adverse on two of three grids. Paired
+bootstrap, $1000$ resamples.}
 \label{tab:swap}
 \begin{tabular}{lrrl}
 \toprule
