@@ -105,7 +105,9 @@ and characterises the value of each layer. Over the honest baseline (carbon-awar
 scheduling with no inter-region transfer, $\Phi=0$, on the same feasible set), active
 migration cuts daily $\CVaR_{0.95}$ emissions by $4.0$--$9.9\%$ (Western $4.0\%$, Eastern $9.9\%$, Diversified $9.0\%$), and this deterministic transfer channel is the
 dominant lever; the carbon-computing literature independently finds spatial shifting
-dominates temporal shifting. This thesis introduces a pre-committed,
+dominates temporal shifting.
+
+This thesis introduces a pre-committed,
 falsification-based methodology for \emph{pricing} each modelling layer, separating the
 \emph{validity} of the spatial-dependence assumption (the cross-region carbon
 correlations are real) from its \emph{value} to the decision (a replicated null). We
@@ -116,23 +118,26 @@ Eastern belt, and an engineered solar/wind/hydro portfolio) returns a replicated
 \textbf{null}. The encoded cross-region covariance adds
 below $0.4\%$ of $\CVaR_{0.95}$, and the null survives Ledoit--Wolf shrinkage, removing
 each region's average daily pattern (residualization), Benjamini--Hochberg correction,
-walk-forward validation, and a per-cell equivalence test. A mean-leveling test shows the covariance signal is genuine but masked by the mean
+walk-forward validation, a per-cell equivalence test, and a risk-measure swap scored on both
+a covariance-amplifying objective and a variance-sensitive entropic measure. A mean-leveling
+test shows the covariance signal is genuine but masked by the mean
 field (a mean-dominance bound), and a tail-dependence analysis shows the residual
 dependence is non-elliptical and upper-tail independent, hence invisible to
 covariance-based ambiguity sets; a one-paragraph copula appendix confirms even the
-maximal coupling recovers nothing. Finally we ask when robustness itself pays.
-Following the price of robustness of Bertsimas and Sim, a DRO over day-ahead forecast
+maximal coupling recovers nothing.
+
+We close with an \emph{exploratory} extension, outside the pre-commitment, asking when
+robustness itself pays. Following the price of robustness of Bertsimas and Sim, a DRO over day-ahead forecast
 error buys a small worst-day ($\CVaR_{0.95}$) tail reduction at a mean premium, with a value
 of the stochastic solution near zero, and pays over deterministic transfer only past
-an emergency-severity crossover $M^\star\approx3$ (with $M$ the multiple by which a
-region's carbon intensity spikes in a rare grid emergency, so $M=3$ is a tripling);
-tested against real data-grounded
-worst-tail emergencies across 17 zones, that crossover does not activate. The thesis
-contributes a working scheduler with honest savings, a screening rule for when
-passive dependence modelling fails, and a price-of-robustness decision rule with a
-tested, data-grounded bound, all under 202 unit tests, with the Phase~1--2 falsification
-protocol pre-committed (the stylised-emergency crossover of RQ3 is a calibrated stress
-test, not part of the pre-commitment).
+a \emph{stylised} emergency-severity crossover $M^\star\approx3$ (with $M$ the multiple by which a
+region's carbon intensity spikes in a rare grid emergency, so $M=3$ is a tripling) that
+realized data-grounded worst-tail emergencies across 17 zones do not reach.
+
+The substantive contributions are thus the pricing methodology and its replicated null
+(packaged as a screening rule for when passive dependence modelling fails); the scheduler
+measurement (RQ1) and the exploratory price-of-robustness rule (RQ3) support these, all under
+$202$ unit tests with the Phase~1--2 falsification protocol pre-committed.
 \end{abstract}
 \newpage
 \tableofcontents
@@ -230,9 +235,9 @@ $\CVaR_{0.95}$ emissions relative to carbon-aware scheduling without inter-regio
 transfer, and which lever drives the saving?
 \item[RQ2.] When does adding passive modelling complexity (cross-region covariance, or a
 non-elliptical copula) improve out-of-sample tail emissions, and at what cost?
-\item[RQ3.] When does robustifying against day-ahead forecast error pay over
-deterministic transfer, and do real grids ever reach that regime? What decision rule
-follows?
+\item[RQ3.] \emph{(Exploratory, outside the pre-commitment.)} When does robustifying against
+day-ahead forecast error pay over deterministic transfer, and do real grids ever reach that
+regime? What decision rule follows?
 \end{description}
 
 The value question for RQ2 was specified and commit-locked in version control as a
@@ -259,9 +264,14 @@ count as a true negative rather than an underpowered test.
 \end{center}
 
 \subsection{Contributions}
-The thesis makes five contributions: one pre-committed and confirmatory (the dependence
-null, RQ2), one a baseline-anchored measurement (the day-ahead savings, RQ1), one
-methodological, one exploratory (the robustness crossover, RQ3), and one infrastructural. (i)~\emph{A working day-ahead
+We separate what is new from what supports it. The substantive contribution is
+methodological and empirical: a pre-committed method for \emph{pricing} each modelling layer
+by its marginal out-of-sample value, and the result it yields, that cross-region dependence
+is statistically real yet adds no schedulable value (the null, RQ2). The other items support
+this and we do not claim them as novel in themselves: a baseline-anchored \emph{measurement}
+of an established transfer scheduler (RQ1), an \emph{exploratory} robustness rule outside the
+pre-commitment (RQ3), and a reproducible pipeline that makes the null auditable rather than
+asserted. (i)~\emph{A working day-ahead
 scheduler with honest, baseline-anchored savings}: active inter-region migration cuts
 out-of-sample $\CVaR_{0.95}$ by $4.0$--$9.9\%$ over the no-transfer ($\Phi=0$) baseline on
 the same feasible set across three real grids (a gross spatial ceiling, reported before
@@ -274,13 +284,14 @@ assumption (correlations are genuine, $0.7$--$0.8$) from its \emph{value} to the
 (null). To our knowledge this is the first treatment to place carbon intensity itself in a
 Mahalanobis--Wasserstein ball as a correlated cross-region vector and isolate the marginal
 value of that coupling via a shuffled-marginals falsification test. (iii)~\emph{A screening
-rule} for when passive dependence modelling cannot help, supported from four independent
-directions: an a-priori SOCP gap-bound (Proposition~\ref{prop:meandom}) before any data is
-touched; a mean-leveling positive control showing the covariance signal is genuine but
-masked by the mean field; a tail-dependence/comonotone-copula argument showing even the
-maximal coupling recovers nothing; and a risk-measure swap showing the null survives
-replacing the standard-deviation penalty with a variance penalty built to favour
-covariance (Section~\ref{sec:res-swap}). (iv)~\emph{A price-of-robustness decision rule}, reported as
+rule} for when passive dependence modelling cannot help. The decisive evidence is the measured
+out-of-sample magnitudes; these are corroborated by a mean-leveling positive control (the
+covariance signal is genuine but masked by the mean field), a tail-dependence/comonotone-copula
+argument (even the maximal coupling recovers nothing), and a risk-measure swap that holds under
+both a covariance-amplifying objective and an entropic, variance-sensitive score
+(Section~\ref{sec:res-swap}). A deliberately loose a-priori SOCP bound
+(Proposition~\ref{prop:meandom}) confirms only that the effect is structurally bounded, not
+that it is small; the smallness is empirical. (iv)~\emph{A price-of-robustness decision rule}, reported as
 an \emph{exploratory} extension outside the pre-commitment, with a data-grounded,
 falsified crossover: robustification pays only past an emergency-severity crossover
 $M^\star\approx3$ that realized severity ($1.3$--$1.9\times$; Winter Storm Uri
@@ -1236,52 +1247,39 @@ Diversified & ERCOT--BPAT & 0.00 & 0.04 & 0.05 & $-0.02$ & 0.02\\
 A natural objection is that the null is a property of the particular objective we
 optimise rather than of carbon scheduling. The robust scheduler penalises the
 \emph{standard deviation} of emissions, $\varepsilon\sqrt{x^\top\Sigma x}$, a square root
-that \emph{dampens} the cross-region covariance, so perhaps an objective that weighted the
-covariance more heavily would let it pay. We test this directly. Holding the data, the
-feasible set, and the out-of-sample metric fixed, we replace the standard-deviation
-penalty with a raw \emph{variance} penalty, $\lambda\,x^\top\Sigma x$ (a Markowitz-style
-mean-variance objective), a quadratic that \emph{amplifies} the covariance instead of
-dampening it and so gives it its strongest chance to help. We then re-run the
-shuffled-marginals falsification, sweeping the covariance weight $\lambda$ from negligible
-up to the point where the variance term is about $900\times$ the mean term
+that \emph{dampens} the cross-region covariance; perhaps an objective weighting covariance
+more heavily would let it pay. We test this directly: holding the data, feasible set, and
+out-of-sample metric fixed, we replace the standard-deviation penalty with a raw
+\emph{variance} penalty $\lambda\,x^\top\Sigma x$ (a Markowitz mean-variance objective) that
+\emph{amplifies} the covariance, and re-run the shuffled-marginals falsification, sweeping
+$\lambda$ up to where the variance term is ${\sim}900\times$ the mean
 (\texttt{risk\_measure\_swap} snapshot).
 
-Even with the covariance amplified, modelling it does not pay (Table~\ref{tab:swap}). At
-the weight where the variance term balances the mean, the schedule shifts by up to $30\%$
-of compute relative to the no-covariance (shuffled) schedule, so the covariance genuinely
-drives the decision, yet using the joint covariance is no better out of sample than
-shuffling it away, and is in fact \emph{adverse} on two of three grids: the joint
-covariance \emph{worsens} the held-out $\CVaR_{0.95}$ tail by $1.5\%$ (Western) and
-$0.8\%$ (Diversified) and helps only trivially ($+0.11\%$) on the Eastern belt. Even
-out-of-sample standard deviation, the quantity this objective actually targets, shows no
-robust covariance benefit, and in-sample variance reduction exceeds out-of-sample
-throughout, the classic signature of fitting estimation noise. These adverse gaps do not
-overturn the spatial null; they reinforce it: modelling the cross-region covariance
-\emph{hurts} the held-out tail because the estimated dependence does not generalise. The
-null is therefore not an artifact of the robust scheduler's objective: handed an objective
-built to exploit covariance, the estimated dependence overfits and degrades the tail. This
-strengthens the screening rule rather than bounding it.
+Even amplified, covariance does not pay. At the balanced weight the schedule shifts by up to
+$30\%$ of compute, so covariance genuinely drives the decision, yet the joint covariance is no
+better out of sample than shuffling it away and is \emph{adverse} on two of three grids: the
+out-of-sample $\CVaR_{0.95}$ gap (shuffling minus modelling joint covariance) is $-1.50\%$
+Western [95\% CI $-1.92,-1.18$], $-0.84\%$ Diversified [$-1.02,-0.63$], and $+0.11\%$ Eastern
+[$+0.04,+0.19$] (paired bootstrap, $1000$ resamples). The estimated dependence overfits and
+degrades the held-out tail, reinforcing the null rather than bounding it.
 
-\begin{table}[t]
-\centering\small
-\caption{Risk-measure swap. Re-running the shuffled-marginals test under a mean-variance
-objective (a variance penalty that amplifies covariance), at the weight where the variance
-term balances the mean. The
-schedule moves materially, but the out-of-sample $\CVaR_{0.95}$ gap (shuffling minus
-modelling joint covariance, per Eq.~\eqref{eq:gap}; positive means covariance helps)
-delivers no material benefit and is materially adverse on two of three grids. Paired
-bootstrap, $1000$ resamples.}
-\label{tab:swap}
-\begin{tabular}{lrrl}
-\toprule
-Grid & Schedule move & OOS $\CVaR_{0.95}$ gap & 95\% CI \\
-\midrule
-Western US         & $\sim$30\% & $-1.50\%$ & $[-1.92,\,-1.18]$ \\
-Eastern US--Canada & $\sim$20\% & $+0.11\%$ & $[+0.04,\,+0.19]$ \\
-Diversified        & $\sim$7\%  & $-0.84\%$ & $[-1.02,\,-0.63]$ \\
-\bottomrule
-\end{tabular}
-\end{table}
+A sharper objection grants that the swap, though it amplified covariance in the
+\emph{objective}, still scored on $\CVaR_{0.95}$, which is linear in $\sqrt{x^\top\Sigma x}$
+and so gives covariance little curvature to act on. We therefore also score on the measure
+the variance objective targets, the entropic risk
+$\rho_\theta(E)=\theta^{-1}\log\mathbb{E}[e^{\theta E}]$, whose risk term is \emph{quadratic}
+in that same standard deviation. (This is not an escape from the mean--residual decomposition:
+entropic risk is itself translation-invariant, so what changes is the \emph{curvature} of the
+risk term, not the mean's separability.) For a Gaussian field the entropic-optimal schedule is
+exactly the mean-variance schedule, which we re-score on out-of-sample entropic risk across
+risk aversion $\theta$. At moderate $\theta$, where the schedule already moves $7$--$13\%$ of
+compute yet the statistic still spans $50$--$72$ of the ${\sim}362$ held-out days, modelling
+the joint covariance changes out-of-sample entropic risk by under $0.1\%$ on all three grids
+(\texttt{entropic\_risk\_check} snapshot); at extreme $\theta$ the statistic collapses onto a
+few worst days, ceases to be variance-like, and we do not rely on it. The variance-sensitive
+metric the objective was accused of dodging returns the same null, for objectives monotone in
+the linear emissions; a genuinely nonlinear emission cost lies outside our claim.
+
 
 \subsection{Richer dependence models confirm the screening rule (RQ2)}\label{sec:res-copula}
 If the covariance ball failed only because it is elliptical, a copula that encodes
@@ -1526,11 +1524,10 @@ already-immaterial robustness premium; quantifying that is future work.
 \section{Conclusions}\label{sec:conclusion}
 
 \subsection{Answers to the research questions}
-\textbf{RQ1: how much can the scheduler save, and which lever dominates?} Active
-inter-region migration cuts out-of-sample $\CVaR_{0.95}$ by $4.0$--$9.9\%$ over the
-no-transfer ($\Phi=0$) baseline across the three grids (Section~\ref{sec:res-transfer}).
-The lever is the spatial \emph{mean}: one region is cleanest on average and migration
-ships work there, so the saving is deterministic and needs no dependence model.
+\textbf{RQ1.} Active inter-region migration cuts out-of-sample $\CVaR_{0.95}$ by
+$4.0$--$9.9\%$ over the $\Phi=0$ baseline across the three grids
+(Section~\ref{sec:res-transfer}); the lever is the spatial \emph{mean} (ship work to the
+region cleanest on average), so the saving is deterministic and needs no dependence model.
 
 \textbf{RQ2: when does passive modelling complexity improve tail emissions?} Not on any
 grid we tested. The out-of-sample spatial gap stays below the $0.4\%$ materiality margin
@@ -1547,45 +1544,29 @@ Proposition~\ref{prop:meandom} explains why: the translation invariance of CVaR 
 dependence second-order to the mean. The screening rule: passive sophistication cannot pay
 where the diurnal mean field dominates cross-region dependence.
 
-\textbf{RQ3: when does robustifying pay, and do real grids reach that regime?} The robust
-two-stage commitment buys a small tail reduction at a mean premium (value of the
-stochastic solution near zero) and materially beats the risk-neutral schedule only past an
-emergency-severity crossover $M^\star\approx3$ (Section~\ref{sec:res-crossover}). Realized
-joint severity reached only $1.3$--$1.9\times$ the portfolio mean, and on real top-$5\%$
-emergency days the robust commitment did not pay, so the layer's value is characterized
-but unrealized on observed data. We claim no universal impossibility, only the tested one;
-robustness remains a conditional option given a concrete emergency model.
+\textbf{RQ3 (exploratory, outside the pre-commitment).} The robust two-stage commitment buys
+only a small tail reduction at a mean premium (value of the stochastic solution near zero) and
+beats the risk-neutral schedule only past a \emph{stylised} crossover $M^\star\approx3$
+(Section~\ref{sec:res-crossover}) that realized joint severity ($1.3$--$1.9\times$) does not
+reach; we claim no universal impossibility, only the tested one.
 
 \subsection{Contributions}
-In summary, the thesis contributes: (1)~a working day-ahead migration scheduler saving
-$4.0$--$9.9\%$ over the $\Phi=0$ baseline with a layered decision rule; (2)~a
-pre-committed, falsification-based methodology separating the \emph{validity} of a spatial
-modelling assumption from its \emph{value}, transferable to any correlated-uncertainty DRO;
-(3)~a replicated, robustness-checked null on whether spatial dependence improves
-carbon-aware DRO scheduling, across real grids and the covariance-to-copula hierarchy;
-(4)~a mechanistic explanation (the mean-dominance bound, demonstrated by the mean-leveling
-test) that supplies the screening rule; and (5)~a reproducible, CI-tested pipeline (202
-tests) with archived summary tables for every reported number.
+In summary, the substantive contributions are the pre-committed \emph{pricing} methodology
+and the replicated dependence null it yields (the screening rule, with its mean-dominance
+mechanism); the scheduler's $4.0$--$9.9\%$ baseline-anchored savings (RQ1) and the exploratory
+price-of-robustness rule (RQ3) support these, under a reproducible $202$-test pipeline.
 
 \subsection{Future work}
-Phase 2 settled the immediate question, whether a copula that sees the asymmetry
-recovers value (it does not), and sharpened the remaining agenda. A
-\emph{copula-ambiguity Wasserstein DRO} in the Fan--Ji--Lejeune sense \citep{fan2024},
-built on a fitted vine \citep{aas2009,dissmann2013}, would robustify the dependence
-structure itself rather than sample from one fitted copula;
-Proposition~\ref{prop:meandom} predicts the mean field will still dominate, but the
-claim would then be fully model-free. The body establishes the transfer savings and
-the severity crossover (Sections~\ref{sec:res-transfer}, \ref{sec:res-crossover}); the
-open problem is to robustify the recourse policy with affine decision rules and
-calibrated emergency models. We are not aware of prior work that combines
-Wasserstein-DRO robustification with active inter-region transfer, and making that
-combination pay under realistic forecast error is an open question. The transfer model
-also invites an \emph{online, multistage} treatment with forecasts arriving
-sequentially and a Wasserstein ball centred on a learned forecast, and the
-mean-dominance bound generalizes into a problem-class condition for \emph{when}
-cross-region dependence can improve a robust allocation. The null is therefore not a
-dead end but a sharper target: value, if any, comes from an active spatial decision
-rather than a better passive dependence model.
+Phase 2 settled the immediate question, whether a copula that sees the asymmetry recovers
+value (it does not). Three extensions remain: a \emph{copula-ambiguity Wasserstein DRO}
+\citep{fan2024} built on a fitted vine \citep{aas2009,dissmann2013}, which robustifies the
+dependence structure itself rather than one fitted copula (Proposition~\ref{prop:meandom}
+predicts the mean still dominates, but the claim would then be model-free); an \emph{online,
+multistage} treatment with sequential forecasts and migration-limited recourse; and
+generalizing the mean-dominance bound into a problem-class condition for \emph{when}
+cross-region dependence can improve a robust allocation. The null is not a dead end but a
+sharper target: value, if any, comes from an active spatial decision, not a better passive
+dependence model.
 
 % ===================== REFERENCES =====================
 \renewcommand{\bibsection}{\section*{References}}
@@ -1734,7 +1715,7 @@ Section & Result & Archived source\\
 \ref{sec:res-robust} & BH correction & \texttt{bh\_correction.csv}\\
 \ref{sec:res-ablation} & Mean-leveling test (Table~\ref{tab:ablation}) &
 \texttt{\{case\}\_..\_ablate-\{level,flat\}.csv}\\
-\ref{sec:res-swap} & Risk-measure swap (Table~\ref{tab:swap}) &
+\ref{sec:res-swap} & Risk-measure swap (mean-variance + entropic) &
 \texttt{risk\_measure\_swap\_2026-06-27.csv}\\
 \ref{sec:res-robust} & Serial-dependence (block) bootstrap &
 \texttt{block\_bootstrap\_2026-06-27.csv}\\
