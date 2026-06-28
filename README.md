@@ -6,7 +6,7 @@ layer of modelling sophistication actually buys.
 **Research Capstone in Operations Research · IE School of Science & Technology · 2026**
 **Student:** Marco Ortiz Togashi · **Supervisor:** Prof. Bissan Ghaddar
 
-`202 passing unit tests` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to an archived snapshot`
+`202 tests collected (189 in CI)` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to an archived snapshot`
 
 ---
 
@@ -59,8 +59,10 @@ The answer separates a lever that pays from two that mostly do not:
   Distributional robustness hedges day-ahead forecast error and begins to pay only above an
   emergency-severity crossover $M^\star\approx3$ (where $M$ is the multiple by which a
   region's carbon intensity spikes in a rare grid emergency, so $M=3$ is a tripling).
-  Data-grounded worst-tail emergencies across 17 zones reach only $M\approx1.4$, so on
-  observed conditions the deterministic transfer scheduler is dominant. Under multi-seed
+  Data-grounded joint-grid severities are $M=1.29$--$1.89$, below the material crossover,
+  so on observed conditions the deterministic transfer scheduler is dominant. Individual
+  very-low-carbon zones can have larger ratios, which is why the comparison is made on the
+  same joint portfolio axis as the scheduler. Under multi-seed
   testing the crossover itself survives on the Western grid only, and there only marginally,
   so RQ3 is reported as a tested decision rule, not a universal threshold.
 
@@ -74,7 +76,7 @@ robust layer are conditional options, not free wins.
 |---|---|---|---|
 | **RQ1** | Does letting jobs move between regions cut worst-day emissions, and what drives the saving? | Yes, 4.0–9.9% over a like-for-like no-transfer baseline; the driver is the average carbon field, not dependence | the lever that pays |
 | **RQ2** | Does modelling how regions co-move (covariance, copulas) improve worst-day emissions? | No, the gap stays below 0.4% of CVaR and survives a full robustness battery | a screening rule for when to skip it |
-| **RQ3** | Does hedging forecast error with DRO pay over the plain scheduler, and do real grids reach that regime? | Only above a severity crossover near a tripling that real grids have not reached (about 1.4x in the data) | a conditional option, not a free win |
+| **RQ3** | Does hedging forecast error with DRO pay over the plain scheduler, and do real grids reach that regime? | Only above a severity crossover near a tripling; realized joint-grid severity is 1.29x--1.89x | a conditional option, not a free win |
 
 ## The three grids
 
@@ -119,7 +121,7 @@ The three headline numbers:
 | Claim | Value | Snapshot |
 |---|---|---|
 | RQ1 transfer lever (OOS $\mathrm{CVaR}_{0.95}$ reduction over $\Phi=0$) | Western 4.04%, Eastern 9.91%, Diversified 9.04% | `part3_transfer_value_2026-06-15.csv` (plateau corroborated by `transfer_value_curve_2026-06-24.csv`) |
-| RQ3 real worst-tail emergency severity (17 zones) | median $M\approx1.43$ | `carbon_ceiling_2026-06-24.csv` |
+| RQ3 real worst-tail emergency severity (17 zones) | per-zone median $M\approx1.43$; joint grids $M=1.29$--$1.89$ | `carbon_ceiling_2026-06-24.csv` |
 | RQ3 robustness crossover | first material, significant robust gain at $M\approx3$ | `part3_emergency_2026-06-15.csv` |
 
 ## Reproduce the experiments
@@ -128,7 +130,8 @@ The fastest check needs no API token and no license:
 
 ```bash
 pytest tests/ -q
-# expected: 202 passed in ~20s. The suite runs clean (no warnings).
+# expected without licensed raw data / optional phase-2 extras: 202 collected,
+# with the corresponding integration tests skipped (currently 184 passed, 18 skipped).
 ```
 
 The experiments themselves:
@@ -169,10 +172,10 @@ last digits can shift if a different solver build is selected.
 │   │                    #   transfer_dro (Part 3), online_transfer (Part 4), covariance
 │   └── analysis/        # stratified_correlations, tail_dependence, metrics, plots
 ├── scripts/             # experiment runners + plotting
-├── tests/               # 202 pytest unit tests (CI on push/PR)
+├── tests/               # 202 pytest tests collected; 189 collected in CI
 ├── thesis/              # capstone_thesis.{tex,pdf} (the graded report)
 ├── full_thesis/         # extended write-up (full_thesis.pdf, Parts 3-5 in body)
-├── poster/              # A0 conference poster (build_v24.js -> poster_capstone_v24.pdf)
+├── poster/              # A0 poster (build_v24.js -> .pptx; PDF exported from it)
 ├── deck/                # capstone_defense.pptx (defense deck; built by scripts/build_deck.py)
 ├── docs/
 │   ├── results_snapshots/       # archived summary CSVs (license-safe; every number traces here)
@@ -206,7 +209,7 @@ uv venv && uv pip install -e ".[dev]"
 # or: python -m venv .venv && pip install -e ".[dev]"
 
 cp .env.example .env        # add ELECTRICITY_MAPS_TOKEN (only needed to re-fetch raw data)
-pytest tests/               # 202 tests should pass
+pytest tests/               # 202 collected; data/optional-dependency tests may skip
 ```
 
 **Solvers (all free, all in the default install):** HiGHS for the LP and CVaR-SAA
@@ -259,7 +262,8 @@ Short version of the heavy jargon. The thesis carries a fuller glossary in an ap
   correlation.
 - **Severity $M$ and crossover $M^\star$:** $M$ is how many times worse carbon spikes in a
   rare emergency ($M=3$ is a tripling). $M^\star\approx3$ is where the robust layer starts to
-  beat the plain plan; real emergencies across 17 zones only reach about $M=1.4$.
+  beat the plain plan. The 17-zone per-zone median is $M\approx1.43$; on the comparable
+  joint-grid axis, realized severity is $M=1.29$--$1.89$.
 - **Transfer budget $\Phi$:** the dial for how much compute may migrate between regions.
   $\Phi=0$ is the honest no-transfer baseline; turning it up delivers the 4.0–9.9% saving.
   "Logical" migration means jobs move over the network between the operator's own sites, the
@@ -289,7 +293,7 @@ Short version of the heavy jargon. The thesis carries a fuller glossary in an ap
   adversarial review) made the findings *more conservative, not larger*: the value
   concentrates in the deterministic transfer lever, with the dependence and robust
   layers priced as conditional rather than free.
-- **Code:** 202 unit tests, CI on push/PR; every reported number traces to an
+- **Code:** 202 tests collected (189 in CI), CI on push/PR; every reported number traces to an
   archived, license-safe snapshot in `docs/results_snapshots/`.
 
 ## Key references

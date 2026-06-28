@@ -159,7 +159,7 @@ decision rule} with a data-grounded, falsified crossover: robustification pays o
 past an emergency-severity crossover $M^\star\approx3$ that realized severity
 ($1.3$--$1.9\times$; Winter Storm Uri $1.3\times$) never reaches, stated as the rule
 plus its tested bound, not a universal impossibility. (v)~\emph{A reproducible,
-validated pipeline}: pre-commitment, $199$ unit tests, a small-instance model
+validated pipeline}: pre-commitment, $202$ unit tests, a small-instance model
 validation, a robustness battery, Benjamini--Hochberg correction, and per-cell TOST
 equivalence tests that affirmatively reject any effect above the $0.4\%$ materiality
 margin.
@@ -704,7 +704,7 @@ reproduction is cheap.
 
 \subsection{Reproducibility}\label{sec:repro}
 All code is version-controlled (private repository, continuous-integration test
-suite, $199$ unit tests total ($186$ run in CI; the 13 Electricity Maps integration tests need licensed data and are excluded from CI), including a feasible-set equivalence test pinning the
+suite, $202$ unit tests total ($189$ run in CI; the 13 Electricity Maps integration tests need licensed data and are excluded from CI), including a feasible-set equivalence test pinning the
 Phase 2 CVaR scheduler to the Phase 1 constraint set); experiment configurations
 are commit-locked before test-set evaluation; bootstrap and scenario seeds are
 fixed; and every number reported in
@@ -1556,7 +1556,7 @@ large-dimensional covariance matrices,'' \emph{J. Multivar. Anal.}, vol.~88,
 no.~2, pp.~365--411, 2004.
 \bibitem{radovanovic2022} A.~Radovanovi\'c et al., ``Carbon-aware computing for
 datacenters,'' \emph{IEEE Trans. Power Syst.}, vol.~38, no.~2, pp.~1270--1280,
-2022.
+2023, doi:10.1109/TPWRS.2022.3173250.
 \bibitem{rockafellar2000} R.~T. Rockafellar and S.~Uryasev, ``Optimization of
 conditional value-at-risk,'' \emph{J. Risk}, vol.~2, no.~3, pp.~21--41, 2000.
 \bibitem{sklar1959} A.~Sklar, ``Fonctions de r\'epartition \`a $n$ dimensions et
@@ -1601,8 +1601,8 @@ with $S$; the $\pm0.1\%$ no-value band is shaded.}
 \end{figure}
 
 \paragraph{Repository and environment.} All code lives in a private,
-version-controlled repository with a continuous-integration suite ($186$ unit
-tests run in CI of $199$ total; the 13 Electricity Maps integration tests are excluded from CI as they require
+version-controlled repository with a continuous-integration suite ($189$ unit
+tests run in CI of $202$ total; the 13 Electricity Maps integration tests are excluded from CI as they require
 licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL
 for the second-order cone program and HiGHS for deterministic LP baselines. Exact
 dependency versions are pinned in a tracked \texttt{requirements-lock.txt}

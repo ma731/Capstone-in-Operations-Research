@@ -16,7 +16,9 @@ dependencies = [
     "pyarrow>=15.0",          # for parquet I/O
     # Optimization
     "cvxpy>=1.5",
-    "highspy>=1.7",            # HiGHS: the LP / CVaR-SAA solver behind the reported numbers
+    "clarabel>=0.9",           # primary SOCP solver used for the reported DRO results
+    "scs>=3.2",                # free SOCP fallback
+    "highspy>=1.7",            # HiGHS: LP / CVaR-SAA solver behind the reported numbers
     "scikit-learn>=1.4",       # Ledoit-Wolf shrinkage covariance (robustness line)
     # Data access
     "requests>=2.32",

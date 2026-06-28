@@ -162,8 +162,9 @@
         <div class="verdict v-cond">RQ3 · the conditional option</div>
         <h3>Hedging forecast error with robust optimization</h3>
         <p>Distributional robustness only starts to pay once a rare emergency makes a region's
-        carbon spike by about <strong>3&times;</strong> (the crossover M&#8902;&#8776;3). Real
-        worst-case emergencies across 17 zones only reach about <strong>1.4&times;</strong>,
+        carbon spike by about <strong>3&times;</strong> (the crossover M&#8902;&#8776;3). On the
+        comparable joint-grid axis, realized severity across the three studied portfolios is
+        <strong>1.29&times; to 1.89&times;</strong>,
         so on observed conditions the simpler deterministic scheduler wins. Even at high
         severity the crossover survives careful multi-seed testing on only one grid, and only
         marginally.</p>
@@ -198,7 +199,7 @@
     that cannot see anything.</p>
 
     <figure>
-      <img src="figures/finding.png" alt="Two-panel summary: spatial value does not track correlation; the covariance is masked, not worthless">
+      <img src="poster/figs/finding.png" alt="Two-panel summary: spatial value does not track correlation; the covariance is masked, not worthless">
       <figcaption><strong>The finding in one figure.</strong> Left: the value of cross-region
       structure stays at zero no matter how correlated the regions are. Right: in the
       mean-leveled "covariance-only" world the same structure suddenly pays, proving the
@@ -213,7 +214,7 @@
     hidden. That is harder to attack than an inflated positive, and it is paired with a real,
     measured saving (the transfer lever) and a clear decision rule.</p>
     <figure>
-      <img src="figures/crossover.png" alt="Robust advantage versus emergency severity, with the crossover near M=3">
+      <img src="poster/figs/crossover.png" alt="Robust advantage versus emergency severity, with the crossover near M=3">
       <figcaption><strong>When does robustness pay?</strong> The robust scheduler only pulls
       ahead once emergencies get severe (around a 3&times; carbon spike). Real grids sit far
       to the left of that line, in the region where the simple plan is already best.</figcaption>
@@ -298,7 +299,7 @@
       <div class="row"><span class="term">Mean-dominance</span>: the central reason for the null: the swing in average carbon is so much larger than the cross-region co-movement that any covariance or copula model can only move the schedule by a provably tiny amount.</div>
       <div class="row"><span class="term">Out-of-sample / walk-forward</span>: scoring a plan only on data it never trained on; walk-forward is the rolling version (train on earlier years, test on a later untouched one), mimicking real deployment.</div>
       <div class="row"><span class="term">Equivalence test (TOST)</span>: a test that affirmatively shows an effect is smaller than a chosen materiality margin, turning "we found nothing" into "any effect this large is ruled out".</div>
-      <div class="row"><span class="term">Severity M and the crossover M&#8902;</span>: M is how many times worse carbon spikes in a rare emergency (M = 3 is a tripling). M&#8902; &#8776; 3 is where the robust layer starts to beat the simple plan; real emergencies only reach about M = 1.4.</div>
+      <div class="row"><span class="term">Severity M and the crossover M&#8902;</span>: M is how many times worse carbon spikes in a rare emergency (M = 3 is a tripling). M&#8902; &#8776; 3 is where the robust layer starts to beat the simple plan; realized joint-grid severity is M = 1.29 to 1.89.</div>
       <div class="row"><span class="term">Value of the stochastic solution (VSS)</span>: how much you gain by planning against the full spread of uncertainty rather than a single best-guess forecast. Here it is near zero.</div>
       <div class="row"><span class="term">Transfer budget (&Phi;)</span>: the dial for how much compute may migrate between regions. &Phi; = 0 is the honest no-transfer baseline; turning it up delivers the 4–9.9% saving.</div>
     </div>
@@ -308,30 +309,31 @@
     <h2><span class="num">10</span>Defense quick-answers</h2>
     <p class="muted">Short, clear answers to the questions an examiner is most likely to ask.</p>
     <div class="qa">
-      <div class="q">"What is M, and what is the 1.4?"</div>
+      <div class="q">&ldquo;What is M, and what did the real-grid severity reach?&rdquo;</div>
       <div class="a">M is the multiple by which a region's carbon intensity spikes in a rare grid
       emergency: M = 3 means three times dirtier than normal. The robust layer only earns its
-      keep above about M = 3. When we measure the worst real emergencies across 17 zones, the
-      joint severity only reaches about 1.4&times;, well short of where robustness would pay.</div>
+      keep above about M = 3. Across the three joint grid portfolios, realized severity ranges
+      from 1.29&times; to 1.89&times;, well short of where robustness would pay. The per-zone
+      median is about 1.43&times;; very-low-carbon zones can show larger individual ratios.</div>
 
-      <div class="q">"What is the mean-leveling test?"</div>
+      <div class="q">&ldquo;What is the mean-leveling test?&rdquo;</div>
       <div class="a">We artificially flatten each region's average carbon so the only thing left
       is how the regions move together, then re-run the scheduler. It is a controlled check:
       if the cross-region structure ever pays, it pays here, and it does (+1.46%). That is why
       we can say the real-data null is a true "no value", not a test too blunt to see it.</div>
 
-      <div class="q">"Isn't a null result just a failure?"</div>
+      <div class="q">&ldquo;Isn&rsquo;t a null result just a failure?&rdquo;</div>
       <div class="a">No. It is a specification finding: a precise, pre-committed statement that
       a popular extra layer does not pay here, backed by a positive control and a money-valued
       decision rule. It saves practitioners from estimating models that cannot help.</div>
 
-      <div class="q">"Is 'spatial correlation' the right term?"</div>
+      <div class="q">&ldquo;Is &lsquo;spatial correlation&rsquo; the right term?&rdquo;</div>
       <div class="a">We use "cross-region correlation" for the statistic, and reserve "spatial"
       for the across-locations decision (spatial vs temporal shifting). It is deliberately not
       distance-based spatial autocorrelation (Moran's I) and not an electrical coupling of the
       grids.</div>
 
-      <div class="q">"What is genuinely new?"</div>
+      <div class="q">&ldquo;What is genuinely new?&rdquo;</div>
       <div class="a">A reusable, pre-committed protocol for pricing any single modelling layer
       in a stochastic program, separating whether an assumption is <em>true</em> from whether
       it is <em>useful</em>, applied to carbon scheduling and certified with a cheap a-priori
