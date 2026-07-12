@@ -59,6 +59,7 @@ include = ["src*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
+markers = ["slow: solver-backed tests that take longer"]
 
 [tool.ruff]
 line-length = 100

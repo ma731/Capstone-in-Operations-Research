@@ -20,7 +20,8 @@ def test_snapshots_match_manifest():
         digest, name = line.split("  ", 1)
         expected[name] = digest
     actual = {
-        p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in SNAP.glob("*.csv")
+        p.name: hashlib.sha256(p.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+        for p in SNAP.glob("*.csv")
     }
     assert actual == expected, {
         "changed_or_new": sorted(k for k in actual if expected.get(k) != actual[k]),

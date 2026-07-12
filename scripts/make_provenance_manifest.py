@@ -24,8 +24,10 @@ MANIFEST = SNAP_DIR / "MANIFEST.sha256"
 
 
 def _digest(path: Path) -> str:
+    """SHA-256 over line-ending-normalized bytes (CRLF -> LF), so the digest is
+    identical whether the file was checked out on Windows (autocrlf) or Unix."""
     h = hashlib.sha256()
-    h.update(path.read_bytes())
+    h.update(path.read_bytes().replace(b"\r\n", b"\n"))
     return h.hexdigest()
 
 
