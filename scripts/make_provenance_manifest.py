@@ -32,7 +32,10 @@ def _digest(path: Path) -> str:
 
 
 def build() -> str:
-    lines = [f"{_digest(p)}  {p.name}" for p in sorted(SNAP_DIR.glob("*.csv"))]
+    # sort by name STRING: Path ordering is case-insensitive on Windows, so sorting
+    # Path objects produces platform-dependent manifests. String sort is byte-order
+    # everywhere.
+    lines = [f"{_digest(p)}  {p.name}" for p in sorted(SNAP_DIR.glob("*.csv"), key=lambda q: q.name)]
     return "\n".join(lines) + "\n"
 
 
@@ -45,13 +48,14 @@ def main() -> int:
         if not MANIFEST.exists():
             print("MANIFEST.sha256 missing; run without --check to create it.")
             return 1
-        if MANIFEST.read_text() != current:
-            cur = {n: d for d, n in (l.split("  ", 1) for l in current.strip().splitlines())}
-            com = {n: d for d, n in (l.split("  ", 1) for l in MANIFEST.read_text().strip().splitlines())}
-            for name in sorted(set(cur) | set(com)):
-                if cur.get(name) != com.get(name):
-                    a = (com.get(name) or "none")[:12]
-                    b = (cur.get(name) or "none")[:12]
+        def _parse(text: str) -> dict:
+            return {n: d for d, n in (l.split("  ", 1) for l in text.strip().splitlines())}
+        if _parse(MANIFEST.read_text()) != _parse(current):
+            cur_d, com_d = _parse(current), _parse(MANIFEST.read_text())
+            for name in sorted(set(cur_d) | set(com_d)):
+                if cur_d.get(name) != com_d.get(name):
+                    a = (com_d.get(name) or "none")[:12]
+                    b = (cur_d.get(name) or "none")[:12]
                     print(f"DRIFT: {name}: manifest={a} actual={b}")
             return 1
         print(f"OK: {len(current.strip().splitlines())} snapshots match the manifest.")
