@@ -50,7 +50,7 @@ COORD = {
     "US-NW-BPAT": (-121.2, 45.6),
 }
 CASE_COLOR = {"us_west": NAVY, "taskc": RUST, "us_hetero": SAGE}
-CASE_LABEL = {"us_west": "Western US (WECC)", "taskc": "Eastern US–Canada",
+CASE_LABEL = {"us_west": "Western US (WECC)", "taskc": "Eastern US-Canada",
               "us_hetero": "engineered (solar/wind/hydro)"}
 
 

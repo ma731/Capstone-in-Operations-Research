@@ -25,9 +25,9 @@ PALETTE = [NAVY, GOLD, SAGE, RUST, BLUE]
 def apply_style() -> None:
     """Install the publication style globally for the current process."""
     mpl.rcParams.update({
-        # type: serif to match the Times New Roman report body
-        "font.family": "serif",
-        "font.serif": ["Times New Roman", "Tinos", "Georgia", "DejaVu Serif", "serif"],
+        # type: sans to match the deck body (Segoe UI); math stays in STIX
+        "font.family": "sans-serif",
+        "font.sans-serif": ["Segoe UI", "Calibri", "Helvetica", "Arial", "DejaVu Sans", "sans-serif"],
         "mathtext.fontset": "stix",
         "font.size": 12,
         "axes.titlesize": 13.5,

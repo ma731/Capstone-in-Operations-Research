@@ -48,8 +48,8 @@
 \settitle{
   % === conference-poster title bar: IE logo left, title centered ===
   \begin{minipage}[c]{0.17\linewidth}\centering
-    \IfFileExists{../figures/ie_logo.pdf}{%
-      \colorbox{white}{\rule[-1.7cm]{0pt}{0pt}\includegraphics[height=4.0cm]{../figures/ie_logo.pdf}}}{%
+    \IfFileExists{../figures/ie_logo.png}{%
+      \colorbox{white}{\rule[-1.7cm]{0pt}{0pt}\includegraphics[height=4.0cm]{../figures/ie_logo.png}}}{%
       \IfFileExists{../figures/ie_logo.png}{%
         \colorbox{white}{\rule[-1.7cm]{0pt}{0pt}\includegraphics[height=4.0cm]{../figures/ie_logo.png}}}{%
         {\color{titlefgcolor}\large IE University\\[2pt]School of Sci.\ \& Tech.}}}
@@ -120,7 +120,7 @@ After removing each zone's hour-of-day mean, residual cross-region correlation i
 Ontario belt CA-ON--NYISO $0.73$. The three grids and their correlation network:
 \vspace{0.2cm}
 \centering
-\includegraphics[width=0.98\linewidth]{../figures/correlation_map.pdf}
+\includegraphics[width=0.98\linewidth]{../figures/correlation_map.png}
 \vspace{0.1cm}
 \innerblock{}{\centering\textbf{The assumption motivating spatial DRO is empirically
 valid.}}
@@ -139,7 +139,7 @@ $\mathrm{CVaR}_{0.90}$--$\mathrm{CVaR}_{0.99}$. A per-cell \textbf{equivalence t
 $27$ cells, the gap is statistically $\mathbf{=0}$, not merely undetected.
 \vspace{0.2cm}
 \centering
-\includegraphics[width=0.99\linewidth]{../figures/finding.pdf}
+\includegraphics[width=0.99\linewidth]{../figures/finding.png}
 \vspace{0.1cm}
 \innerblock{}{This is an \textbf{active null}: CV selects $\varepsilon^\star=1$ in
 nearly every cell, so the DRO is genuinely robustifying, and the covariance
@@ -158,7 +158,7 @@ together ($\chi_L>\chi_U$, upper-tail independent). An elliptical covariance bal
 forces $\chi_L=\chi_U$, it is the \emph{wrong object}.
 \vspace{0.2cm}
 \centering
-\includegraphics[width=0.86\linewidth]{../figures/tail_dependence_taskc.pdf}
+\includegraphics[width=0.86\linewidth]{../figures/tail_dependence_taskc.png}
 }
 
 % ===================== COLUMN 3 =====================
@@ -170,8 +170,8 @@ We replace the covariance ball with copula schedulers (CVaR sample-average) that
 \textbf{Clayton}, and the maximal \textbf{comonotone} (upper Fr\'echet $\sup_C$).
 \vspace{0.2cm}
 \centering
-\includegraphics[width=0.99\linewidth]{../figures/copula_density.pdf}\\[0.3cm]
-\includegraphics[width=0.99\linewidth]{../figures/copula_result.pdf}
+\includegraphics[width=0.99\linewidth]{../figures/copula_density.png}\\[0.3cm]
+\includegraphics[width=0.99\linewidth]{../figures/copula_result.png}
 \vspace{0.1cm}
 \innerblock{}{Even the \emph{maximal} copula's gain sits at the scenario-noise
 floor ($|\Lambda|\lesssim\mathbf{0.1\%}$, $\approx0$ over seeds): the null is
@@ -209,7 +209,7 @@ extends to the active and online settings: value lives in the decision, not the
 dependence model.
 \end{itemize}
 \vspace{0.2cm}
-\small Reproducible pipeline: \textbf{202 unit tests}, pre-committed configs,
+\small Reproducible pipeline: \textbf{202 tests}, pre-committed configs,
 per-cell equivalence tests, multi-seed stability, an independent adversarial review,
 license-safe archived results. \emph{AI used as a coding/drafting assistant under the
 author's direction.}

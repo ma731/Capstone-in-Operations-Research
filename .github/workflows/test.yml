@@ -1,15 +1,27 @@
 name: tests
 on: [push, pull_request]
 jobs:
-  pytest:
+  validate:
+    name: repository validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
         with: {python-version: "3.12"}
-      - run: pip install -e .[dev] pytest-cov
-      # Snapshot integrity: every cited number's source CSV must match the
-      # committed SHA-256 manifest (snapshots are append-only by repo rule).
-      - run: python -m scripts.make_provenance_manifest --check
+      - name: Compile Python sources
+        run: python -m compileall -q src scripts tests
+      - name: Validate artifacts, claims, and fixed document date
+        run: python -m scripts.validate_repository
+      - name: Snapshot integrity (SHA-256 manifest; snapshots are append-only)
+        run: python -m scripts.make_provenance_manifest --check
+
+  pytest:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with: {python-version: "3.12"}
+      - run: pip install -e ".[dev]" pytest-cov
       # test_electricitymaps.py needs the licensed (non-committed) EM raw data
       - run: pytest -q --ignore=tests/test_electricitymaps.py --cov=src --cov-report=term --cov-fail-under=75

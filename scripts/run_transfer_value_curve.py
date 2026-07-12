@@ -129,7 +129,7 @@ def main():
                 arrowprops=dict(arrowstyle="->", color=NAVY, lw=1.4,
                                 connectionstyle="arc3,rad=-0.18"))
 
-    ax.set_xlabel("transfer budget (% of daily workload that may migrate)",
+    ax.set_xlabel("transfer budget (% of daily workload that can move)",
                   fontsize=12.5)
     ax.set_ylabel(r"out-of-sample CVaR$_{0.95}$ reduction vs $\Phi=0$ [%]",
                   fontsize=12.5)

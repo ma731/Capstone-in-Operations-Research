@@ -21,6 +21,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from src.analysis.plotstyle import apply_style, NAVY, GOLD, SAGE, MUTED, INK, RUST
@@ -30,12 +31,20 @@ apply_style()
 # Cumulative % emissions saved vs a carbon-blind scheduler, per grid, per layer.
 # +transfer is the one jump; +joint cov / +robust DRO / +copula are flat (the null),
 # robust dipping slightly where it fits noise (Diversified).
+#
+# The plotted values are read from an archived snapshot rather than hardcoded, so every
+# number on the figure traces to a committed file. The +transfer plateau is the MEASURED
+# run_dayahead_savings save_aware (validated); the flat tail encodes the RQ2/RQ3 nulls.
+# See the snapshot's `kind`/`source` columns for the provenance of each point.
+_FRONTIER_CSV = Path("docs/results_snapshots/complexity_frontier_2026-07-05.csv")
+_GRID_STYLE = [("us_west", NAVY), ("taskc", GOLD), ("us_hetero", SAGE)]
+
 LAYERS = ["carbon\nblind", "+temporal", "+transfer", "+joint\ncov.", "+robust\nDRO", "+copula"]
-GRIDS = [
-    ("Western US",        NAVY, [0.0, 3.9, 11.7, 11.7, 11.6, 11.7]),
-    ("Eastern US-Canada", GOLD, [0.0, 1.2, 12.5, 12.5, 12.5, 12.5]),
-    ("Diversified",       SAGE, [0.0, 4.7, 15.8, 15.8, 15.0, 15.8]),
-]
+_frontier = pd.read_csv(_FRONTIER_CSV)
+GRIDS = []
+for _key, _color in _GRID_STYLE:
+    _rows = _frontier[_frontier["grid"] == _key].sort_values("layer_idx")
+    GRIDS.append((str(_rows["display"].iloc[0]), _color, _rows["cumulative_saving_pct"].tolist()))
 
 
 # Where to drop the direct end-of-line labels (nudged off the exact endpoints so the

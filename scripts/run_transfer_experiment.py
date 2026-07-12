@@ -1,4 +1,4 @@
-"""PART 3 — the proper test: does robustifying transfer against FORECAST ERROR
+"""PART 3 - the proper test: does robustifying transfer against FORECAST ERROR
 (not residual variability) finally pay?
 
 Setup that fixes the prototype's mismatch:

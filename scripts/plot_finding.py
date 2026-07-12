@@ -30,7 +30,7 @@ from src.analysis.tail_dependence import residualize_hour_of_day  # noqa: E402
 from src.data.electricitymaps import load_all_zones, to_wide  # noqa: E402
 
 CASES = ("us_hetero", "taskc", "us_west")
-LABEL = {"us_hetero": "Diversified\n(solar/wind/hydro)", "taskc": "Eastern US–Canada\n(Ontario+belt)",
+LABEL = {"us_hetero": "Diversified\n(solar/wind/hydro)", "taskc": "Eastern US-Canada\n(Ontario+belt)",
          "us_west": "Western US\n(CA/NV/AZ)"}
 COLOR = {"us_hetero": SAGE, "taskc": GOLD, "us_west": NAVY}
 RES = Path("results")

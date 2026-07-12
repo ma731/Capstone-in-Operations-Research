@@ -6,7 +6,7 @@ layer of modelling sophistication actually buys.
 **Research Capstone in Operations Research · IE School of Science & Technology · 2026**
 **Student:** Marco Ortiz Togashi · **Supervisor:** Prof. Bissan Ghaddar
 
-`213 unit tests (195 runnable without the licensed data)` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to a SHA-256-frozen snapshot`
+`213 tests collected (200 in public CI)` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to a SHA-256-frozen snapshot`
 
 ---
 
@@ -59,8 +59,10 @@ The answer separates a lever that pays from two that mostly do not:
   Distributional robustness hedges day-ahead forecast error and begins to pay only above an
   emergency-severity crossover $M^\star\approx3$ (where $M$ is the multiple by which a
   region's carbon intensity spikes in a rare grid emergency, so $M=3$ is a tripling).
-  Data-grounded worst-tail emergencies across 17 zones reach only $M\approx1.4$, so on
-  observed conditions the deterministic transfer scheduler is dominant. Under multi-seed
+  Data-grounded joint-grid severities are $M=1.29$--$1.89$, below the material crossover,
+  so on observed conditions the deterministic transfer scheduler is dominant. Individual
+  very-low-carbon zones can have larger ratios, which is why the comparison is made on the
+  same joint portfolio axis as the scheduler. Under multi-seed
   testing the crossover itself survives on the Western grid only, and there only marginally,
   so RQ3 is reported as a tested decision rule, not a universal threshold.
 
@@ -74,7 +76,7 @@ robust layer are conditional options, not free wins.
 |---|---|---|---|
 | **RQ1** | Does letting jobs move between regions cut worst-day emissions, and what drives the saving? | Yes, 4.0–9.9% over a like-for-like no-transfer baseline; the driver is the average carbon field, not dependence | the lever that pays |
 | **RQ2** | Does modelling how regions co-move (covariance, copulas) improve worst-day emissions? | No, the gap stays below 0.4% of CVaR and survives a full robustness battery | a screening rule for when to skip it |
-| **RQ3** | Does hedging forecast error with DRO pay over the plain scheduler, and do real grids reach that regime? | Only above a severity crossover near a tripling that real grids have not reached (about 1.4x in the data) | a conditional option, not a free win |
+| **RQ3** | Does hedging forecast error with DRO pay over the plain scheduler, and do real grids reach that regime? | Only above a severity crossover near a tripling; realized joint-grid severity is 1.29x--1.89x | a conditional option, not a free win |
 
 ## The three grids
 
@@ -119,8 +121,12 @@ The three headline numbers:
 | Claim | Value | Snapshot |
 |---|---|---|
 | RQ1 transfer lever (OOS $\mathrm{CVaR}_{0.95}$ reduction over $\Phi=0$) | Western 4.04%, Eastern 9.91%, Diversified 9.04% | `part3_transfer_value_2026-06-15.csv` (plateau corroborated by `transfer_value_curve_2026-06-24.csv`) |
-| RQ3 real worst-tail emergency severity (17 zones) | median $M\approx1.43$ | `carbon_ceiling_2026-06-24.csv` |
+| RQ3 real worst-tail emergency severity (17 zones) | per-zone median $M\approx1.43$; joint grids $M=1.29$--$1.89$ | `carbon_ceiling_2026-06-24.csv` |
 | RQ3 robustness crossover | first material, significant robust gain at $M\approx3$ | `part3_emergency_2026-06-15.csv` |
+
+A full slide-by-slide provenance map for the defense deck (every number → archived CSV →
+figure script) is in [`docs/deck_provenance.md`](docs/deck_provenance.md); a short list of
+known slide-label corrections is in [`docs/deck_errata.md`](docs/deck_errata.md).
 
 ## What moves the results: constraint sensitivity, ranked
 
@@ -149,10 +155,11 @@ The three headline numbers:
 The fastest check needs no API token and no license:
 
 ```bash
-pytest tests/ -q --ignore=tests/test_electricitymaps.py
-# expected: 195 passed, 5 skipped in ~15s (two benign upstream DeprecationWarnings).
-# The skipped tests plus the ignored file need the licensed Electricity Maps raw data;
-# with it present the full suite is 213 tests.
+pytest tests/ -q
+# without the licensed raw data: 213 collected, 195 passed, 18 skipped
+# (the skips are the Electricity Maps ingestion/integration tests).
+# with the licensed data present: 213 passed, 0 skipped.
+# public CI runs 200 (it ignores tests/test_electricitymaps.py entirely).
 
 python -m scripts.make_provenance_manifest --check
 # expected: OK -- every archived snapshot matches its committed SHA-256 digest.
@@ -187,9 +194,11 @@ python -m scripts.plot_copula
 python -m scripts.plot_robustness
 ```
 
-For byte-identical reported digits, install the pinned versions in
-`requirements-lock.txt`; a plain `pip install -e .` reaches the same conclusions but the
-last digits can shift if a different solver build is selected.
+For the fully resolved environment, use the tracked `uv.lock` (`uv sync --frozen
+--extra dev`). `constraints-numerics.txt` records the validated numerical and solver
+versions used for the reported runs. Reproduction is judged against the archived
+rounded values and declared tolerances; last digits can vary across platforms or
+solver builds.
 
 ## Experiment catalog (script -> what it answers -> snapshot)
 
@@ -245,10 +254,10 @@ Calibration helpers (`calibrate_*`, `screen_zones`), figure builders (`plot_*`, 
 │   │                    #   transfer_dro (Part 3), online_transfer (Part 4), covariance
 │   └── analysis/        # stratified_correlations, tail_dependence, metrics, plots
 ├── scripts/             # experiment runners + plotting
-├── tests/               # 213 pytest unit tests incl. snapshot-integrity + determinism (CI on push/PR)
+├── tests/               # 213 pytest tests incl. snapshot-integrity + determinism (200 collected in public CI)
 ├── thesis/              # capstone_thesis.{tex,pdf} (the graded report)
 ├── full_thesis/         # extended write-up (full_thesis.pdf, Parts 3-5 in body)
-├── poster/              # A0 conference poster (build_v24.js -> poster_capstone_v24.pdf)
+├── poster/              # A0 poster (build_v24.js -> .pptx; PDF exported from it)
 ├── deck/                # capstone_defense.pptx (defense deck; built by scripts/build_deck.py)
 ├── docs/
 │   ├── results_snapshots/       # archived summary CSVs (license-safe; every number traces here;
@@ -285,7 +294,7 @@ uv venv && uv pip install -e ".[dev]"
 # or: python -m venv .venv && pip install -e ".[dev]"
 
 cp .env.example .env        # add ELECTRICITY_MAPS_TOKEN (only needed to re-fetch raw data)
-pytest tests/               # 202 tests should pass
+pytest tests/               # 202 collected; data/optional-dependency tests may skip
 ```
 
 **Solvers (all free, all in the default install):** HiGHS for the LP and CVaR-SAA
@@ -405,7 +414,8 @@ Short version of the heavy jargon. The thesis carries a fuller glossary in an ap
   correlation.
 - **Severity $M$ and crossover $M^\star$:** $M$ is how many times worse carbon spikes in a
   rare emergency ($M=3$ is a tripling). $M^\star\approx3$ is where the robust layer starts to
-  beat the plain plan; real emergencies across 17 zones only reach about $M=1.4$.
+  beat the plain plan. The 17-zone per-zone median is $M\approx1.43$; on the comparable
+  joint-grid axis, realized severity is $M=1.29$--$1.89$.
 - **Transfer budget $\Phi$:** the dial for how much compute may migrate between regions.
   $\Phi=0$ is the honest no-transfer baseline; turning it up delivers the 4.0–9.9% saving.
   "Logical" migration means jobs move over the network between the operator's own sites, the
@@ -435,8 +445,8 @@ Short version of the heavy jargon. The thesis carries a fuller glossary in an ap
   adversarial review) made the findings *more conservative, not larger*: the value
   concentrates in the deterministic transfer lever, with the dependence and robust
   layers priced as conditional rather than free.
-- **Code:** 213 unit tests, CI on push/PR; every reported number traces to an
-  archived, license-safe snapshot in `docs/results_snapshots/`, frozen by a
+- **Code:** 213 tests collected (200 in public CI), CI on push/PR; every reported number
+  traces to an archived, license-safe snapshot in `docs/results_snapshots/`, frozen by a
   CI-enforced SHA-256 manifest.
 - **Post-defense hardening (July 2026, honestly dated):** snapshot SHA-256 manifest +
   integrity test, seed-determinism tests, coverage floor in CI (79% on `src/`, floor 75%),
@@ -445,6 +455,23 @@ Short version of the heavy jargon. The thesis carries a fuller glossary in an ap
   `run_external_baselines`; policy logic unit-tested, empirical runs require the licensed
   data). The scientific record (models, experiments, snapshots) predates the 2026-07-07
   defense; these additions certify and protect it without altering it.
+
+### What validation proves
+
+Public CI has three gates. The repository-validation gate checks document dates, links,
+canonical artifacts, headline values against archived CSVs, every TeX graphic, solver
+metadata, and the absence of a public handwritten signature. The snapshot-integrity gate
+verifies every archived CSV against the committed SHA-256 manifest, so the evidentiary
+record cannot silently change. The pytest gate exercises 200 data-independent tests,
+including model invariants, synthetic controls, regression snapshots, seed determinism,
+and numerical tolerances. Together they are strong protection against code, claim, and
+publication drift.
+
+They are not an independent re-download and recomputation of Electricity Maps data:
+13 ingestion tests require the licensed raw files and therefore run only in an authorised
+local environment. This boundary is deliberate and documented rather than hidden; the
+public aggregate snapshots validate traceability, while a full scientific reproduction
+requires the licence-holder's raw-data directory.
 
 ## Key references
 
@@ -458,13 +485,14 @@ Short version of the heavy jargon. The thesis carries a fuller glossary in an ap
 
 ## License
 
-**Code:** MIT (see [`LICENSE`](LICENSE)), the source in `src/`, `scripts/`, and
-`tests/` is free to use, modify, and redistribute.
+**Code:** MIT (see [`LICENSES/MIT-CODE.txt`](LICENSES/MIT-CODE.txt)); the source in
+`src/`, `scripts/`, and `tests/`, plus `pyproject.toml`, is free to use, modify, and
+redistribute under that licence.
 
 This MIT grant is **scoped to the code only**. It does **not** cover:
 
 - **The thesis text, poster, and deck** (`thesis/`, `full_thesis/`, `poster/`,
-  `deck/`), © 2026 Marco Ortiz Togashi, all rights reserved pending
+  `deck/`, and `capstone_explained.html`), © 2026 Marco Ortiz Togashi, all rights reserved pending
   submission/defense; do not redistribute without permission.
 - **The carbon-intensity data**, supplied by Electricity Maps under a
   **non-redistributable academic licence**. Raw CSVs are gitignored and never
@@ -472,3 +500,4 @@ This MIT grant is **scoped to the code only**. It does **not** cover:
   the raw data.
 
 Before any external publication of the thesis itself, confirm with the supervisor.
+The root [`LICENSE`](LICENSE) is the authoritative scope notice for repository content.

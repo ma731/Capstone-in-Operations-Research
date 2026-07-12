@@ -22,7 +22,7 @@ from src.analysis.plotstyle import (  # noqa: E402
 FIG = Path("figures")
 
 # (a) transfer-budget savings (out-of-sample CVaR reduction vs no transfer)
-GRIDS = ["Western US", "Eastern US–Canada", "Diversified"]
+GRIDS = ["Western US", "Eastern US-Canada", "Diversified"]
 SAVINGS = [4.0, 9.9, 9.0]
 
 # (b) emergency-severity crossover: robust(CVaR)-commitment gain over risk-neutral

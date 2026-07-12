@@ -57,7 +57,7 @@ def main():
                    edgecolor="white", lw=1.3, zorder=4, label=label)
 
     cluster(WEST, NAVY, label="Western US  ($\\rho$ up to 0.78)")
-    cluster(EAST, CER, label="Eastern US–Canada  (4 zones)")
+    cluster(EAST, CER, label="Eastern US-Canada  (4 zones)")
     cluster(DIV, SAGE, marker="D", size=120,
             label="Diversified  (CA solar · TX wind · NW hydro)")
 

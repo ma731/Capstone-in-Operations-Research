@@ -14,6 +14,7 @@
 \let\openbox\relax
 \usepackage{newtxtext,newtxmath}        % Times New Roman text + math
 \usepackage[margin=1in]{geometry}
+\usepackage{microtype}                  % protrusion + font expansion: the professional polish
 \usepackage{setspace}\onehalfspacing    % 1.5 line spacing
 \usepackage{booktabs,array,enumitem,graphicx,xcolor,mathtools}
 \usepackage{algorithm}
@@ -23,6 +24,8 @@
 \definecolor{navy}{HTML}{1F3B63}
 \definecolor{rust}{HTML}{B3402F}
 \usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={The Price of Sophistication},
+            pdfauthor={Marco Ortiz Togashi}}
 \usepackage[numbers,sort&compress]{natbib}  % IEEE-style numeric citations
 
 \newtheorem{proposition}{Proposition}
@@ -40,14 +43,11 @@
 % ===================== COVER PAGE =====================
 \begin{titlepage}
 \centering
-% Official IE University logo. Drop the file at figures/ie_logo.pdf (vector
-% preferred; .png also works) and it appears automatically; until then the
-% text wordmark below stands in.
-\IfFileExists{../figures/ie_logo.pdf}{%
-  \includegraphics[height=2.0cm]{../figures/ie_logo.pdf}\par\vspace{1.0cm}}{%
-  \IfFileExists{../figures/ie_logo.png}{%
-    \includegraphics[height=2.0cm]{../figures/ie_logo.png}\par\vspace{1.0cm}}{%
-    {\large IE University, School of Science \& Technology\par}\vspace{0.4cm}}}
+% Official IE University logo. The tracked PNG keeps clean-clone builds portable;
+% the text wordmark below is a defensive fallback.
+\IfFileExists{../figures/ie_logo.png}{%
+  \includegraphics[height=2.0cm]{../figures/ie_logo.png}\par\vspace{1.0cm}}{%
+  {\large IE University, School of Science \& Technology\par}\vspace{0.4cm}}
 {\large Master in Business Analytics \& Data Science\par}
 {\large Research Capstone in Operations Research\par}
 \vspace{2.2cm}
@@ -90,6 +90,10 @@ as candidly as the positive ones, to avoid overstating the value of the proposed
 methods. The author declares no conflicts of interest.
 \end{minipage}
 \end{titlepage}
+
+% Front matter (abstract, contents) numbered i, ii, iii ...;
+% the body resets to arabic page 1 at the Introduction.
+\pagenumbering{roman}
 
 % ===================== ABSTRACT =====================
 \begin{abstract}
@@ -135,11 +139,14 @@ documents the validation behind every claim: small-instance model checks, a
 pre-committed protocol, and a $202$-test software suite. The thesis contributes a
 working scheduler with honest savings, a screening rule for when passive dependence
 modelling fails, and a price-of-robustness decision rule with a tested, data-grounded
-bound, all under 202 unit tests, with the Phase~1--2 falsification protocol pre-committed (the stylised-emergency crossover of RQ3 is a calibrated stress test, not part of the pre-commitment).
+bound, all under 202 tests, with the Phase~1--2 falsification protocol pre-committed (the stylised-emergency crossover of RQ3 is a calibrated stress test, not part of the pre-commitment).
 \end{abstract}
 \newpage
 \tableofcontents
 \newpage
+
+% Body begins here: arabic page 1.
+\pagenumbering{arabic}
 
 % ===================== 1. INTRODUCTION =====================
 \section{Introduction}\label{sec:intro}
@@ -808,7 +815,7 @@ solves; Phase 2 adds $3\times3\times3\times4=108$ CVaR-SAA LPs. Total wall-clock
 the entire study is under two hours on one core, so reproduction is cheap.
 
 \subsection{Reproducibility}\label{sec:repro}
-All code is version-controlled (private repository, continuous-integration test
+All code is version-controlled (public repository, continuous-integration test
 suite, $202$ unit tests, including a feasible-set equivalence test pinning the
 Phase 2 CVaR scheduler to the Phase 1 constraint set); experiment configurations
 are commit-locked before test-set evaluation; bootstrap and scenario seeds are
@@ -846,8 +853,8 @@ the data.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.48\textwidth]{../figures/ci_corr_heatmap_us_west.pdf}\hfill
-\includegraphics[width=0.48\textwidth]{../figures/ci_corr_heatmap_taskc.pdf}
+\includegraphics[width=0.48\textwidth]{../figures/ci_corr_heatmap_us_west.png}\hfill
+\includegraphics[width=0.48\textwidth]{../figures/ci_corr_heatmap_taskc.png}
 \caption{Residual (hour-of-day-removed) cross-region correlation of hourly carbon
 intensity, 2021--2025. Left: US West (CISO, BANC, LDWP, NEVP, AZPS). Right:
 Ontario--Eastern belt (CA-ON, NYISO, MISO, PJM). Cross-region correlation is strong and
@@ -864,7 +871,7 @@ moderate, by construction.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.92\textwidth]{../figures/correlation_map.pdf}
+\includegraphics[width=0.92\textwidth]{../figures/correlation_map.png}
 \caption{The three grids and their residual correlation network. Nodes are
 Electricity Maps zones at their geographic centroids; edge weight is the
 de-seasonalized cross-region correlation. Tight clusters (US West, Ontario--Eastern
@@ -902,7 +909,7 @@ a data-grounded emergency stress test.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.92\textwidth]{../figures/transfer_value_curve.pdf}
+\includegraphics[width=0.92\textwidth]{../figures/transfer_value_curve.png}
 \caption{The transfer lever. Out-of-sample $\CVaR_{0.95}$ saving against the
 inter-region transfer budget $\Phi$, relative to the carbon-aware no-transfer baseline
 ($\Phi=0$). Active migration captures this spatial lever;
@@ -928,7 +935,7 @@ developed in Section~\ref{sec:res-mech}.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.85\textwidth]{../figures/complexity_frontier.pdf}
+\includegraphics[width=0.85\textwidth]{../figures/complexity_frontier.png}
 \caption{The complexity--value frontier. Cumulative out-of-sample emissions saved
 versus a carbon-blind scheduler, as each modelling layer is added. The value lives in
 deterministic transfer; passive dependence sophistication is flat; robust transfer is
@@ -973,7 +980,7 @@ joint and shuffled curves lie on top of one another.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\textwidth]{../figures/cv_curve.pdf}
+\includegraphics[width=\textwidth]{../figures/cv_curve.png}
 \caption{The DRO genuinely engages. Blocked 5-fold cross-validation
 $\CVaR_{0.95}$ (relative to the nominal $\varepsilon=0$ problem) against the
 Wasserstein radius $\varepsilon$, for the joint (solid) and shuffled (dashed)
@@ -1035,7 +1042,7 @@ value from it.}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\textwidth]{../figures/finding.pdf}
+\includegraphics[width=\textwidth]{../figures/finding.png}
 \caption{The Phase 1 finding. \textbf{A:} spatial gap vs.\ mean residual
 cross-region correlation; value does not track correlation anywhere on the
 spectrum. \textbf{B:} mean-leveling test; in the covariance-only world (constant
@@ -1052,7 +1059,7 @@ cross-region covariance changes essentially nothing about what the scheduler doe
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\textwidth]{../figures/schedule_us_west.pdf}
+\includegraphics[width=\textwidth]{../figures/schedule_us_west.png}
 \caption{The spatial null, seen directly (Western US, regime R3,
 $\alpha=0.5$, $\varepsilon^\star=1$). Bars are the optimal load under the joint
 covariance; the red step is the load under the shuffled (block-diagonal)
@@ -1314,7 +1321,7 @@ Figure~\ref{fig:tails} shows the asymmetry for the Ontario--Eastern belt.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.72\textwidth]{../figures/tail_dependence_taskc.pdf}
+\includegraphics[width=0.72\textwidth]{../figures/tail_dependence_taskc.png}
 \caption{Upper-tail dependence $\chiU(q)$ for the Ontario--Eastern belt region
 pairs (solid) against the Gaussian-copula benchmark at the matched correlation
 (dashed). The empirical curves sit at or below the benchmark as $q\to1$: in the
@@ -1476,7 +1483,7 @@ full multi-seed treatment and the data-grounded emergency model behind this verd
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.8\textwidth]{../figures/crossover.pdf}
+\includegraphics[width=0.8\textwidth]{../figures/crossover.png}
 \caption{The price-of-robustness crossover. Robust-minus-risk-neutral $\CVaR_{0.95}$
 advantage against emergency severity $M$. The materially relevant crossover is
 $M^\star\approx3$ (grid-specific); the plotted curves are single representative seeds,
@@ -2311,7 +2318,7 @@ large-dimensional covariance matrices,'' \emph{J. Multivar. Anal.}, vol.~88,
 no.~2, pp.~365--411, 2004.
 \bibitem{radovanovic2022} A.~Radovanovi\'c et al., ``Carbon-aware computing for
 datacenters,'' \emph{IEEE Trans. Power Syst.}, vol.~38, no.~2, pp.~1270--1280,
-2022.
+2023, doi:10.1109/TPWRS.2022.3173250.
 \bibitem{rockafellar2000} R.~T. Rockafellar and S.~Uryasev, ``Optimization of
 conditional value-at-risk,'' \emph{J. Risk}, vol.~2, no.~3, pp.~21--41, 2000.
 \bibitem{sklar1959} A.~Sklar, ``Fonctions de r\'epartition \`a $n$ dimensions et
@@ -2347,7 +2354,7 @@ immaterial rather than a real effect, and it confirms $S=1000$ is sufficient.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.7\textwidth]{../figures/scenario_convergence.pdf}
+\includegraphics[width=0.7\textwidth]{../figures/scenario_convergence.png}
 \caption{The comonotone gap is scenario-sampling noise. Mean (line) and range over
 five seeds (band) of the comonotone-vs-independence $\CVaR_{0.95}$ gap on
 Eastern US--Canada, against the scenario count $S$. The band straddles zero and narrows
@@ -2360,9 +2367,9 @@ version-controlled repository with a continuous-integration suite (202 unit
 tests in total; CI runs 189, excluding the 13 Electricity Maps integration tests
 that require licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL
 for the second-order cone program and HiGHS for deterministic LP baselines. Exact
-dependency versions are pinned in a tracked \texttt{requirements-lock.txt}
+dependency versions are resolved in a tracked \texttt{uv.lock}
 (CLARABEL~0.11.1, HiGHS/highspy~1.14.0, CVXPY~1.9.1, NumPy~2.4.6, SciPy~1.17.1;
-Python~3.12.4), under which every reported number reproduces byte-identically. The
+Python~3.12), under which the reported rounded values reproduce within the declared tolerances. The
 licensed raw carbon-intensity data is never committed; only derived aggregate
 summary tables (CV-selected $\varepsilon$, test CVaR, spatial gaps, bootstrap CIs,
 BH $p$-values) are archived, so the non-redistribution academic licence is
@@ -2487,7 +2494,7 @@ $\chiU=0.26$ for CISO--BANC), exactly the structure the symmetric Gaussian copul
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\textwidth]{../figures/copula_density.pdf}
+\includegraphics[width=\textwidth]{../figures/copula_density.png}
 \caption{The dependence object a covariance ball cannot represent. Samples from the
 Gaussian copula (left, symmetric: $\chiL\approx\chiU$) and the fitted Clayton copula
 (right) for a representative US-West pair. Clayton concentrates in the lower-left
@@ -2541,7 +2548,7 @@ Diversified & 0.20 & 0.50 & 0.069 & 0.127 & 0.114 & $\approx0$, noise\\
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\textwidth]{../figures/copula_result.pdf}
+\includegraphics[width=\textwidth]{../figures/copula_result.png}
 \caption{Copula result (single locked scenario seed). \textbf{A:} maximum positive
 gain versus independence for the Gaussian, Clayton, and comonotone (upper-Fr\'echet
 $\sup_C$) arms. The largest single-seed comonotone gain is $0.18\%$ (Eastern US--Canada);
@@ -2569,7 +2576,7 @@ the shape of the dependence object.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.82\textwidth]{../figures/scenario_tail.pdf}
+\includegraphics[width=0.82\textwidth]{../figures/scenario_tail.png}
 \caption{Out of sample the copula schedulers are interchangeable
 (Eastern US--Canada). Distribution of real 2025 daily emissions under the schedule
 fitted to independence, Clayton, and comonotone scenarios; the dotted lines mark

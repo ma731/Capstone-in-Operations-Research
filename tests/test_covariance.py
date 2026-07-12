@@ -519,8 +519,9 @@ class TestRealDataIntegration:
     """Hits real data on disk. Skips if not present so unit-test runs stay
     fast and CI-friendly. Run with `pytest -k Integration` to exercise."""
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def wide_panel(self):
+    def wide_panel():
         try:
             from src.data.electricitymaps import load_all_zones, to_wide
         except ImportError:
