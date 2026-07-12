@@ -191,6 +191,50 @@ For byte-identical reported digits, install the pinned versions in
 `requirements-lock.txt`; a plain `pip install -e .` reaches the same conclusions but the
 last digits can shift if a different solver build is selected.
 
+## Experiment catalog (script -> what it answers -> snapshot)
+
+Everything under `scripts/` is runnable as `python -m scripts.<name>`. The load-bearing ones:
+
+**Core experiments (need the licensed raw data)**
+
+| Script | Question it answers | Snapshot it writes |
+|---|---|---|
+| `run_shuffled_marginals_experiment` (+ `_taskA`, `_taskc`, `_es_pt_fr`, `_components` variants) | RQ2: does joint covariance beat shuffled (independent-regions) covariance? Flags select estimator (`--estimator lw/ar1/seasonal`), ablations, test year | `<grid>_regimes_<date>[ _variant].csv` |
+| `run_copula_experiment --region-set <grid>` | RQ2 ceiling: Gaussian / Clayton / comonotone copula schedulers vs independence | `<grid>_copula_<date>.csv` |
+| `run_part3_transfer_value` | RQ1 headline: CVaR reduction of inter-region transfer over the Phi=0 baseline | `part3_transfer_value_<date>.csv` |
+| `run_transfer_value_curve` | RQ1 shape: value vs transfer budget Phi, saturation knee | `transfer_value_curve_<date>.csv` |
+| `run_part3_emergency` / `run_part3_real_emergency` | RQ3: robust-vs-deterministic gain vs emergency severity M (synthetic / data-grounded) | `part3_emergency_<date>.csv`, `part3_real_emergency_<date>.csv` |
+| `run_carbon_ceiling` | RQ3 context: realized worst-tail severities across all 17 zones (median ~1.43x, max BPAT 5.12x) | `carbon_ceiling_<date>.csv` |
+| `run_part4_online` / `run_part4_forecasts` | Online rolling-horizon controller; forecast-error interaction | `part4_online_<date>.csv`, `part4_forecasts_<date>.csv` |
+| `run_part5_condition` / `run_part5_kappa` / `run_part5_tight` | Theory: the mean-dominance ratio, its 1/kappa capacity scaling, tightness of the bound | `part5_*.csv` |
+
+**Statistical battery**
+
+| Script | Purpose | Snapshot |
+|---|---|---|
+| `run_block_bootstrap_check` | serial-dependence-aware CIs; reports the block/iid SE ratio | `block_bootstrap_<date>.csv` |
+| `bh_correction` | Benjamini-Hochberg FDR correction across all gap cells | `bh_correction.csv` |
+| `run_dro_tail_sensitivity` | is the RQ3 verdict an artifact of the 0.95 tail? (0.90/0.95/0.99/worst-day) | `dro_tail_sensitivity_<date>.csv` |
+| `run_risk_measure_swap` / `run_entropic_risk_check` | does the objective choice (mean-std DRO, entropic) change conclusions? | `risk_measure_swap_<date>.csv`, `entropic_risk_check_<date>.csv` |
+| `run_crossover_sensitivity` / `run_parts34_stability` | multi-seed stability of the crossover and Parts 3-4 | `parts34_stability_<date>.csv` |
+
+**Journal extensions (July 2026; logic unit-tested, empirical runs need the raw data)**
+
+| Script | Purpose | Snapshot |
+|---|---|---|
+| `run_transfer_penalty_sweep` | cost realism: transfer value under per-unit migration cost lam; break-even lam* | `transfer_penalty_sweep_<date>.csv` |
+| `run_external_baselines` | literature benchmarks: carbon-agnostic, greedy clean-hour packing, threshold suspend/resume vs the LP arms | `external_baselines_<date>.csv` |
+
+**Meta and integrity (run WITHOUT the raw data)**
+
+| Script | Purpose | Output |
+|---|---|---|
+| `make_provenance_manifest [--check]` | freeze / verify SHA-256 digests of every archived snapshot | `docs/results_snapshots/MANIFEST.sha256` |
+| `analyze_constraint_sensitivity` | rank every swept knob by conclusion-impact vs magnitude-impact, from snapshots alone | `constraint_sensitivity_<date>.csv` + [`docs/CONSTRAINT_SENSITIVITY.md`](docs/CONSTRAINT_SENSITIVITY.md) |
+| `data_audit` | completeness / gap report on the raw data you downloaded | console report |
+
+Calibration helpers (`calibrate_*`, `screen_zones`), figure builders (`plot_*`, `build_deck`), and `prototype_*` / `toy_validation*` (kept for history) round out the folder.
+
 ## Project structure
 
 ```
@@ -253,6 +297,73 @@ comparison arm only, available via the `gurobi` extra (`pip install -e ".[gurobi
 **gitignored, never committed** (only derived aggregate statistics are archived). The
 Open-Meteo ERA5 temperature CSVs under `data/raw/temperature/` are CC-BY and *are*
 committed. Do not redistribute the Electricity Maps data.
+
+## Getting the data
+
+**Carbon intensity (required for experiments; licensed, never committed).** Hourly
+carbon-intensity CSVs from [Electricity Maps](https://portal.electricitymaps.com/datasets)
+under their free academic/non-commercial data program (their license does not permit
+redistribution, which is why `data/raw/` is gitignored and every public number lives in a
+derived snapshot instead). Download the hourly datasets for the 17 zones x 5 years
+(2021-2025) used in the thesis and place them at:
+
+```
+data/raw/electricitymaps/snapshots_<download-date>_<ZONE>-<YEAR>-hourly.csv
+# e.g. data/raw/electricitymaps/snapshots_2026-02-10_US-CAL-CISO-2024-hourly.csv
+```
+
+The loader globs `snapshots_*_<ZONE>-<YEAR>-hourly.csv`, so the download-date token is
+free. Expected schema: the standard 11-column Electricity Maps hourly export
+(`Datetime (UTC)`, zone identifiers, direct and life-cycle carbon intensity, CFE%, ...);
+the ingestion module normalizes the headers. The 17 zones:
+
+`CA-AB, CA-ON, US-CAL-BANC, US-CAL-CISO, US-CAL-IID, US-CAL-LDWP, US-CAL-TIDC,
+US-MIDA-PJM, US-MIDW-AECI, US-MIDW-MISO, US-NW-BPAT, US-NW-NEVP, US-NY-NYIS,
+US-SW-AZPS, US-SW-PNM, US-SW-SRP, US-TEX-ERCO`
+
+After downloading, `python -m scripts.data_audit` reports completeness and gaps.
+
+**Temperature (committed).** Open-Meteo ERA5 hourly temperature (CC-BY) ships with the
+repo; `python -m scripts.fetch_temperature` re-fetches it if needed.
+
+## Frequently hit issues
+
+- **Tests pass but 5 skip / `test_electricitymaps` is ignored** -- expected without the
+  licensed raw data; the full 213 run needs it (see above).
+- **Windows** -- the docs use `.venv\Scripts\python`; on Unix use `.venv/bin/python`.
+  Long OneDrive paths can break pip installs; keep the repo near the drive root if so.
+- **Solvers** -- everything runs on cvxpy's bundled free solvers; no Gurobi/MOSEK license
+  is needed anywhere.
+- **`MANIFEST.sha256` check fails** -- an archived snapshot was edited. Snapshots are
+  append-only by policy: restore the original and write regenerated results to a NEW
+  dated file.
+
+## Integrity policy (why you can trust the numbers)
+
+Results here follow four standing rules: (1) headline hypotheses were **pre-committed**
+before decisive results existed (the locked `taskC` runner); (2) snapshots are
+**append-only** and SHA-256-frozen in CI, so the evidentiary record cannot silently
+change; (3) **adverse results ship** -- the Diversified grid's negative online result and
+the BPAT 5.12x outlier are in the archive and the write-ups, not the drawer; (4) every
+number in any document must trace to a snapshot cell (see
+[`docs/VALIDATION_EXPLAINED.md`](docs/VALIDATION_EXPLAINED.md) for the full methodology
+and its literature).
+
+## Citing this work
+
+Journal manuscript in preparation (Applied Energy, targeted 2026). Until then:
+
+```bibtex
+@mastersthesis{ortiztogashi2026price,
+  title  = {The Price of Sophistication: When Do Transfer, Dependence, and Robustness
+            Pay in Carbon-Aware Data-Center Scheduling?},
+  author = {Ortiz Togashi, Marco},
+  school = {IE School of Science and Technology},
+  year   = {2026},
+  note   = {Supervised by Bissan Ghaddar. Code and archived results:
+            \url{https://github.com/ma731/Capstone-in-Operations-Research}}
+}
+```
 
 ## Glossary (plain English)
 
