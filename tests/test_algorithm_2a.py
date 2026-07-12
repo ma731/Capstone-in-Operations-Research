@@ -259,8 +259,9 @@ class TestInputValidation:
 class TestRealDataIntegration:
     """End-to-end on the 4-zone Electricity Maps panel. Skips if data absent."""
 
+    @staticmethod
     @pytest.fixture(scope="class")
-    def real_panel(self):
+    def real_panel():
         try:
             from src.data.electricitymaps import load_all_zones, to_wide
             from src.models.covariance import build_daily_panel

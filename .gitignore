@@ -64,8 +64,10 @@ Thumbs.db
 # Outputs
 *.log
 results/
-figures/*.png
-figures/*.pdf
+tmp/
+# Publication figures are tracked so the TeX sources build from a clean clone.
+# Generated scratch figures should use `results/`; figures used by publications
+# are intentionally versioned in this directory.
 !figures/.gitkeep
 
 # LaTeX build artifacts
@@ -85,6 +87,7 @@ full_thesis/*.out
 full_thesis/*.toc
 thesis/_*.png
 thesis/_*.txt
+full_thesis/_*.txt
 thesis/*.bak
 *.ORIG.bak
 poster/_*.png
@@ -101,14 +104,18 @@ poster/node_modules/
 *.fls
 docs/results_snapshots/*.out
 
-# Old poster iterations: only v23 (build_v23.js -> poster_capstone_v23.*) is canonical
-# and tracked; everything below is superseded scratch output.
+# Old poster iterations: only v24 (build_v24.js -> poster_capstone_v24.*) is canonical
+# and tracked; the broad patterns below ignore superseded scratch output. Canonical files
+# remain tracked because they were force-added when v24 was published.
 poster/build_v*.js
 poster/poster_capstone.pdf
 poster/poster_capstone.pptx
 poster/poster_capstone_FINAL.*
 poster/poster_capstone_v*.pdf
 poster/poster_capstone_v*.pptx
+!poster/build_v24.js
+!poster/poster_capstone_v24.pdf
+!poster/poster_capstone_v24.pptx
 poster/poster_capstone_v*_CMYK_print.pdf
 poster/poster_v*_PREVIEW.png
 poster/poster_v*_proof.pdf
