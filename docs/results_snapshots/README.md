@@ -24,7 +24,14 @@ academic license does not apply.
   null holds in every one, max gap 0.21% of CVaR);
   `ramp5`/`util0.5`/`util0.95` = constraint-tightness sweeps;
   `cvar0.9`/`cvar0.99` = CVaR tail-level sweep (default metric is CVaR_0.95).
-- `bh_correction.csv` = Benjamini-Hochberg over all gap cells.
+- `bh_correction.csv` = Benjamini-Hochberg over the pre-committed **144-cell** null
+  family (4 grid-runs `taskC`/`taskc`/`us_west`/`us_hetero` x 9 regime-alpha cells x 4
+  covariance estimators baseline/ar1/lw/seasonal = 144; this is the deck slide-7 scatter).
+  The file also carries **54 mean-ablation positive-control** rows (`variant` in
+  {`ablate-flat`, `ablate-level`}, the +1.46% instrument on deck slide 18), so it has
+  144 + 54 = **198 data rows** total. BH q=0.05 is applied to the 144-cell family; the max
+  |gap| among those is 0.355% (all inside the 0.4% margin), while several ablate rows
+  exceed 0.4% by design.
 - `<case>_copula_<date>.csv` = **Phase 2** copula schedulers. Columns:
   `regime, alpha, cvar_indep, cvar_gauss, cvar_clayton, clayton_theta, kendall_tau,
   gap_gauss_pct, gap_clayton_pct, gap_clayton_vs_gauss_pct, detectable_*`. Gap =
@@ -63,6 +70,22 @@ gap_ci_lo, gap_ci_hi, detectable`. Positive gap = joint covariance beats shuffle
   respected. The block SE is 9-44% wider than iid, but every gap stays within the 0.4%
   materiality margin (widest bound 0.22%), so the equivalence null is not an artifact of the
   independent-day bootstrap. `.venv\Scripts\python -m scripts.run_block_bootstrap_check`.
+- `tail_dependence_<date>.csv` = **RQ2 backup** upper/lower tail-dependence coefficients per
+  region pair per grid, for the raw and the hour-of-day-**residual** series. Backs the deck
+  slide-17 chi_L > chi_U asymmetry (e.g. residual CISO|LDWP 0.48/0.25, BANC|LDWP 0.40/0.17).
+  Columns: `grid, display, series, n_obs, pair, pearson_rho, chi_U_emp, chi_U_gauss,
+  chi_U_excess, chi_L_emp` (`chi_L_emp` = clean-together, `chi_U_emp` = dirty-together;
+  positive `chi_U_excess` = dirty-tail co-movement a covariance ball cannot represent).
+  Regenerate with `.venv\Scripts\python -m scripts.run_tail_dependence_snapshot`.
+- `complexity_frontier_<date>.csv` = **RQ1/RQ2/RQ3** the complexity-value frontier (deck
+  slide 6). Per grid, cumulative % emissions saved **vs a carbon-blind scheduler** as each
+  modelling layer is added. The `+transfer` plateau is the measured `run_dayahead_savings`
+  `save_aware` (Western 11.7, Eastern 12.5, Diversified 15.8); the flat tail encodes the
+  RQ2/RQ3 nulls. Columns: `grid, display, layer_idx, layer, cumulative_saving_pct, kind,
+  source` (the `kind`/`source` columns mark each point as measured / anchored-null /
+  intermediate). NB the y-axis is a looser metric than the 4.0-9.9% CVaR-vs-Phi=0 headline.
+  Read by `scripts/plot_complexity_frontier.py`; regenerate the plateau with
+  `.venv\Scripts\python -m scripts.run_dayahead_savings`.
 
 Regenerate any of these with
 `.venv\Scripts\python -m scripts.run_case_experiment --region-set <case> [flags]`.

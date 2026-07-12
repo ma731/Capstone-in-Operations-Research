@@ -1,0 +1,19 @@
+grid,display,layer_idx,layer,cumulative_saving_pct,kind,source
+us_west,Western US,0,carbon-blind,0.0,baseline,definitional zero (carbon-agnostic uniform schedule)
+us_west,Western US,1,+temporal,3.9,intermediate,per-region carbon-aware (no transfer) vs blind
+us_west,Western US,2,+transfer,11.7,measured,run_dayahead_savings.py save_aware (carbon-aware+transfer vs blind); validated 2026-07-05
+us_west,Western US,3,+joint-cov,11.7,anchored-null,equals +transfer; covariance adds <0.4% (bh_correction.csv)
+us_west,Western US,4,+robust,11.6,anchored-null,robust adds ~0 online; slight dip where it fits noise (part4_online_2026-06-15.csv)
+us_west,Western US,5,+copula,11.7,anchored-null,equals +transfer; copula adds nothing (us_west_copula_2026-06-13.csv)
+taskc,Eastern US-Canada,0,carbon-blind,0.0,baseline,definitional zero (carbon-agnostic uniform schedule)
+taskc,Eastern US-Canada,1,+temporal,1.2,intermediate,per-region carbon-aware (no transfer) vs blind
+taskc,Eastern US-Canada,2,+transfer,12.5,measured,run_dayahead_savings.py save_aware (carbon-aware+transfer vs blind); validated 2026-07-05
+taskc,Eastern US-Canada,3,+joint-cov,12.5,anchored-null,equals +transfer; covariance adds <0.4% (bh_correction.csv)
+taskc,Eastern US-Canada,4,+robust,12.5,anchored-null,robust adds ~0 online (part4_online_2026-06-15.csv)
+taskc,Eastern US-Canada,5,+copula,12.5,anchored-null,equals +transfer; copula adds nothing (taskc_copula_2026-06-13.csv)
+us_hetero,Diversified,0,carbon-blind,0.0,baseline,definitional zero (carbon-agnostic uniform schedule)
+us_hetero,Diversified,1,+temporal,4.7,intermediate,per-region carbon-aware (no transfer) vs blind
+us_hetero,Diversified,2,+transfer,15.8,measured,run_dayahead_savings.py save_aware (carbon-aware+transfer vs blind); validated 2026-07-05
+us_hetero,Diversified,3,+joint-cov,15.8,anchored-null,equals +transfer; covariance adds <0.4% (bh_correction.csv)
+us_hetero,Diversified,4,+robust,15.0,anchored-null,robust is adverse on Diversified (-10.34% CVaR online; part4_online_2026-06-15.csv)
+us_hetero,Diversified,5,+copula,15.8,anchored-null,equals +transfer; copula adds nothing (us_hetero_copula_2026-06-13.csv)
