@@ -26,7 +26,7 @@ RES = Path("results")
 STAMP = "2026-06-13"
 CASES = ("us_west", "taskc", "us_hetero")
 LABEL = {"us_west": "Western US\n(CA/NV/AZ, $\\tau$=0.47)",
-         "taskc": "Eastern US–Canada\n(Ontario belt, $\\tau$=0.31)",
+         "taskc": "Eastern US-Canada\n(Ontario belt, $\\tau$=0.31)",
          "us_hetero": "Diversified\n(solar/wind/hydro, $\\tau$=0.20)"}
 
 

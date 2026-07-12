@@ -26,12 +26,12 @@ from src.analysis.plotstyle import NAVY, RUST, apply_style  # noqa: E402
 FIG = Path("figures")
 SNAP = Path("docs/results_snapshots")
 CASES = ("us_west", "taskc", "us_hetero")
-TITLE = {"us_west": "Western US  (CA/NV/AZ)", "taskc": "Eastern US–Canada  (Ontario belt)",
+TITLE = {"us_west": "Western US  (CA/NV/AZ)", "taskc": "Eastern US-Canada  (Ontario belt)",
          "us_hetero": "Diversified  (solar/wind/hydro)"}
 # arm label -> snapshot filename suffix
 ARMS = [
     ("sample cov.",      "{c}_regimes_2026-06-10.csv"),
-    ("Ledoit–Wolf", "{c}_regimes_2026-06-10_lw.csv"),
+    ("Ledoit-Wolf", "{c}_regimes_2026-06-10_lw.csv"),
     ("seasonal resid.",  "{c}_regimes_2026-06-10_seasonal.csv"),
     ("AR(1) resid.",     "{c}_regimes_2026-06-10_ar1.csv"),
     ("walk-forward '24", "{c}_regimes_2026-06-10_ty2024.csv"),

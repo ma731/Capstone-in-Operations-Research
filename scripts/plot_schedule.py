@@ -70,12 +70,12 @@ def main() -> None:
         ax2 = ax.twinx()
         # carbon intensity (mean field) as the backdrop
         ax2.fill_between(hours, rho_bar[r], color=GOLD, alpha=0.18, zorder=0)
-        ax2.plot(hours, rho_bar[r], color=GOLD, lw=1.6, zorder=1,
+        ax2.plot(hours, rho_bar[r], color=GOLD, lw=3.4, zorder=1,
                  label="carbon intensity")
         # scheduled load: joint (bars) vs shuffled (step) -- visually identical
-        ax.bar(hours, xj[r], width=0.9, color=NAVY, alpha=0.8, zorder=2,
+        ax.bar(hours, xj[r], width=0.9, color=NAVY, alpha=0.88, zorder=2,
                label="load (joint $\\Sigma$)")
-        ax.step(hours, xs[r], where="mid", color=RUST, lw=1.4, zorder=3,
+        ax.step(hours, xs[r], where="mid", color=RUST, lw=3.0, zorder=3,
                 label="load (shuffled $\\Sigma$)")
         ax.axvspan(-0.5, 7.5, color=SAGE, alpha=0.08, zorder=0)
         ax.set_title(_short(zones[r]), fontsize=11)
@@ -91,7 +91,7 @@ def main() -> None:
     # combined legend: load (joint/shuffled) + the gold carbon backdrop
     from matplotlib.lines import Line2D
     h1, l1 = axes[0][0].get_legend_handles_labels()
-    h1 = h1 + [Line2D([0], [0], color=GOLD, lw=2.6)]
+    h1 = h1 + [Line2D([0], [0], color=GOLD, lw=4.2)]
     l1 = l1 + ["carbon intensity (mean field)"]
     fig.legend(h1, l1, frameon=False, loc="outside lower center", ncol=3)
     fig.suptitle(f"Joint vs. shuffled-covariance schedules are visually "

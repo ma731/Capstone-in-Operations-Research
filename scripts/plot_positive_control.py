@@ -24,7 +24,7 @@ import numpy as np
 NAVY, GOLD, GOLDD, RUST = "#1F3B63", "#C98A2B", "#8A5C16", "#B3402F"
 SNAP = Path(__file__).resolve().parents[1] / "docs" / "results_snapshots"
 OUT = Path(__file__).resolve().parents[1] / "poster" / "figs" / "positive_control.png"
-GRIDS = [("us_west", "Western US"), ("taskc", "Eastern US–Canada"),
+GRIDS = [("us_west", "Western US"), ("taskc", "Eastern US-Canada"),
          ("us_hetero", "Diversified")]
 MARGIN = 0.4
 

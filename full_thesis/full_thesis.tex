@@ -14,6 +14,7 @@
 \let\openbox\relax
 \usepackage{newtxtext,newtxmath}        % Times New Roman text + math
 \usepackage[margin=1in]{geometry}
+\usepackage{microtype}                  % protrusion + font expansion: the professional polish
 \usepackage{setspace}\onehalfspacing    % 1.5 line spacing
 \usepackage{booktabs,array,enumitem,graphicx,xcolor,mathtools}
 \usepackage{algorithm}
@@ -23,6 +24,8 @@
 \definecolor{navy}{HTML}{1F3B63}
 \definecolor{rust}{HTML}{B3402F}
 \usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={The Price of Sophistication},
+            pdfauthor={Marco Ortiz Togashi}}
 \usepackage[numbers,sort&compress]{natbib}  % IEEE-style numeric citations
 
 \newtheorem{proposition}{Proposition}
@@ -91,6 +94,10 @@ methods. The author declares no conflicts of interest.
 \end{minipage}
 \end{titlepage}
 
+% Front matter (abstract, contents) numbered i, ii, iii ...;
+% the body resets to arabic page 1 at the Introduction.
+\pagenumbering{roman}
+
 % ===================== ABSTRACT =====================
 \begin{abstract}
 \noindent Data-center operators can shift compute toward cleaner hours and regions,
@@ -140,6 +147,9 @@ bound, all under 202 unit tests, with the Phase~1--2 falsification protocol pre-
 \newpage
 \tableofcontents
 \newpage
+
+% Body begins here: arabic page 1.
+\pagenumbering{arabic}
 
 % ===================== 1. INTRODUCTION =====================
 \section{Introduction}\label{sec:intro}

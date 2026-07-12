@@ -119,10 +119,10 @@ def _pivot_for_display(long_df: pd.DataFrame, strip_prefix: str = "US-CAL-") -> 
 # write-ups. The keys below stay as internal identifiers (CLI args, filenames).
 DISPLAY_NAME = {
     "us_west": "Western US",
-    "taskc": "Eastern US–Canada",
+    "taskc": "Eastern US-Canada",
     "us_hetero": "Diversified",
-    "taskA": "California–Nevada",
-    "ab_on": "Alberta–Ontario",
+    "taskA": "California-Nevada",
+    "ab_on": "Alberta-Ontario",
     "us_west_full": "Western US (7-zone)",
     "south_central": "South-Central (NM+MO+TX)",
 }

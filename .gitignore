@@ -117,3 +117,7 @@ poster/toplook.png
 
 # Transient LaTeX recompile log
 thesis/_recompile.log
+
+# Office/editor lock + scratch files (LibreOffice drops these next to the poster PDFs)
+.~lock.*
+poster/*.tmp

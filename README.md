@@ -122,6 +122,10 @@ The three headline numbers:
 | RQ3 real worst-tail emergency severity (17 zones) | median $M\approx1.43$ | `carbon_ceiling_2026-06-24.csv` |
 | RQ3 robustness crossover | first material, significant robust gain at $M\approx3$ | `part3_emergency_2026-06-15.csv` |
 
+A full slide-by-slide provenance map for the defense deck (every number → archived CSV →
+figure script) is in [`docs/deck_provenance.md`](docs/deck_provenance.md); a short list of
+known slide-label corrections is in [`docs/deck_errata.md`](docs/deck_errata.md).
+
 ## Reproduce the experiments
 
 The fastest check needs no API token and no license:
