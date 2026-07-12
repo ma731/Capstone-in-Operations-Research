@@ -7,6 +7,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
-      - run: pip install -e .[dev]
+      - run: pip install -e .[dev] pytest-cov
+      # Snapshot integrity: every cited number's source CSV must match the
+      # committed SHA-256 manifest (snapshots are append-only by repo rule).
+      - run: python -m scripts.make_provenance_manifest --check
       # test_electricitymaps.py needs the licensed (non-committed) EM raw data
-      - run: pytest -q --ignore=tests/test_electricitymaps.py
+      - run: pytest -q --ignore=tests/test_electricitymaps.py --cov=src --cov-report=term --cov-fail-under=75

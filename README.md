@@ -6,7 +6,7 @@ layer of modelling sophistication actually buys.
 **Research Capstone in Operations Research · IE School of Science & Technology · 2026**
 **Student:** Marco Ortiz Togashi · **Supervisor:** Prof. Bissan Ghaddar
 
-`202 passing unit tests` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to an archived snapshot`
+`213 unit tests (195 runnable without the licensed data)` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to a SHA-256-frozen snapshot`
 
 ---
 
@@ -122,14 +122,46 @@ The three headline numbers:
 | RQ3 real worst-tail emergency severity (17 zones) | median $M\approx1.43$ | `carbon_ceiling_2026-06-24.csv` |
 | RQ3 robustness crossover | first material, significant robust gain at $M\approx3$ | `part3_emergency_2026-06-15.csv` |
 
+## What moves the results: constraint sensitivity, ranked
+
+`python -m scripts.analyze_constraint_sensitivity` reads only the committed snapshots
+(no licensed data needed) and ranks every swept knob on two axes: how much it shifts the
+**conclusion** (the RQ2 spatial-null gap, in pp of CVaR) vs how much it rescales the
+**problem** (the absolute CVaR level). The short version
+(full table + interpretation: [`docs/CONSTRAINT_SENSITIVITY.md`](docs/CONSTRAINT_SENSITIVITY.md)):
+
+- **Capacity/utilization is the constraint that matters** — but for *magnitude*, not
+  conclusions: slack (0.50) vs tight (0.95) utilization shifts the absolute CVaR level by
+  ~39% / ~20% while moving the null gap by at most 0.28pp. The `part5` sweep pins the
+  mechanism exactly: the theoretical bound scales as $\Delta \propto 1/\kappa$ on all grids.
+- **The largest conclusion-mover is the walk-forward test-year choice, and it is still
+  small**: worst knob, worst cell = 0.42pp (mean 0.08pp). That is the null's robustness in
+  one number.
+- **The covariance estimator barely matters — Ledoit–Wolf least of all (0.007pp)** —
+  which is itself evidence for mean dominance: if the null were an estimation artifact,
+  better-conditioned estimation would move it. It does not.
+- RQ3 supplement: the DRO gap stays null across CVaR tail levels 0.90/0.95/0.99 on
+  us_west and taskc, while the Diversified grid's *adverse* result is adverse at every
+  tail — the disclosed negative finding is tail-robust too.
+
 ## Reproduce the experiments
 
 The fastest check needs no API token and no license:
 
 ```bash
-pytest tests/ -q
-# expected: 202 passed in ~20s. The suite runs clean (no warnings).
+pytest tests/ -q --ignore=tests/test_electricitymaps.py
+# expected: 195 passed, 5 skipped in ~15s (two benign upstream DeprecationWarnings).
+# The skipped tests plus the ignored file need the licensed Electricity Maps raw data;
+# with it present the full suite is 213 tests.
+
+python -m scripts.make_provenance_manifest --check
+# expected: OK -- every archived snapshot matches its committed SHA-256 digest.
 ```
+
+Full fresh-machine instructions, expected outputs, and the regeneration command for
+every snapshot: [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md). A plain-language walkthrough
+of every validation layer, why each method was chosen over its alternatives, and the
+literature behind them: [`docs/VALIDATION_EXPLAINED.md`](docs/VALIDATION_EXPLAINED.md).
 
 The experiments themselves:
 
@@ -169,13 +201,16 @@ last digits can shift if a different solver build is selected.
 │   │                    #   transfer_dro (Part 3), online_transfer (Part 4), covariance
 │   └── analysis/        # stratified_correlations, tail_dependence, metrics, plots
 ├── scripts/             # experiment runners + plotting
-├── tests/               # 202 pytest unit tests (CI on push/PR)
+├── tests/               # 213 pytest unit tests incl. snapshot-integrity + determinism (CI on push/PR)
 ├── thesis/              # capstone_thesis.{tex,pdf} (the graded report)
 ├── full_thesis/         # extended write-up (full_thesis.pdf, Parts 3-5 in body)
 ├── poster/              # A0 conference poster (build_v24.js -> poster_capstone_v24.pdf)
 ├── deck/                # capstone_defense.pptx (defense deck; built by scripts/build_deck.py)
 ├── docs/
-│   ├── results_snapshots/       # archived summary CSVs (license-safe; every number traces here)
+│   ├── results_snapshots/       # archived summary CSVs (license-safe; every number traces here;
+│   │                            #   frozen by MANIFEST.sha256, CI-enforced)
+│   ├── VALIDATION_EXPLAINED.md  # every validation layer: what, why-not-alternatives, citations
+│   ├── CONSTRAINT_SENSITIVITY.md# which knobs move conclusions vs magnitude, ranked
 │   ├── snippets/                # paste-ready table/figure LaTeX snippets
 │   └── stratified_results.txt   # stratified-correlation results dump
 ├── data/raw/            # carbon CSVs (Electricity Maps, gitignored); temperature CSVs (Open-Meteo ERA5, committed, CC-BY)
@@ -289,8 +324,16 @@ Short version of the heavy jargon. The thesis carries a fuller glossary in an ap
   adversarial review) made the findings *more conservative, not larger*: the value
   concentrates in the deterministic transfer lever, with the dependence and robust
   layers priced as conditional rather than free.
-- **Code:** 202 unit tests, CI on push/PR; every reported number traces to an
-  archived, license-safe snapshot in `docs/results_snapshots/`.
+- **Code:** 213 unit tests, CI on push/PR; every reported number traces to an
+  archived, license-safe snapshot in `docs/results_snapshots/`, frozen by a
+  CI-enforced SHA-256 manifest.
+- **Post-defense hardening (July 2026, honestly dated):** snapshot SHA-256 manifest +
+  integrity test, seed-determinism tests, coverage floor in CI (79% on `src/`, floor 75%),
+  `REPRODUCIBILITY.md`, the validation explainer, the constraint-sensitivity analysis, and
+  two journal-submission experiment scripts (`run_transfer_penalty_sweep`,
+  `run_external_baselines`; policy logic unit-tested, empirical runs require the licensed
+  data). The scientific record (models, experiments, snapshots) predates the 2026-07-07
+  defense; these additions certify and protect it without altering it.
 
 ## Key references
 
