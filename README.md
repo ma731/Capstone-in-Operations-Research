@@ -158,9 +158,11 @@ python -m scripts.plot_copula
 python -m scripts.plot_robustness
 ```
 
-For byte-identical reported digits, install the pinned versions in
-`requirements-lock.txt`; a plain `pip install -e .` reaches the same conclusions but the
-last digits can shift if a different solver build is selected.
+For the fully resolved environment, use the tracked `uv.lock` (`uv sync --frozen
+--extra dev`). `constraints-numerics.txt` records the validated numerical and solver
+versions used for the reported runs. Reproduction is judged against the archived
+rounded values and declared tolerances; last digits can vary across platforms or
+solver builds.
 
 ## Project structure
 
@@ -293,8 +295,23 @@ Short version of the heavy jargon. The thesis carries a fuller glossary in an ap
   adversarial review) made the findings *more conservative, not larger*: the value
   concentrates in the deterministic transfer lever, with the dependence and robust
   layers priced as conditional rather than free.
-- **Code:** 202 tests collected (189 in CI), CI on push/PR; every reported number traces to an
-  archived, license-safe snapshot in `docs/results_snapshots/`.
+- **Code:** 202 tests collected (189 in public CI), CI on push/PR; every reported number traces
+  to an archived, license-safe snapshot in `docs/results_snapshots/`.
+
+### What validation proves
+
+Public CI has two gates. The repository-validation gate checks document dates, links,
+canonical artifacts, headline values against archived CSVs, every TeX graphic, solver
+metadata, and the absence of a public handwritten signature. The pytest gate exercises
+189 data-independent tests, including model invariants, synthetic controls, regression
+snapshots, and numerical tolerances. Together they are strong protection against code,
+claim, and publication drift.
+
+They are not an independent re-download and recomputation of Electricity Maps data:
+13 ingestion tests require the licensed raw files and therefore run only in an authorised
+local environment. This boundary is deliberate and documented rather than hidden; the
+public aggregate snapshots validate traceability, while a full scientific reproduction
+requires the licence-holder's raw-data directory.
 
 ## Key references
 
@@ -308,13 +325,14 @@ Short version of the heavy jargon. The thesis carries a fuller glossary in an ap
 
 ## License
 
-**Code:** MIT (see [`LICENSE`](LICENSE)), the source in `src/`, `scripts/`, and
-`tests/` is free to use, modify, and redistribute.
+**Code:** MIT (see [`LICENSES/MIT-CODE.txt`](LICENSES/MIT-CODE.txt)); the source in
+`src/`, `scripts/`, and `tests/`, plus `pyproject.toml`, is free to use, modify, and
+redistribute under that licence.
 
 This MIT grant is **scoped to the code only**. It does **not** cover:
 
 - **The thesis text, poster, and deck** (`thesis/`, `full_thesis/`, `poster/`,
-  `deck/`), © 2026 Marco Ortiz Togashi, all rights reserved pending
+  `deck/`, and `capstone_explained.html`), © 2026 Marco Ortiz Togashi, all rights reserved pending
   submission/defense; do not redistribute without permission.
 - **The carbon-intensity data**, supplied by Electricity Maps under a
   **non-redistributable academic licence**. Raw CSVs are gitignored and never
@@ -322,3 +340,4 @@ This MIT grant is **scoped to the code only**. It does **not** cover:
   the raw data.
 
 Before any external publication of the thesis itself, confirm with the supervisor.
+The root [`LICENSE`](LICENSE) is the authoritative scope notice for repository content.

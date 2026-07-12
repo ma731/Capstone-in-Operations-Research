@@ -1,0 +1,38 @@
+# constraints-numerics.txt -- validated numerical runtime versions.
+#
+# The reported runs used this numerical stack on Python 3.12.4. Validation targets
+# the archived rounded values and declared tolerances; different platforms or solver
+# builds may change insignificant final digits.
+#
+# `uv.lock` is the full, transitive environment lock. This file is a concise record
+# of the known-good numerical and solver stack and can also be used as pip
+# constraints. For example:
+#
+#     python -m venv .venv
+#     .venv/Scripts/python -m pip install -c constraints-numerics.txt -e ".[dev]"
+#
+# Solvers: the second-order cone program uses CLARABEL; deterministic LP baselines
+# use HiGHS (highspy). gurobipy is intentionally omitted -- the study runs entirely
+# on the free solvers per supervisor guidance.
+
+# --- core scientific stack ---
+numpy==2.4.6
+scipy==1.17.1
+pandas==3.0.3
+pyarrow==24.0.0
+matplotlib==3.10.9
+
+# --- optimization / solvers ---
+cvxpy==1.9.1
+clarabel==0.11.1
+highspy==1.14.0
+scs==3.2.11
+osqp==1.1.2
+
+# --- statistics / estimators / io ---
+scikit-learn==1.9.0   # sklearn.covariance.LedoitWolf -- Ledoit-Wolf robustness column
+seaborn==0.13.2       # figure styling
+requests==2.34.2      # Open-Meteo temperature fetch
+
+# The complete transitive environment, including development tools, is recorded in
+# `uv.lock`; prefer `uv sync --frozen --extra dev` for a clean reproduction.

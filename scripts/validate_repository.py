@@ -32,7 +32,9 @@ def _read(relative: str) -> str:
 def _check_required_files() -> None:
     required = (
         "LICENSE",
-        "requirements-lock.txt",
+        "constraints-numerics.txt",
+        "uv.lock",
+        "LICENSES/MIT-CODE.txt",
         "thesis/capstone_thesis.pdf",
         "full_thesis/full_thesis.pdf",
         "poster/build_v24.js",
@@ -106,6 +108,32 @@ def _check_document_dates() -> None:
         _require(marker in _read(path), f"{path} document date is not {DOCUMENT_DATE}")
 
 
+def _check_tex_assets_and_public_privacy() -> None:
+    """Require clean-clone TeX assets and keep the public copy unsigned."""
+    missing: list[str] = []
+    tex_files = list((ROOT / "thesis").glob("*.tex")) + list(
+        (ROOT / "full_thesis").glob("*.tex")
+    )
+    for tex_path in tex_files:
+        source = tex_path.read_text(encoding="utf-8")
+        for target in re.findall(r"\\includegraphics(?:\[[^]]*\])?\{([^}]+)\}", source):
+            candidate = tex_path.parent / target
+            if candidate.suffix:
+                exists = candidate.is_file()
+            else:
+                exists = any(candidate.with_suffix(ext).is_file() for ext in (".pdf", ".png", ".jpg"))
+            if not exists:
+                missing.append(f"{tex_path.relative_to(ROOT)} -> {target}")
+    _require(not missing, f"missing TeX graphics: {', '.join(missing)}")
+
+    _require(not (ROOT / "thesis/signature.png").exists(), "public handwritten signature is present")
+    thesis = _read("thesis/capstone_thesis.tex")
+    _require(
+        "Signature withheld from public copy" in thesis,
+        "public thesis does not contain the signature-withheld notice",
+    )
+
+
 def _check_project_metadata() -> None:
     with (ROOT / "pyproject.toml").open("rb") as handle:
         project = tomllib.load(handle)["project"]
@@ -133,6 +161,7 @@ def main() -> None:
     _check_public_links()
     _check_headline_snapshots()
     _check_document_dates()
+    _check_tex_assets_and_public_privacy()
     _check_project_metadata()
     print("repository validation passed")
 

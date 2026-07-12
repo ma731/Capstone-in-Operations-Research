@@ -39,7 +39,7 @@ dev = [
 ]
 # Phase 2 extras (install when needed)
 phase2 = [
-    "vinecopulib>=0.6",
+    "pyvinecopulib>=0.6",
     "statsmodels>=0.14",
 ]
 # Optional commercial solver: used only as a comparison arm, never required to

@@ -80,7 +80,7 @@ tested against real data-grounded
 worst-tail emergencies across 17 zones, that crossover never activates. The thesis
 contributes a working scheduler with honest savings, a screening rule for when
 passive dependence modelling fails, and a price-of-robustness decision rule with a
-tested, data-grounded bound, all under 202 unit tests, with the Phase~1--2 falsification protocol pre-committed (the stylised-emergency crossover of RQ3 is a calibrated stress test, not part of the pre-commitment).
+tested, data-grounded bound, all under 202 tests, with the Phase~1--2 falsification protocol pre-committed (the stylised-emergency crossover of RQ3 is a calibrated stress test, not part of the pre-commitment).
     \end{abstract}
     \vspace{1.4em}
   \end{@twocolumnfalse}
@@ -703,7 +703,7 @@ CVaR-SAA LPs, yet the entire study runs in under two hours on one core, so
 reproduction is cheap.
 
 \subsection{Reproducibility}\label{sec:repro}
-All code is version-controlled (private repository, continuous-integration test
+All code is version-controlled (public repository, continuous-integration test
 suite, $202$ unit tests total ($189$ run in CI; the 13 Electricity Maps integration tests need licensed data and are excluded from CI), including a feasible-set equivalence test pinning the
 Phase 2 CVaR scheduler to the Phase 1 constraint set); experiment configurations
 are commit-locked before test-set evaluation; bootstrap and scenario seeds are
@@ -737,8 +737,8 @@ cannot be attributed to an absence of correlation in the data.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.48\textwidth]{../figures/ci_corr_heatmap_us_west.pdf}\hfill
-\includegraphics[width=0.48\textwidth]{../figures/ci_corr_heatmap_taskc.pdf}
+\includegraphics[width=0.48\textwidth]{../figures/ci_corr_heatmap_us_west.png}\hfill
+\includegraphics[width=0.48\textwidth]{../figures/ci_corr_heatmap_taskc.png}
 \caption{Residual (hour-of-day-removed) cross-region correlation of hourly carbon
 intensity, 2021--2025. Left: US West (CISO, BANC, LDWP, NEVP, AZPS). Right:
 Ontario--Eastern belt (CA-ON, NYISO, MISO, PJM). Cross-region correlation is strong and
@@ -775,7 +775,7 @@ conservative plateau as the headline rather than the peak.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.92\columnwidth]{../figures/transfer_value_curve.pdf}
+\includegraphics[width=0.92\columnwidth]{../figures/transfer_value_curve.png}
 \caption{The transfer lever. Out-of-sample $\CVaR_{0.95}$ saving against the
 inter-region transfer budget $\Phi$, relative to the carbon-aware no-transfer baseline
 ($\Phi=0$). Active migration captures this spatial lever;
@@ -801,7 +801,7 @@ developed in Section~\ref{sec:res-mech}.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.85\columnwidth]{../figures/complexity_frontier.pdf}
+\includegraphics[width=0.85\columnwidth]{../figures/complexity_frontier.png}
 \caption{The complexity--value frontier. Out-of-sample $\CVaR_{0.95}$ saving against
 modelling and estimation complexity. The value lives in deterministic transfer; passive
 dependence sophistication is flat; robust transfer is conditional on tail severity
@@ -843,7 +843,7 @@ joint and shuffled curves lie on top of one another.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth]{../figures/cv_curve.pdf}
+\includegraphics[width=\textwidth]{../figures/cv_curve.png}
 \caption{The DRO genuinely engages. Blocked 5-fold cross-validation
 $\CVaR_{0.95}$ (relative to the nominal $\varepsilon=0$ problem) against the
 Wasserstein radius $\varepsilon$, for the joint (solid) and shuffled (dashed)
@@ -905,7 +905,7 @@ value from it.}
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth]{../figures/finding.pdf}
+\includegraphics[width=\textwidth]{../figures/finding.png}
 \caption{The Phase 1 finding. \textbf{A:} spatial gap vs.\ mean residual
 cross-region correlation; value does not track correlation anywhere on the
 spectrum. \textbf{B:} mean-ablation; in the covariance-only world (constant
@@ -1149,7 +1149,7 @@ Figure~\ref{fig:tails} shows the asymmetry for the Ontario--Eastern belt.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.72\columnwidth]{../figures/tail_dependence_taskc.pdf}
+\includegraphics[width=0.72\columnwidth]{../figures/tail_dependence_taskc.png}
 \caption{Upper-tail dependence $\chiU(q)$ for the Ontario--Eastern belt region
 pairs (solid) against the Gaussian-copula benchmark at the matched correlation
 (dashed). The empirical curves sit at or below the benchmark as $q\to1$: in the
@@ -1273,7 +1273,7 @@ emergencies we have, robustness does not activate.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.8\columnwidth]{../figures/crossover.pdf}
+\includegraphics[width=0.8\columnwidth]{../figures/crossover.png}
 \caption{The price-of-robustness crossover. Robust-minus-risk-neutral $\CVaR_{0.95}$
 advantage against emergency severity $M$. The materially relevant crossover is
 $M^\star\approx3$ (grid-specific); realized joint severity stays at $1.3$--$1.9\times$
@@ -1592,7 +1592,7 @@ immaterial rather than a real effect, and it confirms $S=1000$ is sufficient.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.7\columnwidth]{../figures/scenario_convergence.pdf}
+\includegraphics[width=0.7\columnwidth]{../figures/scenario_convergence.png}
 \caption{The comonotone gap is scenario-sampling noise. Mean (line) and range over
 five seeds (band) of the comonotone-vs-independence $\CVaR_{0.95}$ gap on
 Eastern US--Canada, against the scenario count $S$. The band straddles zero and narrows
@@ -1605,9 +1605,9 @@ version-controlled repository with a continuous-integration suite ($189$ unit
 tests run in CI of $202$ total; the 13 Electricity Maps integration tests are excluded from CI as they require
 licensed data). Experiments run under Python with CVXPY; solvers are CLARABEL
 for the second-order cone program and HiGHS for deterministic LP baselines. Exact
-dependency versions are pinned in a tracked \texttt{requirements-lock.txt}
+dependency versions are resolved in a tracked \texttt{uv.lock}
 (CLARABEL~0.11.1, HiGHS/highspy~1.14.0, CVXPY~1.9.1, NumPy~2.4.6, SciPy~1.17.1;
-Python~3.12.4), under which every reported number reproduces byte-identically. The
+Python~3.12), under which the reported rounded values reproduce within the declared tolerances. The
 licensed raw carbon-intensity data is never committed; only derived aggregate
 summary tables (CV-selected $\varepsilon$, test CVaR, spatial gaps, bootstrap CIs,
 BH $p$-values) are archived, so the non-redistribution academic licence is

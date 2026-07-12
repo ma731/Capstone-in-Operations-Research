@@ -64,8 +64,10 @@ Thumbs.db
 # Outputs
 *.log
 results/
-figures/*.png
-figures/*.pdf
+tmp/
+# Publication figures are tracked so the TeX sources build from a clean clone.
+# Generated scratch figures should use `results/`; figures used by publications
+# are intentionally versioned in this directory.
 !figures/.gitkeep
 
 # LaTeX build artifacts
@@ -85,6 +87,7 @@ full_thesis/*.out
 full_thesis/*.toc
 thesis/_*.png
 thesis/_*.txt
+full_thesis/_*.txt
 thesis/*.bak
 *.ORIG.bak
 poster/_*.png

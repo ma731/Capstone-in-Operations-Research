@@ -5,8 +5,8 @@ jobs:
     name: repository validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
         with: {python-version: "3.12"}
       - name: Compile Python sources
         run: python -m compileall -q src scripts tests
@@ -17,8 +17,8 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
         with: {python-version: "3.12"}
       - run: pip install -e ".[dev]"
       # test_electricitymaps.py needs the licensed (non-committed) EM raw data

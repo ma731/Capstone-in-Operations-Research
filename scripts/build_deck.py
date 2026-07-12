@@ -8,7 +8,6 @@ Run:  .venv/Scripts/python scripts/build_deck.py
 """
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import matplotlib
@@ -118,19 +117,30 @@ def _bullets(slide, x, y, w, h, items, *, size=18, gap=10, color=INK, lead=None)
         first = False
         p.space_after = Pt(gap + 2)
         p.line_spacing = 1.12
-        r = p.add_run(); r.text = lead
-        r.font.name = SANS; r.font.size = Pt(size + 3); r.font.bold = True; r.font.color.rgb = NAVY
+        r = p.add_run()
+        r.text = lead
+        r.font.name = SANS
+        r.font.size = Pt(size + 3)
+        r.font.bold = True
+        r.font.color.rgb = NAVY
     for (txt, col, bold) in items:
         p = tf.paragraphs[0] if first else tf.add_paragraph()
         first = False
         p.space_after = Pt(gap)
         p.space_before = Pt(0)
         p.line_spacing = 1.12
-        rd = p.add_run(); rd.text = "●  "
-        rd.font.name = SANS; rd.font.size = Pt(size - 4); rd.font.color.rgb = GOLD; rd.font.bold = True
-        rt = p.add_run(); rt.text = txt
-        rt.font.name = SANS; rt.font.size = Pt(size)
-        rt.font.color.rgb = col or color; rt.font.bold = bold
+        rd = p.add_run()
+        rd.text = "●  "
+        rd.font.name = SANS
+        rd.font.size = Pt(size - 4)
+        rd.font.color.rgb = GOLD
+        rd.font.bold = True
+        rt = p.add_run()
+        rt.text = txt
+        rt.font.name = SANS
+        rt.font.size = Pt(size)
+        rt.font.color.rgb = col or color
+        rt.font.bold = bold
     return tb
 
 
@@ -140,9 +150,11 @@ def _pic(slide, path, x, y, *, w=None, h=None, max_w=None, max_h=None, center_x=
     ar = iw / ih
     if max_w and max_h:
         if max_w / max_h > ar:
-            h = max_h; w = max_h * ar
+            h = max_h
+            w = max_h * ar
         else:
-            w = max_w; h = max_w / ar
+            w = max_w
+            h = max_w / ar
     elif w and not h:
         h = w / ar
     elif h and not w:
@@ -342,7 +354,7 @@ s = content("The price-of-robustness crossover", 10)
 _pic(s, FIG / "crossover.png", 0.7, 1.55, max_w=7.6, max_h=4.9)
 _bullets(s, 8.5, 1.7, 4.2, 4.8, [
     ("Robust beats risk-neutral only past an emergency severity M* near 3.", None, False),
-    ("Real grids, tested across 17 zones, peak at only M near 1.4.", RUST, True),
+    ("Real grids, tested across 17 zones, lie at joint-grid M = 1.29–1.89.", RUST, True),
     ("So robustness does not activate on observed data; even Winter Storm Uri "
      "reached only 1.3x.", None, False),
     ("On real data, deterministic transfer is unambiguously dominant.", NAVY, True),
@@ -394,7 +406,7 @@ _bullets(s, 0.7, 1.5, 6.1, 4.9, [
     ("The null survives Ledoit-Wolf shrinkage, residualization, and "
      "Benjamini-Hochberg correction across cells.", None, False),
     ("Walk-forward out-of-sample validation and a per-cell equivalence test.", None, False),
-    ("202 unit tests (189 in CI); bootstrap confidence intervals on every gap.", NAVY, True),
+    ("202 tests (189 in public CI); bootstrap confidence intervals on every gap.", NAVY, True),
     ("Pre-committed, version-controlled, with archived summary tables for every "
      "reported number.", None, False),
 ], size=18, gap=14, lead="A pre-committed battery")
@@ -421,8 +433,8 @@ _bullets(s, 0.7, 1.5, 11.9, 4.9, [
     ("A screening rule: passive covariance and copulas add nothing, with a "
      "mean-dominance bound that says why.", None, False),
     ("A price-of-robustness decision rule with a tested, data-grounded bound "
-     "(M near 1.4 below M* near 3).", None, False),
-    ("A reproducible, pre-committed pipeline under 202 unit tests.", NAVY, True),
+     "(joint-grid M = 1.29–1.89, below M* near 3).", None, False),
+    ("A reproducible, pre-committed pipeline under 202 tests.", NAVY, True),
 ], size=19, gap=15, lead="What this thesis delivers")
 
 # ---- 16. The decision rule recap + thanks ----
