@@ -6,7 +6,7 @@ layer of modelling sophistication actually buys.
 **Research Capstone in Operations Research · IE School of Science & Technology · 2026**
 **Student:** Marco Ortiz Togashi · **Supervisor:** Prof. Bissan Ghaddar
 
-`202 tests collected (189 in CI)` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to an archived snapshot`
+`202 tests collected (189 in public CI)` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to an archived snapshot`
 
 ---
 
@@ -304,18 +304,105 @@ Short version of the heavy jargon. The thesis carries a fuller glossary in an ap
 
 ### What validation proves
 
-Public CI has two gates. The repository-validation gate checks document dates, links,
-canonical artifacts, headline values against archived CSVs, every TeX graphic, solver
-metadata, and the absence of a public handwritten signature. The pytest gate exercises
-189 data-independent tests, including model invariants, synthetic controls, regression
-snapshots, and numerical tolerances. Together they are strong protection against code,
-claim, and publication drift.
+Validation is organised as an evidence chain rather than a single “tests passed” claim:
 
-They are not an independent re-download and recomputation of Electricity Maps data:
-13 ingestion tests require the licensed raw files and therefore run only in an authorised
-local environment. This boundary is deliberate and documented rather than hidden; the
-public aggregate snapshots validate traceability, while a full scientific reproduction
-requires the licence-holder's raw-data directory.
+`source and configuration → model invariants → numerical behaviour → archived results → public claims`
+
+Each link is checked separately. This matters because a correct optimizer can still be
+fed the wrong data, a statistically sound experiment can still be quoted incorrectly,
+and a correct README can still point to a missing or stale artifact. No single unit test
+can detect all of those failure modes.
+
+#### The two automated CI gates
+
+Every push and pull request must pass two ordered jobs in
+`.github/workflows/test.yml`:
+
+1. **Repository validation.** Python first compiles every source, script, and test file.
+   It then runs `python -m scripts.validate_repository`. A failure stops the workflow,
+   so the numerical suite is not allowed to give a misleading green result when the
+   repository or publication layer is inconsistent.
+2. **Numerical pytest suite.** After the first gate passes, CI installs the declared
+   project and solver dependencies and runs 189 data-independent tests. In the current
+   validated run, 184 passed and five were expected skips. The complete suite collects
+   202 tests; the remaining 13 exercise licensed Electricity Maps ingestion and run only
+   where the authorised raw files are available.
+
+The 189 public-CI tests deliberately cover different kinds of evidence:
+
+| Validation target | Representative tests | What a failure would reveal |
+|---|---|---|
+| Optimizer and reformulation correctness | `test_algorithm_1.py`, `test_algorithm_2a.py`, `test_algorithm_2b_mahalanobis.py` | Objective, ambiguity-set, solver, or reformulation behaviour no longer matches the intended model. |
+| Feasibility and physical constraints | `test_constraints_taskA.py`, `test_capacity.py`, `test_carbon_budget.py` | A schedule violates workload conservation, capacity, ramping, transfer, or carbon-budget assumptions. |
+| Dependence and tail analysis | `test_covariance.py`, `test_stratified_correlations.py`, `test_tail_dependence.py`, `test_phase2_copula.py` | Covariance, stratification, copula, or tail-dependence calculations have changed or become internally inconsistent. |
+| Transfer and robustness mechanisms | `test_transfer_dro.py`, `test_online_transfer.py`, `test_emergency_inject.py`, `test_part5_condition.py` | The active-transfer lever, online comparison, severity stress test, or mean-dominance condition no longer behaves as claimed. |
+| Claim and result binding | `test_claim_binding.py`, `test_carbon_ceiling_snapshot.py`, `test_risk_measure_swap_snapshot.py` | A reported headline, severity bound, or robustness result has drifted away from its committed result table. |
+| Data interfaces and derived inputs | `test_temperature.py`, `test_es_pt_fr.py`, plus the licensed `test_electricitymaps.py` | Parsing, alignment, units, region mapping, or expected data coverage is broken. |
+
+This mix is stronger than relying only on end-to-end regression numbers. Invariant and
+feasibility tests can identify *why* an implementation is wrong; synthetic positive
+controls check that the pipeline can detect a signal when one is deliberately inserted;
+and snapshot tests catch later changes to the specific quantities used in the thesis.
+
+#### What `scripts/validate_repository.py` does
+
+This small fail-fast validator covers publication and provenance risks that ordinary
+model tests do not address:
+
+- `_check_required_files()` requires the canonical thesis, extended thesis, poster,
+  deck, licence files, dependency lock, and headline result snapshots. A release cannot
+  silently omit the artifact that the README describes.
+- `_check_public_links()` resolves local Markdown links and HTML image sources, catching
+  broken public navigation and missing explainer graphics.
+- `_check_headline_snapshots()` reads the committed CSVs and checks the RQ1 transfer
+  reductions (4.04%, 9.91%, and 9.04%) and the RQ3 joint-severity values (1.34, 1.29,
+  and 1.89). It then checks that the README states the same values. This binds the
+  narrative to archived machine-readable evidence instead of duplicated prose alone.
+- `_check_document_dates()` protects the fixed June 2026 dates in all three manuscript
+  sources from accidental regeneration changes.
+- `_check_tex_assets_and_public_privacy()` parses every `\\includegraphics` reference in
+  the thesis sources, requires the referenced file to exist in a clean checkout, and
+  prevents the handwritten signature from reappearing in the public copy.
+- `_check_project_metadata()` parses `pyproject.toml`, requires every documented default
+  solver to be declared, and verifies that the canonical poster sources and exports are
+  not accidentally hidden by `.gitignore`.
+
+The validator exits immediately with a specific error when any condition fails. That
+“fail closed” design is useful for a research repository: uncertainty or missing evidence
+blocks the green CI status instead of being reduced to a warning that can be overlooked.
+
+#### How this supports the reported results
+
+The automated gates establish that the published numbers are traceable to versioned
+outputs, that the implementation still satisfies the intended mathematical and physical
+constraints, and that the public documents have not drifted away from those outputs.
+The study-level validation then tests whether the findings are stable rather than merely
+repeatable: walk-forward out-of-sample evaluation limits look-ahead bias; multi-seed and
+sensitivity runs test dependence on arbitrary settings; bootstrap confidence intervals
+quantify sampling uncertainty; equivalence tests distinguish “no material effect” from
+an underpowered failure to reject; and Benjamini–Hochberg correction controls the false
+discovery rate across the many comparison cells. Synthetic positive controls further
+show that the method is capable of finding covariance or robustness value when the data
+are constructed to contain it, strengthening the interpretation of a null on the real
+grids.
+
+This is the strongest practical public-validation design for this project because it
+combines independent checks at the code, model, statistics, artifact, and claim levels
+while respecting the Electricity Maps licence. It is also reproducible: `uv.lock`
+resolves the complete Python environment, and the derived aggregate snapshots needed to
+audit the public claims are committed without redistributing the licensed observations.
+
+#### Scope and limitation
+
+A green public workflow is strong evidence of implementation integrity, internal
+consistency, traceability, and stability; it is not, by itself, proof that the scientific
+conclusions are universally true. Public CI does not independently download and recompute
+the Electricity Maps observations. The 13 ingestion tests and a complete raw-to-result
+reproduction require the licence-holder's local raw-data directory. Snapshot checks also
+confirm agreement with archived outputs rather than independently recreating those
+outputs. Stating these boundaries explicitly makes the validation more credible: another
+authorised researcher can distinguish what GitHub verifies automatically from what must
+be replicated with the licensed source data.
 
 ## Key references
 
