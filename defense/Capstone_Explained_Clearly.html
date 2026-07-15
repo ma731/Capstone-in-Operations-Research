@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Price of Sophistication - Explained Clearly</title>
+<style>
+  :root{
+    --navy:#0E2A52; --gold:#E69F00; --goldd:#B57D00; --green:#2f7d4f; --greenbg:#eaf5ee;
+    --red:#B3402F; --redbg:#fbecea; --goldbg:#fdf3e0; --ink:#16202E; --muted:#5B6675;
+    --line:#dde3ec; --tint:#f4f7fb; --blue:#2E6FB0; --bluebg:#eef4fb;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#eef1f6;color:var(--ink);
+       font:17px/1.65 "Segoe UI",system-ui,-apple-system,sans-serif;}
+  .page{max-width:880px;margin:0 auto;background:#fff;padding:0 0 40px;
+        box-shadow:0 0 50px rgba(14,42,82,.10);}
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif;color:var(--navy);line-height:1.2;}
+  b,strong{color:var(--navy);}
+  .g{color:var(--green);font-weight:700;} .r{color:var(--red);font-weight:700;}
+
+  /* hero */
+  .title{margin:0;background:var(--navy);color:#fff;padding:34px 44px 6px;
+         border-left:9px solid var(--gold);font-size:38px;}
+  .tag{background:var(--navy);color:#CDD6E4;margin:0;padding:0 44px 30px;
+       border-left:9px solid var(--gold);font-size:18px;}
+
+  section{padding:26px 44px;border-bottom:1px solid var(--line);}
+  section > h2{font-size:25px;margin:.1em 0 .6em;}
+
+  .setup{background:var(--tint);}
+  .setup .big{font-size:19px;background:#fff;border:1px solid var(--line);
+              border-left:5px solid var(--gold);border-radius:8px;padding:14px 18px;margin-top:14px;}
+
+  /* decision blocks */
+  .decision{border-left:10px solid var(--muted);}
+  .d1{border-left-color:var(--green);} .d2{border-left-color:var(--red);} .d3{border-left-color:var(--gold);}
+  .dhead{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;margin-bottom:6px;}
+  .dnum{font-family:"Segoe UI",sans-serif;font-size:13px;font-weight:800;letter-spacing:.05em;
+        text-transform:uppercase;color:var(--goldd);}
+  .dhead h2{margin:0;font-size:26px;flex:1 1 320px;}
+  .verdict{font-family:"Segoe UI",sans-serif;font-size:14px;font-weight:800;color:#fff;
+           padding:6px 14px;border-radius:20px;white-space:nowrap;}
+  .verdict.yes{background:var(--green);} .verdict.no{background:var(--red);} .verdict.maybe{background:var(--goldd);}
+  .q{font-size:18px;color:var(--ink);background:var(--tint);border-radius:8px;
+     padding:10px 16px;margin:.4em 0 1.1em;}
+
+  .sides{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .side{border-radius:10px;padding:16px 18px;border:1px solid var(--line);}
+  .side h3{margin:0 0 .4em;font-size:18px;}
+  .side p{margin:0;}
+  .side.for{background:var(--bluebg);border-color:#d3e2f2;}
+  .side.for h3{color:var(--blue);}
+  .side.found.yes{background:var(--greenbg);border-color:#cfe6d7;} .side.found.yes h3{color:var(--green);}
+  .side.found.no{background:var(--redbg);border-color:#f2d5d0;} .side.found.no h3{color:var(--red);}
+  .side.found.maybe{background:var(--goldbg);border-color:#f0dcb4;} .side.found.maybe h3{color:var(--goldd);}
+
+  .twist{margin-top:18px;background:#fff;border:2px dashed var(--gold);border-radius:12px;padding:16px 20px;}
+  .twist h3{margin:0 0 .4em;color:var(--goldd);font-size:20px;}
+  .twist p{margin:.5em 0;}
+  .analogy{margin-top:12px;background:var(--navy);color:#fff;border-radius:10px;
+           padding:12px 18px;font-size:16.5px;}
+  .analogy b{color:var(--gold);}
+  .one{font-size:18px;margin:1.1em 0 0;padding-left:14px;border-left:4px solid var(--navy);}
+
+  .term{border-bottom:1px dotted var(--muted);cursor:help;}
+
+  /* rule */
+  .rule{background:var(--navy);color:#fff;border:0;}
+  .rule h2{color:#fff;}
+  .rulelist{list-style:none;padding:0;margin:0;counter-reset:r;}
+  .rulelist li{background:rgba(255,255,255,.06);border-radius:8px;padding:12px 16px;margin:8px 0;font-size:17px;}
+  .rulelist b{color:#fff;}
+  .chip{display:inline-block;font-family:"Segoe UI",sans-serif;font-size:12.5px;font-weight:800;
+        color:#0E2A52;padding:3px 10px;border-radius:6px;margin-right:10px;text-transform:uppercase;}
+  .chip.g{background:#7ec79a;} .chip.r{background:#e79b8f;} .chip.gold{background:var(--gold);}
+  .onerule{font-family:Georgia,serif;font-size:22px;color:var(--gold);font-weight:700;
+           margin:20px 0 0;line-height:1.35;}
+
+  /* trust + gloss */
+  .trust ul{padding-left:22px;} .trust li{margin:8px 0;}
+  .gloss dl{margin:0;} .gloss dt{font-weight:800;color:var(--navy);margin-top:12px;}
+  .gloss dd{margin:2px 0 0;color:var(--ink);}
+  .foot{padding:22px 44px;background:var(--tint);color:var(--muted);font-size:13.5px;border:0;}
+
+  @media(max-width:640px){
+    .sides{grid-template-columns:1fr;}
+    .title,.tag{padding-left:24px;padding-right:24px;} .title{font-size:29px;}
+    section,.foot{padding-left:24px;padding-right:24px;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1 class="title">The Price of Sophistication</h1>
+<p class="tag">Explained as clearly as possible. Every side, every decision, in plain words.</p>
+
+<section class="setup">
+  <h2>The whole thing in 20 seconds</h2>
+  <p>You run data centers in several regions. Every evening you choose <b>where tomorrow's flexible work runs</b> (things like AI training that can wait a few hours or run somewhere else). You do this to keep a <b>carbon promise</b>: use cleaner electricity.</p>
+  <p>Electricity is cleaner at some hours and places than others, because of sun, wind, and demand. So the smart move is simple: <b>send the work to the cleanest hour and the cleanest place.</b></p>
+  <p class="big">Salespeople offer you three "smart" upgrades on top of that. This thesis prices each one. The answer: <span class="g">one pays</span>, <span class="r">two do not</span>.</p>
+</section>
+
+<section class="decision d1">
+  <div class="dhead">
+    <span class="dnum">Decision 1</span>
+    <h2>Should you move work between regions?</h2>
+    <span class="verdict yes">YES &middot; do it</span>
+  </div>
+  <p class="q">In plain words: is it worth building the ability to shift work to whichever region is cleanest right now?</p>
+  <div class="sides">
+    <div class="side for">
+      <h3>The case for it</h3>
+      <p>At any given hour, <b>somewhere is cleanest</b>. If you can send your work there instead of leaving it where it is, you burn less carbon. Obvious win, if it works.</p>
+    </div>
+    <div class="side found yes">
+      <h3>What we actually found</h3>
+      <p><b>It works, and it is the big one.</b> Moving work cuts your <span class="term" title="the average of your dirtiest 5% of days, where a carbon promise actually fails">worst-day emissions</span> by <b>4 to 10%</b> (Western 4.0%, Eastern 9.9%, Diversified 9.0%). On one fleet that is roughly <b>$1.7M a year</b> (a gross figure, before the cost of moving the work). And it needs <b>zero fancy statistics</b>.</p>
+    </div>
+  </div>
+  <p class="one">In one sentence: <b>this is the lever. Build it.</b></p>
+</section>
+
+<section class="decision d2">
+  <div class="dhead">
+    <span class="dnum">Decision 2</span>
+    <h2>Should you model how the regions move together?</h2>
+    <span class="verdict no">NO &middot; skip it</span>
+  </div>
+  <p class="q">In plain words: the regions' cleanliness rises and falls <b>together</b>. Should you build a model of that linkage to schedule even smarter?</p>
+  <div class="sides">
+    <div class="side for">
+      <h3>The case for it</h3>
+      <p>The regions really are linked. The correlation runs <b>up to 0.78 out of 1</b> on the US West, which is close to a perfect match. It <i>feels</i> obvious that capturing that linkage would help. <b>The whole research field assumed it does</b>, and sold you the model on that assumption.</p>
+    </div>
+    <div class="side found no">
+      <h3>What we actually found</h3>
+      <p><b>It adds almost nothing:</b> under <b>0.4%</b>, which is below the noise, and worth maybe <b>$37k a year</b> that is not even reliably positive. Sometimes it even <i>hurts</i>. So: skip it.</p>
+    </div>
+  </div>
+
+  <div class="twist">
+    <h3>The twist (this is the interesting part)</h3>
+    <p>The linkage signal is <b>not fake</b>. When we artificially removed the big daily pattern, the very same model suddenly paid <b>+1.46%</b>. So the signal is real. It is just <b>drowned out</b>.</p>
+    <p><b>Why?</b> Carbon has a huge, predictable <b>daily wave</b> (driven by the sun and demand). The cross-region linkage is a tiny <b>ripple</b> riding on top of that wave, about <b>2 to 4 times smaller</b>. Your schedule follows the giant wave, and the little ripple is simply too small to change its mind.</p>
+    <div class="analogy">Picture it: trying to change a song's volume with a <b>whisper</b> while a <b>loudspeaker</b> is blasting. The whisper is real. It just cannot compete.</div>
+  </div>
+  <p class="one">In one sentence: <b>the signal is real, but too small to bank. Skip the model.</b></p>
+</section>
+
+<section class="decision d3">
+  <div class="dhead">
+    <span class="dnum">Decision 3</span>
+    <h2>Should you plan for a worse day than the forecast?</h2>
+    <span class="verdict maybe">ONLY IF &middot; conditional</span>
+  </div>
+  <p class="q">In plain words: forecasts are wrong sometimes. Should you pay a small premium <b>every day</b> to be protected on the bad days? This is basically <b>insurance</b>.</p>
+  <div class="sides">
+    <div class="side for">
+      <h3>The case for it</h3>
+      <p>If tomorrow turns out much dirtier than predicted, a plan that trusted the forecast gets hurt. <b>Insurance protects you</b> on those bad days, for a small everyday cost. Sounds prudent.</p>
+    </div>
+    <div class="side found maybe">
+      <h3>What we actually found</h3>
+      <p>The insurance <b>only pays once carbon can spike to about 3 times normal</b> (a tripling). And real grids do not get there. The worst spikes we measured across 17 zones over 5 years had a <b>median of about 1.4 times</b>. Even Winter Storm Uri, the worst grid emergency in the data, only reached <b>1.28 times</b>. So on real data: <b>do not buy it</b>.</p>
+    </div>
+  </div>
+  <p class="one">In one sentence: <b>insurance only pays for disasters that do not happen on these grids.</b></p>
+</section>
+
+<section class="rule">
+  <h2>The bottom line, in four lines</h2>
+  <ol class="rulelist">
+    <li><span class="chip g">Always</span> Ride the daily wave. Schedule each region day-ahead. This is free.</li>
+    <li><span class="chip gold">The lever</span> Add the ability to move work between regions. 4 to 10% off your worst days.</li>
+    <li><span class="chip r">Skip</span> The co-movement model. Under 0.4%, below the noise.</li>
+    <li><span class="chip gold">Only if</span> Buy robustness only if you expect emergencies past a tripling. Real grids are not there.</li>
+  </ol>
+  <p class="onerule">"A fancier model is not safer. It is a bill, and it only pays when the ripple rivals the wave."</p>
+</section>
+
+<section class="trust">
+  <h2>Why you can trust the two "no"s</h2>
+  <p>A "we found nothing" result is easy to doubt, so it was built to be checked:</p>
+  <ul>
+    <li><b>The rule was locked first.</b> The pass-or-fail line went into version control <i>before</i> we ever looked at the test year (2025).</li>
+    <li><b>We proved the test works.</b> Remove the daily wave and the same test fires at +1.46%. So a "no" is a real no, not a broken instrument.</li>
+    <li><b>The test was powerful enough.</b> It could have caught any real effect down to about 0.1%. It caught nothing above 0.4%. That is "we proved it isn't there", not "we didn't look hard enough".</li>
+    <li><b>Everything is receipted.</b> 202 automated tests, and every number on every slide traces to a saved file.</li>
+  </ul>
+</section>
+
+<section class="gloss">
+  <h2>The few words, decoded</h2>
+  <dl>
+    <dt>Worst-day emissions (CVaR)</dt><dd>We score the average of your <b>dirtiest 5% of days</b>, not a normal day, because a carbon promise fails on the bad days.</dd>
+    <dt>Gross (as in "$1.7M gross")</dt><dd>The saving <b>before</b> subtracting the cost of moving the work (network, delays). It is a ceiling, not a net profit.</dd>
+    <dt>The lever</dt><dd>The one upgrade that pays: moving work between regions.</dd>
+    <dt>The wave and the ripple</dt><dd>The <b>wave</b> is the big daily swing in how clean power is. The <b>ripple</b> is the small cross-region linkage on top. The wave is 2 to 4 times bigger, so it wins.</dd>
+    <dt>The positive control (+1.46%)</dt><dd>A deliberate check that the test can detect a real effect. It can. That is what makes the "no" trustworthy.</dd>
+  </dl>
+</section>
+
+<footer class="foot">The Price of Sophistication &middot; carbon-aware data-center scheduling &middot; Marco Ortiz Togashi</footer>
+
+</div>
+</body>
+</html>
