@@ -128,6 +128,42 @@ A full slide-by-slide provenance map for the defense deck (every number → arch
 figure script) is in [`docs/deck_provenance.md`](docs/deck_provenance.md); a short list of
 known slide-label corrections is in [`docs/deck_errata.md`](docs/deck_errata.md).
 
+## Future work (in progress)
+
+The capstone is graded and frozen at the thesis pin; the repo now moves toward
+publication. The full plan (directions, venues, timing) is in
+[`docs/roadmap_papers.md`](docs/roadmap_papers.md). Three directions are active on the
+`paper-expansion` branch, all additive (no graded result is touched):
+
+1. **Signal robustness: does the null survive a marginal-emissions signal?**
+   The whole study runs on *average* carbon intensity. The field is split on
+   average vs. marginal signals (e-Energy'24 shows they produce conflicting
+   schedules), so replicating the Phase 1 falsification under a marginal signal
+   tests whether the dependence null is signal-specific or fundamental. Status:
+   loader + pre-registered protocol scaffolded
+   ([`docs/protocols/marginal_signal_protocol.md`](docs/protocols/marginal_signal_protocol.md));
+   blocked on marginal data access (WattTime or Electricity Maps premium).
+2. **State-conditional robustness: a contextual price-of-robustness.** RQ3 says
+   unconditional DRO does not pay below $M^\star\approx3$. The conditional question:
+   are high-severity days *predictable* from covariates known day-ahead
+   (temperature, lagged carbon, calendar), so a scheduler can exercise robustness
+   as an option only when the predicted regime warrants it? Status: gating
+   prototype (`scripts/prototype_contextual_gate.py`) quantifies day-ahead
+   predictability of high-severity days on the two locally-cached panels.
+3. **Calibrated emergency severity via extreme value theory.** The $M^\star$
+   crossover currently uses a stylised multiplier plus empirical top-5% pools
+   (`run_part3_real_emergency.py`). The EVT upgrade fits a generalized Pareto tail
+   to realized joint-severity ratios and reports return periods for
+   $M \ge 2, 2.5, 3$: "a crossover-grade day is a 1-in-$N$-year event," anchored
+   on real events (the 2022 French nuclear outage is in the panel). Status:
+   `src/analysis/severity_evt.py` + `scripts/run_severity_evt.py`, snapshot under
+   `docs/results_snapshots/`.
+
+Target venues: ACM e-Energy 2027 (fall cycle) for the compressed RQ1+RQ2 paper with
+direction 1; e-Energy winter cycle / SoCC for directions 2+3; an OR journal (with
+supervisor) for the Part 5 screening condition; HotCarbon 2027 as the position-paper
+staging ground.
+
 ## Reproduce the experiments
 
 The fastest check needs no API token and no license:
