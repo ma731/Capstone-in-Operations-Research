@@ -60,6 +60,23 @@ arXiv 2607.00099; end-to-end conditional RO, arXiv 2403.04670).
 - Full version: two-stage commit with a covariate-gated robustness switch,
   evaluated under the same falsification discipline (pre-registered,
   bootstrap-quantified), on real workload traces if D5 lands.
+- Prototype findings (2026-07-19, train <= 2023, eval 2024, 2025 untouched):
+  - Gate: CA-NV severe days ARE predictable day-ahead (logit AUC 0.97,
+    precision@top-decile 0.64 vs base 0.08). ES-PT-FR: zero 2024 days cross
+    the train-era threshold; the 2022 crisis was a regime shift, so severity
+    there is crisis-driven, not covariate-predictable.
+  - Gated policy (`scripts/prototype_gated_robustness.py`): with a working
+    gate (precision 0.68, recall 0.79), all four policies (always-neutral,
+    always-robust, gated, oracle-gated) land within 0.2% mean / 0.06% CVaR
+    of each other, below the 0.4% margin; robustness helps LESS on severe
+    days (-0.04%) than normal days (-0.20%).
+  - Reading: predictability is not the bottleneck, severity magnitude is
+    (consistent with D3: the CA-NV tail is bounded at M~1.41 << M*~3). On
+    average-CI signals the contextual escape hatch is closed on both panels,
+    one per failure mode: predictable-but-small (CA-NV) vs
+    large-but-unpredictable (ES-PT-FR). This sharpens P2's framing and makes
+    D1 (marginal signal, spikier tails) the live route to a positive
+    contextual result.
 
 ### D3. EVT-calibrated emergency severity (active)
 
