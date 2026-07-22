@@ -6,7 +6,7 @@ layer of modelling sophistication actually buys.
 **Research Capstone in Operations Research · IE School of Science & Technology · 2026**
 **Student:** Marco Ortiz Togashi · **Supervisor:** Prof. Bissan Ghaddar
 
-`202 tests collected (189 in public CI)` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to an archived snapshot`
+`223 tests collected (210 in public CI)` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to an archived snapshot`
 
 ---
 
@@ -128,14 +128,51 @@ A full slide-by-slide provenance map for the defense deck (every number → arch
 figure script) is in [`docs/deck_provenance.md`](docs/deck_provenance.md); a short list of
 known slide-label corrections is in [`docs/deck_errata.md`](docs/deck_errata.md).
 
+## Future work (in progress)
+
+The capstone is graded and frozen at the thesis pin; the repo now moves toward
+publication. The full plan (directions, venues, timing) is in
+[`docs/roadmap_papers.md`](docs/roadmap_papers.md). Three directions are active on the
+`paper-expansion` branch, all additive (no graded result is touched):
+
+1. **Signal robustness: does the null survive a marginal-emissions signal?**
+   The whole study runs on *average* carbon intensity. The field is split on
+   average vs. marginal signals (e-Energy'24 shows they produce conflicting
+   schedules), so replicating the Phase 1 falsification under a marginal signal
+   tests whether the dependence null is signal-specific or fundamental. Status:
+   loader + pre-registered protocol scaffolded
+   ([`docs/protocols/marginal_signal_protocol.md`](docs/protocols/marginal_signal_protocol.md));
+   blocked on marginal data access (WattTime or Electricity Maps premium).
+2. **State-conditional robustness: a contextual price-of-robustness.** RQ3 says
+   unconditional DRO does not pay below $M^\star\approx3$. The conditional question:
+   are high-severity days *predictable* from covariates known day-ahead
+   (temperature, lagged carbon, calendar), so a scheduler can exercise robustness
+   as an option only when the predicted regime warrants it? Status: gating
+   prototype (`scripts/prototype_contextual_gate.py`) quantifies day-ahead
+   predictability of high-severity days on the two locally-cached panels.
+3. **Calibrated emergency severity via extreme value theory.** The $M^\star$
+   crossover currently uses a stylised multiplier plus empirical top-5% pools
+   (`run_part3_real_emergency.py`). The EVT upgrade fits a generalized Pareto tail
+   to realized joint-severity ratios and reports return periods for
+   $M \ge 2, 2.5, 3$: "a crossover-grade day is a 1-in-$N$-year event," anchored
+   on real events (the 2022 French nuclear outage is in the panel). Status:
+   `src/analysis/severity_evt.py` + `scripts/run_severity_evt.py`, snapshot under
+   `docs/results_snapshots/`.
+
+Target venues: ACM e-Energy 2027 (fall cycle) for the compressed RQ1+RQ2 paper with
+direction 1; e-Energy winter cycle / SoCC for directions 2+3; an OR journal (with
+supervisor) for the Part 5 screening condition; HotCarbon 2027 as the position-paper
+staging ground. The new modules carry their own unit tests under the same discipline:
+the suite grew from 202 to 223 collected tests (189 to 210 in CI) with these additions.
+
 ## Reproduce the experiments
 
 The fastest check needs no API token and no license:
 
 ```bash
 pytest tests/ -q
-# expected without licensed raw data / optional phase-2 extras: 202 collected,
-# with the corresponding integration tests skipped (currently 184 passed, 18 skipped).
+# expected without licensed raw data / optional phase-2 extras: 223 collected,
+# with the corresponding integration tests skipped (currently 205 passed, 18 skipped).
 ```
 
 The experiments themselves:
@@ -178,7 +215,7 @@ solver builds.
 │   │                    #   transfer_dro (Part 3), online_transfer (Part 4), covariance
 │   └── analysis/        # stratified_correlations, tail_dependence, metrics, plots
 ├── scripts/             # experiment runners + plotting
-├── tests/               # 202 pytest tests collected; 189 collected in CI
+├── tests/               # 223 pytest tests collected; 210 collected in CI
 ├── thesis/              # capstone_thesis.{tex,pdf} (the graded report)
 ├── full_thesis/         # extended write-up (full_thesis.pdf, Parts 3-5 in body)
 ├── poster/              # A0 poster (build_v24.js -> .pptx; PDF exported from it)
@@ -215,7 +252,7 @@ uv venv && uv pip install -e ".[dev]"
 # or: python -m venv .venv && pip install -e ".[dev]"
 
 cp .env.example .env        # add ELECTRICITY_MAPS_TOKEN (only needed to re-fetch raw data)
-pytest tests/               # 202 collected; data/optional-dependency tests may skip
+pytest tests/               # 223 collected; data/optional-dependency tests may skip
 ```
 
 **Solvers (all free, all in the default install):** HiGHS for the LP and CVaR-SAA
