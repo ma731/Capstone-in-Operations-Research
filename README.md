@@ -27,6 +27,33 @@ optional layers of sophistication, one at a time:
 The result is a clean separation: **one layer pays, two mostly do not.** Any unfamiliar term
 below is defined in the [glossary](#glossary-plain-english) near the bottom.
 
+![The price of sophistication: moving jobs between regions cuts worst-day emissions by 4.0 to 9.9%; modelling regional co-movement adds at most 0.23%; robust optimisation only pays in grid emergencies about three times worse than the 1.29x to 1.89x observed](figures/value_ladder.svg)
+
+*Every number in the figure is read from the archived snapshots by
+[`scripts/plot_value_ladder.py`](scripts/plot_value_ladder.py).*
+
+---
+
+## Why this matters for enterprise AI
+
+Most flexible data-center work is AI work: training, fine-tuning, evaluation, batch
+inference. Companies scaling AI are meeting its compute bill in money, energy and carbon,
+and this project is a worked example of the question an AI value strategist asks about any
+investment: **what does each extra layer of sophistication actually buy?**
+
+- **Fund the lever that pays.** Moving flexible AI jobs between regions is an operating
+  decision (a scheduler and a policy for which jobs may move), and it cut worst-day
+  emissions by 4.0 to 9.9%.
+- **Skip what does not.** The two expensive layers, joint dependence models and robust
+  optimisation, need specialist skills and slower solves and added almost nothing on real
+  grids. Knowing not to build them is part of the value.
+- **Be honest about size.** At a carbon price alone the saving is modest below campus scale:
+  roughly EUR 2k to 6k a year for 5 MW of flexible AI compute, EUR 49k to 120k for 100 MW,
+  valuing only the worst days the study measured.
+
+The full illustrative value case, its assumptions, and what a client would be told:
+[docs/enterprise_value_case.md](docs/enterprise_value_case.md).
+
 ---
 
 ## The finding (TL;DR)
