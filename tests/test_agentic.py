@@ -4,7 +4,7 @@ Skipped when the optional extras are not installed (pip install -e .[agentic]), 
 thesis test suite is unaffected.
 """
 import asyncio
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 
@@ -112,3 +112,40 @@ def test_labelled_eval_is_perfect():
 
     res = evals.run()
     assert res["routing_accuracy"] == 1.0 and res["end_to_end_accuracy"] == 1.0
+
+
+def _synthetic(drift_from: date | None):
+    """A fake _hourly: a daily cycle plus noise that triples after drift_from."""
+    import numpy as np
+
+    def fake(zone, start, end):
+        rng = np.random.default_rng(0)
+        days = (end - start).days + 1
+        base = 300 + 50 * np.sin(np.linspace(0, 2 * np.pi, 24))
+        out = []
+        for i in range(days):
+            d = start + timedelta(days=i)
+            sd = 30 if drift_from and d >= drift_from else 10
+            out.append(base + rng.normal(0, sd, 24))
+        return np.array(out)
+    return fake
+
+
+def test_drift_monitor_stays_quiet_on_a_stable_forecast(monkeypatch):
+    from agentic import monitoring
+
+    monkeypatch.setattr(monitoring, "_hourly", _synthetic(None))
+    rep = monitoring.drift_report(["Z"], date(2025, 1, 1), date(2025, 8, 31))
+    assert rep["alerts"] == [] and "stays the right choice" in rep["action"]
+    assert len(rep["zones"]["Z"]["months"]) == 8
+
+
+def test_drift_monitor_flags_a_worse_forecast_and_points_at_rq3(monkeypatch):
+    from agentic import monitoring
+
+    monkeypatch.setattr(monitoring, "_hourly", _synthetic(date(2025, 6, 1)))
+    rep = monitoring.drift_report(["Z"], date(2025, 1, 1), date(2025, 8, 31))
+    assert {a["month"] for a in rep["alerts"]} >= {"2025-07", "2025-08"}
+    assert all(a["month"] >= "2025-06" for a in rep["alerts"])   # no false alarms before the shift
+    assert "RQ3" in rep["action"]
+    assert "DRIFT" in monitoring.to_markdown(rep, "test")

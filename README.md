@@ -292,6 +292,16 @@ optimiser computes, closed in one place.
 expected tool and outcome. Routing 100%, end to end 100%; a fixed job is never proposed
 for migration, an unclear request is asked back.
 
+**Monitoring and a weekly pipeline** ([`agentic/monitoring.py`](agentic/monitoring.py),
+[`agentic-weekly.yml`](.github/workflows/agentic-weekly.yml)): the forecast re-fits every
+day by construction (the mean of the last 14 days). What can still go wrong is drift, so a
+monitor compares each month's forecast error with the first three months and raises an
+alert at 1.5x. The alert names the thesis decision to revisit: RQ3 found the robust layer
+only pays when forecast surprises are large, so sustained drift is the signal to re-check
+it. Over 2025 no region crossed the line; the closest was NYISO in August at 1.48x. Every
+Monday a GitHub Actions job re-runs the extension tests, the labelled eval and, where the
+licensed data is available, the drift report, and keeps the output as a build artifact.
+
 | Concept | Where | Why this choice |
 |---|---|---|
 | Linear workflow | `workflow.py` | An optimisation with guarantees does not need a model picking steps |
@@ -303,6 +313,7 @@ for migration, an unclear request is asked back.
 | MCP | `mcp_server.py` | Any agent can use the scheduler; read-only plus a draft-only tool |
 | A2A | `a2a.py` | Other agents can delegate a task without knowing the internals |
 | Evals | `evals.py` | Labelled cases checked on every change |
+| MLOps: drift monitoring, scheduled runs | `monitoring.py`, weekly workflow | Error drift is the trigger to revisit the robust layer (RQ3) |
 | *Not used:* autonomous or role-based multi-agent | | Nothing to negotiate or explore: one optimiser decides |
 | *Not used:* vector database, RAG | | No documents to search; the knowledge is structured, so a graph fits |
 
@@ -310,7 +321,8 @@ for migration, an unclear request is asked back.
 pip install -e .[agentic]
 python -m agentic.mcp_server            # stdio MCP server
 python -m agentic.evals                 # the labelled eval
-python -m pytest tests/test_agentic.py  # 16 tests; skipped without the extras
+python -m agentic.monitoring            # monthly drift report (needs the licensed data)
+python -m pytest tests/test_agentic.py  # 18 tests; skipped without the extras
 ```
 
 Example on 15 June 2025: moving up to 30% of the work between the Western regions would have

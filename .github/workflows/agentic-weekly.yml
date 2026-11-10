@@ -1,0 +1,38 @@
+name: Agentic weekly check
+
+# Every Monday: re-run the extension tests and the labelled eval, and the drift
+# report when the licensed Electricity Maps data is available to the runner.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev,agentic]"
+      - name: Extension tests (includes the drift monitor on synthetic data)
+        run: pytest -q tests/test_agentic.py
+      - name: Labelled eval
+        run: python -m agentic.evals | tee eval.txt
+      - name: Drift report
+        run: |
+          if ls data/raw/electricitymaps/*.csv >/dev/null 2>&1; then
+            for p in us_west taskc us_hetero; do python -m agentic.monitoring --portfolio "$p"; done
+          else
+            echo "Licensed Electricity Maps data not on this runner; drift report skipped." | tee agentic/reports-skipped.txt
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: weekly-report
+          path: |
+            eval.txt
+            agentic/reports/
+            agentic/reports-skipped.txt
+          if-no-files-found: ignore

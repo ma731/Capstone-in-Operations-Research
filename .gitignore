@@ -128,3 +128,6 @@ thesis/_recompile.log
 # Office/editor lock + scratch files (LibreOffice drops these next to the poster PDFs)
 .~lock.*
 poster/*.tmp
+
+# Drift reports are built from licensed data
+agentic/reports/
