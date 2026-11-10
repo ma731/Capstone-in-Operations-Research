@@ -20,7 +20,7 @@ APPROVAL_REASON = ("Moving work between regions changes where data is processed 
                    "contracts and capacity commitments), so a person signs it off.")
 
 
-def propose(job: str, day: date, transfer_share: float = 0.3) -> dict:
+def propose(job: str, day: date, transfer_share: float = 0.3, detail: bool = False) -> dict:
     steps = []
     options = knowledge.migration_options(job)
     steps.append({"step": "1. ontology check", "result": options["why"]})
@@ -30,7 +30,7 @@ def propose(job: str, day: date, transfer_share: float = 0.3) -> dict:
         return {"job": job, "status": "NOT_MOVABLE", "home_zone": options.get("home_zone"), "steps": steps}
 
     zones = options["allowed_zones"]
-    plan = scheduler.plan_day(zones, day, transfer_share=transfer_share)
+    plan = scheduler.plan_day(zones, day, transfer_share=transfer_share, detail=detail)
     steps.append({"step": "2. forecast", "result": f"14-day seasonal forecast for {len(zones)} regions on {day}."})
     steps.append({"step": "3. plan", "result": f"Time shifting only vs moving up to {transfer_share:.0%} of the work "
                                                f"between {', '.join(zones)}."})

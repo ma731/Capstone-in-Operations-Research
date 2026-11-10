@@ -94,3 +94,67 @@ def migration_options(job: str) -> dict:
     why.append(f"reachableRegion is inferred by the property chain runsAt → memberOf → hasRegion: {', '.join(zones)}.")
     return {"job": job, "known": True, "flexible": True, "home_zone": home_zone, "portfolio": portfolio,
             "allowed_zones": zones, "why": why}
+
+
+EDGE_PREDICATES = {"runsAt", "locatedIn", "memberOf", "inPortfolio", "hasRegion", "homeRegion", "reachableRegion"}
+_KINDS = [("Job", "job"), ("DataCenter", "datacenter"), ("Portfolio", "portfolio"), ("Region", "region"),
+          ("Metric", "metric")]
+
+
+def graph_export() -> dict:
+    """Nodes and edges of the ontology for drawing: asserted edges, plus what the reasoner adds and why."""
+    from rdflib import RDF, RDFS, Literal, URIRef
+    from rdflib.namespace import OWL
+
+    g0, g1 = graph(False), graph(True)
+    props = {s for s in g1.subjects(RDF.type, OWL.ObjectProperty)} | \
+            {s for s in g1.subjects(RDF.type, OWL.DatatypeProperty)}
+    classes = {s for s in g1.subjects(RDF.type, OWL.Class) if str(s).startswith(NS)}
+
+    def ours(n) -> bool:
+        return isinstance(n, URIRef) and not isinstance(n, Literal) and str(n).startswith(NS) and n not in props
+
+    def asserted_type(n) -> bool:
+        return any(str(c).startswith(NS) for c in g0.objects(n, RDF.type))
+
+    edges, nodes = [], set()
+    for s, p, o in g1:
+        if not (ours(s) and ours(o)) or s == o:
+            continue
+        if p == RDF.type:
+            pred = "type"
+        elif p == RDFS.subClassOf:
+            pred = "subClassOf"
+        elif str(p).startswith(NS) and _short(p) in EDGE_PREDICATES:
+            pred = _short(p)
+        else:
+            continue
+        inferred = (s, p, o) not in g0
+        if not inferred:
+            rule = "asserted"
+        elif pred == "type":
+            rule = "rdfs:subClassOf" if asserted_type(s) else "rdfs:domain"
+        elif pred == "subClassOf":
+            rule = "rdfs:subClassOf"
+        elif pred in ("homeRegion", "reachableRegion"):
+            rule = "property chain"
+        elif pred == "hasRegion":
+            rule = "owl:inverseOf"
+        else:
+            rule = "OWL RL"
+        edges.append({"source": _short(s), "target": _short(o), "predicate": pred, "inferred": inferred, "rule": rule})
+        nodes.update((s, o))
+
+    out_nodes = []
+    for n in sorted(nodes, key=str):
+        label = g1.value(n, RDFS.label)
+        zone = g1.value(n, URIRef(NS + "zoneId"))
+        types = {_short(c) for c in g1.objects(n, RDF.type)}
+        kind = "class" if n in classes else next((k for c, k in _KINDS if c in types), "class")
+        out_nodes.append({"id": _short(n), "label": str(label) if label else (str(zone) if zone else _short(n)),
+                          "kind": kind, "zone": str(zone) if zone else None})
+    edges.sort(key=lambda e: (e["inferred"], e["predicate"], e["source"], e["target"]))
+    return {"counts": {"asserted_triples": len(g0), "reasoned_triples": len(g1), "nodes": len(out_nodes),
+                       "edges_asserted": sum(not e["inferred"] for e in edges),
+                       "edges_inferred": sum(e["inferred"] for e in edges)},
+            "nodes": out_nodes, "edges": edges}

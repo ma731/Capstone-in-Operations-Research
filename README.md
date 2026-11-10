@@ -330,6 +330,30 @@ cut that day's emissions by 14.4% compared with time shifting alone, and 37% acr
 Eastern regions. One day, one budget, average rather than worst days: these are an
 illustration, not comparable to the thesis's 4.0-9.9% out-of-sample CVaR.
 
+### Gridshift console (local)
+
+A local web console over the same code: a map that plays the day, the five-step workflow,
+the approval gate, the ontology graph, the drift monitor and the agent interfaces, with a
+voice you can talk to and a hands-free three-minute tour (Present). The server is
+[`agentic/serve.py`](agentic/serve.py) (standard library only) and the app is
+[`agentic/web/index.html`](agentic/web/index.html).
+
+```bash
+.venv\Scripts\python -m agentic.serve          # opens http://localhost:8765
+.venv\Scripts\python -m agentic.warm_cache     # run it the night before; needs internet once
+.venv\Scripts\python -m agentic.warm_cache --check
+```
+
+- `GRIDSHIFT_NO_DATA=1` acts as if the licensed data were missing (no one-day numbers anywhere).
+- `GRIDSHIFT_TTS=off` turns the neural voice off; the browser voice takes over.
+- `GRIDSHIFT_TTS_PYTHON=<path>` points at a Python that has `edge-tts`; `GRIDSHIFT_VOICE` picks the voice.
+
+The neural voice uses `edge-tts`, which is not a project dependency: it lives in the system
+Python and is called as a subprocess. Without it, lines already cached still play and the
+rest falls back to the browser voice. The console reads the licensed Electricity Maps data
+locally and never ships it: answers and audio are cached in `agentic/.cache/`, which is
+gitignored.
+
 ## Project structure
 
 ```
