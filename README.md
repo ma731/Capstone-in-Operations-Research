@@ -244,6 +244,51 @@ Everything under `scripts/` is runnable as `python -m scripts.<name>`. The load-
 
 Calibration helpers (`calibrate_*`, `screen_zones`), figure builders (`plot_*`, `build_deck`), and `prototype_*` / `toy_validation*` (kept for history) round out the folder.
 
+## After the capstone: the scheduler as a tool for agents
+
+A post-capstone extension in [`agentic/`](agentic/). It changes no thesis result; it shows
+how the scheduler would sit inside a company's AI systems.
+
+**Why a workflow, not an agent.** The decision is an optimisation with guarantees: budgets,
+capacities, and a solver that proves its answer is optimal. Letting a language model choose
+the steps would add cost and risk and buy nothing. So it is a fixed, five-step workflow, all
+code, and the one real judgement (actually moving the work) stays with a person:
+
+1. **Ontology check:** may this job move, and where to?
+2. **Forecast:** a 14-day seasonal forecast per region, so the plan never sees the day it schedules.
+3. **Plan:** the thesis optimiser, time shifting only vs also moving work between regions.
+4. **Explain:** what moves where, and what it would have saved on the carbon that actually happened.
+5. **Approval:** always `PENDING_APPROVAL`; nothing is executed.
+
+**The ontology** ([`agentic/ontology.ttl`](agentic/ontology.ttl), RDFS + OWL) defines regions,
+portfolios (the thesis's three grids), data centres and jobs. An OWL RL reasoner adds the
+facts that follow from it instead of writing them by hand:
+
+- *subclass:* a `TrainingJob` is a `FlexibleJob`, so it may move; an `InteractiveJob` is a
+  `FixedJob`, disjoint with `FlexibleJob`, so it never does;
+- *domain:* a data centre is never typed by hand; being `locatedIn` a region makes it one;
+- *property chain:* `runsAt → memberOf → hasRegion` gives the regions a job's work could move to.
+
+The scheduler never decides *what* is allowed to move. The ontology does; the optimiser only
+decides how much, when and where among the allowed regions.
+
+**MCP server** ([`agentic/mcp_server.py`](agentic/mcp_server.py)): any agent (Claude, a
+Copilot) can list jobs, ask where one may move, and request a proposal. Two tools are
+read-only; `propose_migration` returns a draft. The ontology and the thesis findings are
+resources, so an agent reads the rules and the evidence (for example, that robust
+optimisation rarely pays) before proposing anything.
+
+```bash
+pip install -e .[agentic]
+python -m agentic.mcp_server            # stdio MCP server
+python -m pytest tests/test_agentic.py  # 9 tests; skipped without the extras
+```
+
+Example on 15 June 2025: moving up to 30% of the work between the Western regions would have
+cut that day's emissions by 14.4% compared with time shifting alone, and 37% across the
+Eastern regions. One day, one budget, average rather than worst days: these are an
+illustration, not comparable to the thesis's 4.0-9.9% out-of-sample CVaR.
+
 ## Project structure
 
 ```
