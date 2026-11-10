@@ -278,6 +278,7 @@ export function setOrb(s) {
   emit('orb', s)
 }
 
+// The "orb" is drawn as a small scope: a live trace of the voice signal.
 export function startOrb(canvas) {
   if (!canvas) return
   const dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -291,63 +292,45 @@ export function startOrb(canvas) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now
     const calm = reduced()
     t += dt * (calm ? 0.25 : 1)
-
-    // loudness: real audio when playing, otherwise procedural while speaking
+    const live = orbState === 'speaking' && source && analyser
+    if (live) analyser.getFloatTimeDomainData(data)
     let target = 0
     if (orbState === 'speaking') {
-      if (source && analyser) {
-        analyser.getFloatTimeDomainData(data)
-        let sum = 0
-        for (let i = 0; i < data.length; i++) sum += data[i] * data[i]
-        target = Math.min(1, Math.sqrt(sum / data.length) * 5.5)
-      } else {
-        target = 0.35 + 0.3 * Math.abs(Math.sin(t * 7.3) * Math.sin(t * 3.1 + 1))
-      }
+      if (live) { let sum = 0; for (let i = 0; i < data.length; i++) sum += data[i] * data[i]; target = Math.min(1, Math.sqrt(sum / data.length) * 5.5) }
+      else target = 0.35 + 0.3 * Math.abs(Math.sin(t * 7.3) * Math.sin(t * 3.1 + 1))
     }
     level += (target - level) * (target > level ? 0.45 : 0.12)
 
     g.setTransform(dpr, 0, 0, dpr, 0, 0)
-    g.clearRect(0, 0, S, S)
-    const cx = S / 2; const cy = S / 2
-    const breathe = calm ? 0 : Math.sin(t * 1.6) * 0.8
-    const R = 12.5 + breathe + level * 6
-
-    // listening: expanding rings
-    if (orbState === 'listening') {
-      for (let k = 0; k < 3; k++) {
-        const p = ((t * 0.9 + k / 3) % 1)
-        g.beginPath(); g.arc(cx, cy, R + p * 11, 0, Math.PI * 2)
-        g.strokeStyle = `rgba(20,232,160,${(1 - p) * 0.7})`; g.lineWidth = 1.5; g.stroke()
-      }
+    g.fillStyle = '#0b0d0e'; g.fillRect(0, 0, S, S)
+    // graticule
+    g.strokeStyle = 'rgba(160,172,178,.12)'; g.lineWidth = 1
+    for (let k = 1; k < 4; k++) {
+      const p = Math.round((S / 4) * k) + 0.5
+      g.beginPath(); g.moveTo(p, 2); g.lineTo(p, S - 2); g.moveTo(2, p); g.lineTo(S - 2, p); g.stroke()
     }
-
-    // glow
-    const glow = g.createRadialGradient(cx, cy, R * 0.4, cx, cy, R + 12)
-    const ga = orbState === 'idle' ? 0.18 : 0.32 + level * 0.3
-    glow.addColorStop(0, `rgba(20,232,160,${ga})`); glow.addColorStop(1, 'rgba(20,232,160,0)')
-    g.fillStyle = glow; g.beginPath(); g.arc(cx, cy, R + 12, 0, Math.PI * 2); g.fill()
-
-    // blob with noise displacement
-    const amp = 0.06 + level * 0.18 + (orbState === 'thinking' ? 0.05 : 0)
+    const mid = S / 2
+    const col = orbState === 'listening' ? '#45a8c4' : orbState === 'thinking' ? '#e3b341' : '#c8f03c'
+    g.strokeStyle = col; g.lineWidth = 1.6; g.lineJoin = 'round'
     g.beginPath()
-    const N = 48
-    for (let i = 0; i <= N; i++) {
-      const a = (i / N) * Math.PI * 2
-      const n = Math.sin(a * 3 + t * 1.9) * 0.5 + Math.sin(a * 5 - t * 2.7) * 0.3 + Math.sin(a * 2 + t * 0.8) * 0.2
-      const r = R * (1 + amp * n)
-      const x = cx + Math.cos(a) * r; const y = cy + Math.sin(a) * r
-      if (i === 0) g.moveTo(x, y); else g.lineTo(x, y)
+    for (let x = 3; x <= S - 3; x++) {
+      const u = (x - 3) / (S - 6)
+      let y = 0
+      if (orbState === 'speaking') {
+        y = live ? data[Math.floor(u * 400)] * 60 : Math.sin(u * 18 + t * 14) * Math.sin(u * 5 - t * 3) * 14 * level
+      } else if (orbState === 'listening') {
+        y = Math.sin(u * 30 - t * 10) * 4 * Math.sin(Math.PI * u)
+      } else if (orbState === 'thinking') {
+        const head = (t * 1.4) % 1
+        y = Math.exp(-Math.pow((u - head) * 9, 2)) * -10
+      } else {
+        y = Math.sin(u * 12 + t * 2) * 0.8
+      }
+      y = Math.max(-mid + 3, Math.min(mid - 3, y))
+      if (x === 3) g.moveTo(x, mid + y); else g.lineTo(x, mid + y)
     }
-    g.closePath()
-    const fill = g.createRadialGradient(cx - R * 0.35, cy - R * 0.45, 1, cx, cy, R * 1.2)
-    fill.addColorStop(0, '#d9ffe9'); fill.addColorStop(0.3, '#5ff6c4'); fill.addColorStop(0.75, '#14b886'); fill.addColorStop(1, '#0a6e50')
-    g.fillStyle = fill; g.fill()
-
-    // thinking: rotating arc
-    if (orbState === 'thinking') {
-      g.beginPath(); g.arc(cx, cy, R + 6, t * 4.2, t * 4.2 + Math.PI * 0.9)
-      g.strokeStyle = 'rgba(168,255,53,.9)'; g.lineWidth = 2; g.lineCap = 'round'; g.stroke()
-    }
+    g.stroke()
+    g.strokeStyle = 'rgba(160,172,178,.25)'; g.strokeRect(0.5, 0.5, S - 1, S - 1)
     requestAnimationFrame(frame)
   }
   requestAnimationFrame(frame)

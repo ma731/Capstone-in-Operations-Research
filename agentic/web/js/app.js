@@ -68,7 +68,7 @@ function bootDots() {
       for (let x = 18; x < w; x += 26) {
         const d = Math.hypot(x - w / 2, y - hh * 0.42) / Math.hypot(w, hh)
         const a = Math.max(0, Math.min(1, t * 1.4 - d * 3)) * (0.08 + 0.1 * Math.sin(x * 0.05 + y * 0.03 + t * 1.2) ** 2)
-        g.fillStyle = `rgba(20,232,160,${a})`
+        g.fillStyle = `rgba(160,172,178,${a})`
         g.fillRect(x, y, 1.6, 1.6)
       }
     }
@@ -148,15 +148,15 @@ function glyph() {
   const g = $('.glyph-dots')
   const pos = []
   for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) pos.push([9 + c * 7, 9 + r * 7])
-  g.innerHTML = pos.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.1" fill="#2e3f39"/>`).join('')
+  g.innerHTML = pos.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.1" fill="#2a3034"/>`).join('')
   const dots = [...g.children]
   let i = 0
   const seq = [6, 3, 4, 1, 2, 5, 8]
   const tick = () => {
-    dots.forEach((d) => d.setAttribute('fill', '#2e3f39'))
+    dots.forEach((d) => d.setAttribute('fill', '#2a3034'))
     for (let k = 0; k < 3; k++) {
       const d = dots[seq[(i + k) % seq.length]]
-      d.setAttribute('fill', k === 2 ? '#a8ff35' : k === 1 ? '#14e8a0' : '#0d9d6c')
+      d.setAttribute('fill', k === 2 ? '#c8f03c' : k === 1 ? '#7d868b' : '#4a5358')
     }
     i++
   }

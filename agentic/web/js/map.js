@@ -191,9 +191,27 @@ function draw(now) {
     }
   }
 
-  // dots
+  // graticule every 5 degrees: the map's own coordinate frame
   const f = frame(w, h)
-  const dotR = clamp(f.mw * cam.z / 59 * 0.17, 0.9, 2.6)
+  g.lineWidth = 1
+  g.strokeStyle = 'rgba(160,172,178,.07)'
+  g.font = '500 9.5px "IBM Plex Mono", ui-monospace'
+  g.fillStyle = 'rgba(160,172,178,.38)'
+  for (let lon = -125; lon <= -65; lon += 5) {
+    const [x] = project((lon + 125) / 59, 0, w, h)
+    if (x < 0 || x > w) continue
+    g.beginPath(); g.moveTo(Math.round(x) + 0.5, 0); g.lineTo(Math.round(x) + 0.5, h); g.stroke()
+    g.fillText(`${-lon}W`, Math.round(x) + 3, h - 4)
+  }
+  for (let lat = 25; lat <= 50; lat += 5) {
+    const [, y] = project(0, (50 - lat) / 26, w, h)
+    if (y < 0 || y > h) continue
+    g.beginPath(); g.moveTo(0, Math.round(y) + 0.5); g.lineTo(w, Math.round(y) + 0.5); g.stroke()
+    g.fillText(`${lat}N`, w - 26, Math.round(y) - 3)
+  }
+
+  // dot matrix: square cells, tinted near live regions
+  const dotS = clamp(f.mw * cam.z / 59 * 0.26, 1.2, 3.2)
   const waveAge = now - waveT0
   for (const d of dots) {
     const [x, y] = project(d.u, d.v, w, h)
@@ -203,58 +221,64 @@ function draw(now) {
     const z = zones[d.zi]
     const val = z && zv.get(z.id)
     if (val && val.g !== null) {
-      const k = Math.exp(-(d.d * d.d) / (2 * 2.3 * 2.3))
+      const k = Math.exp(-(d.d * d.d) / (2 * 2.1 * 2.1))
       const [r, gg, b] = carbonRGB(val.g)
-      g.fillStyle = `rgba(${r},${gg},${b},${(0.12 + 0.62 * k) * wa})`
+      g.fillStyle = `rgba(${r},${gg},${b},${(0.1 + 0.55 * k) * wa})`
     } else {
       const dim = P && z && !planZones.has(z.id)
-      g.fillStyle = `rgba(150,172,163,${(dim ? 0.09 : 0.16) * wa})`
+      g.fillStyle = `rgba(160,172,178,${(dim ? 0.1 : 0.18) * wa})`
     }
-    g.beginPath(); g.arc(x, y, dotR, 0, Math.PI * 2); g.fill()
+    g.fillRect(Math.round(x - dotS / 2), Math.round(y - dotS / 2), dotS, dotS)
   }
 
-  // flows: faint arcs + particles
+  // flows: thin lines with direction marks, packets travel along them
   if (live && flowArcs.length) {
-    g.save()
-    g.globalCompositeOperation = 'lighter'
     for (const fl of flowArcs) {
       const [ax, ay] = project(fl.a.u, fl.a.v, w, h)
       const [bx, by] = project(fl.b.u, fl.b.v, w, h)
       const mx = (ax + bx) / 2; const my = (ay + by) / 2
       const dx = bx - ax; const dy = by - ay
       const len = Math.hypot(dx, dy) || 1
-      const cx = mx - (dy / len) * len * 0.28; const cy = my + (dx / len) * len * 0.28 - len * 0.08
+      const cx = mx - (dy / len) * len * 0.22; const cy = my + (dx / len) * len * 0.22 - len * 0.06
       fl.geo = { ax, ay, bx, by, cx, cy }
       const rate = H >= 24 ? (fl.mwh / 24) / maxFlowRate : valAt(fl.by_hour_mwh, H) / maxFlowRate
       g.beginPath(); g.moveTo(ax, ay); g.quadraticCurveTo(cx, cy, bx, by)
-      g.strokeStyle = `rgba(168,255,53,${calm ? 0.15 + 0.6 * rate : 0.07 + 0.2 * rate})`
-      g.lineWidth = calm ? 1 + rate * 4 : 1 + rate * 1.5
-      g.stroke()
+      g.strokeStyle = `rgba(200,240,60,${calm ? 0.2 + 0.6 * rate : 0.18 + 0.35 * rate})`
+      g.lineWidth = calm ? 1 + rate * 3 : 1
+      g.setLineDash([2, 3]); g.stroke(); g.setLineDash([])
+      // arrowhead at 70% along the curve
+      const t = 0.7
+      const px = (1 - t) * (1 - t) * ax + 2 * (1 - t) * t * cx + t * t * bx
+      const py = (1 - t) * (1 - t) * ay + 2 * (1 - t) * t * cy + t * t * by
+      const tx = 2 * (1 - t) * (cx - ax) + 2 * t * (bx - cx); const ty = 2 * (1 - t) * (cy - ay) + 2 * t * (by - cy)
+      const an = Math.atan2(ty, tx)
+      g.save(); g.translate(px, py); g.rotate(an)
+      g.fillStyle = `rgba(200,240,60,${0.35 + 0.5 * rate})`
+      g.beginPath(); g.moveTo(5, 0); g.lineTo(-3, -3.5); g.lineTo(-3, 3.5); g.closePath(); g.fill()
+      g.restore()
       if (!calm && rate > 0.001) {
-        fl.acc += dt * rate * 16
-        while (fl.acc >= 1) { fl.acc -= 1; particles.push({ fl, t: 0, sp: 0.55 + Math.random() * 0.25, j: (Math.random() - 0.5) * 6 }) }
+        fl.acc += dt * rate * 14
+        while (fl.acc >= 1) { fl.acc -= 1; particles.push({ fl, t: 0, sp: 0.5 + Math.random() * 0.2 }) }
       }
     }
+    g.fillStyle = '#c8f03c'
     for (const p of particles) {
       p.t += dt * p.sp
       const q = p.fl.geo
       if (!q) continue
-      for (let k = 0; k < 4; k++) {
-        const t = clamp(p.t - k * 0.025, 0, 1)
-        const x = (1 - t) * (1 - t) * q.ax + 2 * (1 - t) * t * (q.cx + p.j) + t * t * q.bx
-        const y = (1 - t) * (1 - t) * q.ay + 2 * (1 - t) * t * (q.cy + p.j) + t * t * q.by
-        const a = (1 - k / 4) * Math.sin(Math.PI * clamp(p.t, 0, 1))
-        g.fillStyle = k === 0 ? `rgba(220,255,170,${a})` : `rgba(168,255,53,${a * 0.45})`
-        g.beginPath(); g.arc(x, y, k === 0 ? 2.2 : 1.6, 0, Math.PI * 2); g.fill()
-      }
+      const t = clamp(p.t, 0, 1)
+      const x = (1 - t) * (1 - t) * q.ax + 2 * (1 - t) * t * q.cx + t * t * q.bx
+      const y = (1 - t) * (1 - t) * q.ay + 2 * (1 - t) * t * q.cy + t * t * q.by
+      g.globalAlpha = Math.sin(Math.PI * t)
+      g.fillRect(Math.round(x) - 1.5, Math.round(y) - 1.5, 3, 3)
     }
+    g.globalAlpha = 1
     particles = particles.filter((p) => p.t < 1)
     if (particles.length > 400) particles.splice(0, particles.length - 400)
-    g.restore()
   }
 
-  // nodes
-  const pulse = calm ? 0.5 : (Math.sin(now / 420) + 1) / 2
+  // regions: square substation markers, size = load, dashed square = hour-shift-only load
+  const blink = calm ? 1 : (Math.floor(now / 600) % 2 ? 1 : 0.35)
   for (const z of zones) {
     const [x, y] = project(z.u, z.v, w, h)
     const val = zv.get(z.id)
@@ -262,32 +286,24 @@ function draw(now) {
     const dim = (P && !inPlan) || (!P && fixedZone && z.id !== fixedZone)
     if (val && val.g !== null) {
       const [r, gg, b] = carbonRGB(val.g)
-      const rad = 5 + 15 * Math.sqrt(Math.max(0, val.load) / maxLoad)
-      const ghost = 5 + 15 * Math.sqrt(Math.max(0, val.ghost) / maxLoad)
-      const glow = g.createRadialGradient(x, y, rad * 0.3, x, y, rad * 2.6)
-      glow.addColorStop(0, `rgba(${r},${gg},${b},0.55)`); glow.addColorStop(1, `rgba(${r},${gg},${b},0)`)
-      g.fillStyle = glow; g.beginPath(); g.arc(x, y, rad * 2.6, 0, Math.PI * 2); g.fill()
-      g.fillStyle = `rgba(${r},${gg},${b},0.92)`
-      g.beginPath(); g.arc(x, y, rad, 0, Math.PI * 2); g.fill()
-      g.strokeStyle = 'rgba(7,11,10,.65)'; g.lineWidth = 1; g.stroke()
-      // ghost ring: where the load would sit with hour shifting only
-      g.setLineDash([3, 3]); g.strokeStyle = 'rgba(243,248,245,.55)'; g.lineWidth = 1
-      g.beginPath(); g.arc(x, y, ghost, 0, Math.PI * 2); g.stroke(); g.setLineDash([])
-      if (z.id === homeZone) {
-        g.strokeStyle = `rgba(243,248,245,${0.35 + 0.4 * pulse})`; g.lineWidth = 1.5
-        g.beginPath(); g.arc(x, y, rad + 6 + pulse * 2, 0, Math.PI * 2); g.stroke()
-      }
-      label(g, z, x, y, rad, `${fmt(val.g, 0)} g`, `rgb(${r},${gg},${b})`, z.id === homeZone)
+      const s = 5 + 13 * Math.sqrt(Math.max(0, val.load) / maxLoad)
+      const gs = 5 + 13 * Math.sqrt(Math.max(0, val.ghost) / maxLoad)
+      g.fillStyle = `rgb(${r},${gg},${b})`
+      g.fillRect(Math.round(x - s), Math.round(y - s), Math.round(s * 2), Math.round(s * 2))
+      g.strokeStyle = 'rgba(11,13,14,.9)'; g.lineWidth = 1
+      g.strokeRect(Math.round(x - s) + 0.5, Math.round(y - s) + 0.5, Math.round(s * 2) - 1, Math.round(s * 2) - 1)
+      g.setLineDash([3, 2]); g.strokeStyle = 'rgba(233,236,236,.6)'
+      g.strokeRect(Math.round(x - gs) - 0.5, Math.round(y - gs) - 0.5, Math.round(gs * 2) + 1, Math.round(gs * 2) + 1)
+      g.setLineDash([])
+      if (z.id === homeZone) brackets(g, x, y, s + 6, 'rgba(233,236,236,.85)')
+      label(g, z, x, y, s, `${fmt(val.g, 0)} g/kWh`, `rgb(${r},${gg},${b})`, z.id === homeZone)
     } else {
       const isFixed = z.id === fixedZone
-      const rad = isFixed ? 7 : 3.6
-      g.fillStyle = isFixed ? 'rgba(245,183,61,.9)' : dim ? 'rgba(120,140,132,.35)' : 'rgba(169,188,180,.7)'
-      g.beginPath(); g.arc(x, y, rad, 0, Math.PI * 2); g.fill()
-      if (isFixed) {
-        g.strokeStyle = `rgba(245,183,61,${0.3 + 0.5 * pulse})`; g.lineWidth = 1.5
-        g.beginPath(); g.arc(x, y, rad + 5 + pulse * 3, 0, Math.PI * 2); g.stroke()
-      }
-      label(g, z, x, y, rad, isFixed ? 'fixed' : null, isFixed ? '#f5b73d' : null, false, dim)
+      const s = isFixed ? 6 : 3
+      g.fillStyle = isFixed ? `rgba(227,179,65,${blink})` : dim ? 'rgba(120,130,135,.45)' : 'rgba(170,180,185,.8)'
+      g.fillRect(Math.round(x - s), Math.round(y - s), s * 2, s * 2)
+      if (isFixed) brackets(g, x, y, s + 6, 'rgba(227,179,65,.9)')
+      label(g, z, x, y, s, isFixed ? 'fixed, never moves' : null, isFixed ? '#e3b341' : null, false, dim)
     }
   }
 
@@ -300,15 +316,15 @@ function draw(now) {
       lines.push(`${fmt(val.g, 0)} gCO2eq/kWh ${H >= 24 ? 'day mean' : 'actual'}`)
       lines.push(`${fmt(val.load, 2)} MWh this hour`)
     } else lines.push(P ? 'Not in this job\'s portfolio' : 'No plan loaded')
-    g.font = '500 11px Inter, system-ui'
+    g.font = '500 11px "IBM Plex Sans", system-ui'
     const bw = Math.max(...lines.map((l) => g.measureText(l).width)) + 18
     const bh = lines.length * 15 + 10
     let bx = x + 14; let by = y - bh - 8
     if (bx + bw > w - 6) bx = x - bw - 14
     if (by < 6) by = y + 14
-    g.fillStyle = 'rgba(13,19,17,.95)'; g.strokeStyle = 'rgba(39,53,49,1)'; g.lineWidth = 1
-    roundRect(g, bx, by, bw, bh, 8); g.fill(); g.stroke()
-    lines.forEach((l, i) => { g.fillStyle = i === 0 ? '#f3f8f5' : '#a9bcb4'; g.fillText(l, bx + 9, by + 18 + i * 15) })
+    g.fillStyle = 'rgba(17,20,22,.97)'; g.strokeStyle = 'rgba(52,58,62,1)'; g.lineWidth = 1
+    g.fillRect(bx, by, bw, bh); g.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh - 1)
+    lines.forEach((l, i) => { g.fillStyle = i === 0 ? '#e9ecec' : '#9aa3a8'; g.fillText(l, bx + 9, by + 18 + i * 15) })
   }
 
   requestAnimationFrame(draw)
@@ -320,15 +336,25 @@ function label(g, z, x, y, rad, val, col, home, dim) {
   g.textAlign = left ? 'right' : 'left'
   const ox = left ? x - rad - 7 : x + rad + 7
   g.font = '600 11px "IBM Plex Mono", ui-monospace'
-  g.fillStyle = dim ? 'rgba(126,147,137,.55)' : 'rgba(243,248,245,.92)'
+  g.fillStyle = dim ? 'rgba(130,140,145,.6)' : 'rgba(233,236,236,.95)'
   const name = z.short || z.id
   g.fillText(home ? `${name} · home` : name, ox, y - (val ? 6 : 0))
   if (val) {
     g.font = '500 10.5px "IBM Plex Mono", ui-monospace'
-    g.fillStyle = col || '#a9bcb4'
+    g.fillStyle = col || '#9aa3a8'
     g.fillText(val, ox, y + 7)
   }
   g.textAlign = 'left'
+}
+
+function brackets(g, x, y, r, col) {
+  const k = Math.max(4, r * 0.45)
+  g.strokeStyle = col; g.lineWidth = 1.5
+  g.beginPath()
+  for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+    g.moveTo(x + sx * r, y + sy * (r - k)); g.lineTo(x + sx * r, y + sy * r); g.lineTo(x + sx * (r - k), y + sy * r)
+  }
+  g.stroke()
 }
 
 function roundRect(g, x, y, w, h, r) {

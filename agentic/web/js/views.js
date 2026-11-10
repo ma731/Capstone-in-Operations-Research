@@ -325,12 +325,12 @@ function renderGauge(F3, text) {
   g.innerHTML = `
     <div class="lad-h"><span class="lad-title">When does robust optimisation pay?</span><span class="badge-thesis"><b>THESIS</b>RQ3</span></div>
     <svg viewBox="0 0 400 236" role="img" aria-label="Shock severity gauge">
-      <path d="${arc(1, 4, G.r)}" fill="none" stroke="#1b2622" stroke-width="22" stroke-linecap="round"/>
-      ${be ? `<path d="${arc(be, 4, G.r)}" fill="none" stroke="rgba(245,183,61,.28)" stroke-width="22"/>` : ''}
-      ${ob.length === 2 ? `<path d="${arc(ob[0], ob[1], G.r)}" fill="none" stroke="#43e5c0" stroke-width="22" style="filter:drop-shadow(0 0 8px rgba(67,229,192,.6))"/>` : ''}
-      ${ticks.map((t) => { const [a, b] = pt(t, G.r + 15); const [c, d] = pt(t, G.r + 21); const [lx, ly] = pt(t, G.r + 33); return `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="#3a4c45"/>${Number.isInteger(t) ? `<text class="g-tick" x="${lx}" y="${ly + 4}" text-anchor="middle">${t}x</text>` : ''}` }).join('')}
-      ${be ? (() => { const [a, b] = pt(be, G.r - 16); const [c, d] = pt(be, G.r + 14); return `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="#f5b73d" stroke-width="2.5"/>` })() : ''}
-      <g id="needle"><line x1="${G.cx}" y1="${G.cy}" x2="${G.cx - G.r + 26}" y2="${G.cy}" stroke="#f3f8f5" stroke-width="2.5" stroke-linecap="round"/><circle cx="${G.cx}" cy="${G.cy}" r="7" fill="#f3f8f5"/></g>
+      <path d="${arc(1, 4, G.r)}" fill="none" stroke="#1d2226" stroke-width="22"/>
+      ${be ? `<path d="${arc(be, 4, G.r)}" fill="none" stroke="rgba(227,179,65,.22)" stroke-width="22"/>` : ''}
+      ${ob.length === 2 ? `<path d="${arc(ob[0], ob[1], G.r)}" fill="none" stroke="#45a8c4" stroke-width="22"/>` : ''}
+      ${ticks.map((t) => { const [a, b] = pt(t, G.r + 15); const [c, d] = pt(t, G.r + 21); const [lx, ly] = pt(t, G.r + 33); return `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="#4a5358"/>${Number.isInteger(t) ? `<text class="g-tick" x="${lx}" y="${ly + 4}" text-anchor="middle">${t}x</text>` : ''}` }).join('')}
+      ${be ? (() => { const [a, b] = pt(be, G.r - 16); const [c, d] = pt(be, G.r + 14); return `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="#e3b341" stroke-width="2.5"/>` })() : ''}
+      <g id="needle"><line x1="${G.cx}" y1="${G.cy}" x2="${G.cx - G.r + 26}" y2="${G.cy}" stroke="#e9ecec" stroke-width="2" stroke-linecap="round"/><circle cx="${G.cx}" cy="${G.cy}" r="5" fill="#e9ecec"/></g>
       <text class="g-lbl data" x="${G.cx}" y="${G.cy + 30}" text-anchor="middle">Observed shocks: ${ob.length === 2 ? `${fmt(ob[0], 2)} to ${fmt(ob[1], 2)}x normal` : 'n/a'}</text>
       <text class="g-lbl amber" x="${G.cx}" y="${G.cy + 48}" text-anchor="middle">Break-even: about ${fmt(be)}x normal</text>
     </svg>
@@ -400,7 +400,7 @@ export async function ensureDrift() {
 }
 
 const ratioColor = (x) => {
-  const stops = [[0.6, [13, 157, 108]], [1.0, [67, 229, 192]], [1.25, [245, 183, 61]], [1.5, [255, 92, 92]]]
+  const stops = [[0.6, [52, 92, 110]], [1.0, [69, 168, 196]], [1.25, [227, 179, 65]], [1.5, [224, 90, 71]]]
   if (x <= stops[0][0]) return `rgb(${stops[0][1]})`
   for (let i = 1; i < stops.length; i++) {
     if (x <= stops[i][0]) {
@@ -408,7 +408,7 @@ const ratioColor = (x) => {
       return `rgb(${ca.map((c, k) => Math.round(c + (cb[k] - c) * t)).join(',')})`
     }
   }
-  return 'rgb(255,92,92)'
+  return 'rgb(224,90,71)'
 }
 
 function renderDrift() {
