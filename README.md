@@ -278,10 +278,39 @@ read-only; `propose_migration` returns a draft. The ontology and the thesis find
 resources, so an agent reads the rules and the evidence (for example, that robust
 optimisation rarely pays) before proposing anything.
 
+**A2A** ([`agentic/a2a.py`](agentic/a2a.py)): MCP lets an agent use the *tools*; A2A lets
+another company's agent hand over a whole *task* in plain language. An Agent Card describes
+three skills; `message/send` answers through a **router** ([`agentic/router.py`](agentic/router.py))
+that sends each request to one tool, and asks back (`input-required`) when it cannot tell.
+
+**Semantic layer**: every number the workflow reports (emissions, saving, moved work, CVaR)
+is defined once in the ontology, with its unit and what it is used for, so a person and an
+agent read "saving" the same way. That is the gap between business language and what the
+optimiser computes, closed in one place.
+
+**Evals** ([`agentic/evals.py`](agentic/evals.py)): nine plain-language requests with the
+expected tool and outcome. Routing 100%, end to end 100%; a fixed job is never proposed
+for migration, an unclear request is asked back.
+
+| Concept | Where | Why this choice |
+|---|---|---|
+| Linear workflow | `workflow.py` | An optimisation with guarantees does not need a model picking steps |
+| Routing | `router.py` | Few request types: transparent rules, testable; an LLM classifier could slot in |
+| Human in the loop | every proposal | Moving work changes where data is processed: a person signs off |
+| Ontology, RDFS, OWL, inference | `ontology.ttl`, `knowledge.py` | The rules about what may move live in one place, not in code branches |
+| Knowledge graph | the reasoned ontology | Jobs, data centres, regions, portfolios as connected facts |
+| Semantic layer | `:Metric` in the ontology | Metrics defined once, for people and agents |
+| MCP | `mcp_server.py` | Any agent can use the scheduler; read-only plus a draft-only tool |
+| A2A | `a2a.py` | Other agents can delegate a task without knowing the internals |
+| Evals | `evals.py` | Labelled cases checked on every change |
+| *Not used:* autonomous or role-based multi-agent | | Nothing to negotiate or explore: one optimiser decides |
+| *Not used:* vector database, RAG | | No documents to search; the knowledge is structured, so a graph fits |
+
 ```bash
 pip install -e .[agentic]
 python -m agentic.mcp_server            # stdio MCP server
-python -m pytest tests/test_agentic.py  # 9 tests; skipped without the extras
+python -m agentic.evals                 # the labelled eval
+python -m pytest tests/test_agentic.py  # 16 tests; skipped without the extras
 ```
 
 Example on 15 June 2025: moving up to 30% of the work between the Western regions would have

@@ -69,4 +69,46 @@ def test_mcp_server_exposes_read_only_tools_and_a_draft_tool():
     assert not tools["propose_migration"].annotations.read_only_hint
     assert not tools["propose_migration"].annotations.destructive_hint
     resources = {str(r.uri) for r in asyncio.run(m.server.list_resources())}
-    assert resources == {"capstone://ontology", "capstone://findings"}
+    assert resources == {"capstone://ontology", "capstone://metrics", "capstone://findings"}
+
+
+def test_semantic_layer_defines_each_metric_once_and_infers_risk_metrics():
+    m = knowledge.metrics()
+    assert {"emissions_tonnes", "saving_pct", "moved_mwh", "cvar95"} <= set(m)
+    assert m["cvar95"]["risk_metric"] and not m["saving_pct"]["risk_metric"]   # RiskMetric -> Metric
+    p = workflow.propose("llm_training", date(2025, 6, 15))
+    assert set(p["metric_definitions"]) == {"emissions_tonnes", "saving_pct", "moved_mwh"}
+
+
+@pytest.mark.parametrize("text,intent,job", [
+    ("Where can the nightly ETL pipeline move?", "migration_options", "nightly_etl"),
+    ("Plan the model training for 2025-06-15", "propose_migration", "llm_training"),
+    ("Does robust optimisation pay?", "findings", None),
+    ("Help me with the thing", "clarify", None),
+])
+def test_router_sends_each_request_to_one_tool(text, intent, job):
+    from agentic import router
+
+    r = router.route(text)
+    assert r["intent"] == intent and r["args"].get("job") == job
+
+
+def test_a2a_card_and_message_send():
+    from agentic import a2a
+
+    card = a2a.agent_card("http://localhost:9000/")
+    assert card["url"] == "http://localhost:9000/a2a" and len(card["skills"]) == 3
+    ok = a2a.handle({"jsonrpc": "2.0", "id": 1, "method": "message/send",
+                     "params": {"message": {"parts": [{"kind": "text", "text": "Where can the risk simulation move?"}]}}})
+    assert ok["result"]["status"]["state"] == "completed"
+    ask = a2a.handle({"jsonrpc": "2.0", "id": 2, "method": "message/send",
+                      "params": {"message": {"parts": [{"kind": "text", "text": "hmm"}]}}})
+    assert ask["result"]["status"]["state"] == "input-required"
+    assert a2a.handle({"jsonrpc": "2.0", "id": 3, "method": "tasks/cancel"})["error"]["code"] == -32601
+
+
+def test_labelled_eval_is_perfect():
+    from agentic import evals
+
+    res = evals.run()
+    assert res["routing_accuracy"] == 1.0 and res["end_to_end_accuracy"] == 1.0

@@ -42,6 +42,8 @@ def propose(job: str, day: date, transfer_share: float = 0.3) -> dict:
                f"({plan['saving_pct']}% less), scored on the carbon that actually happened.")
     steps.append({"step": "4. explain", "result": summary})
     steps.append({"step": "5. approval", "result": f"Pending: {APPROVER}. {APPROVAL_REASON}"})
+    defs = knowledge.metrics()
     return {"job": job, "status": "PENDING_APPROVAL", "approval_required_from": APPROVER,
             "approval_reason": APPROVAL_REASON, "executed": False, "summary": summary,
-            "plan": plan, "steps": steps, "pattern": "linear workflow (fixed steps, code only, human approval)"}
+            "plan": plan, "steps": steps, "pattern": "linear workflow (fixed steps, code only, human approval)",
+            "metric_definitions": {k: defs[k] for k in ("emissions_tonnes", "saving_pct", "moved_mwh")}}

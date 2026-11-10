@@ -49,6 +49,29 @@
 :reachableRegion a owl:ObjectProperty ; owl:propertyChainAxiom ( :runsAt :memberOf :hasRegion ) ;
                  rdfs:label "region the job's work could move to" .
 
+# ---------------------------------------------------------------- semantic layer: metrics defined once
+# Every number the workflow reports points to one of these, so a person and an agent read
+# "saving" the same way. This is what closes the semantic gap between business language
+# ("how much cleaner?") and what the optimiser computes.
+:Metric       a owl:Class ; rdfs:label "Metric" .
+:RiskMetric   a owl:Class ; rdfs:subClassOf :Metric ; rdfs:label "Risk metric" .
+:definition   a owl:DatatypeProperty ; rdfs:domain :Metric ; rdfs:range xsd:string .
+:unit         a owl:DatatypeProperty ; rdfs:domain :Metric ; rdfs:range xsd:string .
+:usedFor      a owl:DatatypeProperty ; rdfs:domain :Metric ; rdfs:range xsd:string .
+
+:emissions_tonnes a :Metric ; rdfs:label "Emissions" ; :unit "tonnes CO2e" ;
+    :definition "Executed load (MWh) times lifecycle carbon intensity (gCO2eq/kWh), summed over hours and regions, divided by 1,000." ;
+    :usedFor "The one-day proposals in agentic/." .
+:saving_pct a :Metric ; rdfs:label "Saving" ; :unit "%" ;
+    :definition "Emissions with time shifting only minus emissions with migration, divided by emissions with time shifting only, scored on realised carbon." ;
+    :usedFor "The one-day proposals in agentic/." .
+:cvar95 a :RiskMetric ; rdfs:label "CVaR 95%" ; :unit "tonnes CO2e" ;
+    :definition "Average emissions over the worst 5% of days, out of sample." ;
+    :usedFor "Every thesis result (RQ1-RQ3)." .
+:moved_mwh a :Metric ; rdfs:label "Moved work" ; :unit "MWh" ;
+    :definition "Total work relocated between regions, never above the transfer budget." ;
+    :usedFor "The one-day proposals in agentic/." .
+
 # ---------------------------------------------------------------- the three grids of the thesis
 :us_west   a :Portfolio ; rdfs:label "Western US" .
 :taskc     a :Portfolio ; rdfs:label "Eastern US-Canada" .

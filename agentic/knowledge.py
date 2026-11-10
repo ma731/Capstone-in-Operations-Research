@@ -61,6 +61,16 @@ def portfolio_zones(portfolio: str) -> list[str]:
     return sorted(str(r[0]) for r in rows)
 
 
+def metrics() -> dict:
+    """The semantic layer: every reported metric, defined once in the ontology. Risk
+    metrics are found by subclass inference (a RiskMetric is a Metric)."""
+    rows = _q("SELECT ?m ?label ?unit ?def ?use WHERE { ?m a :Metric ; rdfs:label ?label ; :unit ?unit ; "
+              ":definition ?def ; :usedFor ?use }")
+    risk = {_short(r[0]) for r in _q("SELECT ?m WHERE { ?m a :RiskMetric }")}
+    return {_short(m): {"label": str(lb), "unit": str(u), "definition": str(d), "used_for": str(us),
+                        "risk_metric": _short(m) in risk} for m, lb, u, d, us in rows}
+
+
 def migration_options(job: str) -> dict:
     """Whether a job may move, where to, and the chain of facts that says so."""
     kinds = types_of(job)

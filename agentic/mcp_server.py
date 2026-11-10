@@ -15,18 +15,10 @@ from mcp.server.mcpserver import MCPServer
 from mcp.types import ToolAnnotations
 
 from . import knowledge, workflow
+from .findings import FINDINGS
 
 READ_ONLY = ToolAnnotations(read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=False)
 DRAFT_ONLY = ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False)
-
-FINDINGS = {
-    "RQ1": "Moving work between regions pays: 4.0-9.9% lower out-of-sample CVaR_0.95 than no transfer.",
-    "RQ2": "Modelling how regions co-move (covariance, copulas) adds under 0.4% of CVaR.",
-    "RQ3": "Distributionally robust hedging pays only above an emergency severity of about 3x; "
-           "real joint-grid severities are 1.29-1.89x.",
-    "recommendation": "A per-region scheduler plus an active transfer channel captures the value; richer "
-                      "dependence models and robustness are conditional options.",
-}
 
 server = MCPServer(
     "carbon-aware-scheduler",
@@ -65,6 +57,13 @@ def propose_migration(job: str, day: str, transfer_share: float = 0.3) -> dict:
                  mime_type="text/turtle")
 def ontology_resource() -> str:
     return knowledge.ONTOLOGY.read_text(encoding="utf-8")
+
+
+@server.resource("capstone://metrics", name="metrics",
+                 description="The semantic layer: every reported metric, defined once in the ontology.",
+                 mime_type="application/json")
+def metrics_resource() -> str:
+    return json.dumps(knowledge.metrics(), indent=2)
 
 
 @server.resource("capstone://findings", name="findings",
