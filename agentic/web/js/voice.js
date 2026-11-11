@@ -302,15 +302,15 @@ export function startOrb(canvas) {
     level += (target - level) * (target > level ? 0.45 : 0.12)
 
     g.setTransform(dpr, 0, 0, dpr, 0, 0)
-    g.fillStyle = '#0b0d0e'; g.fillRect(0, 0, S, S)
+    g.fillStyle = '#f4f6f8'; g.fillRect(0, 0, S, S)
     // graticule
-    g.strokeStyle = 'rgba(160,172,178,.12)'; g.lineWidth = 1
+    g.strokeStyle = 'rgba(18,26,38,.07)'; g.lineWidth = 1
     for (let k = 1; k < 4; k++) {
       const p = Math.round((S / 4) * k) + 0.5
       g.beginPath(); g.moveTo(p, 2); g.lineTo(p, S - 2); g.moveTo(2, p); g.lineTo(S - 2, p); g.stroke()
     }
     const mid = S / 2
-    const col = orbState === 'listening' ? '#45a8c4' : orbState === 'thinking' ? '#e3b341' : '#c8f03c'
+    const col = orbState === 'listening' ? '#15805f' : orbState === 'thinking' ? '#c8700f' : '#2443d6'
     g.strokeStyle = col; g.lineWidth = 1.6; g.lineJoin = 'round'
     g.beginPath()
     for (let x = 3; x <= S - 3; x++) {
@@ -330,7 +330,7 @@ export function startOrb(canvas) {
       if (x === 3) g.moveTo(x, mid + y); else g.lineTo(x, mid + y)
     }
     g.stroke()
-    g.strokeStyle = 'rgba(160,172,178,.25)'; g.strokeRect(0.5, 0.5, S - 1, S - 1)
+    
     requestAnimationFrame(frame)
   }
   requestAnimationFrame(frame)

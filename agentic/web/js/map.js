@@ -1,4 +1,4 @@
-// Dot-matrix map of North America. Regions glow by carbon, work flows as particles.
+// Dot-matrix map of North America, printed light. Regions bloom by carbon, moved work travels in cobalt.
 
 import { state, on } from './state.js'
 import { fitCanvas, carbonRGB, reduced, clamp, lerp, easeInOut, fmt } from './util.js'
@@ -133,7 +133,7 @@ function setCamera(list) {
 
 // map area inside the stage, leaving room for the overlay controls
 function frame(w, h) {
-  const top = 78; const bottom = 40; const side = 18
+  const top = 30; const bottom = 40; const side = 24
   const uh = Math.max(60, h - top - bottom)
   const mw = Math.min(w - side * 2, uh * 1.8)
   return { mw, mh: mw / 1.8, cx: w / 2, cy: top + uh / 2 }
@@ -194,9 +194,9 @@ function draw(now) {
   // graticule every 5 degrees: the map's own coordinate frame
   const f = frame(w, h)
   g.lineWidth = 1
-  g.strokeStyle = 'rgba(160,172,178,.07)'
-  g.font = '500 9.5px "IBM Plex Mono", ui-monospace'
-  g.fillStyle = 'rgba(160,172,178,.38)'
+  g.strokeStyle = 'rgba(18,26,38,.055)'
+  g.font = '500 10px "Archivo", system-ui'
+  g.fillStyle = 'rgba(62,74,90,.55)'
   for (let lon = -125; lon <= -65; lon += 5) {
     const [x] = project((lon + 125) / 59, 0, w, h)
     if (x < 0 || x > w) continue
@@ -208,6 +208,36 @@ function draw(now) {
     if (y < 0 || y > h) continue
     g.beginPath(); g.moveTo(0, Math.round(y) + 0.5); g.lineTo(w, Math.round(y) + 0.5); g.stroke()
     g.fillText(`${lat}N`, w - 26, Math.round(y) - 3)
+  }
+
+  // carbon bloom: a soft field under each live region
+  if (live) {
+    g.save()
+    const R = clamp(f.mw * cam.z * 0.1, 56, 200)
+    for (const z of zones) {
+      const val = zv.get(z.id)
+      if (!val || val.g === null) continue
+      const [x, y] = project(z.u, z.v, w, h)
+      const [r, gg, b] = carbonRGB(val.g)
+      const grd = g.createRadialGradient(x, y, 0, x, y, R)
+      grd.addColorStop(0, `rgba(${r},${gg},${b},.26)`)
+      grd.addColorStop(0.5, `rgba(${r},${gg},${b},.09)`)
+      grd.addColorStop(1, `rgba(${r},${gg},${b},0)`)
+      g.fillStyle = grd
+      g.fillRect(x - R, y - R, R * 2, R * 2)
+    }
+    g.restore()
+    // one contour ring per region, like an isoline on a weather chart
+    g.setLineDash([2, 4]); g.lineWidth = 1
+    for (const z of zones) {
+      const val = zv.get(z.id)
+      if (!val || val.g === null) continue
+      const [x, y] = project(z.u, z.v, w, h)
+      const [r, gg, b] = carbonRGB(val.g)
+      g.strokeStyle = `rgba(${r},${gg},${b},.45)`
+      g.beginPath(); g.arc(x, y, R * 0.62, 0, Math.PI * 2); g.stroke()
+    }
+    g.setLineDash([])
   }
 
   // dot matrix: square cells, tinted near live regions
@@ -223,10 +253,10 @@ function draw(now) {
     if (val && val.g !== null) {
       const k = Math.exp(-(d.d * d.d) / (2 * 2.1 * 2.1))
       const [r, gg, b] = carbonRGB(val.g)
-      g.fillStyle = `rgba(${r},${gg},${b},${(0.1 + 0.55 * k) * wa})`
+      g.fillStyle = `rgba(${r},${gg},${b},${(0.16 + 0.7 * k) * wa})`
     } else {
       const dim = P && z && !planZones.has(z.id)
-      g.fillStyle = `rgba(160,172,178,${(dim ? 0.1 : 0.18) * wa})`
+      g.fillStyle = `rgba(18,26,38,${(dim ? 0.12 : 0.2) * wa})`
     }
     g.fillRect(Math.round(x - dotS / 2), Math.round(y - dotS / 2), dotS, dotS)
   }
@@ -243,9 +273,9 @@ function draw(now) {
       fl.geo = { ax, ay, bx, by, cx, cy }
       const rate = H >= 24 ? (fl.mwh / 24) / maxFlowRate : valAt(fl.by_hour_mwh, H) / maxFlowRate
       g.beginPath(); g.moveTo(ax, ay); g.quadraticCurveTo(cx, cy, bx, by)
-      g.strokeStyle = `rgba(200,240,60,${calm ? 0.2 + 0.6 * rate : 0.18 + 0.35 * rate})`
-      g.lineWidth = calm ? 1 + rate * 3 : 1
-      g.setLineDash([2, 3]); g.stroke(); g.setLineDash([])
+      g.strokeStyle = `rgba(36,67,214,${calm ? 0.35 + 0.6 * rate : 0.4 + 0.5 * rate})`
+      g.lineWidth = calm ? 1 + rate * 3 : 1.5 + rate * 1.5
+      g.setLineDash([3, 4]); g.stroke(); g.setLineDash([])
       // arrowhead at 70% along the curve
       const t = 0.7
       const px = (1 - t) * (1 - t) * ax + 2 * (1 - t) * t * cx + t * t * bx
@@ -253,15 +283,15 @@ function draw(now) {
       const tx = 2 * (1 - t) * (cx - ax) + 2 * t * (bx - cx); const ty = 2 * (1 - t) * (cy - ay) + 2 * t * (by - cy)
       const an = Math.atan2(ty, tx)
       g.save(); g.translate(px, py); g.rotate(an)
-      g.fillStyle = `rgba(200,240,60,${0.35 + 0.5 * rate})`
-      g.beginPath(); g.moveTo(5, 0); g.lineTo(-3, -3.5); g.lineTo(-3, 3.5); g.closePath(); g.fill()
+      g.fillStyle = `rgba(36,67,214,${0.5 + 0.5 * rate})`
+      g.beginPath(); g.moveTo(6, 0); g.lineTo(-3.5, -4); g.lineTo(-3.5, 4); g.closePath(); g.fill()
       g.restore()
       if (!calm && rate > 0.001) {
         fl.acc += dt * rate * 14
         while (fl.acc >= 1) { fl.acc -= 1; particles.push({ fl, t: 0, sp: 0.5 + Math.random() * 0.2 }) }
       }
     }
-    g.fillStyle = '#c8f03c'
+    g.fillStyle = '#2443d6'
     for (const p of particles) {
       p.t += dt * p.sp
       const q = p.fl.geo
@@ -270,7 +300,7 @@ function draw(now) {
       const x = (1 - t) * (1 - t) * q.ax + 2 * (1 - t) * t * q.cx + t * t * q.bx
       const y = (1 - t) * (1 - t) * q.ay + 2 * (1 - t) * t * q.cy + t * t * q.by
       g.globalAlpha = Math.sin(Math.PI * t)
-      g.fillRect(Math.round(x) - 1.5, Math.round(y) - 1.5, 3, 3)
+      g.fillRect(Math.round(x) - 2, Math.round(y) - 2, 4, 4)
     }
     g.globalAlpha = 1
     particles = particles.filter((p) => p.t < 1)
@@ -286,24 +316,24 @@ function draw(now) {
     const dim = (P && !inPlan) || (!P && fixedZone && z.id !== fixedZone)
     if (val && val.g !== null) {
       const [r, gg, b] = carbonRGB(val.g)
-      const s = 5 + 13 * Math.sqrt(Math.max(0, val.load) / maxLoad)
-      const gs = 5 + 13 * Math.sqrt(Math.max(0, val.ghost) / maxLoad)
+      const s = 6 + 15 * Math.sqrt(Math.max(0, val.load) / maxLoad)
+      const gs = 6 + 15 * Math.sqrt(Math.max(0, val.ghost) / maxLoad)
       g.fillStyle = `rgb(${r},${gg},${b})`
       g.fillRect(Math.round(x - s), Math.round(y - s), Math.round(s * 2), Math.round(s * 2))
-      g.strokeStyle = 'rgba(11,13,14,.9)'; g.lineWidth = 1
-      g.strokeRect(Math.round(x - s) + 0.5, Math.round(y - s) + 0.5, Math.round(s * 2) - 1, Math.round(s * 2) - 1)
-      g.setLineDash([3, 2]); g.strokeStyle = 'rgba(233,236,236,.6)'
+      g.strokeStyle = 'rgba(255,255,255,.95)'; g.lineWidth = 1.5
+      g.strokeRect(Math.round(x - s) + 0.75, Math.round(y - s) + 0.75, Math.round(s * 2) - 1.5, Math.round(s * 2) - 1.5)
+      g.lineWidth = 1; g.setLineDash([3, 2]); g.strokeStyle = 'rgba(18,26,38,.5)'
       g.strokeRect(Math.round(x - gs) - 0.5, Math.round(y - gs) - 0.5, Math.round(gs * 2) + 1, Math.round(gs * 2) + 1)
       g.setLineDash([])
-      if (z.id === homeZone) brackets(g, x, y, s + 6, 'rgba(233,236,236,.85)')
-      label(g, z, x, y, s, `${fmt(val.g, 0)} g/kWh`, `rgb(${r},${gg},${b})`, z.id === homeZone)
+      if (z.id === homeZone) brackets(g, x, y, s + 6, 'rgba(18,26,38,.85)')
+      label(g, z, x, y, s, `${fmt(val.g, 0)} g/kWh`, null, z.id === homeZone)
     } else {
       const isFixed = z.id === fixedZone
       const s = isFixed ? 6 : 3
-      g.fillStyle = isFixed ? `rgba(227,179,65,${blink})` : dim ? 'rgba(120,130,135,.45)' : 'rgba(170,180,185,.8)'
+      g.fillStyle = isFixed ? `rgba(200,112,15,${blink})` : dim ? 'rgba(18,26,38,.22)' : 'rgba(18,26,38,.55)'
       g.fillRect(Math.round(x - s), Math.round(y - s), s * 2, s * 2)
-      if (isFixed) brackets(g, x, y, s + 6, 'rgba(227,179,65,.9)')
-      label(g, z, x, y, s, isFixed ? 'fixed, never moves' : null, isFixed ? '#e3b341' : null, false, dim)
+      if (isFixed) brackets(g, x, y, s + 6, 'rgba(200,112,15,.95)')
+      label(g, z, x, y, s, isFixed ? 'fixed, never moves' : null, isFixed ? '#9a4f08' : null, false, dim)
     }
   }
 
@@ -316,15 +346,17 @@ function draw(now) {
       lines.push(`${fmt(val.g, 0)} gCO2eq/kWh ${H >= 24 ? 'day mean' : 'actual'}`)
       lines.push(`${fmt(val.load, 2)} MWh this hour`)
     } else lines.push(P ? 'Not in this job\'s portfolio' : 'No plan loaded')
-    g.font = '500 11px "IBM Plex Sans", system-ui'
+    g.font = '500 12px "Archivo", system-ui'
     const bw = Math.max(...lines.map((l) => g.measureText(l).width)) + 18
-    const bh = lines.length * 15 + 10
+    const bh = lines.length * 16 + 12
     let bx = x + 14; let by = y - bh - 8
     if (bx + bw > w - 6) bx = x - bw - 14
     if (by < 6) by = y + 14
-    g.fillStyle = 'rgba(17,20,22,.97)'; g.strokeStyle = 'rgba(52,58,62,1)'; g.lineWidth = 1
-    g.fillRect(bx, by, bw, bh); g.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh - 1)
-    lines.forEach((l, i) => { g.fillStyle = i === 0 ? '#e9ecec' : '#9aa3a8'; g.fillText(l, bx + 9, by + 18 + i * 15) })
+    g.save(); g.shadowColor = 'rgba(18,26,38,.16)'; g.shadowBlur = 18; g.shadowOffsetY = 6
+    g.fillStyle = '#ffffff'; roundRect(g, bx, by, bw, bh, 6); g.fill(); g.restore()
+    g.strokeStyle = 'rgba(18,26,38,.12)'; g.lineWidth = 1; roundRect(g, bx + 0.5, by + 0.5, bw - 1, bh - 1, 6); g.stroke()
+    g.textBaseline = 'alphabetic'
+    lines.forEach((l, i) => { g.fillStyle = i === 0 ? '#121a26' : '#4a5566'; g.font = i === 0 ? '600 12px "Archivo", system-ui' : '500 12px "Archivo", system-ui'; g.fillText(l, bx + 9, by + 19 + i * 16) })
   }
 
   requestAnimationFrame(draw)
@@ -335,14 +367,16 @@ function label(g, z, x, y, rad, val, col, home, dim) {
   g.textBaseline = 'middle'
   g.textAlign = left ? 'right' : 'left'
   const ox = left ? x - rad - 7 : x + rad + 7
-  g.font = '600 11px "IBM Plex Mono", ui-monospace'
-  g.fillStyle = dim ? 'rgba(130,140,145,.6)' : 'rgba(233,236,236,.95)'
+  g.lineJoin = 'round'; g.strokeStyle = 'rgba(247,249,251,.92)'; g.lineWidth = 3.5
+  g.font = '700 13px "Archivo", system-ui'
+  g.fillStyle = dim ? 'rgba(18,26,38,.38)' : '#121a26'
   const name = z.short || z.id
-  g.fillText(home ? `${name} · home` : name, ox, y - (val ? 6 : 0))
+  const nm = home ? `${name}, home` : name
+  g.strokeText(nm, ox, y - (val ? 7 : 0)); g.fillText(nm, ox, y - (val ? 7 : 0))
   if (val) {
-    g.font = '500 10.5px "IBM Plex Mono", ui-monospace'
-    g.fillStyle = col || '#9aa3a8'
-    g.fillText(val, ox, y + 7)
+    g.font = '500 12px "Archivo", system-ui'
+    g.fillStyle = col || '#3e4a5a'
+    g.strokeText(val, ox, y + 8); g.fillText(val, ox, y + 8)
   }
   g.textAlign = 'left'
 }

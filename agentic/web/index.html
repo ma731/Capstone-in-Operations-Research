@@ -8,38 +8,30 @@
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 
-<!-- ambient layer -->
-<div class="ambient" aria-hidden="true">
-  <div class="aurora a1"></div><div class="aurora a2"></div><div class="aurora a3"></div>
-  <div class="gridbg"></div>
-</div>
-<div class="grain" aria-hidden="true"></div>
-
 <!-- boot splash -->
 <div id="boot" class="boot" role="dialog" aria-label="Starting Gridshift">
-  <div class="boot-scan" aria-hidden="true"></div>
   <canvas id="bootDots" class="boot-dots" aria-hidden="true"></canvas>
   <div class="boot-inner">
     <div class="boot-brand">
       <img src="assets/mark.svg" alt="" class="boot-mark">
       <div>
-        <div class="boot-name">GRIDSHIFT</div>
+        <div class="boot-name">Gridshift</div>
         <div class="boot-tag" id="bootTag">Carbon-aware workload console</div>
       </div>
     </div>
-    <h1 class="boot-hero">Run computing where, and when, the grid is <em>cleanest</em>.</h1>
+    <h1 class="boot-hero">Run computing where, and when, the grid is cleanest.</h1>
     <div class="boot-lines" id="bootLines" aria-live="polite"></div>
     <div class="boot-actions">
       <button id="enterBtn" class="btn-primary btn-lg" disabled>
         <span>Enter console</span>
         <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M5 10h10M11 6l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <div class="boot-hint">Enter to start. Then P to present, Ctrl+K for commands, hold Space to talk.</div>
+      <div class="boot-hint"><kbd>Enter</kbd> to start. Then <kbd>P</kbd> to present, <kbd>Ctrl</kbd><kbd>K</kbd> for commands, hold <kbd>Space</kbd> to talk.</div>
     </div>
   </div>
   <div class="boot-foot" id="bootFoot">IE capstone in Operations Research</div>
@@ -58,7 +50,7 @@
         <g class="glyph-dots"></g>
       </svg>
       <div class="brand-text">
-        <div class="brand-name">GRIDSHIFT</div>
+        <div class="brand-name">Gridshift</div>
         <div class="brand-tag" id="brandTag">Carbon-aware workload console</div>
       </div>
     </div>
@@ -73,8 +65,8 @@
     </nav>
 
     <div class="top-right">
-      <span id="dataPill" class="pill pill-mute"><i></i><span>CHECKING</span></span>
-      <span id="voicePill" class="pill pill-mute" title="Voice engine"><i></i><span>VOICE</span></span>
+      <span id="dataPill" class="pill pill-mute"><i></i><span>Checking</span></span>
+      <span id="voicePill" class="pill pill-mute" title="Voice engine"><i></i><span>Voice</span></span>
       <button id="lensBtn" class="icon-btn" title="Supply chain lens (L)" aria-label="Toggle supply chain lens">
         <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12.5 12.5 17 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
@@ -103,35 +95,34 @@
 
     <!-- COMMAND -->
     <section class="view" id="view-command" data-view="command" aria-label="Command">
-      <div class="sowhat">
-        <h2><b>Command</b>Where and when should flexible computing run? The optimiser proposes; a person approves.</h2>
-      </div>
+      <header class="vhead">
+        <h2 class="vtitle">Command</h2>
+        <p class="vsub">Where and when should flexible computing run? The optimiser proposes; a person approves.</p>
+      </header>
 
       <div id="strip" class="strip" aria-label="Workflow"></div>
 
       <div class="cmd-grid">
-        <div class="cmd-left">
-          <div id="map" class="panel stage">
+        <div class="cmd-left sheet">
+          <div class="cmd-tools">
+            <div class="chips" id="jobChips" role="group" aria-label="Job"></div>
+            <div class="ctl-row">
+              <label class="ctl">
+                <span class="ctl-lab">Day</span>
+                <input type="date" id="dayInput" class="date-in">
+              </label>
+              <label class="ctl ctl-share">
+                <span class="ctl-lab">Logistics capacity</span>
+                <input type="range" id="shareInput" min="0" max="0.5" step="0.1" value="0.3">
+                <span class="ctl-val" id="shareVal">30%</span>
+              </label>
+            </div>
+          </div>
+          <div id="map" class="stage">
             <canvas id="mapCanvas" aria-label="Map of grid regions coloured by carbon intensity"></canvas>
-            <div class="stage-top">
-              <div class="stage-controls">
-                <div class="chips" id="jobChips" role="group" aria-label="Job"></div>
-                <div class="ctl-row">
-                  <label class="ctl">
-                    <span class="ctl-lab">Day</span>
-                    <input type="date" id="dayInput" class="date-in">
-                  </label>
-                  <label class="ctl ctl-share">
-                    <span class="ctl-lab">Logistics capacity</span>
-                    <input type="range" id="shareInput" min="0" max="0.5" step="0.1" value="0.3">
-                    <span class="ctl-val mono" id="shareVal">30%</span>
-                  </label>
-                </div>
-              </div>
-              <div class="hour-read">
-                <div class="hour-big mono" id="hourBig">--:--</div>
-                <div class="hour-sub" id="hourSub">UTC</div>
-              </div>
+            <div class="hour-read">
+              <div class="hour-big" id="hourBig">--:--</div>
+              <div class="hour-sub" id="hourSub">UTC</div>
             </div>
             <div class="stage-bottom">
               <div class="legend" id="carbonLegend"></div>
@@ -139,23 +130,24 @@
             </div>
             <div class="stage-msg" id="stageMsg" hidden></div>
           </div>
-          <div id="scrubber" class="panel scrubber"></div>
+          <div id="scrubber" class="scrubber"></div>
         </div>
 
         <aside class="cmd-right" id="cmdRight">
           <div id="kpis" class="panel kpis"></div>
           <div id="gate" class="panel gate" hidden></div>
-          <div id="audit" class="panel audit"></div>
           <div id="sweep" class="panel sweep"></div>
+          <div id="audit" class="panel audit"></div>
         </aside>
       </div>
     </section>
 
     <!-- KNOWLEDGE -->
     <section class="view" id="view-knowledge" data-view="knowledge" aria-label="Knowledge">
-      <div class="sowhat">
-        <h2><b>Knowledge</b>The rules, as a machine-readable ontology. The reasoner works out what is allowed.</h2>
-      </div>
+      <header class="vhead">
+        <h2 class="vtitle">Knowledge</h2>
+        <p class="vsub">The rules, as a machine-readable ontology. The reasoner works out what is allowed.</p>
+      </header>
       <div class="kn-grid">
         <div id="kgraph" class="panel kgraph"></div>
         <aside class="panel kside" id="kside"></aside>
@@ -164,9 +156,10 @@
 
     <!-- EVIDENCE -->
     <section class="view" id="view-evidence" data-view="evidence" aria-label="Evidence">
-      <div class="sowhat">
-        <h2><b>Evidence</b>Which layer of sophistication actually pays. Thesis results, out of sample, worst 5% of days.</h2>
-      </div>
+      <header class="vhead">
+        <h2 class="vtitle">Evidence</h2>
+        <p class="vsub">Which layer of sophistication actually pays. Thesis results, out of sample, worst 5% of days.</p>
+      </header>
       <div class="ev-wrap" id="evidenceWrap">
         <div id="rq-cards" class="rq-cards"></div>
         <div class="ev-row">
@@ -179,17 +172,19 @@
 
     <!-- MONITOR -->
     <section class="view" id="view-monitor" data-view="monitor" aria-label="Monitor">
-      <div class="sowhat">
-        <h2><b>Monitor</b>Is the forecast still good enough to trust the simple plan?</h2>
-      </div>
+      <header class="vhead">
+        <h2 class="vtitle">Monitor</h2>
+        <p class="vsub">Is the forecast still good enough to trust the simple plan?</p>
+      </header>
       <div id="drift" class="panel drift"></div>
     </section>
 
     <!-- INTERFACES -->
     <section class="view" id="view-interfaces" data-view="interfaces" aria-label="Interfaces">
-      <div class="sowhat">
-        <h2><b>Interfaces</b>How other agents plug in, and how every answer is checked.</h2>
-      </div>
+      <header class="vhead">
+        <h2 class="vtitle">Interfaces</h2>
+        <p class="vsub">How other agents plug in, and how every answer is checked.</p>
+      </header>
       <div class="if-grid">
         <div id="a2a" class="panel a2a"></div>
         <div class="if-col">
@@ -230,7 +225,7 @@
 <!-- spotlight + demo cursor -->
 <div id="spotlight" class="spotlight" aria-hidden="true"></div>
 <div id="fakeCursor" class="fake-cursor" aria-hidden="true">
-  <svg viewBox="0 0 24 24" width="26" height="26"><path d="M5 3l14 8-6 1.5L10 19z" fill="#f3f8f5" stroke="#070b0a" stroke-width="1.4" stroke-linejoin="round"/></svg>
+  <svg viewBox="0 0 24 24" width="26" height="26"><path d="M5 3l14 8-6 1.5L10 19z" fill="#ffffff" stroke="#121a26" stroke-width="1.4" stroke-linejoin="round"/></svg>
 </div>
 
 <!-- command palette -->

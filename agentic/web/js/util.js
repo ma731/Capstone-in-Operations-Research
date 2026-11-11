@@ -76,11 +76,10 @@ export function typeText(el, text, { cps = 90, signal } = {}) {
   })
 }
 
-// Carbon ramp from the spec: 0 emerald, 200 data, 450 amber, 700+ red.
-// clean to dirty: cold blue, sea green, amber, red. Lime stays reserved for savings and actions.
-const RAMP = [[0, [69, 168, 196]], [200, [111, 191, 155]], [450, [227, 179, 65]], [700, [224, 90, 71]]]
+// Carbon ramp, clean to dirty: green, olive, ochre, brick. Cobalt stays reserved for what the optimiser does.
+const RAMP = [[0, [21, 128, 95]], [200, [124, 160, 58]], [450, [222, 160, 38]], [700, [196, 64, 44]]]
 export function carbonRGB(g) {
-  if (g === null || g === undefined || Number.isNaN(+g)) return [110, 125, 120]
+  if (g === null || g === undefined || Number.isNaN(+g)) return [140, 150, 162]
   if (g <= RAMP[0][0]) return RAMP[0][1]
   for (let i = 1; i < RAMP.length; i++) {
     if (g <= RAMP[i][0]) {

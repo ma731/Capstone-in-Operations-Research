@@ -34,7 +34,7 @@ function renderControls() {
   chips.innerHTML = ''
   for (const j of meta?.jobs || []) {
     const b = h('button', { class: 'chip', 'data-job': j.job, title: j.flexible ? `Flexible: may move within ${j.portfolio || 'its portfolio'}` : 'Fixed: user-facing, never moves' },
-      `${esc(j.label)} <span class="tag">${j.flexible ? 'FLEX' : 'FIXED'}</span>`)
+      `${esc(j.label)} <span class="tag">${j.flexible ? 'flex' : 'fixed'}</span>`)
     b.addEventListener('click', () => setJob(j.job))
     chips.appendChild(b)
   }
@@ -256,7 +256,7 @@ export function renderKpis() {
   const P = plan?.plan
 
   if (!state.dataAvailable) {
-    k.innerHTML = `<div class="panel-h"><span class="panel-t"><b>Day result</b></span><span class="pill pill-amber"><i></i>DATA OFFLINE</span></div>
+    k.innerHTML = `<div class="panel-h"><span class="panel-t"><b>Day result</b></span><span class="pill pill-amber"><i></i>Data offline</span></div>
       <div class="kpi-top"><div><div class="kpi-big dash">--</div><div class="kpi-cap">Live plans need the licensed hourly grid data, which is not installed here.</div></div></div>
       ${day.raceHTML()}
       <div class="kpi-note">Nothing on this panel is estimated or filled in. Evidence, Knowledge and Interfaces still work.</div>`
@@ -264,7 +264,7 @@ export function renderKpis() {
     return
   }
   if (plan && !P) {
-    const st = plan.status === 'NOT_MOVABLE' ? 'NOT MOVABLE' : plan.status === 'UNKNOWN_JOB' ? 'UNKNOWN JOB' : (plan.status || '')
+    const st = plan.status === 'NOT_MOVABLE' ? 'Not movable' : plan.status === 'UNKNOWN_JOB' ? 'Unknown job' : (plan.status || '')
     k.innerHTML = `<div class="panel-h"><span class="panel-t"><b>${esc(plan.label || plan.job)}</b></span><span class="pill pill-amber"><i></i>${esc(st)}</span></div>
       <div class="explain">${esc(notMovableText(plan))}</div>
       <div class="kpi-note">No plan is drafted, so there is nothing to approve. Fixed jobs stay in their home region.</div>`
@@ -282,14 +282,14 @@ export function renderKpis() {
   const C = 2 * Math.PI * 27
   k.innerHTML = `
     <div class="panel-h"><span class="panel-t"><b>${esc(plan.label || plan.job)}</b>, ${esc(dayLabel(plan.day))}</span><span class="panel-t">logistics ${Math.round((plan.transfer_share ?? 0) * 100)}%</span></div>
-    <div class="badge-ill"><b>ILLUSTRATION</b><span>${esc(ILLUSTRATION)}</span></div>
     <div class="kpi-top">
-      <div>
+      <div class="kpi-main">
         <div class="kpi-big"><span id="kpiSave">0</span><small>%</small></div>
         <div class="kpi-cap">lower emissions than <b>shifting hours only</b>, from also moving work</div>
       </div>
-      <div class="kpi-side"><div class="v"><span id="kpiFlat">0</span>%</div><div class="l">vs running flat</div></div>
+      <div class="kpi-side"><div class="v"><span id="kpiFlat">0</span><small>%</small></div><div class="l">lower than running flat</div></div>
     </div>
+    <div class="badge-ill"><b>ILLUSTRATION</b><span>${esc(ILLUSTRATION)}</span></div>
     ${day.raceHTML()}
     <div class="kpi-mid">
       <div class="ring" title="Moved work out of the transfer budget">
@@ -367,7 +367,7 @@ export function renderAudit(fresh) {
   a.innerHTML = `<div class="panel-h"><span class="panel-t"><b>Audit log</b></span><span class="panel-t">in memory, newest first</span></div>
     ${rows.length ? `<div class="audit-list">${rows.map((r, i) => `
       <div class="audit-row" style="${fresh && i === 0 ? '' : 'animation:none'}">
-        <span class="d ${r.decision === 'approve' ? 'approve' : 'reject'}">${r.decision === 'approve' ? 'APPROVED' : 'REJECTED'}</span>
+        <span class="d ${r.decision === 'approve' ? 'approve' : 'reject'}">${r.decision === 'approve' ? 'Approved' : 'Rejected'}</span>
         <span class="m">${esc(r.job)}, ${esc(r.day)}, by ${esc(r.by)}</span>
         <span class="x">executed: ${r.executed === true ? 'true' : 'false'}</span>
       </div>`).join('')}</div>`
@@ -412,7 +412,7 @@ export function renderSweep(animate) {
   const curP = pts.find((p) => Math.abs(p.share - cur) < 1e-6)
   s.innerHTML = `${head}
     <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Saving percent by transfer share">
-      <defs><linearGradient id="sweepGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(168,255,53,.28)"/><stop offset="1" stop-color="rgba(168,255,53,0)"/></linearGradient></defs>
+      <defs><linearGradient id="sweepGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(36,67,214,.16)"/><stop offset="1" stop-color="rgba(36,67,214,0)"/></linearGradient></defs>
       <line class="axis" x1="${L}" y1="${y(0)}" x2="${W - R}" y2="${y(0)}"/>
       <line class="grid-l" x1="${L}" y1="${y(maxY / 1.15)}" x2="${W - R}" y2="${y(maxY / 1.15)}"/>
       <text class="tick" x="${L - 5}" y="${y(maxY / 1.15) + 3}" text-anchor="end">${fmt(maxY / 1.15)}%</text>
@@ -430,7 +430,7 @@ export function renderSweep(animate) {
       const len = c.getTotalLength()
       c.style.strokeDasharray = `${len}`; c.style.strokeDashoffset = `${len}`
       c.getBoundingClientRect()
-      c.style.transition = 'stroke-dashoffset 1.1s cubic-bezier(.23,1,.32,1)'
+      c.style.transition = 'stroke-dashoffset .9s cubic-bezier(.23,1,.32,1)'
       c.style.strokeDashoffset = '0'
     } catch { /* svg not laid out */ }
   }

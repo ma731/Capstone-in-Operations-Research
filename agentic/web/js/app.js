@@ -68,7 +68,7 @@ function bootDots() {
       for (let x = 18; x < w; x += 26) {
         const d = Math.hypot(x - w / 2, y - hh * 0.42) / Math.hypot(w, hh)
         const a = Math.max(0, Math.min(1, t * 1.4 - d * 3)) * (0.08 + 0.1 * Math.sin(x * 0.05 + y * 0.03 + t * 1.2) ** 2)
-        g.fillStyle = `rgba(160,172,178,${a})`
+        g.fillStyle = `rgba(18,26,38,${a * 1.1})`
         g.fillRect(x, y, 1.6, 1.6)
       }
     }
@@ -131,32 +131,32 @@ on('mute', (m) => {
 
 function setDataPill() {
   const p = $('#dataPill')
-  if (!state.serverUp) { p.className = 'pill pill-red'; p.innerHTML = '<i></i><span>SERVER DOWN</span>'; return }
-  if (state.dataAvailable) { p.className = 'pill pill-live'; p.innerHTML = '<i></i><span>LIVE DATA</span>'; p.title = 'Every number is computed live from the thesis code' }
-  else { p.className = 'pill pill-amber'; p.innerHTML = '<i></i><span>DATA OFFLINE</span>'; p.title = line('data_offline')?.caption || 'Licensed grid data not installed' }
+  if (!state.serverUp) { p.className = 'pill pill-red'; p.innerHTML = '<i></i><span>Server down</span>'; return }
+  if (state.dataAvailable) { p.className = 'pill pill-live'; p.innerHTML = '<i></i><span>Live data</span>'; p.title = 'Every number is computed live from the thesis code' }
+  else { p.className = 'pill pill-amber'; p.innerHTML = '<i></i><span>Data offline</span>'; p.title = line('data_offline')?.caption || 'Licensed grid data not installed' }
 }
 
 function setVoicePill(engine) {
   const p = $('#voicePill')
   const name = (state.health?.tts?.voice || '').replace(/^en-US-|Neural$/g, '') || 'neural'
-  if (engine === 'neural') { p.className = 'pill pill-live'; p.innerHTML = `<i></i><span>VOICE ${esc(name.toUpperCase())}</span>` }
-  else if (engine === 'browser') { p.className = 'pill pill-mute'; p.innerHTML = '<i></i><span>BROWSER VOICE</span>' }
-  else { p.className = 'pill pill-amber'; p.innerHTML = '<i></i><span>CAPTIONS ONLY</span>' }
+  if (engine === 'neural') { p.className = 'pill pill-live'; p.innerHTML = `<i></i><span>Voice: ${esc(name)}</span>` }
+  else if (engine === 'browser') { p.className = 'pill pill-mute'; p.innerHTML = '<i></i><span>Browser voice</span>' }
+  else { p.className = 'pill pill-amber'; p.innerHTML = '<i></i><span>Captions only</span>' }
 }
 
 function glyph() {
   const g = $('.glyph-dots')
   const pos = []
   for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) pos.push([9 + c * 7, 9 + r * 7])
-  g.innerHTML = pos.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.1" fill="#2a3034"/>`).join('')
+  g.innerHTML = pos.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.1" fill="#d5dbe2"/>`).join('')
   const dots = [...g.children]
   let i = 0
   const seq = [6, 3, 4, 1, 2, 5, 8]
   const tick = () => {
-    dots.forEach((d) => d.setAttribute('fill', '#2a3034'))
+    dots.forEach((d) => d.setAttribute('fill', '#d5dbe2'))
     for (let k = 0; k < 3; k++) {
       const d = dots[seq[(i + k) % seq.length]]
-      d.setAttribute('fill', k === 2 ? '#c8f03c' : k === 1 ? '#7d868b' : '#4a5358')
+      d.setAttribute('fill', k === 2 ? '#2443d6' : k === 1 ? '#7c8899' : '#aeb7c2')
     }
     i++
   }
