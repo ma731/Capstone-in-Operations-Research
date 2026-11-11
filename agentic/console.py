@@ -20,7 +20,7 @@ from datetime import date, datetime, timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
 
-from . import knowledge, router, voice
+from . import faq, knowledge, router, voice
 from .findings import FINDINGS
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -76,7 +76,7 @@ LADDER = [
 ]
 SUGGESTIONS = ["Plan the model training for June 15th", "Where can the nightly ETL move?",
                "Can the checkout API move?", "Does robust optimisation pay?", "Is the forecast drifting?",
-               "Present"]
+               "Why is the null result still substantive?", "What can I ask?", "Present"]
 DECISION_LINES = {
     "approve": "Approved and logged. Nothing was executed: this is a draft for the operations lead.",
     "reject": "Rejected and logged. The work stays where it was planned.",
@@ -90,7 +90,11 @@ _MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", 
 _ACRONYMS = [(r"\bA2A\b", "A to A"), (r"\bMCP\b", "M C P"), (r"\bETL\b", "E T L"), (r"\bCVaR\s?95\b", "C var 95"),
              (r"\bCVaR\b", "C var"), (r"\bRQ(\d)\b", r"R Q \1"), (r"S&OP", "S and O P"), (r"\bAPI\b", "A P I"),
              (r"\bDRO\b", "D R O"), (r"\bUTC\b", "U T C"), (r"\bCO2e?\b", "carbon"), (r"\bOWL RL\b", "owl R L"),
-             (r"\bJSON-RPC\b", "JSON R P C"), (r"~", "about ")]
+             (r"\bJSON-RPC\b", "JSON R P C"), (r"~", "about "), (r"\bSOCP\b", "S O C P"), (r"\bPUE\b", "P U E"),
+             (r"\bSLA\b", "S L A"), (r"\bTOST\b", "tost"), (r"\bAR\(1\)", "A R 1"), (r"\bHiGHS\b", "highs"),
+             (r"\bOWL\b", "owl"), (r"\bMLOps\b", "M L ops"), (r"\bSHA-256\b", "S H A 256"), (r"\bCSV\b", "C S V"),
+             (r"python -m agentic\.serve", "python dash m agentic dot serve"),
+             (r"agentic\.warm_cache", "agentic dot warm cache"), (r"localhost:(\d+)", r"localhost \1")]
 
 
 def ordinal(n: int) -> str:
@@ -111,7 +115,11 @@ def _no_dashes(text: str) -> str:
 
 
 def _round1(m: re.Match) -> str:
-    v = round(float(m.group(1)), 1)
+    raw = float(m.group(1))
+    if abs(raw) < 1:
+        # small numbers keep two significant figures: 0.36% must not be read as the 0.4% margin
+        return f"{raw:.2g}"
+    v = round(raw, 1)
     return str(int(v)) if v == int(v) else str(v)
 
 
@@ -675,11 +683,76 @@ def decide(body: dict) -> dict:
 # ------------------------------------------------------------------ ask
 
 _DRIFT = re.compile(r"\b(drift|drifting|monitor|monitoring|forecast error|alarm|alerts?)\b")
-_ABOUT = re.compile(r"\b(who are you|what are you|what is this|what can you do|help)\b")
+# a request for the live drift numbers, not a question about how monitoring works
+_LIVE_DRIFT = re.compile(r"\b(is|are|any|did|has|have|show|check|run|give)\b.*\b(drift\w*|alerts?|alarms?)\b|"
+                         r"\bdrift report\b|\bforecast drifting\b")
+_ABOUT = re.compile(r"\b(who are you|what are you|what is this|what is gridshift)\b")
+_FOUND = re.compile(r"\b(find|found|findings?|results?|conclusions?|conclude|outcomes?)\b")
+_OPERATIONAL = re.compile(r"\b(plan|propose|schedule|move|moved|shift|run it|where|allowed|movable|can|may)\b")
 
 
 def _error_reply(err: ApiError) -> tuple[None, dict, str]:
     return None, speech(err.caption), err.message
+
+
+def _faq_values() -> dict:
+    """Live counts some answers quote, read from the code rather than typed in."""
+    from . import a2a, evals, monitoring
+
+    vals = {"thr": _fmt(monitoring.THRESHOLD), "base": monitoring.BASELINE_MONTHS, "nskills": len(a2a.SKILLS),
+            "ncases": len(evals.CASES)}
+    try:
+        c = graph()["counts"]
+        vals.update(asserted=c["asserted_triples"], reasoned=c["reasoned_triples"])
+    except Exception:
+        vals.update(asserted="the asserted", reasoned="many more")
+    tools = _mcp_lists()["tools"]
+    vals.update(ntools=len(tools) or 3, ro=sum(t["read_only"] for t in tools) if tools else 2)
+    return vals
+
+
+def faq_answer(key: str) -> dict:
+    """{speech, answer, view, topic} for one FAQ topic."""
+    t = faq.BY_KEY[key]
+    cap = t["say"].format(**_faq_values()) if "{" in t["say"] else t["say"]
+    answer = cap + (" " + t["more"] if t.get("more") else "") + f" Source: {t['src']}."
+    return {"speech": speech(cap), "answer": answer, "view": t.get("view"), "topic": key, "title": t["title"]}
+
+
+def help_answer() -> dict:
+    lines_ = [f"{g}: {'; '.join(qs)}" for g, qs in faq.HELP_GROUPS]
+    return {"speech": speech(faq.HELP_SAY), "answer": "Try: " + " | ".join(lines_),
+            "groups": [{"group": g, "questions": qs} for g, qs in faq.HELP_GROUPS],
+            "topics": [{"key": t["key"], "title": t["title"]} for t in faq.TOPICS]}
+
+
+def classify(text: str) -> tuple[str, dict]:
+    """(intent, args) for one request. Plans and live checks first, then the offline answers."""
+    low = text.lower()
+    job = router._job(text)
+    if job and _OPERATIONAL.search(low):
+        r = router.route(text)
+        if r["intent"] in ("propose_migration", "migration_options"):
+            return r["intent"], dict(r["args"])
+    if _LIVE_DRIFT.search(low) and not re.search(r"\bhow\b", low):
+        return "drift", {"portfolio": "all"}
+    if faq.is_help(text):
+        return "help", {}
+    if re.fullmatch(r"\s*(thanks|thank you|cheers|great|perfect|nice)[\s\w,.!]{0,20}", low):
+        return "thanks", {}
+    if re.fullmatch(r"\s*(hi|hello|hey|good (morning|afternoon|evening))[\s\w,.!]{0,20}", low):
+        return "about", {}
+    key = faq.match(text)
+    if key:
+        return "faq", {"topic": key}
+    if _FOUND.search(low):
+        return "findings", {}
+    if _DRIFT.search(low):
+        return "drift", {"portfolio": "all"}
+    if _ABOUT.search(low):
+        return "about", {}
+    r = router.route(text)
+    return r["intent"], dict(r["args"])
 
 
 def ask(text: str, context: dict | None = None) -> dict:
@@ -690,17 +763,10 @@ def ask(text: str, context: dict | None = None) -> dict:
     if len(text) > 500:
         raise BadRequestError("text is too long")
     ctx = dict(context or {}) if isinstance(context, dict) else {}
-    low = text.lower()
-    if _DRIFT.search(low):
-        intent, args = "drift", {"portfolio": "all"}
-    elif _ABOUT.search(low):
-        intent, args = "about", {}
-    else:
-        r = router.route(text)
-        intent, args = r["intent"], dict(r["args"])
-        if intent == "clarify" and router.has_explicit_day(text) and (router._job(text) or ctx.get("job")):
-            intent = "propose_migration"
-            args = {"job": router._job(text) or ctx["job"], "day": router._day(text).isoformat()}
+    intent, args = classify(text)
+    if intent == "clarify" and router.has_explicit_day(text) and (router._job(text) or ctx.get("job")):
+        intent = "propose_migration"
+        args = {"job": router._job(text) or ctx["job"], "day": router._day(text).isoformat()}
 
     view, data, answer = None, None, ""
     try:
@@ -755,11 +821,21 @@ def ask(text: str, context: dict | None = None) -> dict:
             sp = speech("I'm Gridshift. I plan where and when flexible computing runs, so it uses the cleanest "
                         "power, and a person approves every move.")
             answer = (sp["caption"] + " Try: " + "; ".join(SUGGESTIONS[:5]) + ".")
+        elif intent == "thanks":
+            sp = speech("You're welcome. Ask me anything else, or say what can I ask.")
+            answer = sp["caption"]
+        elif intent == "help":
+            data = help_answer()
+            sp, answer = data.pop("speech"), data.pop("answer")
+        elif intent == "faq":
+            data = faq_answer(args["topic"])
+            sp, answer, view = data.pop("speech"), data.pop("answer"), data.pop("view")
         else:
             data = {"known_jobs": [j["job"] for j in _jobs()], "suggestions": SUGGESTIONS}
-            sp = speech("Which job, and what do you need? Try: plan the model training for June 15th.")
-            answer = ("I can say where a job may move, propose a cleaner schedule for a day, summarise what the "
-                      "thesis found, or check the forecast for drift.")
+            sp = speech("I'm not sure what you mean. Ask about the method, the data, the results or the demo, "
+                        "or say: what can I ask?")
+            answer = ("I can answer questions about the thesis and this console, say where a job may move, propose "
+                      "a cleaner schedule for a day, or check the forecast for drift. Say what can I ask for the list.")
     except ApiError as err:
         data, sp, answer = _error_reply(err)
     return {"text": text, "intent": intent, "args": args, "view": view, "answer": answer, "speech": sp,

@@ -302,7 +302,7 @@ def test_present_script_has_sixteen_steps_with_live_numbers():
 # ------------------------------------------------------------------ copy rule
 
 def test_no_em_or_en_dashes_in_new_files():
-    files = [ROOT / "agentic" / f for f in ("serve.py", "console.py", "voice.py", "warm_cache.py", "scheduler.py",
+    files = [ROOT / "agentic" / f for f in ("serve.py", "console.py", "voice.py", "faq.py", "warm_cache.py", "scheduler.py",
                                              "workflow.py", "router.py", "knowledge.py")]
     files.append(Path(__file__))
     web = ROOT / "agentic" / "web"

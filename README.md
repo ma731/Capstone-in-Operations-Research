@@ -344,6 +344,11 @@ voice you can talk to and a hands-free three-minute tour (Present). The server i
 .venv\Scripts\python -m agentic.warm_cache --check
 ```
 
+- Ask "what can I ask?" for the list. Besides plans and drift checks, the voice answers about 45 kinds of
+  question on the method, data, baselines, results, limitations, next steps and the agent layer. They are
+  matched offline, with no language model ([`agentic/faq.py`](agentic/faq.py)), and every number in them
+  comes from `docs/results_snapshots/`; `tests/test_voice_faq.py` re-reads those CSVs.
+- `?mute` on the URL (`http://localhost:8765/?mute`) starts with the voice off and captions on.
 - `GRIDSHIFT_NO_DATA=1` acts as if the licensed data were missing (no one-day numbers anywhere).
 - `GRIDSHIFT_TTS=off` turns the neural voice off; the browser voice takes over.
 - `GRIDSHIFT_TTS_PYTHON=<path>` points at a Python that has `edge-tts`; `GRIDSHIFT_VOICE` picks the voice.

@@ -748,6 +748,11 @@ details.raw > .json { border-top: 1px solid var(--rule); }
 .dock-reply .rx { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border-radius: var(--r-sm); border: 0; background: transparent; color: var(--ink-3); font-size: 1.1rem; line-height: 1; }
 .dock-reply .rx:hover { color: var(--ink); background: var(--sheet-2); }
 .dock-reply .rt { font-size: .76rem; font-weight: 650; color: var(--cobalt); margin-bottom: 3px; }
+.help-list { display: grid; gap: 6px; }
+.help-g { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; }
+.help-g b { font-size: .76rem; font-weight: 650; color: var(--ink); min-width: 9.5em; }
+.help-q { border: 1px solid var(--rule); background: var(--sheet); color: var(--ink-2); border-radius: 999px; padding: 2px 9px; font-size: .78rem; cursor: pointer; }
+@media (hover: hover) and (pointer: fine) { .help-q:hover { color: var(--cobalt); border-color: var(--cobalt-line); } }
 body.presenting .dock-chips { display: none; }
 
 /* ---------- lens ---------- */

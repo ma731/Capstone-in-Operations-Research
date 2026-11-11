@@ -117,6 +117,8 @@ function start() {
   if (state.dataAvailable) cmd.loadPlan({ autoPlay: true })
   else cmd.showOffline()
   views.prefetch()
+  // ?mute starts with the voice off (captions still show), for rehearsals and tests
+  if (new URLSearchParams(location.search).has('mute')) voice.setMuted(true)
   const greet = line('greeting')
   if (greet) setTimeout(() => { if (!state.presenting) voice.speak(greet) }, 500)
 }
@@ -263,9 +265,13 @@ function micUnavailable(say) {
   if (say && !micWarned && line('mic_unavailable')) { micWarned = true; voice.speak(line('mic_unavailable')) }
 }
 
+// questions about the project go to the server, even when they mention "demo" or "stop"
+const QUESTION = /^\s*(how|what|why|who|which|when|where|is|are|does|do|did|explain|tell me|describe|isn'?t|can you explain)\b/i
+const isQuestion = (t) => QUESTION.test(t) && !/^\s*(can you |could you |please )?(present|start the tour|give me the tour)\b/i.test(t)
+
 const UI = [
-  [/\b(present|presentation|tour|walk me through|demo)\b/i, () => startTour()],
-  [/\b(stop|cancel|quiet|enough)\b/i, () => { present.stopPresent(); day.pause(); voice.stop(); say('stopped') }],
+  [/\b(present|presentation|tour|walk me through|demo)\b/i, () => startTour(), (t) => !isQuestion(t)],
+  [/\b(stop|cancel|quiet|enough)\b/i, () => { present.stopPresent(); day.pause(); voice.stop(); say('stopped') }, (t) => !isQuestion(t)],
   [/\bunmute\b/i, () => toggleMute(false)],
   [/\bmute\b/i, () => toggleMute(true)],
   [/\b(show|open|go to)\b.*\b(map|command|home)\b/i, () => setView('command', { speakIt: true })],
@@ -279,17 +285,19 @@ const UI = [
   [/\breject\b/i, () => cmd.decide('reject'), () => state.gate === 'pending'],
   [/\b(supply chain|lens)\b/i, () => { setLens(!state.lensOpen); if (state.lensOpen) say('lens') }],
 ]
+UI.forEach((row) => { if (!row[2]) row[2] = () => true })
 
 function say(k, skipIfMuted) { const s = uiLine(k); if (s && !(skipIfMuted && state.muted)) voice.speak(s) }
 
 function uiCommand(text) {
   for (const [re, fn, guard] of UI) {
-    if (re.test(text) && (!guard || guard())) { fn(); return true }
+    if (re.test(text) && guard(text)) { fn(); return true }
   }
   return false
 }
 
-const PLANNY = /\b(plan|schedule|training|train|etl|pipeline|batch|move|what about|and on|june|july|august|may|today|tomorrow)\b/i
+const KNOWLEDGE = /^\s*(how|why|explain|tell me|describe|isn'?t)\b|\bwhat (is|are|was|were|would)\b/i
+const PLANNY =/\b(plan|schedule|training|train|etl|pipeline|batch|move|what about|and on|june|july|august|may|today|tomorrow)\b/i
 
 export async function ask(text, { present: inPresent = false, signal } = {}) {
   const tr = $('#dockTranscript')
@@ -299,7 +307,8 @@ export async function ask(text, { present: inPresent = false, signal } = {}) {
   if (!state.serverUp) { const e = line('error'); voice.speak(e || { caption: 'The server is not reachable. Start it with python -m agentic.serve.' }); return null }
 
   voice.setOrb('thinking')
-  const optimistic = state.dataAvailable && PLANNY.test(text)
+  // knowledge questions should not flash the command view
+  const optimistic = state.dataAvailable && PLANNY.test(text) && !KNOWLEDGE.test(text)
   if (optimistic) { setView('command'); cmd.stripBusy() }
   const r = await api('/api/ask', { method: 'POST', body: { text, context: state.context } })
   voice.setOrb('idle')
@@ -322,10 +331,23 @@ export async function ask(text, { present: inPresent = false, signal } = {}) {
   } else {
     if (optimistic) cmd.restoreStrip()
     views.applyAskData(d.intent, d.data, d.args)
-    if (!inPresent && d.answer && d.answer !== d.speech?.caption) showReply(d.answer, d.intent?.replace(/_/g, ' '))
+    if (!inPresent && d.intent === 'help' && d.data?.groups) showHelp(d.data.groups)
+    else if (!inPresent && d.answer && d.answer !== d.speech?.caption) showReply(d.answer, cap(d.data?.title || d.intent?.replace(/_/g, ' ')))
     if (!inPresent) voice.speak(d.speech)
   }
   return d
+}
+
+const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s)
+
+// the "what can I ask" list: each question is clickable
+function showHelp(groups) {
+  const r = $('#dockReply')
+  r.innerHTML = `<button class="rx" aria-label="Close">&times;</button><div class="rt">What you can ask</div>
+    <div class="help-list">${groups.map((g) => `<div class="help-g"><b>${esc(g.group)}</b> ${g.questions.map((q) => `<button type="button" class="help-q">${esc(q)}</button>`).join('')}</div>`).join('')}</div>`
+  r.hidden = false
+  r.querySelector('.rx').addEventListener('click', () => { r.hidden = true })
+  r.querySelectorAll('.help-q').forEach((b) => b.addEventListener('click', () => ask(b.textContent)))
 }
 
 function showReply(text, title) {
