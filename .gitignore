@@ -128,3 +128,9 @@ thesis/_recompile.log
 # Office/editor lock + scratch files (LibreOffice drops these next to the poster PDFs)
 .~lock.*
 poster/*.tmp
+
+# Drift reports are built from licensed data
+agentic/reports/
+
+# Gridshift console runtime cache: voice mp3s and API JSON derived from licensed data
+agentic/.cache/

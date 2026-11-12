@@ -1,0 +1,37 @@
+grid_family,knob,knob_family,label,base_file,variant_file,cells,gap_shift_max_pp,gap_shift_mean_pp,cvar_magnitude_shift_mean_pct
+taskC_regimes,ar1,estimator,covariance estimator: AR(1) residualization,taskC_regimes_2026-06-09.csv,taskC_regimes_2026-06-09_ar1.csv,9,0.2012860456714598,0.07360927872617837,0.03786283606379811
+taskC_regimes,lw,estimator,covariance estimator: Ledoit-Wolf shrinkage,taskC_regimes_2026-06-09.csv,taskC_regimes_2026-06-09_lw.csv,9,5.5512344591000014e-05,1.185710502663371e-05,2.1690329666751263e-07
+taskC_regimes,seasonal,estimator,covariance estimator: seasonal residualization,taskC_regimes_2026-06-09.csv,taskC_regimes_2026-06-09_seasonal.csv,9,0.08352932324432241,0.03706546719861491,0.026522166897400352
+taskc_regimes,ar1,estimator,covariance estimator: AR(1) residualization,taskc_regimes_2026-06-10.csv,taskc_regimes_2026-06-10_ar1.csv,9,0.2012860456714598,0.06126289685284395,0.04439772946361633
+taskc_regimes,cvar0.9,metric,risk tail CVaR_0.90,taskc_regimes_2026-06-10.csv,taskc_regimes_2026-06-15_cvar0.9.csv,9,0.0060854080047321,0.004879858280210589,1.4058282861724436
+taskc_regimes,cvar0.99,metric,risk tail CVaR_0.99,taskc_regimes_2026-06-10.csv,taskc_regimes_2026-06-15_cvar0.99.csv,9,0.1090986882347118,0.03151478955089464,2.8037411339958083
+taskc_regimes,lw,estimator,covariance estimator: Ledoit-Wolf shrinkage,taskc_regimes_2026-06-10.csv,taskc_regimes_2026-06-10_lw.csv,9,0.0018818099464151042,0.0002225829166186444,2.012356358505622e-06
+taskc_regimes,ramp5,feasibility,ramp limit tightened (5%/step),taskc_regimes_2026-06-10.csv,taskc_regimes_2026-06-13_ramp5.csv,9,0.0585888858196046,0.03051859444882973,0.05715929048539792
+taskc_regimes,seasonal,estimator,covariance estimator: seasonal residualization,taskc_regimes_2026-06-10.csv,taskc_regimes_2026-06-10_seasonal.csv,9,0.050480698818463204,0.024235551958773537,0.03241269362030886
+taskc_regimes,ty2022,test-year,walk-forward test year 2022,taskc_regimes_2026-06-10.csv,taskc_regimes_2026-06-27_ty2022.csv,9,0.0336118929899441,0.017031111444962575,3.6148907139495257
+taskc_regimes,ty2023,test-year,walk-forward test year 2023,taskc_regimes_2026-06-10.csv,taskc_regimes_2026-06-27_ty2023.csv,9,0.11226559957756901,0.03191748938845355,4.301998205626019
+taskc_regimes,ty2024,test-year,walk-forward test year 2024,taskc_regimes_2026-06-10.csv,taskc_regimes_2026-06-10_ty2024.csv,9,0.0350769889531781,0.020444562923321426,4.622413267569735
+taskc_regimes,util0.5,feasibility,utilization 0.50 (slack capacity),taskc_regimes_2026-06-10.csv,taskc_regimes_2026-06-13_util0.5.csv,9,0.1020040215121772,0.03608638590881384,37.55033934668993
+taskc_regimes,util0.95,feasibility,utilization 0.95 (tight capacity),taskc_regimes_2026-06-10.csv,taskc_regimes_2026-06-13_util0.95.csv,9,0.058130027497672,0.024050614466831446,18.839214942423112
+us_hetero_regimes,ar1,estimator,covariance estimator: AR(1) residualization,us_hetero_regimes_2026-06-10.csv,us_hetero_regimes_2026-06-10_ar1.csv,9,0.23254094840180942,0.13572815850805509,0.1656621779781686
+us_hetero_regimes,cvar0.9,metric,risk tail CVaR_0.90,us_hetero_regimes_2026-06-10.csv,us_hetero_regimes_2026-06-15_cvar0.9.csv,9,0.02252826970322158,0.012288838679207667,3.021770468806827
+us_hetero_regimes,cvar0.99,metric,risk tail CVaR_0.99,us_hetero_regimes_2026-06-10.csv,us_hetero_regimes_2026-06-15_cvar0.99.csv,9,0.14951885561237638,0.09080547815303476,6.86162128218622
+us_hetero_regimes,lw,estimator,covariance estimator: Ledoit-Wolf shrinkage,us_hetero_regimes_2026-06-10.csv,us_hetero_regimes_2026-06-10_lw.csv,9,0.007086197783333199,0.0013244067364588266,0.001322572532079993
+us_hetero_regimes,ramp5,feasibility,ramp limit tightened (5%/step),us_hetero_regimes_2026-06-10.csv,us_hetero_regimes_2026-06-13_ramp5.csv,9,0.2312116416281466,0.1120773347253663,0.6284010098410301
+us_hetero_regimes,seasonal,estimator,covariance estimator: seasonal residualization,us_hetero_regimes_2026-06-10.csv,us_hetero_regimes_2026-06-10_seasonal.csv,9,0.2913817303669682,0.16221539806074953,0.11106345450073513
+us_hetero_regimes,ty2022,test-year,walk-forward test year 2022,us_hetero_regimes_2026-06-10.csv,us_hetero_regimes_2026-06-27_ty2022.csv,9,0.3268576253938209,0.1495684336490453,10.415198086613039
+us_hetero_regimes,ty2023,test-year,walk-forward test year 2023,us_hetero_regimes_2026-06-10.csv,us_hetero_regimes_2026-06-27_ty2023.csv,9,0.4216339789346799,0.19489717817083216,23.796524632832178
+us_hetero_regimes,ty2024,test-year,walk-forward test year 2024,us_hetero_regimes_2026-06-10.csv,us_hetero_regimes_2026-06-10_ty2024.csv,9,0.2424606737424363,0.16598458901213536,3.558382108644837
+us_hetero_regimes,util0.5,feasibility,utilization 0.50 (slack capacity),us_hetero_regimes_2026-06-10.csv,us_hetero_regimes_2026-06-13_util0.5.csv,9,0.28221160833908077,0.10959905440620363,39.73778923762477
+us_hetero_regimes,util0.95,feasibility,utilization 0.95 (tight capacity),us_hetero_regimes_2026-06-10.csv,us_hetero_regimes_2026-06-13_util0.95.csv,9,0.2437377735892848,0.1422289771266031,21.470255376086968
+us_west_regimes,ar1,estimator,covariance estimator: AR(1) residualization,us_west_regimes_2026-06-10.csv,us_west_regimes_2026-06-10_ar1.csv,9,0.060015292942366696,0.015702995902133563,0.029120958190126705
+us_west_regimes,cvar0.9,metric,risk tail CVaR_0.90,us_west_regimes_2026-06-10.csv,us_west_regimes_2026-06-15_cvar0.9.csv,9,0.049820802991108,0.02791012322276086,2.537552116872555
+us_west_regimes,cvar0.99,metric,risk tail CVaR_0.99,us_west_regimes_2026-06-10.csv,us_west_regimes_2026-06-15_cvar0.99.csv,9,0.1044496586166774,0.03351073331834544,4.9482042737286625
+us_west_regimes,lw,estimator,covariance estimator: Ledoit-Wolf shrinkage,us_west_regimes_2026-06-10.csv,us_west_regimes_2026-06-10_lw.csv,9,2.42517604862047e-05,7.782626927142603e-06,5.71091685447277e-06
+us_west_regimes,ramp5,feasibility,ramp limit tightened (5%/step),us_west_regimes_2026-06-10.csv,us_west_regimes_2026-06-13_ramp5.csv,9,0.030101078408470296,0.01096123702678068,0.24985732308485945
+us_west_regimes,seasonal,estimator,covariance estimator: seasonal residualization,us_west_regimes_2026-06-10.csv,us_west_regimes_2026-06-10_seasonal.csv,9,0.052646869845666196,0.013760425055128998,0.009970139689832548
+us_west_regimes,ty2022,test-year,walk-forward test year 2022,us_west_regimes_2026-06-10.csv,us_west_regimes_2026-06-27_ty2022.csv,9,0.0432363762299108,0.015231032252259587,9.090643976438308
+us_west_regimes,ty2023,test-year,walk-forward test year 2023,us_west_regimes_2026-06-10.csv,us_west_regimes_2026-06-27_ty2023.csv,9,0.037458085197159305,0.012246301459983892,2.8374536746118277
+us_west_regimes,ty2024,test-year,walk-forward test year 2024,us_west_regimes_2026-06-10.csv,us_west_regimes_2026-06-10_ty2024.csv,9,0.027916055697006902,0.008822892776431931,5.679338744056246
+us_west_regimes,util0.5,feasibility,utilization 0.50 (slack capacity),us_west_regimes_2026-06-10.csv,us_west_regimes_2026-06-13_util0.5.csv,9,0.040318604596795996,0.014995467205430641,38.92185488835502
+us_west_regimes,util0.95,feasibility,utilization 0.95 (tight capacity),us_west_regimes_2026-06-10.csv,us_west_regimes_2026-06-13_util0.95.csv,9,0.03388503416981779,0.013849922136153072,20.33585448293846

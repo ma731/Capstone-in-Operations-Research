@@ -1,0 +1,109 @@
+@prefix :     <https://github.com/ma731/Capstone-in-Operations-Research/ontology#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# A small ontology for carbon-aware scheduling. It says what kinds of things exist
+# (regions, portfolios, data centres, jobs), how they relate, and which relationships
+# follow from others. The reasoner (OWL RL) adds the inferred facts; the scheduler then
+# only moves work the ontology says may move, to regions it says are reachable.
+
+<https://github.com/ma731/Capstone-in-Operations-Research/ontology>
+    a owl:Ontology ;
+    rdfs:label "Carbon-aware scheduling ontology" ;
+    rdfs:comment "Post-capstone extension. The thesis results do not depend on it." .
+
+# ---------------------------------------------------------------- classes (the taxonomy)
+:Region      a owl:Class ; rdfs:label "Grid region" ;
+             rdfs:comment "A balancing area with its own hourly carbon intensity (an Electricity Maps zone)." .
+:Portfolio   a owl:Class ; rdfs:label "Portfolio" ;
+             rdfs:comment "A set of regions one operator can move work between: the capstone's 'grid'." .
+:DataCenter  a owl:Class ; rdfs:label "Data centre" .
+:Job         a owl:Class ; rdfs:label "Compute job" .
+
+:FlexibleJob    a owl:Class ; rdfs:subClassOf :Job ; rdfs:label "Flexible job" ;
+                rdfs:comment "Can wait hours or run in another region." .
+:FixedJob       a owl:Class ; rdfs:subClassOf :Job ; rdfs:label "Fixed job" ;
+                rdfs:comment "Must run where and when it is asked: user-facing traffic." ;
+                owl:disjointWith :FlexibleJob .
+:TrainingJob    a owl:Class ; rdfs:subClassOf :FlexibleJob ; rdfs:label "Model training" .
+:BatchJob       a owl:Class ; rdfs:subClassOf :FlexibleJob ; rdfs:label "Batch processing" .
+:InteractiveJob a owl:Class ; rdfs:subClassOf :FixedJob ; rdfs:label "Interactive service" .
+
+# ---------------------------------------------------------------- properties (the ontology's relations)
+:inPortfolio a owl:ObjectProperty ; rdfs:domain :Region ; rdfs:range :Portfolio ;
+             rdfs:label "region in portfolio" .
+:hasRegion   a owl:ObjectProperty ; owl:inverseOf :inPortfolio ; rdfs:label "portfolio has region" .
+:memberOf    a owl:ObjectProperty ; rdfs:domain :DataCenter ; rdfs:range :Portfolio ;
+             rdfs:label "data centre belongs to portfolio" .
+:locatedIn   a owl:ObjectProperty , owl:FunctionalProperty ;
+             rdfs:domain :DataCenter ; rdfs:range :Region ; rdfs:label "data centre located in" .
+:runsAt      a owl:ObjectProperty ; rdfs:domain :Job ; rdfs:range :DataCenter ; rdfs:label "job runs at" .
+:zoneId      a owl:DatatypeProperty ; rdfs:domain :Region ; rdfs:range xsd:string ;
+             rdfs:label "Electricity Maps zone id" .
+
+# Inferred relations (OWL 2 property chains): never written by hand, always derived.
+:homeRegion      a owl:ObjectProperty ; owl:propertyChainAxiom ( :runsAt :locatedIn ) ;
+                 rdfs:label "job's home region" .
+:reachableRegion a owl:ObjectProperty ; owl:propertyChainAxiom ( :runsAt :memberOf :hasRegion ) ;
+                 rdfs:label "region the job's work could move to" .
+
+# ---------------------------------------------------------------- semantic layer: metrics defined once
+# Every number the workflow reports points to one of these, so a person and an agent read
+# "saving" the same way. This is what closes the semantic gap between business language
+# ("how much cleaner?") and what the optimiser computes.
+:Metric       a owl:Class ; rdfs:label "Metric" .
+:RiskMetric   a owl:Class ; rdfs:subClassOf :Metric ; rdfs:label "Risk metric" .
+:definition   a owl:DatatypeProperty ; rdfs:domain :Metric ; rdfs:range xsd:string .
+:unit         a owl:DatatypeProperty ; rdfs:domain :Metric ; rdfs:range xsd:string .
+:usedFor      a owl:DatatypeProperty ; rdfs:domain :Metric ; rdfs:range xsd:string .
+
+:emissions_tonnes a :Metric ; rdfs:label "Emissions" ; :unit "tonnes CO2e" ;
+    :definition "Executed load (MWh) times lifecycle carbon intensity (gCO2eq/kWh), summed over hours and regions, divided by 1,000." ;
+    :usedFor "The one-day proposals in agentic/." .
+:saving_pct a :Metric ; rdfs:label "Saving" ; :unit "%" ;
+    :definition "Emissions with time shifting only minus emissions with migration, divided by emissions with time shifting only, scored on realised carbon." ;
+    :usedFor "The one-day proposals in agentic/." .
+:cvar95 a :RiskMetric ; rdfs:label "CVaR 95%" ; :unit "tonnes CO2e" ;
+    :definition "Average emissions over the worst 5% of days, out of sample." ;
+    :usedFor "Every thesis result (RQ1-RQ3)." .
+:moved_mwh a :Metric ; rdfs:label "Moved work" ; :unit "MWh" ;
+    :definition "Total work relocated between regions, never above the transfer budget." ;
+    :usedFor "The one-day proposals in agentic/." .
+
+# ---------------------------------------------------------------- the three grids of the thesis
+:us_west   a :Portfolio ; rdfs:label "Western US" .
+:taskc     a :Portfolio ; rdfs:label "Eastern US-Canada" .
+:us_hetero a :Portfolio ; rdfs:label "Diversified" .
+
+:CISO a :Region ; :zoneId "US-CAL-CISO" ;  :inPortfolio :us_west .
+:BANC a :Region ; :zoneId "US-CAL-BANC" ;  :inPortfolio :us_west .
+:LDWP a :Region ; :zoneId "US-CAL-LDWP" ;  :inPortfolio :us_west .
+:NEVP a :Region ; :zoneId "US-NW-NEVP" ;   :inPortfolio :us_west .
+:AZPS a :Region ; :zoneId "US-SW-AZPS" ;   :inPortfolio :us_west .
+
+:ON    a :Region ; :zoneId "CA-ON" ;        :inPortfolio :taskc .
+:NYISO a :Region ; :zoneId "US-NY-NYIS" ;   :inPortfolio :taskc .
+:MISO  a :Region ; :zoneId "US-MIDW-MISO" ; :inPortfolio :taskc .
+:PJM   a :Region ; :zoneId "US-MIDA-PJM" ;  :inPortfolio :taskc .
+
+# Diversified: solar (CAISO), wind (ERCOT), hydro (Bonneville). CAISO appears again as
+# its own individual so the two portfolios stay separate.
+:CISO_h  a :Region ; :zoneId "US-CAL-CISO" ; :inPortfolio :us_hetero .
+:ERCOT_h a :Region ; :zoneId "US-TEX-ERCO" ; :inPortfolio :us_hetero .
+:BPAT_h  a :Region ; :zoneId "US-NW-BPAT" ;  :inPortfolio :us_hetero .
+
+# ---------------------------------------------------------------- data centres
+# Deliberately NOT typed as :DataCenter: the reasoner infers that from rdfs:domain.
+:dc_sacramento :locatedIn :CISO  ; :memberOf :us_west .
+:dc_las_vegas  :locatedIn :NEVP  ; :memberOf :us_west .
+:dc_toronto    :locatedIn :ON    ; :memberOf :taskc .
+:dc_virginia   :locatedIn :PJM   ; :memberOf :taskc .
+:dc_dallas     :locatedIn :ERCOT_h ; :memberOf :us_hetero .
+
+# ---------------------------------------------------------------- jobs
+:llm_training   a :TrainingJob    ; rdfs:label "Nightly model training" ;   :runsAt :dc_sacramento .
+:nightly_etl    a :BatchJob       ; rdfs:label "Nightly data pipeline" ;    :runsAt :dc_virginia .
+:risk_batch     a :BatchJob       ; rdfs:label "Weekly risk simulation" ;  :runsAt :dc_dallas .
+:checkout_api   a :InteractiveJob ; rdfs:label "Checkout API" ;            :runsAt :dc_sacramento .

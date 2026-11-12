@@ -6,7 +6,7 @@ layer of modelling sophistication actually buys.
 **Research Capstone in Operations Research · IE School of Science & Technology · 2026**
 **Student:** Marco Ortiz Togashi · **Supervisor:** Prof. Bissan Ghaddar
 
-`223 tests collected (210 in public CI)` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to an archived snapshot`
+`460 tests collected (447 in public CI)` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to a SHA-256-frozen snapshot`
 
 ---
 
@@ -155,6 +155,28 @@ A full slide-by-slide provenance map for the defense deck (every number → arch
 figure script) is in [`docs/deck_provenance.md`](docs/deck_provenance.md); a short list of
 known slide-label corrections is in [`docs/deck_errata.md`](docs/deck_errata.md).
 
+## What moves the results: constraint sensitivity, ranked
+
+`python -m scripts.analyze_constraint_sensitivity` reads only the committed snapshots
+(no licensed data needed) and ranks every swept knob on two axes: how much it shifts the
+**conclusion** (the RQ2 spatial-null gap, in pp of CVaR) vs how much it rescales the
+**problem** (the absolute CVaR level). The short version
+(full table + interpretation: [`docs/CONSTRAINT_SENSITIVITY.md`](docs/CONSTRAINT_SENSITIVITY.md)):
+
+- **Capacity/utilization is the constraint that matters** — but for *magnitude*, not
+  conclusions: slack (0.50) vs tight (0.95) utilization shifts the absolute CVaR level by
+  ~39% / ~20% while moving the null gap by at most 0.28pp. The `part5` sweep pins the
+  mechanism exactly: the theoretical bound scales as $\Delta \propto 1/\kappa$ on all grids.
+- **The largest conclusion-mover is the walk-forward test-year choice, and it is still
+  small**: worst knob, worst cell = 0.42pp (mean 0.08pp). That is the null's robustness in
+  one number.
+- **The covariance estimator barely matters — Ledoit–Wolf least of all (0.007pp)** —
+  which is itself evidence for mean dominance: if the null were an estimation artifact,
+  better-conditioned estimation would move it. It does not.
+- RQ3 supplement: the DRO gap stays null across CVaR tail levels 0.90/0.95/0.99 on
+  us_west and taskc, while the Diversified grid's *adverse* result is adverse at every
+  tail — the disclosed negative finding is tail-robust too.
+
 ## Future work (in progress)
 
 The capstone is graded and frozen at the thesis pin; the repo now moves toward
@@ -198,9 +220,18 @@ The fastest check needs no API token and no license:
 
 ```bash
 pytest tests/ -q
-# expected without licensed raw data / optional phase-2 extras: 223 collected,
-# with the corresponding integration tests skipped (currently 205 passed, 18 skipped).
+# without the licensed raw data: 460 collected; the Electricity Maps
+# ingestion/integration tests skip.
+# public CI runs 447 (it ignores tests/test_electricitymaps.py entirely).
+
+python -m scripts.make_provenance_manifest --check
+# expected: OK -- every archived snapshot matches its committed SHA-256 digest.
 ```
+
+Full fresh-machine instructions, expected outputs, and the regeneration command for
+every snapshot: [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md). A plain-language walkthrough
+of every validation layer, why each method was chosen over its alternatives, and the
+literature behind them: [`docs/VALIDATION_EXPLAINED.md`](docs/VALIDATION_EXPLAINED.md).
 
 The experiments themselves:
 
@@ -232,6 +263,165 @@ versions used for the reported runs. Reproduction is judged against the archived
 rounded values and declared tolerances; last digits can vary across platforms or
 solver builds.
 
+## Experiment catalog (script -> what it answers -> snapshot)
+
+Everything under `scripts/` is runnable as `python -m scripts.<name>`. The load-bearing ones:
+
+**Core experiments (need the licensed raw data)**
+
+| Script | Question it answers | Snapshot it writes |
+|---|---|---|
+| `run_shuffled_marginals_experiment` (+ `_taskA`, `_taskc`, `_es_pt_fr`, `_components` variants) | RQ2: does joint covariance beat shuffled (independent-regions) covariance? Flags select estimator (`--estimator lw/ar1/seasonal`), ablations, test year | `<grid>_regimes_<date>[ _variant].csv` |
+| `run_copula_experiment --region-set <grid>` | RQ2 ceiling: Gaussian / Clayton / comonotone copula schedulers vs independence | `<grid>_copula_<date>.csv` |
+| `run_part3_transfer_value` | RQ1 headline: CVaR reduction of inter-region transfer over the Phi=0 baseline | `part3_transfer_value_<date>.csv` |
+| `run_transfer_value_curve` | RQ1 shape: value vs transfer budget Phi, saturation knee | `transfer_value_curve_<date>.csv` |
+| `run_part3_emergency` / `run_part3_real_emergency` | RQ3: robust-vs-deterministic gain vs emergency severity M (synthetic / data-grounded) | `part3_emergency_<date>.csv`, `part3_real_emergency_<date>.csv` |
+| `run_carbon_ceiling` | RQ3 context: realized worst-tail severities across all 17 zones (median ~1.43x, max BPAT 5.12x) | `carbon_ceiling_<date>.csv` |
+| `run_part4_online` / `run_part4_forecasts` | Online rolling-horizon controller; forecast-error interaction | `part4_online_<date>.csv`, `part4_forecasts_<date>.csv` |
+| `run_part5_condition` / `run_part5_kappa` / `run_part5_tight` | Theory: the mean-dominance ratio, its 1/kappa capacity scaling, tightness of the bound | `part5_*.csv` |
+
+**Statistical battery**
+
+| Script | Purpose | Snapshot |
+|---|---|---|
+| `run_block_bootstrap_check` | serial-dependence-aware CIs; reports the block/iid SE ratio | `block_bootstrap_<date>.csv` |
+| `bh_correction` | Benjamini-Hochberg FDR correction across all gap cells | `bh_correction.csv` |
+| `run_dro_tail_sensitivity` | is the RQ3 verdict an artifact of the 0.95 tail? (0.90/0.95/0.99/worst-day) | `dro_tail_sensitivity_<date>.csv` |
+| `run_risk_measure_swap` / `run_entropic_risk_check` | does the objective choice (mean-std DRO, entropic) change conclusions? | `risk_measure_swap_<date>.csv`, `entropic_risk_check_<date>.csv` |
+| `run_crossover_sensitivity` / `run_parts34_stability` | multi-seed stability of the crossover and Parts 3-4 | `parts34_stability_<date>.csv` |
+
+**Journal extensions (July 2026; logic unit-tested, empirical runs need the raw data)**
+
+| Script | Purpose | Snapshot |
+|---|---|---|
+| `run_transfer_penalty_sweep` | cost realism: transfer value under per-unit migration cost lam; break-even lam* | `transfer_penalty_sweep_<date>.csv` |
+| `run_external_baselines` | literature benchmarks: carbon-agnostic, greedy clean-hour packing, threshold suspend/resume vs the LP arms | `external_baselines_<date>.csv` |
+
+**Meta and integrity (run WITHOUT the raw data)**
+
+| Script | Purpose | Output |
+|---|---|---|
+| `make_provenance_manifest [--check]` | freeze / verify SHA-256 digests of every archived snapshot | `docs/results_snapshots/MANIFEST.sha256` |
+| `analyze_constraint_sensitivity` | rank every swept knob by conclusion-impact vs magnitude-impact, from snapshots alone | `constraint_sensitivity_<date>.csv` + [`docs/CONSTRAINT_SENSITIVITY.md`](docs/CONSTRAINT_SENSITIVITY.md) |
+| `data_audit` | completeness / gap report on the raw data you downloaded | console report |
+
+Calibration helpers (`calibrate_*`, `screen_zones`), figure builders (`plot_*`, `build_deck`), and `prototype_*` / `toy_validation*` (kept for history) round out the folder.
+
+## After the capstone: the scheduler as a tool for agents
+
+A post-capstone extension in [`agentic/`](agentic/). It changes no thesis result; it shows
+how the scheduler would sit inside a company's AI systems.
+
+**Why a workflow, not an agent.** The decision is an optimisation with guarantees: budgets,
+capacities, and a solver that proves its answer is optimal. Letting a language model choose
+the steps would add cost and risk and buy nothing. So it is a fixed, five-step workflow, all
+code, and the one real judgement (actually moving the work) stays with a person:
+
+1. **Ontology check:** may this job move, and where to?
+2. **Forecast:** a 14-day seasonal forecast per region, so the plan never sees the day it schedules.
+3. **Plan:** the thesis optimiser, time shifting only vs also moving work between regions.
+4. **Explain:** what moves where, and what it would have saved on the carbon that actually happened.
+5. **Approval:** always `PENDING_APPROVAL`; nothing is executed.
+
+**The ontology** ([`agentic/ontology.ttl`](agentic/ontology.ttl), RDFS + OWL) defines regions,
+portfolios (the thesis's three grids), data centres and jobs. An OWL RL reasoner adds the
+facts that follow from it instead of writing them by hand:
+
+- *subclass:* a `TrainingJob` is a `FlexibleJob`, so it may move; an `InteractiveJob` is a
+  `FixedJob`, disjoint with `FlexibleJob`, so it never does;
+- *domain:* a data centre is never typed by hand; being `locatedIn` a region makes it one;
+- *property chain:* `runsAt → memberOf → hasRegion` gives the regions a job's work could move to.
+
+The scheduler never decides *what* is allowed to move. The ontology does; the optimiser only
+decides how much, when and where among the allowed regions.
+
+**MCP server** ([`agentic/mcp_server.py`](agentic/mcp_server.py)): any agent (Claude, a
+Copilot) can list jobs, ask where one may move, and request a proposal. Two tools are
+read-only; `propose_migration` returns a draft. The ontology and the thesis findings are
+resources, so an agent reads the rules and the evidence (for example, that robust
+optimisation rarely pays) before proposing anything.
+
+**A2A** ([`agentic/a2a.py`](agentic/a2a.py)): MCP lets an agent use the *tools*; A2A lets
+another company's agent hand over a whole *task* in plain language. An Agent Card describes
+three skills; `message/send` answers through a **router** ([`agentic/router.py`](agentic/router.py))
+that sends each request to one tool, and asks back (`input-required`) when it cannot tell.
+
+**Semantic layer**: every number the workflow reports (emissions, saving, moved work, CVaR)
+is defined once in the ontology, with its unit and what it is used for, so a person and an
+agent read "saving" the same way. That is the gap between business language and what the
+optimiser computes, closed in one place.
+
+**Evals** ([`agentic/evals.py`](agentic/evals.py)): nine plain-language requests with the
+expected tool and outcome. Routing 100%, end to end 100%; a fixed job is never proposed
+for migration, an unclear request is asked back.
+
+**Monitoring and a weekly pipeline** ([`agentic/monitoring.py`](agentic/monitoring.py),
+[`agentic-weekly.yml`](.github/workflows/agentic-weekly.yml)): the forecast re-fits every
+day by construction (the mean of the last 14 days). What can still go wrong is drift, so a
+monitor compares each month's forecast error with the first three months and raises an
+alert at 1.5x. The alert names the thesis decision to revisit: RQ3 found the robust layer
+only pays when forecast surprises are large, so sustained drift is the signal to re-check
+it. Over 2025 no region crossed the line; the closest was NYISO in August at 1.48x. Every
+Monday a GitHub Actions job re-runs the extension tests, the labelled eval and, where the
+licensed data is available, the drift report, and keeps the output as a build artifact.
+
+| Concept | Where | Why this choice |
+|---|---|---|
+| Linear workflow | `workflow.py` | An optimisation with guarantees does not need a model picking steps |
+| Routing | `router.py` | Few request types: transparent rules, testable; an LLM classifier could slot in |
+| Human in the loop | every proposal | Moving work changes where data is processed: a person signs off |
+| Ontology, RDFS, OWL, inference | `ontology.ttl`, `knowledge.py` | The rules about what may move live in one place, not in code branches |
+| Knowledge graph | the reasoned ontology | Jobs, data centres, regions, portfolios as connected facts |
+| Semantic layer | `:Metric` in the ontology | Metrics defined once, for people and agents |
+| MCP | `mcp_server.py` | Any agent can use the scheduler; read-only plus a draft-only tool |
+| A2A | `a2a.py` | Other agents can delegate a task without knowing the internals |
+| Evals | `evals.py` | Labelled cases checked on every change |
+| MLOps: drift monitoring, scheduled runs | `monitoring.py`, weekly workflow | Error drift is the trigger to revisit the robust layer (RQ3) |
+| *Not used:* autonomous or role-based multi-agent | | Nothing to negotiate or explore: one optimiser decides |
+| *Not used:* vector database, RAG | | No documents to search; the knowledge is structured, so a graph fits |
+
+```bash
+pip install -e .[agentic]
+python -m agentic.mcp_server            # stdio MCP server
+python -m agentic.evals                 # the labelled eval
+python -m agentic.monitoring            # monthly drift report (needs the licensed data)
+python -m pytest tests/test_agentic.py  # 18 tests; skipped without the extras
+```
+
+Example on 15 June 2025: moving up to 30% of the work between the Western regions would have
+cut that day's emissions by 14.4% compared with time shifting alone, and 37% across the
+Eastern regions. One day, one budget, average rather than worst days: these are an
+illustration, not comparable to the thesis's 4.0-9.9% out-of-sample CVaR.
+
+### Gridshift console (local)
+
+A local web console over the same code: a map that plays the day, the five-step workflow,
+the approval gate, the ontology graph, the drift monitor and the agent interfaces, with a
+voice you can talk to and a hands-free three-minute tour (Present). The server is
+[`agentic/serve.py`](agentic/serve.py) (standard library only) and the app is
+[`agentic/web/index.html`](agentic/web/index.html).
+
+```bash
+.venv\Scripts\python -m agentic.serve          # opens http://localhost:8765
+.venv\Scripts\python -m agentic.warm_cache     # run it the night before; needs internet once
+.venv\Scripts\python -m agentic.warm_cache --check
+```
+
+- Ask "what can I ask?" for the list. Besides plans and drift checks, the voice answers about 45 kinds of
+  question on the method, data, baselines, results, limitations, next steps and the agent layer. They are
+  matched offline, with no language model ([`agentic/faq.py`](agentic/faq.py)), and every number in them
+  comes from `docs/results_snapshots/`; `tests/test_voice_faq.py` re-reads those CSVs.
+- `?mute` on the URL (`http://localhost:8765/?mute`) starts with the voice off and captions on.
+- `GRIDSHIFT_NO_DATA=1` acts as if the licensed data were missing (no one-day numbers anywhere).
+- `GRIDSHIFT_TTS=off` turns the neural voice off; the browser voice takes over.
+- `GRIDSHIFT_TTS_PYTHON=<path>` points at a Python that has `edge-tts`; `GRIDSHIFT_VOICE` picks the voice.
+
+The neural voice uses `edge-tts`, which is not a project dependency: it lives in the system
+Python and is called as a subprocess. Without it, lines already cached still play and the
+rest falls back to the browser voice. The console reads the licensed Electricity Maps data
+locally and never ships it: answers and audio are cached in `agentic/.cache/`, which is
+gitignored.
+
 ## Project structure
 
 ```
@@ -242,13 +432,16 @@ solver builds.
 │   │                    #   transfer_dro (Part 3), online_transfer (Part 4), covariance
 │   └── analysis/        # stratified_correlations, tail_dependence, metrics, plots
 ├── scripts/             # experiment runners + plotting
-├── tests/               # 223 pytest tests collected; 210 collected in CI
+├── tests/               # 460 pytest tests collected; 447 in public CI
 ├── thesis/              # capstone_thesis.{tex,pdf} (the graded report)
 ├── full_thesis/         # extended write-up (full_thesis.pdf, Parts 3-5 in body)
 ├── poster/              # A0 poster (build_v24.js -> .pptx; PDF exported from it)
 ├── deck/                # capstone_defense.pptx (defense deck; built by scripts/build_deck.py)
 ├── docs/
-│   ├── results_snapshots/       # archived summary CSVs (license-safe; every number traces here)
+│   ├── results_snapshots/       # archived summary CSVs (license-safe; every number traces here;
+│   │                            #   frozen by MANIFEST.sha256, CI-enforced)
+│   ├── VALIDATION_EXPLAINED.md  # every validation layer: what, why-not-alternatives, citations
+│   ├── CONSTRAINT_SENSITIVITY.md# which knobs move conclusions vs magnitude, ranked
 │   ├── snippets/                # paste-ready table/figure LaTeX snippets
 │   └── stratified_results.txt   # stratified-correlation results dump
 ├── data/raw/            # carbon CSVs (Electricity Maps, gitignored); temperature CSVs (Open-Meteo ERA5, committed, CC-BY)
@@ -291,6 +484,73 @@ comparison arm only, available via the `gurobi` extra (`pip install -e ".[gurobi
 **gitignored, never committed** (only derived aggregate statistics are archived). The
 Open-Meteo ERA5 temperature CSVs under `data/raw/temperature/` are CC-BY and *are*
 committed. Do not redistribute the Electricity Maps data.
+
+## Getting the data
+
+**Carbon intensity (required for experiments; licensed, never committed).** Hourly
+carbon-intensity CSVs from [Electricity Maps](https://portal.electricitymaps.com/datasets)
+under their free academic/non-commercial data program (their license does not permit
+redistribution, which is why `data/raw/` is gitignored and every public number lives in a
+derived snapshot instead). Download the hourly datasets for the 17 zones x 5 years
+(2021-2025) used in the thesis and place them at:
+
+```
+data/raw/electricitymaps/snapshots_<download-date>_<ZONE>-<YEAR>-hourly.csv
+# e.g. data/raw/electricitymaps/snapshots_2026-02-10_US-CAL-CISO-2024-hourly.csv
+```
+
+The loader globs `snapshots_*_<ZONE>-<YEAR>-hourly.csv`, so the download-date token is
+free. Expected schema: the standard 11-column Electricity Maps hourly export
+(`Datetime (UTC)`, zone identifiers, direct and life-cycle carbon intensity, CFE%, ...);
+the ingestion module normalizes the headers. The 17 zones:
+
+`CA-AB, CA-ON, US-CAL-BANC, US-CAL-CISO, US-CAL-IID, US-CAL-LDWP, US-CAL-TIDC,
+US-MIDA-PJM, US-MIDW-AECI, US-MIDW-MISO, US-NW-BPAT, US-NW-NEVP, US-NY-NYIS,
+US-SW-AZPS, US-SW-PNM, US-SW-SRP, US-TEX-ERCO`
+
+After downloading, `python -m scripts.data_audit` reports completeness and gaps.
+
+**Temperature (committed).** Open-Meteo ERA5 hourly temperature (CC-BY) ships with the
+repo; `python -m scripts.fetch_temperature` re-fetches it if needed.
+
+## Frequently hit issues
+
+- **Tests pass but 5 skip / `test_electricitymaps` is ignored** -- expected without the
+  licensed raw data; the full 213 run needs it (see above).
+- **Windows** -- the docs use `.venv\Scripts\python`; on Unix use `.venv/bin/python`.
+  Long OneDrive paths can break pip installs; keep the repo near the drive root if so.
+- **Solvers** -- everything runs on cvxpy's bundled free solvers; no Gurobi/MOSEK license
+  is needed anywhere.
+- **`MANIFEST.sha256` check fails** -- an archived snapshot was edited. Snapshots are
+  append-only by policy: restore the original and write regenerated results to a NEW
+  dated file.
+
+## Integrity policy (why you can trust the numbers)
+
+Results here follow four standing rules: (1) headline hypotheses were **pre-committed**
+before decisive results existed (the locked `taskC` runner); (2) snapshots are
+**append-only** and SHA-256-frozen in CI, so the evidentiary record cannot silently
+change; (3) **adverse results ship** -- the Diversified grid's negative online result and
+the BPAT 5.12x outlier are in the archive and the write-ups, not the drawer; (4) every
+number in any document must trace to a snapshot cell (see
+[`docs/VALIDATION_EXPLAINED.md`](docs/VALIDATION_EXPLAINED.md) for the full methodology
+and its literature).
+
+## Citing this work
+
+Journal manuscript in preparation (Applied Energy, targeted 2026). Until then:
+
+```bibtex
+@mastersthesis{ortiztogashi2026price,
+  title  = {The Price of Sophistication: When Do Transfer, Dependence, and Robustness
+            Pay in Carbon-Aware Data-Center Scheduling?},
+  author = {Ortiz Togashi, Marco},
+  school = {IE School of Science and Technology},
+  year   = {2026},
+  note   = {Supervised by Bissan Ghaddar. Code and archived results:
+            \url{https://github.com/ma731/Capstone-in-Operations-Research}}
+}
+```
 
 ## Glossary (plain English)
 
@@ -363,8 +623,16 @@ Short version of the heavy jargon. The thesis carries a fuller glossary in an ap
   adversarial review) made the findings *more conservative, not larger*: the value
   concentrates in the deterministic transfer lever, with the dependence and robust
   layers priced as conditional rather than free.
-- **Code:** 202 tests collected (189 in public CI), CI on push/PR; every reported number traces
-  to an archived, license-safe snapshot in `docs/results_snapshots/`.
+- **Code:** 213 tests collected (200 in public CI), CI on push/PR; every reported number
+  traces to an archived, license-safe snapshot in `docs/results_snapshots/`, frozen by a
+  CI-enforced SHA-256 manifest.
+- **Post-defense hardening (July 2026, honestly dated):** snapshot SHA-256 manifest +
+  integrity test, seed-determinism tests, coverage floor in CI (79% on `src/`, floor 75%),
+  `REPRODUCIBILITY.md`, the validation explainer, the constraint-sensitivity analysis, and
+  two journal-submission experiment scripts (`run_transfer_penalty_sweep`,
+  `run_external_baselines`; policy logic unit-tested, empirical runs require the licensed
+  data). The scientific record (models, experiments, snapshots) predates the 2026-07-07
+  defense; these additions certify and protect it without altering it.
 
 ### What validation proves
 

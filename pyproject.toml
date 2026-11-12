@@ -42,6 +42,13 @@ phase2 = [
     "pyvinecopulib>=0.6",
     "statsmodels>=0.14",
 ]
+# Post-capstone extension (agentic/): ontology reasoning and an MCP server.
+# Not needed for any thesis result; its tests skip without these.
+agentic = [
+    "rdflib>=7.0",
+    "owlrl>=6.0",
+    "mcp>=1.20",
+]
 # Optional commercial solver: used only as a comparison arm, never required to
 # reproduce any reported number (the free solvers above suffice).
 gurobi = [
@@ -59,6 +66,7 @@ include = ["src*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
+markers = ["slow: solver-backed tests that take longer"]
 
 [tool.ruff]
 line-length = 100

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Test Suite, Explained - 202 tests</title>
+<style>
+  :root{--navy:#0E2A52;--gold:#E69F00;--goldd:#B57D00;--green:#2f7d4f;--red:#B3402F;
+        --ink:#16202E;--muted:#5B6675;--line:#dde3ec;--tint:#f4f7fb;--code:#0b3a2e;--codebg:#eef6f1;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:#eef1f6;color:var(--ink);font:16.5px/1.62 "Segoe UI",system-ui,sans-serif;}
+  .page{max-width:900px;margin:0 auto;background:#fff;padding:0 0 44px;box-shadow:0 0 50px rgba(14,42,82,.10);}
+  h1,h2,h3{font-family:Georgia,serif;color:var(--navy);line-height:1.2;}
+  b,strong{color:var(--navy);}
+  code{font-family:"Cascadia Code",Consolas,monospace;font-size:.9em;background:var(--codebg);
+       color:var(--code);padding:1px 6px;border-radius:5px;}
+  .title{margin:0;background:var(--navy);color:#fff;padding:32px 44px 4px;border-left:9px solid var(--gold);font-size:34px;}
+  .tag{background:var(--navy);color:#CDD6E4;margin:0;padding:0 44px 28px;border-left:9px solid var(--gold);font-size:17.5px;}
+  section{padding:24px 44px;border-bottom:1px solid var(--line);}
+  section>h2{font-size:24px;margin:.1em 0 .6em;}
+  .why{background:var(--tint);}
+  .why .punch{font-size:19px;background:#fff;border:1px solid var(--line);border-left:5px solid var(--gold);
+              border-radius:8px;padding:14px 18px;margin-top:12px;}
+  .ci{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin-top:14px;}
+  .ci b{color:var(--goldd);}
+
+  .grp{border:1px solid var(--line);border-left:8px solid var(--navy);border-radius:10px;
+       padding:16px 20px;margin:14px 0;}
+  .grp.star{border-left-color:var(--gold);background:#fffdf7;}
+  .ghead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;}
+  .gcount{font-family:Georgia,serif;font-weight:700;color:var(--gold);font-size:30px;line-height:1;}
+  .gname{font-family:Georgia,serif;font-weight:700;color:var(--navy);font-size:20px;}
+  .gfiles{font-size:12.5px;color:var(--muted);font-family:"Cascadia Code",Consolas,monospace;}
+  .grp p{margin:.45em 0;}
+  .lab{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;
+       color:#fff;background:var(--muted);padding:1px 7px;border-radius:4px;margin-right:6px;vertical-align:1px;}
+  .lab.ex{background:var(--green);} .lab.why{background:var(--goldd);}
+  .ex-line{background:var(--codebg);border-radius:6px;padding:8px 12px;font-size:14.5px;margin:.4em 0;}
+  .ex-line code{background:transparent;padding:0;}
+
+  .spot{background:var(--navy);color:#fff;border:0;}
+  .spot h2{color:#fff;} .spot h3{color:var(--gold);margin:1em 0 .2em;font-size:18px;}
+  .spot p{margin:.4em 0;} .spot b{color:#fff;}
+  .spot .card{background:rgba(255,255,255,.06);border-radius:8px;padding:12px 16px;margin:8px 0;}
+  .spot code{background:rgba(255,255,255,.12);color:#ffe6b0;}
+
+  .qa{background:var(--tint);border-left:6px solid var(--gold);border-radius:8px;padding:14px 20px;margin-top:10px;}
+  .qa .q{font-weight:700;color:var(--navy);margin:.6em 0 .1em;}
+  .qa .a{margin:0 0 .4em;}
+  .foot{padding:20px 44px;background:var(--tint);color:var(--muted);font-size:13px;border:0;}
+  @media(max-width:640px){.title,.tag,section,.foot{padding-left:22px;padding-right:22px;}.title{font-size:27px;}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1 class="title">Your test suite, explained</h1>
+<p class="tag">202 automated tests, six jobs. What each one checks, in plain words, so you can defend them.</p>
+
+<section class="why">
+  <h2>First: why so many tests on a "we found nothing" result?</h2>
+  <p>Because the weak spot of a null result is the accusation <i>"you didn't look hard enough, or you moved the goalposts."</i> The test suite is the answer to that. It proves the machinery is correct, the thesis's own math holds, and not one reported number can quietly change.</p>
+  <p class="punch">The one-liner for the viva: <b>"The tests are what make a negative result credible instead of just asserted. A wrong model reproduces byte-for-byte too, so reproducibility is hygiene; the tests go further and enforce the actual claims."</b></p>
+  <div class="ci"><b>Why 202 locally but 189 in CI?</b> The 13 <code>test_electricitymaps</code> tests read the raw Electricity Maps carbon data, which is under a non-redistribution licence and is never committed. On the public CI runner that data is absent, so those tests <b>skip</b> (they are marked <code>pytest.mark.skipif</code>, not failed). With the data present locally, all 202 run.</p></div>
+</section>
+
+<section>
+  <h2>The six jobs the tests do</h2>
+
+  <div class="grp">
+    <div class="ghead"><span class="gcount">70</span><span class="gname">Every scheduler vs a known-correct answer</span></div>
+    <div class="gfiles">test_algorithm_1, test_algorithm_2a, test_algorithm_2b_mahalanobis, test_transfer_dro, test_online_transfer, test_phase2_copula</div>
+    <p><span class="lab">Checks</span> Each solver is run on a small, hand-built problem where the right answer is known, and it must match it. Also: constraints are respected, bad input is rejected, and each model reduces to what the maths says it should.</p>
+    <p><span class="lab why">Why</span> If the optimiser is wrong, nothing downstream means anything. This is the foundation.</p>
+    <div class="ex-line"><span class="lab ex">Example</span> <code>test_robust_value_is_mean_plus_penalty</code>: confirms the robust plan really equals <code>mean + &epsilon;&middot;||L&#7488;x||</code>, i.e. it collapses to a mean term plus a cone penalty, exactly as the thesis claims.</div>
+    <div class="ex-line"><span class="lab ex">Example</span> <code>test_transfer_reduces_emissions</code>: with a clean region available, turning transfer on must strictly cut emissions vs transfer off. <code>test_transfer_conserves_work</code>: flows move work, never create or destroy it.</div>
+  </div>
+
+  <div class="grp">
+    <div class="ghead"><span class="gcount">59</span><span class="gname">The covariance and dependence tools</span></div>
+    <div class="gfiles">test_covariance, test_stratified_correlations, test_tail_dependence</div>
+    <p><span class="lab">Checks</span> The maths tools that measure how regions move together: turning a schedule into a vector and back (round-trips), the "shuffle" that destroys cross-region links, correlations, and the tail-dependence coefficients.</p>
+    <p><span class="lab why">Why</span> RQ2 lives or dies on these being correct. If the shuffle or the tail measure were buggy, the null would be meaningless.</p>
+    <div class="ex-line"><span class="lab ex">Example</span> <code>test_comonotone_has_full_upper_tail_dependence</code> and <code>test_independence_has_low_tail_dependence</code>: the &chi; estimator returns 1 for perfectly-linked data and ~0 for unrelated data, so the 0.48-vs-0.25 numbers on slide 20 are trustworthy.</div>
+  </div>
+
+  <div class="grp">
+    <div class="ghead"><span class="gcount">25</span><span class="gname">The shared rulebook (the fair-test constraints)</span></div>
+    <div class="gfiles">test_constraints_taskA, test_capacity, test_carbon_budget</div>
+    <p><span class="lab">Checks</span> The constraints every scheduler must obey: capacity, ramp limits, the variable-capacity field, and the carbon budget. E.g. a budget below the minimum is correctly flagged infeasible; a slack budget matches the unconstrained solution.</p>
+    <p><span class="lab why">Why</span> The whole method is "only the brain changes." These tests enforce that every version runs under identical rules, so any difference is the model, not the setup.</p>
+  </div>
+
+  <div class="grp">
+    <div class="ghead"><span class="gcount">16</span><span class="gname">The data pipelines</span></div>
+    <div class="gfiles">test_electricitymaps (13, data-gated), test_temperature (3)</div>
+    <p><span class="lab">Checks</span> Loading the real data correctly: files parse, a leap year has 8784 hours, timestamps are UTC, carbon intensity is non-negative. Temperature (Open-Meteo, CC-BY) is committed, so its 3 tests always run.</p>
+    <p><span class="lab why">Why</span> Garbage in, garbage out. These 13 are the ones that skip in CI because the licensed carbon data is not public.</p>
+  </div>
+
+  <div class="grp star">
+    <div class="ghead"><span class="gcount">11</span><span class="gname">The thesis's own maths, run as code &nbsp;&#11088;</span></div>
+    <div class="gfiles">test_claim_binding, test_part5_condition</div>
+    <p><span class="lab">Checks</span> This is the unusual one. Each test pins a <b>statement the thesis makes</b>, so the central arguments are enforced on every code change, not just proved on paper.</p>
+    <p><span class="lab why">Why</span> This is your strongest "trust me" evidence. If a load-bearing claim ever broke, the build would go red. See the spotlight below.</p>
+  </div>
+
+  <div class="grp star">
+    <div class="ghead"><span class="gcount">21</span><span class="gname">Frozen numbers: nothing can drift &nbsp;&#11088;</span></div>
+    <div class="gfiles">test_carbon_ceiling_snapshot, test_risk_measure_swap_snapshot, the headline guard in test_transfer_dro, test_emergency_inject, test_es_pt_fr, test_baseline_components_v11, test_plots</div>
+    <p><span class="lab">Checks</span> Every headline number is re-checked against its archived CSV, so a code change cannot silently change a number the thesis reports.</p>
+    <p><span class="lab why">Why</span> It closes the "did you move the goalposts?" attack: the goalposts are pinned in version control. See the spotlight below.</p>
+  </div>
+</section>
+
+<section class="spot">
+  <h2>Spotlight 1: the thesis's maths, enforced in code</h2>
+  <p>These four are the ones to name if an examiner asks "what makes this rigorous?" Each is a theorem from the thesis, checked on every push.</p>
+
+  <div class="card">
+    <h3>CVaR translation-invariance</h3>
+    <p><code>test_translation_invariance</code> checks <code>CVaR(e + c) == CVaR(e) + c</code> for random shifts. This is the algebraic backbone of the whole mechanism: the shared daily mean field passes straight through the risk score, so it <b>cannot interact with the dependence model</b>. That is <i>why</i> the co-movement layer can only touch the small leftover.</p>
+  </div>
+  <div class="card">
+    <h3>Proposition 1's bound, on a real solve</h3>
+    <p><code>test_solved_optimal_value_gap_within_bound</code> actually solves the DRO on a toy instance and checks <code>|OPT(&Sigma;) &minus; OPT(&Sigma;_shuffled)| &le; &epsilon;&middot;max||x||&middot;&radic;||&Sigma;_off||</code>. The gap between the real-links and links-destroyed schedules is provably bounded by the size of the cross-region block. Not just claimed, run.</p>
+  </div>
+  <div class="card">
+    <h3>Mean-dominance, as a property</h3>
+    <p><code>test_growing_mean_field_shrinks_relative_spatial_gap</code> scales the daily mean up (1x, 2x, 4x, 8x, 16x) and checks the relative spatial gap <b>shrinks every time</b>, ending below 5% of where it started. This is the wave-and-ripple mechanism, demonstrated: a bigger wave drowns the fixed ripple.</p>
+  </div>
+  <div class="card">
+    <h3>The shuffle is legitimate</h3>
+    <p><code>test_shuffle_preserves_psd</code> checks that destroying the cross-region links still leaves a valid covariance matrix. So the falsification test compares <b>two legitimate models</b>, not one real model against a broken one.</p>
+  </div>
+</section>
+
+<section class="spot">
+  <h2>Spotlight 2: the numbers are pinned</h2>
+  <p>The snapshot guards re-verify the reported headlines against saved files. Two worth naming:</p>
+  <div class="card">
+    <h3>The RQ3 crossover claim is literally asserted</h3>
+    <p><code>test_carbon_ceiling_matches_thesis</code> pins the joint severities (1.34, 1.29, 1.89) and then asserts <code>joint_max &lt; 3.0</code> &mdash; the code itself enforces that <b>no real grid reaches the M&asymp;3 crossover</b>. It also pins BPAT 5.1x and Uri 1.3x.</p>
+  </div>
+  <div class="card">
+    <h3>The RQ1 headline is pinned and internally consistent</h3>
+    <p><code>test_transfer_value_headline_matches_snapshot</code> pins 4.0 / 9.9 / 9.0% <b>and</b> re-derives them from the raw CVaR columns (<code>(c0 &minus; cT)/c0</code>), so the number cannot be right by luck or stale.</p>
+  </div>
+  <div class="card">
+    <h3>The robustness "generality" probe is guarded too</h3>
+    <p><code>test_meanvar_swap_does_not_rescue_covariance</code> pins that swapping to a covariance-amplifying objective still does not make covariance pay (it hurts by 0.84% and 1.50% on two grids), while <code>test_swap_moves_the_schedule</code> confirms the schedule moved &gt;20% &mdash; so the small gap is not because the objective ignored covariance.</p>
+  </div>
+</section>
+
+<section>
+  <h2>If they ask about the tests, say this</h2>
+  <div class="qa">
+    <p class="q">"Tell me about your test suite."</p>
+    <p class="a">202 automated tests in six groups: 70 check every scheduler against known-correct answers, 59 check the covariance and tail-dependence tools, 25 enforce the shared feasible set, 16 check the data loaders, 11 pin the thesis's own theorems as executable tests, and 21 freeze every reported number against an archived file. They run in CI on every push; 189 run on the public runner because 13 need the licensed carbon data.</p>
+    <p class="q">"Isn't reproducibility just hygiene?"</p>
+    <p class="a">Yes, and I say so. A wrong model reproduces byte-for-byte too. That is exactly why the claim-binding tests go further: they enforce the load-bearing maths, like CVaR translation-invariance and the Proposition 1 bound, so a broken claim turns the build red. That is what makes the null auditable rather than asserted.</p>
+    <p class="q">"How do I know the null isn't a bug in the shuffle?"</p>
+    <p class="a">Two ways. <code>test_shuffle_preserves_psd</code> proves the shuffled matrix is still a valid covariance, so both arms are legitimate. And the positive control fires at +1.46% on the same code, so the pipeline can detect a real effect when one exists.</p>
+    <p class="q">"What could a test have caught that you didn't expect?"</p>
+    <p class="a">The mean-dominance monotonicity test is a genuine property check, not a fixed number: if the mechanism were wrong, scaling the mean up would not shrink the gap, and the test would fail. It encodes the mechanism, so it would catch a mistake in my own reasoning, not just in the code.</p>
+  </div>
+</section>
+
+<footer class="foot">Grounded in the actual test files (tests/test_claim_binding.py, test_carbon_ceiling_snapshot.py, test_transfer_dro.py, test_risk_measure_swap_snapshot.py, and the rest). The Price of Sophistication &middot; Marco Ortiz Togashi</footer>
+
+</div>
+</body>
+</html>

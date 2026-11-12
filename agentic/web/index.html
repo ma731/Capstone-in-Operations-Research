@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gridshift</title>
+<meta name="description" content="Gridshift: a live, voice-driven console for carbon-aware computing. IE capstone in Operations Research.">
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- boot splash -->
+<div id="boot" class="boot" role="dialog" aria-label="Starting Gridshift">
+  <canvas id="bootDots" class="boot-dots" aria-hidden="true"></canvas>
+  <div class="boot-inner">
+    <div class="boot-brand">
+      <img src="assets/mark.svg" alt="" class="boot-mark">
+      <div>
+        <div class="boot-name">Gridshift</div>
+        <div class="boot-tag" id="bootTag">Carbon-aware workload console</div>
+      </div>
+    </div>
+    <h1 class="boot-hero">Run computing where, and when, the grid is cleanest.</h1>
+    <div class="boot-lines" id="bootLines" aria-live="polite"></div>
+    <div class="boot-actions">
+      <button id="enterBtn" class="btn-primary btn-lg" disabled>
+        <span>Enter console</span>
+        <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M5 10h10M11 6l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="boot-hint"><kbd>Enter</kbd> to start. Then <kbd>P</kbd> to present, <kbd>Ctrl</kbd><kbd>K</kbd> for commands, hold <kbd>Space</kbd> to talk.</div>
+    </div>
+  </div>
+  <div class="boot-foot" id="bootFoot">IE capstone in Operations Research</div>
+</div>
+
+<div id="offlineBanner" class="banner" hidden>
+  <span class="banner-dot"></span>
+  <span>Server not reachable. Start it with: <code>python -m agentic.serve</code></span>
+  <button class="btn-ghost btn-sm" id="bannerRetry">Retry</button>
+</div>
+
+<div class="app" id="app" aria-hidden="true">
+  <header class="topbar">
+    <div class="brand">
+      <svg class="glyph" viewBox="0 0 32 32" aria-hidden="true">
+        <g class="glyph-dots"></g>
+      </svg>
+      <div class="brand-text">
+        <div class="brand-name">Gridshift</div>
+        <div class="brand-tag" id="brandTag">Carbon-aware workload console</div>
+      </div>
+    </div>
+
+    <nav class="tabs" role="tablist" aria-label="Views">
+      <span class="tab-ink" aria-hidden="true"></span>
+      <button class="tab" role="tab" data-view="command"><kbd>1</kbd>Command</button>
+      <button class="tab" role="tab" data-view="knowledge"><kbd>2</kbd>Knowledge</button>
+      <button class="tab" role="tab" data-view="evidence"><kbd>3</kbd>Evidence</button>
+      <button class="tab" role="tab" data-view="monitor"><kbd>4</kbd>Monitor</button>
+      <button class="tab" role="tab" data-view="interfaces"><kbd>5</kbd>Interfaces</button>
+    </nav>
+
+    <div class="top-right">
+      <span id="dataPill" class="pill pill-mute"><i></i><span>Checking</span></span>
+      <span id="voicePill" class="pill pill-mute" title="Voice engine"><i></i><span>Voice</span></span>
+      <button id="lensBtn" class="icon-btn" title="Supply chain lens (L)" aria-label="Toggle supply chain lens">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12.5 12.5 17 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <button id="muteBtn" class="icon-btn" title="Mute voice (M)" aria-label="Mute voice" aria-pressed="false">
+        <svg class="ic-on" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8v4h3l4 3.5v-11L6 8H3z" fill="currentColor"/><path d="M13.5 7a4 4 0 0 1 0 6M15.5 5a7 7 0 0 1 0 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg class="ic-off" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8v4h3l4 3.5v-11L6 8H3z" fill="currentColor"/><path d="M13 8l4 4M17 8l-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <button id="paletteBtn" class="kbd-btn" title="Command palette" aria-label="Open command palette"><kbd>Ctrl</kbd><kbd>K</kbd></button>
+      <button id="presentBtn" class="btn-present" title="Hands-free 3 minute tour (P)">
+        <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M6 4.5v11l9-5.5z" fill="currentColor"/></svg>
+        <span>Present</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="presentBar" class="present-bar" hidden>
+    <span class="present-dot"></span>
+    <span class="present-tag">Presenting</span>
+    <span class="present-step" id="presentStep">1 / 16</span>
+    <div class="present-track"><div class="present-fill" id="presentFill"></div></div>
+    <span class="present-keys"><kbd>Right</kbd> skip <kbd>Esc</kbd> stop</span>
+    <button class="btn-ghost btn-sm" id="presentStop">Stop</button>
+  </div>
+
+  <main class="views" id="views">
+
+    <!-- COMMAND -->
+    <section class="view" id="view-command" data-view="command" aria-label="Command">
+      <header class="vhead">
+        <h2 class="vtitle">Command</h2>
+        <p class="vsub">Where and when should flexible computing run? The optimiser proposes; a person approves.</p>
+      </header>
+
+      <div id="strip" class="strip" aria-label="Workflow"></div>
+
+      <div class="cmd-grid">
+        <div class="cmd-left sheet">
+          <div class="cmd-tools">
+            <div class="chips" id="jobChips" role="group" aria-label="Job"></div>
+            <div class="ctl-row">
+              <label class="ctl">
+                <span class="ctl-lab">Day</span>
+                <input type="date" id="dayInput" class="date-in">
+              </label>
+              <label class="ctl ctl-share">
+                <span class="ctl-lab">Logistics capacity</span>
+                <input type="range" id="shareInput" min="0" max="0.5" step="0.1" value="0.3">
+                <span class="ctl-val" id="shareVal">30%</span>
+              </label>
+            </div>
+          </div>
+          <div id="map" class="stage">
+            <canvas id="mapCanvas" aria-label="Map of grid regions coloured by carbon intensity"></canvas>
+            <div class="hour-read">
+              <div class="hour-big" id="hourBig">--:--</div>
+              <div class="hour-sub" id="hourSub">UTC</div>
+            </div>
+            <div class="stage-bottom">
+              <div class="legend" id="carbonLegend"></div>
+              <div class="flows-note" id="flowsNote"></div>
+            </div>
+            <div class="stage-msg" id="stageMsg" hidden></div>
+          </div>
+          <div id="scrubber" class="scrubber"></div>
+        </div>
+
+        <aside class="cmd-right" id="cmdRight">
+          <div id="kpis" class="panel kpis"></div>
+          <div id="gate" class="panel gate" hidden></div>
+          <div id="sweep" class="panel sweep"></div>
+          <div id="audit" class="panel audit"></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- KNOWLEDGE -->
+    <section class="view" id="view-knowledge" data-view="knowledge" aria-label="Knowledge">
+      <header class="vhead">
+        <h2 class="vtitle">Knowledge</h2>
+        <p class="vsub">The rules, as a machine-readable ontology. The reasoner works out what is allowed.</p>
+      </header>
+      <div class="kn-grid">
+        <div id="kgraph" class="panel kgraph"></div>
+        <aside class="panel kside" id="kside"></aside>
+      </div>
+    </section>
+
+    <!-- EVIDENCE -->
+    <section class="view" id="view-evidence" data-view="evidence" aria-label="Evidence">
+      <header class="vhead">
+        <h2 class="vtitle">Evidence</h2>
+        <p class="vsub">Which layer of sophistication actually pays. Thesis results, out of sample, worst 5% of days.</p>
+      </header>
+      <div class="ev-wrap" id="evidenceWrap">
+        <div id="rq-cards" class="rq-cards"></div>
+        <div class="ev-row">
+          <div id="ladder" class="panel ladder"></div>
+          <div id="rq3" class="panel rq3"></div>
+        </div>
+        <div class="ev-source" id="evSource"></div>
+      </div>
+    </section>
+
+    <!-- MONITOR -->
+    <section class="view" id="view-monitor" data-view="monitor" aria-label="Monitor">
+      <header class="vhead">
+        <h2 class="vtitle">Monitor</h2>
+        <p class="vsub">Is the forecast still good enough to trust the simple plan?</p>
+      </header>
+      <div id="drift" class="panel drift"></div>
+    </section>
+
+    <!-- INTERFACES -->
+    <section class="view" id="view-interfaces" data-view="interfaces" aria-label="Interfaces">
+      <header class="vhead">
+        <h2 class="vtitle">Interfaces</h2>
+        <p class="vsub">How other agents plug in, and how every answer is checked.</p>
+      </header>
+      <div class="if-grid">
+        <div id="a2a" class="panel a2a"></div>
+        <div class="if-col">
+          <div id="mcp" class="panel mcp"></div>
+          <div id="evals" class="panel evals"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- captions + dock -->
+<div id="captions" class="captions" aria-live="polite"></div>
+
+<div id="dock" class="dock" aria-label="Voice agent">
+  <div class="dock-reply" id="dockReply" hidden></div>
+  <div class="dock-chips" id="dockChips"></div>
+  <div class="dock-bar">
+    <canvas id="orb" class="orb" width="56" height="56" aria-hidden="true"></canvas>
+    <div class="dock-mid">
+      <div class="dock-transcript" id="dockTranscript"></div>
+      <form id="askForm" class="ask-form" autocomplete="off">
+        <input id="askInput" class="ask-input" type="text" placeholder="Ask Gridshift, or hold Space to talk" aria-label="Ask Gridshift">
+      </form>
+    </div>
+    <button id="micBtn" class="mic-btn" title="Hold Space or click to talk" aria-label="Talk">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="2.5" width="6" height="10" rx="3" fill="currentColor"/><path d="M4.5 9.5a5.5 5.5 0 0 0 11 0M10 15v2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+    <button id="sendBtn" class="send-btn" title="Send" aria-label="Send">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- supply chain lens -->
+<div id="lens" class="lens" hidden role="dialog" aria-label="Supply chain lens"></div>
+
+<!-- spotlight + demo cursor -->
+<div id="spotlight" class="spotlight" aria-hidden="true"></div>
+<div id="fakeCursor" class="fake-cursor" aria-hidden="true">
+  <svg viewBox="0 0 24 24" width="26" height="26"><path d="M5 3l14 8-6 1.5L10 19z" fill="#ffffff" stroke="#121a26" stroke-width="1.4" stroke-linejoin="round"/></svg>
+</div>
+
+<!-- command palette -->
+<div id="palette" class="palette-wrap" hidden>
+  <div class="palette" role="dialog" aria-label="Command palette">
+    <div class="pal-top">
+      <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12.5 12.5 17 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input id="palInput" type="text" placeholder="Search views, actions, jobs" aria-label="Search commands">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="pal-list" id="palList" role="listbox"></div>
+    <div class="pal-foot"><span><kbd>Up</kbd><kbd>Down</kbd> move</span><span><kbd>Enter</kbd> run</span><span class="pal-brand">Gridshift</span></div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
