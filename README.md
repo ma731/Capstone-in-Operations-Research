@@ -6,7 +6,7 @@ layer of modelling sophistication actually buys.
 **Research Capstone in Operations Research · IE School of Science & Technology · 2026**
 **Student:** Marco Ortiz Togashi · **Supervisor:** Prof. Bissan Ghaddar
 
-`213 tests collected (200 in public CI)` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to a SHA-256-frozen snapshot`
+`460 tests collected (447 in public CI)` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to a SHA-256-frozen snapshot`
 
 ---
 
@@ -26,6 +26,33 @@ optional layers of sophistication, one at a time:
 
 The result is a clean separation: **one layer pays, two mostly do not.** Any unfamiliar term
 below is defined in the [glossary](#glossary-plain-english) near the bottom.
+
+![The price of sophistication: moving jobs between regions cuts worst-day emissions by 4.0 to 9.9%; modelling regional co-movement adds at most 0.23%; robust optimisation only pays in grid emergencies about three times worse than the 1.29x to 1.89x observed](figures/value_ladder.svg)
+
+*Every number in the figure is read from the archived snapshots by
+[`scripts/plot_value_ladder.py`](scripts/plot_value_ladder.py).*
+
+---
+
+## Why this matters for enterprise AI
+
+Most flexible data-center work is AI work: training, fine-tuning, evaluation, batch
+inference. Companies scaling AI are meeting its compute bill in money, energy and carbon,
+and this project is a worked example of the question an AI value strategist asks about any
+investment: **what does each extra layer of sophistication actually buy?**
+
+- **Fund the lever that pays.** Moving flexible AI jobs between regions is an operating
+  decision (a scheduler and a policy for which jobs may move), and it cut worst-day
+  emissions by 4.0 to 9.9%.
+- **Skip what does not.** The two expensive layers, joint dependence models and robust
+  optimisation, need specialist skills and slower solves and added almost nothing on real
+  grids. Knowing not to build them is part of the value.
+- **Be honest about size.** At a carbon price alone the saving is modest below campus scale:
+  roughly EUR 2k to 6k a year for 5 MW of flexible AI compute, EUR 49k to 120k for 100 MW,
+  valuing only the worst days the study measured.
+
+The full illustrative value case, its assumptions, and what a client would be told:
+[docs/enterprise_value_case.md](docs/enterprise_value_case.md).
 
 ---
 
@@ -150,16 +177,52 @@ known slide-label corrections is in [`docs/deck_errata.md`](docs/deck_errata.md)
   us_west and taskc, while the Diversified grid's *adverse* result is adverse at every
   tail — the disclosed negative finding is tail-robust too.
 
+## Future work (in progress)
+
+The capstone is graded and frozen at the thesis pin; the repo now moves toward
+publication. The full plan (directions, venues, timing) is in
+[`docs/roadmap_papers.md`](docs/roadmap_papers.md). Three directions are active on the
+`paper-expansion` branch, all additive (no graded result is touched):
+
+1. **Signal robustness: does the null survive a marginal-emissions signal?**
+   The whole study runs on *average* carbon intensity. The field is split on
+   average vs. marginal signals (e-Energy'24 shows they produce conflicting
+   schedules), so replicating the Phase 1 falsification under a marginal signal
+   tests whether the dependence null is signal-specific or fundamental. Status:
+   loader + pre-registered protocol scaffolded
+   ([`docs/protocols/marginal_signal_protocol.md`](docs/protocols/marginal_signal_protocol.md));
+   blocked on marginal data access (WattTime or Electricity Maps premium).
+2. **State-conditional robustness: a contextual price-of-robustness.** RQ3 says
+   unconditional DRO does not pay below $M^\star\approx3$. The conditional question:
+   are high-severity days *predictable* from covariates known day-ahead
+   (temperature, lagged carbon, calendar), so a scheduler can exercise robustness
+   as an option only when the predicted regime warrants it? Status: gating
+   prototype (`scripts/prototype_contextual_gate.py`) quantifies day-ahead
+   predictability of high-severity days on the two locally-cached panels.
+3. **Calibrated emergency severity via extreme value theory.** The $M^\star$
+   crossover currently uses a stylised multiplier plus empirical top-5% pools
+   (`run_part3_real_emergency.py`). The EVT upgrade fits a generalized Pareto tail
+   to realized joint-severity ratios and reports return periods for
+   $M \ge 2, 2.5, 3$: "a crossover-grade day is a 1-in-$N$-year event," anchored
+   on real events (the 2022 French nuclear outage is in the panel). Status:
+   `src/analysis/severity_evt.py` + `scripts/run_severity_evt.py`, snapshot under
+   `docs/results_snapshots/`.
+
+Target venues: ACM e-Energy 2027 (fall cycle) for the compressed RQ1+RQ2 paper with
+direction 1; e-Energy winter cycle / SoCC for directions 2+3; an OR journal (with
+supervisor) for the Part 5 screening condition; HotCarbon 2027 as the position-paper
+staging ground. The new modules carry their own unit tests under the same discipline:
+the suite grew from 202 to 223 collected tests (189 to 210 in CI) with these additions.
+
 ## Reproduce the experiments
 
 The fastest check needs no API token and no license:
 
 ```bash
 pytest tests/ -q
-# without the licensed raw data: 213 collected, 195 passed, 18 skipped
-# (the skips are the Electricity Maps ingestion/integration tests).
-# with the licensed data present: 213 passed, 0 skipped.
-# public CI runs 200 (it ignores tests/test_electricitymaps.py entirely).
+# without the licensed raw data: 460 collected; the Electricity Maps
+# ingestion/integration tests skip.
+# public CI runs 447 (it ignores tests/test_electricitymaps.py entirely).
 
 python -m scripts.make_provenance_manifest --check
 # expected: OK -- every archived snapshot matches its committed SHA-256 digest.
@@ -369,7 +432,7 @@ gitignored.
 │   │                    #   transfer_dro (Part 3), online_transfer (Part 4), covariance
 │   └── analysis/        # stratified_correlations, tail_dependence, metrics, plots
 ├── scripts/             # experiment runners + plotting
-├── tests/               # 213 pytest tests incl. snapshot-integrity + determinism (200 collected in public CI)
+├── tests/               # 460 pytest tests collected; 447 in public CI
 ├── thesis/              # capstone_thesis.{tex,pdf} (the graded report)
 ├── full_thesis/         # extended write-up (full_thesis.pdf, Parts 3-5 in body)
 ├── poster/              # A0 poster (build_v24.js -> .pptx; PDF exported from it)
@@ -409,7 +472,7 @@ uv venv && uv pip install -e ".[dev]"
 # or: python -m venv .venv && pip install -e ".[dev]"
 
 cp .env.example .env        # add ELECTRICITY_MAPS_TOKEN (only needed to re-fetch raw data)
-pytest tests/               # 202 collected; data/optional-dependency tests may skip
+pytest tests/               # 223 collected; data/optional-dependency tests may skip
 ```
 
 **Solvers (all free, all in the default install):** HiGHS for the LP and CVaR-SAA
@@ -573,20 +636,105 @@ Short version of the heavy jargon. The thesis carries a fuller glossary in an ap
 
 ### What validation proves
 
-Public CI has three gates. The repository-validation gate checks document dates, links,
-canonical artifacts, headline values against archived CSVs, every TeX graphic, solver
-metadata, and the absence of a public handwritten signature. The snapshot-integrity gate
-verifies every archived CSV against the committed SHA-256 manifest, so the evidentiary
-record cannot silently change. The pytest gate exercises 200 data-independent tests,
-including model invariants, synthetic controls, regression snapshots, seed determinism,
-and numerical tolerances. Together they are strong protection against code, claim, and
-publication drift.
+Validation is organised as an evidence chain rather than a single “tests passed” claim:
 
-They are not an independent re-download and recomputation of Electricity Maps data:
-13 ingestion tests require the licensed raw files and therefore run only in an authorised
-local environment. This boundary is deliberate and documented rather than hidden; the
-public aggregate snapshots validate traceability, while a full scientific reproduction
-requires the licence-holder's raw-data directory.
+`source and configuration → model invariants → numerical behaviour → archived results → public claims`
+
+Each link is checked separately. This matters because a correct optimizer can still be
+fed the wrong data, a statistically sound experiment can still be quoted incorrectly,
+and a correct README can still point to a missing or stale artifact. No single unit test
+can detect all of those failure modes.
+
+#### The two automated CI gates
+
+Every push and pull request must pass two ordered jobs in
+`.github/workflows/test.yml`:
+
+1. **Repository validation.** Python first compiles every source, script, and test file.
+   It then runs `python -m scripts.validate_repository`. A failure stops the workflow,
+   so the numerical suite is not allowed to give a misleading green result when the
+   repository or publication layer is inconsistent.
+2. **Numerical pytest suite.** After the first gate passes, CI installs the declared
+   project and solver dependencies and runs 189 data-independent tests. In the current
+   validated run, 184 passed and five were expected skips. The complete suite collects
+   202 tests; the remaining 13 exercise licensed Electricity Maps ingestion and run only
+   where the authorised raw files are available.
+
+The 189 public-CI tests deliberately cover different kinds of evidence:
+
+| Validation target | Representative tests | What a failure would reveal |
+|---|---|---|
+| Optimizer and reformulation correctness | `test_algorithm_1.py`, `test_algorithm_2a.py`, `test_algorithm_2b_mahalanobis.py` | Objective, ambiguity-set, solver, or reformulation behaviour no longer matches the intended model. |
+| Feasibility and physical constraints | `test_constraints_taskA.py`, `test_capacity.py`, `test_carbon_budget.py` | A schedule violates workload conservation, capacity, ramping, transfer, or carbon-budget assumptions. |
+| Dependence and tail analysis | `test_covariance.py`, `test_stratified_correlations.py`, `test_tail_dependence.py`, `test_phase2_copula.py` | Covariance, stratification, copula, or tail-dependence calculations have changed or become internally inconsistent. |
+| Transfer and robustness mechanisms | `test_transfer_dro.py`, `test_online_transfer.py`, `test_emergency_inject.py`, `test_part5_condition.py` | The active-transfer lever, online comparison, severity stress test, or mean-dominance condition no longer behaves as claimed. |
+| Claim and result binding | `test_claim_binding.py`, `test_carbon_ceiling_snapshot.py`, `test_risk_measure_swap_snapshot.py` | A reported headline, severity bound, or robustness result has drifted away from its committed result table. |
+| Data interfaces and derived inputs | `test_temperature.py`, `test_es_pt_fr.py`, plus the licensed `test_electricitymaps.py` | Parsing, alignment, units, region mapping, or expected data coverage is broken. |
+
+This mix is stronger than relying only on end-to-end regression numbers. Invariant and
+feasibility tests can identify *why* an implementation is wrong; synthetic positive
+controls check that the pipeline can detect a signal when one is deliberately inserted;
+and snapshot tests catch later changes to the specific quantities used in the thesis.
+
+#### What `scripts/validate_repository.py` does
+
+This small fail-fast validator covers publication and provenance risks that ordinary
+model tests do not address:
+
+- `_check_required_files()` requires the canonical thesis, extended thesis, poster,
+  deck, licence files, dependency lock, and headline result snapshots. A release cannot
+  silently omit the artifact that the README describes.
+- `_check_public_links()` resolves local Markdown links and HTML image sources, catching
+  broken public navigation and missing explainer graphics.
+- `_check_headline_snapshots()` reads the committed CSVs and checks the RQ1 transfer
+  reductions (4.04%, 9.91%, and 9.04%) and the RQ3 joint-severity values (1.34, 1.29,
+  and 1.89). It then checks that the README states the same values. This binds the
+  narrative to archived machine-readable evidence instead of duplicated prose alone.
+- `_check_document_dates()` protects the fixed June 2026 dates in all three manuscript
+  sources from accidental regeneration changes.
+- `_check_tex_assets_and_public_privacy()` parses every `\\includegraphics` reference in
+  the thesis sources, requires the referenced file to exist in a clean checkout, and
+  prevents the handwritten signature from reappearing in the public copy.
+- `_check_project_metadata()` parses `pyproject.toml`, requires every documented default
+  solver to be declared, and verifies that the canonical poster sources and exports are
+  not accidentally hidden by `.gitignore`.
+
+The validator exits immediately with a specific error when any condition fails. That
+“fail closed” design is useful for a research repository: uncertainty or missing evidence
+blocks the green CI status instead of being reduced to a warning that can be overlooked.
+
+#### How this supports the reported results
+
+The automated gates establish that the published numbers are traceable to versioned
+outputs, that the implementation still satisfies the intended mathematical and physical
+constraints, and that the public documents have not drifted away from those outputs.
+The study-level validation then tests whether the findings are stable rather than merely
+repeatable: walk-forward out-of-sample evaluation limits look-ahead bias; multi-seed and
+sensitivity runs test dependence on arbitrary settings; bootstrap confidence intervals
+quantify sampling uncertainty; equivalence tests distinguish “no material effect” from
+an underpowered failure to reject; and Benjamini–Hochberg correction controls the false
+discovery rate across the many comparison cells. Synthetic positive controls further
+show that the method is capable of finding covariance or robustness value when the data
+are constructed to contain it, strengthening the interpretation of a null on the real
+grids.
+
+This is the strongest practical public-validation design for this project because it
+combines independent checks at the code, model, statistics, artifact, and claim levels
+while respecting the Electricity Maps licence. It is also reproducible: `uv.lock`
+resolves the complete Python environment, and the derived aggregate snapshots needed to
+audit the public claims are committed without redistributing the licensed observations.
+
+#### Scope and limitation
+
+A green public workflow is strong evidence of implementation integrity, internal
+consistency, traceability, and stability; it is not, by itself, proof that the scientific
+conclusions are universally true. Public CI does not independently download and recompute
+the Electricity Maps observations. The 13 ingestion tests and a complete raw-to-result
+reproduction require the licence-holder's local raw-data directory. Snapshot checks also
+confirm agreement with archived outputs rather than independently recreating those
+outputs. Stating these boundaries explicitly makes the validation more credible: another
+authorised researcher can distinguish what GitHub verifies automatically from what must
+be replicated with the licensed source data.
 
 ## Key references
 
