@@ -1,0 +1,30 @@
+name: pages
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", "capstone_explained.html", "figures/value_ladder.svg", "poster/figs/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency: {group: pages, cancel-in-progress: true}
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: {name: github-pages, url: "${{ steps.deploy.outputs.page_url }}"}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble the site
+        run: |
+          mkdir -p _site/poster/figs
+          cp site/index.html site/grid_room_data.js _site/
+          cp figures/value_ladder.svg _site/
+          cp poster/figs/crossover.png poster/figs/finding.png _site/poster/figs/
+          # the plain-words explainer, with a way back to the grid room
+          sed 's|<header class="hero">|<header class="hero"><div class="wrap" style="margin-bottom:18px"><a class="pill" href="./" style="text-decoration:none">\&larr; Back to the grid room</a></div>|' capstone_explained.html > _site/explained.html
+          grep -q "Back to the grid room" _site/explained.html
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: _site}
+      - id: deploy
+        uses: actions/deploy-pages@v4

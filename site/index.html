@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grid Room · The Price of Sophistication</title>
+<meta name="description" content="A day on three real power grids: where moving AI compute between regions pays, and where fancier models do not.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2308142a'/%3E%3Crect x='6' y='14' width='5' height='12' rx='1' fill='%234fbf7d'/%3E%3Crect x='13.5' y='8' width='5' height='18' rx='1' fill='%23e8a417'/%3E%3Crect x='21' y='4' width='5' height='22' rx='1' fill='%23d9573b'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --night:#08142a; --room:#0c1d38; --panel:#0f2242; --well:#132a50; --line:#22406e; --line-hi:#37588a;
+  --ink:#eef2f8; --ink-2:#b4c2d8; --ink-3:#8496b2;
+  --gold:#e8a417; --clean:#4fbf7d; --mid:#e8a417; --dirty:#d9573b; --comove:#9fb3d1; --robust:#f0b45a;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--night);color:var(--ink);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--gold)}
+h1,h2,h3{font-family:var(--serif);font-weight:600;text-wrap:balance;margin:0}
+b{font-weight:600;color:var(--ink)}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line);background:var(--night)}
+.top h1{font-size:19px;letter-spacing:-.01em}
+.top h1 span{color:var(--ink-3);font-weight:500}
+.top h1 span::before{content:"· "}
+.top nav{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.pill{font:500 13px var(--sans);color:var(--ink);text-decoration:none;border:1px solid var(--line-hi);border-radius:999px;padding:6px 12px;white-space:nowrap}
+.pill:hover{border-color:var(--gold);color:var(--gold)}
+
+/* the room */
+.room{display:grid;grid-template-columns:minmax(0,1fr) 400px;height:calc(100vh - 58px);height:calc(100svh - 58px);min-height:560px}
+.stage{position:relative;min-width:0;background:radial-gradient(120% 90% at 50% 30%,var(--room),var(--night))}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.tag{position:absolute;left:0;top:0;transform:translate(-50%,-100%);white-space:nowrap;text-align:center;font:500 12px var(--sans);color:var(--ink);text-shadow:0 1px 3px #000a;transition:opacity .3s}
+.tag i{display:block;font:500 11px var(--mono);font-style:normal;color:var(--ink-2)}
+.tag.dim{opacity:.0}
+.tag.best i{color:var(--clean)}
+
+.clock{position:absolute;left:max(16px,env(safe-area-inset-left,0px));right:16px;bottom:16px;display:flex;align-items:center;gap:12px;max-width:560px;background:#0a1830e6;border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+.clock button{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--line-hi);background:var(--well);color:var(--ink);cursor:pointer;display:grid;place-items:center}
+.clock button:hover{border-color:var(--gold)}
+.clock .time{font:500 20px var(--mono);min-width:5ch}
+.clock .tz{font:500 11px var(--sans);color:var(--ink-3);display:block}
+.clock input{flex:1;min-width:0;accent-color:var(--gold)}
+.legend{position:absolute;right:16px;top:14px;display:flex;align-items:center;gap:8px;font:500 11px var(--mono);color:var(--ink-2);background:#0a1830cc;border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+.legend .bar{width:90px;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--clean),var(--mid),var(--dirty))}
+.hint{position:absolute;left:16px;top:14px;font:500 12px var(--sans);color:var(--ink-3);max-width:40ch}
+
+/* panel */
+.panel{border-left:1px solid var(--line);background:var(--panel);padding:18px 18px 22px;display:flex;flex-direction:column;gap:16px;min-width:0;overflow:auto}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{font:500 13px var(--sans);color:var(--ink-2);background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer}
+.tabs button[aria-pressed="true"]{color:var(--night);background:var(--ink);border-color:var(--ink)}
+.blurb{color:var(--ink-2);margin:0;font-size:14px}
+.layers{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.layer{border:1px solid var(--line);border-radius:14px;background:var(--well);padding:12px 14px;transition:border-color .2s}
+.layer.on{border-color:var(--line-hi)}
+.layer .head{display:flex;align-items:center;gap:10px}
+.layer .n{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:600 12px var(--mono);color:var(--night)}
+.layer h3{font-size:16px;flex:1}
+.layer p{margin:6px 0 0;color:var(--ink-2);font-size:13.5px}
+.layer .num{font:600 26px var(--serif);letter-spacing:-.01em;margin-top:6px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.layer .num small{font:500 12.5px var(--sans);color:var(--ink-2)}
+.verdict{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:3px 7px}
+.l1 .n{background:var(--clean)} .l1 .num{color:var(--clean)} .l1 .verdict{background:#4fbf7d26;color:var(--clean)}
+.l2 .n{background:var(--comove)} .l2 .num{color:var(--comove)} .l2 .verdict{background:#9fb3d126;color:var(--comove)}
+.l3 .n{background:var(--robust)} .l3 .num{color:var(--robust)} .l3 .verdict{background:#f0b45a26;color:var(--robust)}
+.switch{position:relative;flex:none;width:42px;height:24px;border-radius:12px;border:1px solid var(--line-hi);background:var(--night);cursor:pointer;padding:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--ink-3);transition:transform .2s cubic-bezier(.22,1,.36,1),background .2s}
+.switch[aria-checked="true"]{background:var(--line-hi)}
+.switch[aria-checked="true"]::after{transform:translateX(18px);background:var(--ink)}
+.sev{margin-top:10px}
+.sev label{display:flex;justify-content:space-between;font:500 12.5px var(--sans);color:var(--ink-2)}
+.sev input{width:100%;accent-color:var(--robust)}
+.strip{position:relative;height:30px;margin-top:4px}
+.strip .track{position:absolute;left:0;right:0;top:12px;height:6px;border-radius:3px;background:var(--night)}
+.strip .real{position:absolute;top:8px;height:14px;border-radius:3px;background:#9fb3d155}
+.strip .cross{position:absolute;top:4px;width:2px;height:22px;background:var(--robust)}
+.strip .you{position:absolute;top:6px;width:12px;height:18px;border-radius:3px;background:var(--ink);transform:translateX(-50%);transition:left .2s}
+.strip-keys{display:flex;justify-content:space-between;font:500 10.5px var(--mono);color:var(--ink-3)}
+.foot-note{font-size:12px;color:var(--ink-3);margin:0}
+
+/* below the room */
+.more{padding:56px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--line)}
+.more .in{max-width:1080px;margin:0 auto;display:grid;gap:28px}
+.more h2{font-size:clamp(24px,3vw,34px);letter-spacing:-.015em;max-width:24ch}
+.more p{color:var(--ink-2);max-width:68ch;margin:0;text-wrap:pretty}
+.fig{background:#fbfcfe;border-radius:14px;padding:14px;overflow-x:auto}
+.fig img{display:block;width:100%;min-width:640px;height:auto}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px 32px;margin:0;padding:0;list-style:none}
+.facts li{border-top:1px solid var(--line);padding-top:12px;color:var(--ink-2);font-size:14px}
+.facts b{display:block;font-family:var(--serif);font-size:17px;margin-bottom:4px}
+footer{padding:20px max(16px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));color:var(--ink-3);font-size:12.5px;border-top:1px solid var(--line)}
+footer .in{max-width:1080px;margin:0 auto}
+.nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--ink-2)}
+
+@media (max-width:980px){
+  .room{grid-template-columns:minmax(0,1fr);height:auto;min-height:0}
+  .stage{height:62vh;height:62svh;min-height:380px}
+  .panel{border-left:0;border-top:1px solid var(--line)}
+  .legend{top:auto;bottom:84px}
+  .hint{display:none}
+}
+@media (max-width:480px){
+  .clock{left:10px;right:10px;bottom:10px;gap:8px;padding:8px 10px}
+  .clock .time{font-size:17px}
+  .legend{right:10px;bottom:74px}
+  .top h1{font-size:17px}
+  .top h1 span{display:block}
+  .top h1 span::before{content:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>The Price of Sophistication <span>a day on three power grids</span></h1>
+  <nav>
+    <a class="pill" href="explained.html">Read it in plain words</a>
+    <a class="pill" href="https://github.com/ma731/Capstone-in-Operations-Research">Code and thesis</a>
+  </nav>
+</header>
+
+<main>
+<section class="room" aria-label="Interactive grid room">
+  <div class="stage" id="stage">
+    <canvas id="gl" aria-label="3D map of the data centers on the selected grid. Each column is the carbon intensity of its power at the time shown."></canvas>
+    <div class="labels" id="labels" aria-hidden="true"></div>
+    <p class="hint">Each tower is a data center. Its column is how dirty its electricity is at that hour. Drag to turn the table.</p>
+    <div class="legend" aria-hidden="true"><span>cleaner</span><span class="bar"></span><span>dirtier</span></div>
+    <div class="clock">
+      <button type="button" id="play" aria-label="Pause the day"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect id="pIcon1" x="2" y="1" width="3.5" height="12" rx="1" fill="currentColor"/><rect id="pIcon2" x="8.5" y="1" width="3.5" height="12" rx="1" fill="currentColor"/><path id="pIcon3" d="M3 1.5v11l9.5-5.5z" fill="currentColor" style="display:none"/></svg></button>
+      <div><span class="time" id="time">13:00</span><span class="tz" id="tz">Pacific time</span></div>
+      <input type="range" id="hour" min="0" max="23.99" step="0.01" value="13" aria-label="Hour of the day">
+    </div>
+  </div>
+
+  <aside class="panel">
+    <div class="tabs" role="group" aria-label="Choose a grid" id="tabs"></div>
+    <p class="blurb" id="blurb"></p>
+    <ol class="layers">
+      <li class="layer l1 on" id="L1">
+        <div class="head"><span class="n">1</span><h3>Move jobs between regions</h3>
+          <button type="button" class="switch" role="switch" aria-checked="true" id="s1" aria-label="Show jobs moving between regions"></button></div>
+        <p>Flexible AI work (training, batch jobs) runs wherever the power is cleanest that hour.</p>
+        <div class="num"><span id="n1">4.0%</span><small>less carbon on the worst days</small><span class="verdict">Pays</span></div>
+      </li>
+      <li class="layer l2" id="L2">
+        <div class="head"><span class="n">2</span><h3>Model how regions move together</h3>
+          <button type="button" class="switch" role="switch" aria-checked="false" id="s2" aria-label="Show how strongly the regions move together"></button></div>
+        <p id="p2">Lines show how closely each pair of regions rises and falls together.</p>
+        <div class="num"><span id="n2">0.04%</span><small>extra, below the 0.4% that would matter</small><span class="verdict">About zero</span></div>
+      </li>
+      <li class="layer l3" id="L3">
+        <div class="head"><span class="n">3</span><h3>Hedge against a grid emergency</h3>
+          <button type="button" class="switch" role="switch" aria-checked="false" id="s3" aria-label="Show a grid emergency"></button></div>
+        <p>Robust optimisation plans for the forecast going badly wrong. In the test, on one day in ten a region's carbon jumped by the multiple below.</p>
+        <div class="sev">
+          <label for="sevIn"><span>How bad the emergency is</span><b id="sevOut">1.0x</b></label>
+          <input type="range" id="sevIn" min="0" max="5" step="1" value="0" aria-describedby="n3note">
+          <div class="strip" aria-hidden="true"><span class="track"></span><span class="real" id="real"></span><span class="cross" id="cross"></span><span class="you" id="you"></span></div>
+          <div class="strip-keys" aria-hidden="true"><span>1x</span><span>2x</span><span>3x</span><span>4x</span></div>
+        </div>
+        <div class="num"><span id="n3">0.0%</span><small id="n3note">gained by hedging at this spike</small><span class="verdict" id="v3">Not worth it</span></div>
+        <p id="p3"></p>
+      </li>
+    </ol>
+    <p class="foot-note">The towers show real 2025 hourly averages. The moving jobs are a picture of the idea; every percentage is measured by the full scheduler on held-out 2025 data.</p>
+  </aside>
+</section>
+
+<section class="more">
+  <div class="in">
+    <h2>One layer pays. Two mostly do not.</h2>
+    <p>The question was never whether carbon-aware scheduling works; the industry already does it. It was how
+    sophisticated the model needs to be. Each layer was added one at a time to the same scheduler, with the
+    test rules written down before the 2025 data was opened.</p>
+    <div class="fig"><img src="value_ladder.svg" alt="Moving jobs between regions cuts worst-day emissions by 4.0 to 9.9%. Modelling regional co-movement adds at most 0.23%. Robust optimisation only pays in emergencies about three times worse than the 1.29x to 1.89x seen on real grids." width="1350" height="420" loading="lazy"></div>
+    <ul class="facts">
+      <li><b>Fund the lever that pays</b>Letting flexible AI jobs move between regions is an operating decision: a scheduler and a policy for which jobs may move.</li>
+      <li><b>Skip what does not</b>Joint dependence models and robust optimisation need specialist skills and slower solves, and added almost nothing on real grids.</li>
+      <li><b>Be honest about size</b>At a carbon price alone: about EUR 2k to 6k a year for 5 MW of flexible compute, EUR 49k to 120k for 100 MW.</li>
+    </ul>
+  </div>
+</section>
+</main>
+<footer><div class="in">Research Capstone in Operations Research, IE School of Science &amp; Technology, 2026. Marco Ortiz Togashi; supervisor Prof. Bissan Ghaddar.
+Carbon data: <a href="https://www.electricitymaps.com">Electricity Maps</a> (academic licence; this page shows only yearly hour-of-day averages, never the hourly series).</div></footer>
+
+<script src="grid_room_data.js"></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const D = window.GRID_ROOM, $ = (id) => document.getElementById(id);
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const C_CLEAN = new THREE.Color(css("--clean")), C_MID = new THREE.Color(css("--mid")), C_DIRTY = new THREE.Color(css("--dirty"));
+const LO = 90, HI = 520;                                   // g/kWh range of the colour scale
+const shade = (ci, out = new THREE.Color()) => {
+  const t = Math.min(1, Math.max(0, (ci - LO) / (HI - LO)));
+  return t < .5 ? out.copy(C_CLEAN).lerp(C_MID, t * 2) : out.copy(C_MID).lerp(C_DIRTY, (t - .5) * 2);
+};
+const SEVS = D.grids[0].emergency.map((e) => e.M);       // 1, 1.5, 2, 2.5, 3, 4
+
+let grid = D.grids[0], hour = 13, playing = !still, show = {move: true, comove: false, robust: false}, sevIdx = 0;
+
+// ---------- scene
+const canvas = $("gl"), stage = $("stage");
+let renderer;
+try { renderer = new THREE.WebGLRenderer({canvas, antialias: true}); }
+catch (e) { stage.insertAdjacentHTML("beforeend", '<p class="nogl">This browser could not start 3D. The numbers on the right still work.</p>'); }
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(css("--night"));
+scene.fog = new THREE.Fog(scene.background, 60, 140);
+const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 400);
+camera.position.set(0, 38, 46);
+const controls = renderer ? new OrbitControls(camera, canvas) : null;
+if (controls) {
+  controls.enableDamping = true; controls.enablePan = false;
+  controls.minDistance = 18; controls.maxDistance = 90; controls.maxPolarAngle = 1.25; controls.minPolarAngle = .35;
+}
+const hemi = new THREE.HemisphereLight(0x9fb3d1, 0x08142a, .9); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xffe2b0, 1.4); sun.position.set(20, 30, 10); scene.add(sun);
+
+// the table: a dotted floor
+const floorGeo = new THREE.PlaneGeometry(200, 200);
+const floor = new THREE.Mesh(floorGeo, new THREE.MeshStandardMaterial({color: 0x0b1a34, roughness: 1}));
+floor.rotation.x = -Math.PI / 2; scene.add(floor);
+{
+  const pts = [];
+  for (let x = -90; x <= 90; x += 3) for (let z = -90; z <= 90; z += 3) pts.push(x, .02, z);
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({color: 0x22406e, size: .14})));
+}
+
+// the table the grid sits on
+const table = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, .3, 96), new THREE.MeshStandardMaterial({color: 0x10254a, roughness: .9}));
+table.position.y = -.14; scene.add(table);
+const rim = new THREE.Mesh(new THREE.RingGeometry(.995, 1.0, 128), new THREE.MeshBasicMaterial({color: 0xe8a417, transparent: true, opacity: .55, side: THREE.DoubleSide}));
+rim.rotation.x = -Math.PI / 2; rim.position.y = .02; scene.add(rim);
+
+// map projection, centred on the US
+const LAT0 = 39, LON0 = -98, K = 1.25;
+const proj = (lat, lon) => new THREE.Vector3((lon - LON0) * Math.cos(LAT0 * Math.PI / 180) * K, 0, -(lat - LAT0) * K);
+
+// a data center per zone: pad, building, glowing column
+const towers = {}, labelBox = $("labels");
+const H = (ci) => .6 + ci / 42;                              // column height in scene units
+for (const [id, z] of Object.entries(D.zones)) {
+  const p = proj(z.lat, z.lon), g = new THREE.Group(); g.position.copy(p);
+  const pad = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.6, .25, 40), new THREE.MeshStandardMaterial({color: 0x132a50, roughness: .8}));
+  pad.position.y = .12; g.add(pad);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(2.55, 2.75, 48), new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: .35, side: THREE.DoubleSide}));
+  ring.rotation.x = -Math.PI / 2; ring.position.y = .26; g.add(ring);
+  const hall = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.1, 1.4), new THREE.MeshStandardMaterial({color: 0x2d5288, roughness: .55, metalness: .25}));
+  hall.position.set(-.5, .8, .6); g.add(hall);
+  const win = new THREE.Mesh(new THREE.BoxGeometry(2.0, .18, .02), new THREE.MeshBasicMaterial({color: 0xe8a417}));
+  win.position.set(-.5, .9, 1.31); g.add(win);
+  const colMat = new THREE.MeshStandardMaterial({color: 0x4fbf7d, emissive: 0x4fbf7d, emissiveIntensity: .55, roughness: .4, transparent: true, opacity: .92});
+  const col = new THREE.Mesh(new THREE.CylinderGeometry(.75, .75, 1, 32), colMat);
+  col.position.set(.9, .5, -.5); g.add(col);
+  const cap = new THREE.Mesh(new THREE.TorusGeometry(.85, .04, 8, 40), new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: .5}));
+  cap.rotation.x = Math.PI / 2; cap.position.set(.9, 1, -.5); g.add(cap);
+  scene.add(g);
+  const tag = document.createElement("div"); tag.className = "tag"; tag.innerHTML = `${z.name}<i></i>`; labelBox.appendChild(tag);
+  towers[id] = {g, col, colMat, cap, win, ring, tag, base: p.clone(), ci: 0, spike: 1};
+}
+
+// each grid gets its own map: real relative positions, scaled to the table, nudged apart
+function layout() {
+  const pts = grid.zones.map((id) => proj(D.zones[id].lat, D.zones[id].lon));
+  const box = new THREE.Box3().setFromPoints(pts), c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3());
+  const k = 26 / Math.max(sz.x, sz.z, 1);
+  pts.forEach((p) => p.sub(c).multiplyScalar(k).setY(0));
+  for (let it = 0; it < 80; it++)                          // keep at least 10 units between towers
+    for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) {
+      const d = pts[j].clone().sub(pts[i]), L = d.length();
+      if (L < 11) { d.setLength((11 - L) / 2 || .1); pts[i].sub(d); pts[j].add(d); }
+    }
+  const c2 = new THREE.Box3().setFromPoints(pts).getCenter(new THREE.Vector3()).setY(0);
+  pts.forEach((p) => p.sub(c2));
+  const r = Math.max(...pts.map((p) => p.length())) + 5;
+  table.scale.set(r, 1, r); rim.scale.set(r, r, 1);
+  grid.zones.forEach((id, i) => { towers[id].base.copy(pts[i]); towers[id].g.position.copy(pts[i]); });
+}
+
+// correlation lines (layer 2), rebuilt per grid
+const linkGroup = new THREE.Group(); scene.add(linkGroup);
+function buildLinks() {
+  linkGroup.clear();
+  for (const pr of grid.pairs) {
+    const a = towers[pr.a].base, b = towers[pr.b].base;
+    const mid = a.clone().add(b).multiplyScalar(.5); mid.y = 1.5 + a.distanceTo(b) * .12;
+    const curve = new THREE.QuadraticBezierCurve3(a.clone().setY(.4), mid, b.clone().setY(.4));
+    const r = Math.max(0, pr.r);
+    const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, .06 + .22 * r, 8, false),
+      new THREE.MeshBasicMaterial({color: 0x9fb3d1, transparent: true, opacity: .15 + .7 * r}));
+    tube.userData = pr; linkGroup.add(tube);
+  }
+}
+
+// moving jobs (layer 1)
+const jobs = [], jobGeo = new THREE.BoxGeometry(.42, .42, .42);
+const jobMat = new THREE.MeshBasicMaterial({color: 0xe8a417});
+let spawnClock = 0;
+function spawnJob(from, to) {
+  const m = new THREE.Mesh(jobGeo, jobMat);
+  const a = towers[from].base.clone().setY(1.2), b = towers[to].base.clone().setY(1.2);
+  const mid = a.clone().add(b).multiplyScalar(.5); mid.y = 3 + a.distanceTo(b) * .22;
+  m.userData = {curve: new THREE.QuadraticBezierCurve3(a, mid, b), t: 0, speed: 1 / (1.2 + a.distanceTo(b) * .03)};
+  scene.add(m); jobs.push(m);
+}
+
+// ---------- data per hour
+const localToUtc = (h) => ((h - grid.tz) % 24 + 24) % 24;
+function ciAt(id, localHour) {
+  const arr = D.zones[id].hourly_utc, u = localToUtc(localHour), i = Math.floor(u), f = u - i;
+  return arr[i] * (1 - f) + arr[(i + 1) % 24] * f;
+}
+const cleanest = () => grid.zones.reduce((best, id) => (towers[id].ci < towers[best].ci ? id : best), grid.zones[0]);
+// the emergency always hits the region that is cleanest on average: the one everyone moves work to
+const target = () => grid.zones.reduce((best, id) => (D.zones[id].mean < D.zones[best].mean ? id : best), grid.zones[0]);
+
+// ---------- camera framing per grid
+const camGoal = {pos: new THREE.Vector3(), look: new THREE.Vector3()};
+function frame() {
+  const box = new THREE.Box3();
+  for (const id of grid.zones) box.expandByPoint(towers[id].base);
+  const c = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3());
+  // back the camera off until the table rim and the tallest columns all fit on screen
+  const half = table.scale.x, probe = camera.clone(), pts = [];
+  for (let a = 0; a < 16; a++) pts.push(new THREE.Vector3(c.x + Math.cos(a / 8 * Math.PI) * half, 0, c.z + Math.sin(a / 8 * Math.PI) * half));
+  for (const id of grid.zones) pts.push(towers[id].base.clone().setY(H(D.zones[id].mean) + 3));
+  camGoal.look.copy(c).setY(1.5);
+  probe.aspect = stage.clientWidth / Math.max(1, stage.clientHeight); probe.updateProjectionMatrix();
+  for (let d = 10; d < 400; d *= 1.04) {
+    probe.position.set(c.x, d * .72, c.z + d * .69); probe.lookAt(camGoal.look); probe.updateMatrixWorld();
+    if (pts.every((p) => { const q = p.clone().project(probe); return q.z > -1 && q.z < 1 && Math.abs(q.x) < .9 && Math.abs(q.y) < .84; })) {
+      camGoal.pos.copy(probe.position); break;
+    }
+  }
+}
+
+// ---------- panel
+function setGrid(g, first) {
+  grid = g;
+  if (controls) controls.userData = {held: false};
+  [...$("tabs").children].forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.key === g.key)));
+  $("blurb").textContent = g.blurb;
+  $("tz").textContent = g.clock;
+  $("n1").textContent = g.move_pct.toFixed(1) + "%";
+  $("n2").textContent = g.comove_pct.toFixed(2) + "%";
+  $("p2").textContent = `Lines show how closely each pair of regions rises and falls together (average correlation ${g.mean_corr.toFixed(2)}; 1 means in lockstep). The scheduler already sees each region's average day, which carries nearly all of the value.`;
+  for (const [id, t] of Object.entries(towers)) {
+    const on = g.zones.includes(id);
+    t.g.visible = on; t.tag.classList.toggle("dim", !on);
+  }
+  jobs.splice(0).forEach((m) => scene.remove(m));
+  layout(); buildLinks(); linkGroup.visible = show.comove;
+  frame();
+  if (first || still) { camera.position.copy(camGoal.pos); controls?.target.copy(camGoal.look); }
+  const pct = (m) => ((m - 1) / 3 * 100).toFixed(1) + "%";
+  $("real").style.left = pct(1); $("real").style.width = `calc(${pct(g.real_severity)} - 0%)`;
+  $("cross").style.left = pct(D.crossover);
+  setSev(sevIdx);
+  tick(0, true);
+}
+
+function setSev(i) {
+  sevIdx = i;
+  const e = grid.emergency[i], M = e.M;
+  $("sevIn").value = i;
+  $("sevOut").textContent = M.toFixed(1) + "x";
+  $("you").style.left = ((M - 1) / 3 * 100).toFixed(1) + "%";
+  $("n3").textContent = Math.abs(e.gain) < .05 ? "0.0%" : (e.gain > 0 ? "+" : "") + e.gain.toFixed(1) + "%";
+  const worth = e.sig && e.gain >= 1;                    // clearly above zero and above noise
+  $("v3").textContent = worth ? "Starts to pay" : "Not worth it";
+  const name = D.zones[target()].name;
+  $("p3").innerHTML = `The worst real emergencies on this grid reached <b>${grid.real_severity.toFixed(2)}x</b> (shaded). `
+    + (worth ? `At ${M}x, hedging starts to earn its keep. Real grids never got this bad.`
+             : M <= grid.real_severity + .2 ? `At real levels, hedging buys nothing measurable and costs a slower, more specialised model.`
+             : `Even at ${M}x, the gain is too small or too uncertain to be worth the extra model.`)
+    + ` (On the map it hits ${name}, where the jobs usually go.)`
+    + ` Measured range: ${e.lo.toFixed(1)}% to ${e.hi.toFixed(1)}%.`;
+}
+
+for (const g of D.grids) {
+  const b = document.createElement("button");
+  b.type = "button"; b.textContent = g.name; b.dataset.key = g.key;
+  b.onclick = () => setGrid(g);
+  $("tabs").appendChild(b);
+}
+const sw = (id, key, layer) => {
+  const el = $(id);
+  el.onclick = () => {
+    show[key] = el.getAttribute("aria-checked") !== "true";
+    el.setAttribute("aria-checked", String(show[key])); $(layer).classList.toggle("on", show[key]);
+    if (key === "comove") linkGroup.visible = show.comove;
+    if (key === "move" && !show.move) jobs.splice(0).forEach((m) => scene.remove(m));
+    tick(0, true);
+  };
+};
+sw("s1", "move", "L1"); sw("s2", "comove", "L2"); sw("s3", "robust", "L3");
+$("sevIn").oninput = (e) => {
+  setSev(+e.target.value);
+  if (!show.robust) $("s3").click();
+};
+
+// clock
+const fmt = (h) => `${String(Math.floor(h)).padStart(2, "0")}:${String(Math.floor((h % 1) * 60)).padStart(2, "0")}`;
+function setPlaying(p) {
+  playing = p;
+  $("play").setAttribute("aria-label", p ? "Pause the day" : "Play the day");
+  $("pIcon1").style.display = $("pIcon2").style.display = p ? "" : "none";
+  $("pIcon3").style.display = p ? "none" : "";
+}
+$("play").onclick = () => setPlaying(!playing);
+$("hour").oninput = (e) => { hour = +e.target.value; setPlaying(false); tick(0, true); };
+setPlaying(playing);
+
+// ---------- frame loop
+const tmpC = new THREE.Color(), v = new THREE.Vector3();
+function tick(dt, force) {
+  if (playing) hour = (hour + dt * 1.0) % 24;               // one hour per second
+  $("hour").value = hour.toFixed(2);
+  $("time").textContent = fmt(hour);
+
+  const tgt = target(), M = grid.emergency[sevIdx].M;
+  for (const id of grid.zones) {
+    const t = towers[id];
+    let ci = ciAt(id, hour);
+    t.spike = show.robust && id === tgt ? M : 1;
+    ci *= t.spike;
+    t.ci = ci;
+  }
+  const best = cleanest();
+  for (const id of grid.zones) {
+    const t = towers[id], h = H(t.ci);
+    t.col.scale.y = h; t.col.position.y = h / 2 + .25; t.cap.position.y = h + .25;
+    shade(t.ci, tmpC); t.colMat.color.copy(tmpC); t.colMat.emissive.copy(tmpC);
+    t.colMat.emissiveIntensity = t.spike > 1 ? .55 + .35 * (0.5 + 0.5 * Math.sin(performance.now() / 180)) : .5;
+    const busy = show.move && id === best;
+    t.win.material.color.set(busy ? 0xffd27a : 0x6b5a2e);
+    t.ring.material.opacity = id === best ? .8 : .25;
+    t.ring.material.color.copy(id === best ? C_CLEAN : new THREE.Color(0xffffff));
+    t.tag.classList.toggle("best", id === best);
+    t.tag.querySelector("i").textContent = `${Math.round(t.ci)} g/kWh` + (t.spike > 1 ? ` · ${M}x spike` : "");
+  }
+
+  // jobs leave the regions dirtier than average for the cleanest one
+  if (show.move && !still && dt > 0) {
+    spawnClock += dt;
+    const avg = grid.zones.reduce((s, id) => s + towers[id].ci, 0) / grid.zones.length;
+    if (spawnClock > .16) {
+      spawnClock = 0;
+      const dirty = grid.zones.filter((id) => id !== best && towers[id].ci > avg);
+      if (dirty.length && jobs.length < 60) {
+        const w = dirty.map((id) => towers[id].ci - towers[best].ci), tot = w.reduce((a, b) => a + b, 0);
+        let r = Math.random() * tot, pick = dirty[0];
+        for (let i = 0; i < dirty.length; i++) { r -= w[i]; if (r <= 0) { pick = dirty[i]; break; } }
+        spawnJob(pick, best);
+      }
+    }
+  }
+  for (let i = jobs.length - 1; i >= 0; i--) {
+    const m = jobs[i], u = m.userData;
+    u.t += dt * u.speed;
+    if (u.t >= 1) { scene.remove(m); jobs.splice(i, 1); continue; }
+    u.curve.getPoint(u.t, m.position); m.rotation.y += dt * 2; m.rotation.x += dt;
+  }
+
+  // the light follows the clock
+  const day = Math.max(0, Math.sin((hour - 6) / 12 * Math.PI));
+  sun.intensity = .35 + 1.3 * day; hemi.intensity = .55 + .5 * day;
+  sun.position.set(Math.cos((hour - 6) / 12 * Math.PI) * 40, 8 + 30 * day, 10);
+}
+
+function place() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  for (const id of Object.keys(towers)) {
+    const t = towers[id];
+    if (!t.g.visible) continue;
+    v.copy(t.base); v.y = H(t.ci) + 1.6; v.project(camera);
+    const on = v.z < 1 && v.x > -1.1 && v.x < 1.1 && v.y > -1.1 && v.y < 1.1;
+    t.tag.style.opacity = on ? "" : "0";
+    t.tag.style.transform = `translate(${(v.x * .5 + .5) * w}px, ${(-v.y * .5 + .5) * h}px) translate(-50%,-100%)`;
+  }
+}
+
+function resize() {
+  if (!renderer) return;
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  frame();
+}
+new ResizeObserver(resize).observe(stage);
+
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(.1, (now - last) / 1000); last = now;
+  tick(dt);
+  if (controls) {
+    if (!controls.userData?.held) {
+      camera.position.lerp(camGoal.pos, 1 - Math.pow(.02, dt));
+      controls.target.lerp(camGoal.look, 1 - Math.pow(.02, dt));
+    }
+    controls.update();
+  }
+  if (renderer) renderer.render(scene, camera);
+  place();
+  requestAnimationFrame(loop);
+}
+// after the user drags, leave the camera where they put it until they switch grids
+controls?.addEventListener("start", () => { controls.userData = {held: true}; });
+resize();
+setGrid(D.grids[0], true);
+requestAnimationFrame(loop);
+window.GRID_READY = true;
+</script>
+</body>
+</html>

@@ -6,6 +6,8 @@ layer of modelling sophistication actually buys.
 **Research Capstone in Operations Research · IE School of Science & Technology · 2026**
 **Student:** Marco Ortiz Togashi · **Supervisor:** Prof. Bissan Ghaddar
 
+**See it:** [the grid room](https://ma731.github.io/Capstone-in-Operations-Research/), a 3D day on the three grids with the measured results.
+
 `460 tests collected (447 in public CI)` · `Python ≥ 3.10` · `free solvers only (no Gurobi needed)` · `every reported number traces to a SHA-256-frozen snapshot`
 
 ---
