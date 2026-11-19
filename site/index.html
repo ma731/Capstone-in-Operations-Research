@@ -3,198 +3,345 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Grid Room · The Price of Sophistication</title>
-<meta name="description" content="A day on three real power grids: where moving AI compute between regions pays, and where fancier models do not.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2308142a'/%3E%3Crect x='6' y='14' width='5' height='12' rx='1' fill='%234fbf7d'/%3E%3Crect x='13.5' y='8' width='5' height='18' rx='1' fill='%23e8a417'/%3E%3Crect x='21' y='4' width='5' height='22' rx='1' fill='%23d9573b'/%3E%3C/svg%3E">
+<title>The Price of Sophistication</title>
+<meta name="description" content="A day on three real power grids: where moving AI compute between regions pays, and where fancier models do not. Research capstone in operations research, IE University, 2026.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23070a12'/%3E%3Crect x='7' y='15' width='3' height='12' rx='1.5' fill='%235fdca6'/%3E%3Crect x='14.5' y='9' width='3' height='18' rx='1.5' fill='%23f2b441'/%3E%3Crect x='22' y='4' width='3' height='23' rx='1.5' fill='%23f0583a'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
 <style>
 :root{
   color-scheme:dark;
-  --night:#08142a; --room:#0c1d38; --panel:#0f2242; --well:#132a50; --line:#22406e; --line-hi:#37588a;
-  --ink:#eef2f8; --ink-2:#b4c2d8; --ink-3:#8496b2;
-  --gold:#e8a417; --clean:#4fbf7d; --mid:#e8a417; --dirty:#d9573b; --comove:#9fb3d1; --robust:#f0b45a;
-  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
-  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --bg:#070a12; --bg-2:#0c111c; --bg-3:#121928; --line:#1f2737; --line-hi:#323d52;
+  --ink:#f3f1ea; --ink-2:#b9c0cc; --ink-3:#8a93a3;
+  --sodium:#f2b441; --clean:#5fdca6; --dirty:#f0583a; --steel:#9db8e0;
+  --serif:"Instrument Serif","Iowan Old Style",Georgia,serif;
+  --sans:"Geist",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Geist Mono",ui-monospace,Consolas,monospace;
+  --copyW:min(500px,40vw);
+  --gut:max(16px,env(safe-area-inset-left,0px));
+  --gutR:max(16px,env(safe-area-inset-right,0px));
+  --ease:cubic-bezier(.22,1,.36,1);
 }
 *{box-sizing:border-box}
+html{scroll-behavior:smooth}
 html,body{margin:0}
-body{background:var(--night);color:var(--ink);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
-a{color:var(--gold)}
-h1,h2,h3{font-family:var(--serif);font-weight:600;text-wrap:balance;margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:clip}
+a{color:inherit}
+h1,h2,h3{font-family:var(--serif);font-weight:400;text-wrap:balance;margin:0;letter-spacing:-.01em}
+p{margin:0;text-wrap:pretty}
 b{font-weight:600;color:var(--ink)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--sodium);outline-offset:3px;border-radius:4px}
 
-/* top bar */
-.top{display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line);background:var(--night)}
-.top h1{font-size:19px;letter-spacing:-.01em}
-.top h1 span{color:var(--ink-3);font-weight:500}
-.top h1 span::before{content:"· "}
-.top nav{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
-.pill{font:500 13px var(--sans);color:var(--ink);text-decoration:none;border:1px solid var(--line-hi);border-radius:999px;padding:6px 12px;white-space:nowrap}
-.pill:hover{border-color:var(--gold);color:var(--gold)}
-
-/* the room */
-.room{display:grid;grid-template-columns:minmax(0,1fr) 400px;height:calc(100vh - 58px);height:calc(100svh - 58px);min-height:560px}
-.stage{position:relative;min-width:0;background:radial-gradient(120% 90% at 50% 30%,var(--room),var(--night))}
-#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
-.labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.tag{position:absolute;left:0;top:0;transform:translate(-50%,-100%);white-space:nowrap;text-align:center;font:500 12px var(--sans);color:var(--ink);text-shadow:0 1px 3px #000a;transition:opacity .3s}
-.tag i{display:block;font:500 11px var(--mono);font-style:normal;color:var(--ink-2)}
-.tag.dim{opacity:.0}
+/* the scene sits behind everything */
+#gl{position:fixed;inset:0;width:100vw;height:100vh;height:100lvh;display:block;z-index:0}
+.veil{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(90deg,var(--bg) 0,rgba(7,10,18,.86) calc(var(--copyW) + 4vw),rgba(7,10,18,0) calc(var(--copyW) + 22vw)),
+             linear-gradient(0deg,rgba(7,10,18,.7),rgba(7,10,18,0) 22%)}
+.labels{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.tag{position:absolute;left:0;top:0;white-space:nowrap;font:500 13px var(--sans);color:var(--ink);text-shadow:0 1px 8px #000,0 0 2px #000;transition:opacity .4s var(--ease);will-change:transform}
+.tag i{display:block;font:500 11.5px var(--mono);font-style:normal;color:var(--ink-2)}
 .tag.best i{color:var(--clean)}
+.tag.hit i{color:var(--dirty)}
+.tag::before{content:"";position:absolute;left:-10px;top:7px;width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.6}
+.rtag{position:absolute;left:0;top:0;font:500 11px var(--mono);color:var(--steel);text-shadow:0 1px 6px #000;transition:opacity .4s}
 
-.clock{position:absolute;left:max(16px,env(safe-area-inset-left,0px));right:16px;bottom:16px;display:flex;align-items:center;gap:12px;max-width:560px;background:#0a1830e6;border:1px solid var(--line);border-radius:14px;padding:10px 14px}
-.clock button{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--line-hi);background:var(--well);color:var(--ink);cursor:pointer;display:grid;place-items:center}
-.clock button:hover{border-color:var(--gold)}
-.clock .time{font:500 20px var(--mono);min-width:5ch}
-.clock .tz{font:500 11px var(--sans);color:var(--ink-3);display:block}
-.clock input{flex:1;min-width:0;accent-color:var(--gold)}
-.legend{position:absolute;right:16px;top:14px;display:flex;align-items:center;gap:8px;font:500 11px var(--mono);color:var(--ink-2);background:#0a1830cc;border:1px solid var(--line);border-radius:10px;padding:6px 10px}
-.legend .bar{width:90px;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--clean),var(--mid),var(--dirty))}
-.hint{position:absolute;left:16px;top:14px;font:500 12px var(--sans);color:var(--ink-3);max-width:40ch}
+/* reading progress */
+.prog{position:fixed;top:0;left:0;right:0;height:2px;z-index:8;background:var(--sodium);transform-origin:0 50%;transform:scaleX(0);pointer-events:none}
+.keys{font:500 12px var(--sans);color:var(--ink-3)}
+.keys kbd{font:500 11px var(--mono);color:var(--ink-2);border:1px solid var(--line-hi);border-radius:4px;padding:1px 5px}
+.tag.quiet i{display:none}
+/* top bar */
+.top{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:16px;padding:14px var(--gutR) 14px var(--gut);padding-top:calc(14px + env(safe-area-inset-top,0px))}
+.brand{font:400 20px var(--serif);text-decoration:none;letter-spacing:-.01em}
+.brand em{color:var(--sodium)}
+.top nav{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.top nav a{font:500 13px var(--sans);text-decoration:none;color:var(--ink-2);padding:7px 12px;border-radius:999px;border:1px solid transparent;transition:color .2s,border-color .2s,background .2s}
+.top nav a:hover{color:var(--ink);border-color:var(--line-hi);background:rgba(12,17,28,.7)}
 
-/* panel */
-.panel{border-left:1px solid var(--line);background:var(--panel);padding:18px 18px 22px;display:flex;flex-direction:column;gap:16px;min-width:0;overflow:auto}
-.tabs{display:flex;gap:6px;flex-wrap:wrap}
-.tabs button{font:500 13px var(--sans);color:var(--ink-2);background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer}
-.tabs button[aria-pressed="true"]{color:var(--night);background:var(--ink);border-color:var(--ink)}
-.blurb{color:var(--ink-2);margin:0;font-size:14px}
-.layers{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
-.layer{border:1px solid var(--line);border-radius:14px;background:var(--well);padding:12px 14px;transition:border-color .2s}
-.layer.on{border-color:var(--line-hi)}
-.layer .head{display:flex;align-items:center;gap:10px}
-.layer .n{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:600 12px var(--mono);color:var(--night)}
-.layer h3{font-size:16px;flex:1}
-.layer p{margin:6px 0 0;color:var(--ink-2);font-size:13.5px}
-.layer .num{font:600 26px var(--serif);letter-spacing:-.01em;margin-top:6px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.layer .num small{font:500 12.5px var(--sans);color:var(--ink-2)}
-.verdict{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:3px 7px}
-.l1 .n{background:var(--clean)} .l1 .num{color:var(--clean)} .l1 .verdict{background:#4fbf7d26;color:var(--clean)}
-.l2 .n{background:var(--comove)} .l2 .num{color:var(--comove)} .l2 .verdict{background:#9fb3d126;color:var(--comove)}
-.l3 .n{background:var(--robust)} .l3 .num{color:var(--robust)} .l3 .verdict{background:#f0b45a26;color:var(--robust)}
-.switch{position:relative;flex:none;width:42px;height:24px;border-radius:12px;border:1px solid var(--line-hi);background:var(--night);cursor:pointer;padding:0}
-.switch::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--ink-3);transition:transform .2s cubic-bezier(.22,1,.36,1),background .2s}
-.switch[aria-checked="true"]{background:var(--line-hi)}
-.switch[aria-checked="true"]::after{transform:translateX(18px);background:var(--ink)}
-.sev{margin-top:10px}
-.sev label{display:flex;justify-content:space-between;font:500 12.5px var(--sans);color:var(--ink-2)}
-.sev input{width:100%;accent-color:var(--robust)}
-.strip{position:relative;height:30px;margin-top:4px}
-.strip .track{position:absolute;left:0;right:0;top:12px;height:6px;border-radius:3px;background:var(--night)}
-.strip .real{position:absolute;top:8px;height:14px;border-radius:3px;background:#9fb3d155}
-.strip .cross{position:absolute;top:4px;width:2px;height:22px;background:var(--robust)}
-.strip .you{position:absolute;top:6px;width:12px;height:18px;border-radius:3px;background:var(--ink);transform:translateX(-50%);transition:left .2s}
-.strip-keys{display:flex;justify-content:space-between;font:500 10.5px var(--mono);color:var(--ink-3)}
-.foot-note{font-size:12px;color:var(--ink-3);margin:0}
+/* chapters */
+main{position:relative;z-index:3;pointer-events:none}
+.ch{min-height:100vh;min-height:100svh;display:flex;align-items:center;padding:110px var(--gutR) 120px var(--gut)}
+.ch .copy{pointer-events:auto;width:var(--copyW);padding-left:clamp(0px,3vw,48px);display:flex;flex-direction:column;gap:18px}
+.ch h2{font-size:clamp(34px,3.4vw,50px);line-height:1.04}
+.ch h2 em{font-style:italic;color:var(--sodium)}
+.ch p{color:var(--ink-2);max-width:56ch}
+.step{font:500 12px var(--mono);color:var(--ink-3);letter-spacing:.04em}
+.step b{color:var(--ink);font-weight:500}
 
-/* below the room */
-.more{padding:56px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--line)}
-.more .in{max-width:1080px;margin:0 auto;display:grid;gap:28px}
-.more h2{font-size:clamp(24px,3vw,34px);letter-spacing:-.015em;max-width:24ch}
-.more p{color:var(--ink-2);max-width:68ch;margin:0;text-wrap:pretty}
-.fig{background:#fbfcfe;border-radius:14px;padding:14px;overflow-x:auto}
-.fig img{display:block;width:100%;min-width:640px;height:auto}
-.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px 32px;margin:0;padding:0;list-style:none}
-.facts li{border-top:1px solid var(--line);padding-top:12px;color:var(--ink-2);font-size:14px}
-.facts b{display:block;font-family:var(--serif);font-size:17px;margin-bottom:4px}
-footer{padding:20px max(16px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));color:var(--ink-3);font-size:12.5px;border-top:1px solid var(--line)}
-footer .in{max-width:1080px;margin:0 auto}
-.nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--ink-2)}
+.hero{align-items:flex-end;padding-bottom:clamp(64px,12vh,140px)}
+.hero .copy{width:min(760px,100%);gap:22px}
+.hero h1{font-size:clamp(54px,7.6vw,96px);line-height:.95;letter-spacing:-.02em}
+.hero h1 em{color:var(--sodium)}
+.hero .lead{font-size:clamp(17px,1.4vw,19px);color:var(--ink-2);max-width:48ch}
+.byline{font:500 12.5px var(--mono);color:var(--ink-3);text-wrap:balance}
+.cue{display:inline-flex;align-items:center;gap:10px;font:500 13px var(--sans);color:var(--ink);text-decoration:none;align-self:flex-start;padding:10px 16px;border-radius:999px;border:1px solid var(--line-hi);background:rgba(12,17,28,.6);transition:border-color .2s,background .2s}
+.cue:hover{border-color:var(--sodium);background:rgba(242,180,65,.08)}
+.cue svg{animation:nudge 2.2s var(--ease) infinite}
+@keyframes nudge{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(4px)}}
 
-@media (max-width:980px){
-  .room{grid-template-columns:minmax(0,1fr);height:auto;min-height:0}
-  .stage{height:62vh;height:62svh;min-height:380px}
-  .panel{border-left:0;border-top:1px solid var(--line)}
-  .legend{top:auto;bottom:84px}
-  .hint{display:none}
+/* big measured number */
+.fig{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.fig .big{font:400 clamp(64px,6.4vw,92px)/.9 var(--serif);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.fig .what{font-size:15px;color:var(--ink-2);max-width:22ch;line-height:1.35}
+.c-clean{color:var(--clean)} .c-steel{color:var(--steel)} .c-sodium{color:var(--sodium)} .c-dirty{color:var(--dirty)}
+.chip{display:inline-flex;align-items:center;gap:7px;font:500 12px var(--mono);border-radius:999px;padding:5px 11px;border:1px solid currentColor;align-self:flex-start;white-space:nowrap}
+.chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* small charts */
+.bars{display:grid;gap:9px;margin:2px 0 0;padding:0;list-style:none}
+.bars li{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr) 4.2em;align-items:center;gap:10px;font-size:13px;color:var(--ink-3);cursor:pointer;border-radius:6px}
+.bars li.on{color:var(--ink)}
+.bars .tr{position:relative;height:8px;border-radius:4px;background:var(--bg-3)}
+.bars .fill{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--bc);opacity:.3;width:0;transition:width 1s var(--ease)}
+.bars.c-clean{--bc:var(--clean)} .bars.c-steel{--bc:var(--steel)}
+.bars li.on .fill{opacity:1}
+.bars .v{font:500 12.5px var(--mono);text-align:right}
+.bars .thr{position:absolute;top:-5px;bottom:-5px;width:0;border-left:1.5px dashed var(--ink-3)}
+.thr-note{font:500 11.5px var(--mono);color:var(--ink-3)}
+svg.chart{display:block;width:100%;height:auto;overflow:visible}
+svg.chart text{font:500 10.5px var(--mono);fill:var(--ink-3)}
+
+/* grid picker */
+.picker{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.picker button{width:100%;text-align:left;display:grid;grid-template-columns:14px minmax(0,1fr);gap:4px 12px;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:rgba(12,17,28,.72);cursor:pointer;transition:border-color .25s,background .25s}
+.picker button:hover{border-color:var(--line-hi)}
+.picker button[aria-pressed="true"]{border-color:rgba(242,180,65,.6);background:rgba(242,180,65,.07)}
+.picker .dot{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--ink-3);margin-top:8px}
+.picker button[aria-pressed="true"] .dot{background:var(--sodium);border-color:var(--sodium);box-shadow:0 0 12px var(--sodium)}
+.picker .nm{font:400 22px/1.2 var(--serif)}
+.picker .meta{grid-column:2;font:500 11.5px var(--mono);color:var(--ink-3)}
+.picker .bl{grid-column:2;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+
+/* emergency slider */
+.sev{display:grid;gap:8px}
+.sev label{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;color:var(--ink-2)}
+.sev label b{font:400 28px var(--serif);color:var(--sodium)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;cursor:pointer;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line-hi)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--line-hi)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--ink);margin-top:-7px;box-shadow:0 0 0 4px rgba(242,180,65,.25)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:var(--ink);box-shadow:0 0 0 4px rgba(242,180,65,.25)}
+
+/* the ladder */
+.ladder{display:grid;gap:0;margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+.ladder li{display:grid;grid-template-columns:2.2em minmax(0,1fr) auto;gap:4px 12px;padding:14px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.ladder .n{font:500 12px var(--mono);color:var(--ink-3)}
+.ladder .t{font:400 21px/1.2 var(--serif)}
+.ladder .val{font:500 15px var(--mono);text-align:right}
+.ladder .cost{grid-column:2/4;font-size:13px;color:var(--ink-3)}
+.ladder .tr{grid-column:2/4;height:6px;border-radius:3px;background:var(--bg-3);position:relative;margin-top:4px}
+.ladder .tr span{position:absolute;inset:0 auto 0 0;border-radius:3px;background:currentColor;width:0;transition:width 1.2s var(--ease)}
+.takeaways{display:grid;gap:16px;margin:6px 0 0;padding:0;list-style:none}
+.takeaways li{font-size:14.5px;color:var(--ink-2)}
+.takeaways b{display:block;font:400 21px/1.25 var(--serif);color:var(--ink);margin-bottom:2px}
+
+/* explore */
+.toggles{display:flex;gap:8px;flex-wrap:wrap}
+.toggles button{display:inline-flex;align-items:center;gap:8px;font:500 13px var(--sans);padding:8px 14px;border-radius:999px;border:1px solid var(--line-hi);background:rgba(12,17,28,.72);cursor:pointer;color:var(--ink-2)}
+.toggles button[aria-pressed="true"]{color:var(--ink);border-color:currentColor}
+.toggles button::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--line-hi)}
+.toggles button[aria-pressed="true"]::before{background:var(--tc)}
+.links{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;font:500 14px var(--sans);text-decoration:none;padding:11px 18px;border-radius:999px;border:1px solid var(--line-hi);background:rgba(12,17,28,.72);transition:border-color .2s}
+.btn:hover{border-color:var(--sodium)}
+.btn.solid{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.solid:hover{background:var(--sodium);border-color:var(--sodium)}
+.small{font-size:13px;color:var(--ink-3)}
+.small a{color:var(--ink-2)}
+
+/* dock: grid switch and clock */
+.dock{position:fixed;z-index:6;left:calc(var(--copyW) + var(--gut) + 3vw);right:76px;bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;pointer-events:none;transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.dock.off{opacity:0;transform:translateY(12px)}
+.dock.off *{pointer-events:none!important}
+.dock .in{pointer-events:auto;display:flex;align-items:center;gap:10px;padding:6px;border-radius:999px;background:rgba(12,17,28,.86);border:1px solid var(--line-hi);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);max-width:100%}
+.seg{display:flex;gap:2px}
+.seg button{font:500 13px var(--sans);color:var(--ink-2);background:transparent;border:0;border-radius:999px;padding:8px 13px;cursor:pointer;white-space:nowrap;transition:color .2s,background .2s}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.seg .s{display:none}
+.clock{display:flex;align-items:center;gap:10px;padding:0 8px 0 4px;border-left:1px solid var(--line-hi);min-width:0}
+.clock button{flex:none;width:32px;height:32px;margin-left:8px;border-radius:50%;border:0;background:var(--bg-3);display:grid;place-items:center;cursor:pointer}
+.clock button:hover{background:var(--line-hi)}
+.clock .time{font:500 15px var(--mono);font-variant-numeric:tabular-nums}
+.clock .tz{font:500 11px var(--sans);color:var(--ink-3);display:block;line-height:1.1}
+.clock input{width:130px;height:24px}
+
+/* chapter rail */
+.rail{position:fixed;z-index:6;right:var(--gutR);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
+.rail a{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:6px 4px;text-decoration:none;font:500 12px var(--sans);color:var(--ink-3)}
+.rail a span{opacity:0;transform:translateX(6px);transition:opacity .25s,transform .25s var(--ease);white-space:nowrap}
+.rail a i{width:7px;height:7px;border-radius:50%;background:var(--line-hi);transition:background .3s,transform .3s var(--ease)}
+.rail a:hover span,.rail a:focus-visible span,.rail a[aria-current="true"] span{opacity:1;transform:none}
+.rail a[aria-current="true"]{color:var(--ink)}
+.rail a[aria-current="true"] i{background:var(--sodium);transform:scale(1.5)}
+
+footer{position:relative;z-index:3;padding:28px var(--gutR) calc(36px + env(safe-area-inset-bottom,0px)) var(--gut);color:var(--ink-3);font-size:12.5px;background:var(--bg);border-top:1px solid var(--line)}
+footer .in{max-width:1100px;padding-left:clamp(0px,3vw,48px)}
+footer a{color:var(--ink-2)}
+.nogl{position:fixed;inset:0;display:grid;place-items:center;color:var(--ink-3);z-index:0}
+
+/* entrance: content is visible by default; this only animates it in */
+.seen .copy>*{animation:rise .9s var(--ease) both}
+.seen .copy>*:nth-child(2){animation-delay:.06s}.seen .copy>*:nth-child(3){animation-delay:.12s}
+.seen .copy>*:nth-child(4){animation-delay:.18s}.seen .copy>*:nth-child(5){animation-delay:.24s}
+.seen .copy>*:nth-child(n+6){animation-delay:.3s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+@media (max-width:1180px){ .clock input{display:none} }
+@media (max-width:1100px){ .rail{display:none} .dock{right:var(--gutR)} }
+@media (max-width:820px){
+  :root{--copyW:100%}
+  .veil{background:linear-gradient(0deg,var(--bg) 0,rgba(7,10,18,.9) 34%,rgba(7,10,18,0) 56%),linear-gradient(180deg,rgba(7,10,18,.8),rgba(7,10,18,0) 140px)}
+  .ch{align-items:flex-end;padding:120px var(--gutR) 28px var(--gut);min-height:100svh}
+  .ch .copy{padding:22px 18px;border-radius:20px;background:rgba(12,17,28,.92);border:1px solid var(--line);margin-top:48svh}
+  .hero .copy{background:transparent;border:0;padding:0}
+  .ch h2{font-size:clamp(30px,8vw,40px)}
+  .dock{left:var(--gut);right:var(--gutR);top:calc(58px + env(safe-area-inset-top,0px));bottom:auto}
+  .dock .in{border-radius:16px;width:100%;justify-content:space-between}
+  .seg .l{display:none}.seg .s{display:inline}
+  .seg button{padding:8px 11px}
+  .clock input{display:none}
+  .clock .tz{display:none}
+  .top nav a:first-child{display:none}
+  .keys{display:none}
+  .fig .big{font-size:64px}
 }
-@media (max-width:480px){
-  .clock{left:10px;right:10px;bottom:10px;gap:8px;padding:8px 10px}
-  .clock .time{font-size:17px}
-  .legend{right:10px;bottom:74px}
-  .top h1{font-size:17px}
-  .top h1 span{display:block}
-  .top h1 span::before{content:none}
+@media (max-width:380px){ .seg button{padding:7px 8px;font-size:12px} .clock{padding-right:4px} }
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before{animation:none!important;transition:none!important}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
+<div class="prog" id="prog" aria-hidden="true"></div>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="veil" aria-hidden="true"></div>
+<div class="labels" id="labels" aria-hidden="true"></div>
+
 <header class="top">
-  <h1>The Price of Sophistication <span>a day on three power grids</span></h1>
+  <a class="brand" href="#top">The Price of <em>Sophistication</em></a>
   <nav>
-    <a class="pill" href="explained.html">Read it in plain words</a>
-    <a class="pill" href="https://github.com/ma731/Capstone-in-Operations-Research">Code and thesis</a>
+    <a href="explained.html">Read it in plain words</a>
+    <a href="https://github.com/ma731/Capstone-in-Operations-Research">Code and thesis</a>
   </nav>
 </header>
 
-<main>
-<section class="room" aria-label="Interactive grid room">
-  <div class="stage" id="stage">
-    <canvas id="gl" aria-label="3D map of the data centers on the selected grid. Each column is the carbon intensity of its power at the time shown."></canvas>
-    <div class="labels" id="labels" aria-hidden="true"></div>
-    <p class="hint">Each tower is a data center. Its column is how dirty its electricity is at that hour. Drag to turn the table.</p>
-    <div class="legend" aria-hidden="true"><span>cleaner</span><span class="bar"></span><span>dirtier</span></div>
+<ol class="rail" id="rail" aria-label="Chapters"></ol>
+
+<div class="dock off" id="dock">
+  <div class="in">
+    <div class="seg" role="group" aria-label="Choose a grid" id="seg"></div>
     <div class="clock">
-      <button type="button" id="play" aria-label="Pause the day"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect id="pIcon1" x="2" y="1" width="3.5" height="12" rx="1" fill="currentColor"/><rect id="pIcon2" x="8.5" y="1" width="3.5" height="12" rx="1" fill="currentColor"/><path id="pIcon3" d="M3 1.5v11l9.5-5.5z" fill="currentColor" style="display:none"/></svg></button>
+      <button type="button" id="play" aria-label="Pause the day"><svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true"><rect id="pI1" x="2" y="1" width="3.5" height="12" rx="1" fill="currentColor"/><rect id="pI2" x="8.5" y="1" width="3.5" height="12" rx="1" fill="currentColor"/><path id="pI3" d="M3 1.5v11l9.5-5.5z" fill="currentColor" style="display:none"/></svg></button>
       <div><span class="time" id="time">13:00</span><span class="tz" id="tz">Pacific time</span></div>
       <input type="range" id="hour" min="0" max="23.99" step="0.01" value="13" aria-label="Hour of the day">
     </div>
   </div>
+</div>
 
-  <aside class="panel">
-    <div class="tabs" role="group" aria-label="Choose a grid" id="tabs"></div>
-    <p class="blurb" id="blurb"></p>
-    <ol class="layers">
-      <li class="layer l1 on" id="L1">
-        <div class="head"><span class="n">1</span><h3>Move jobs between regions</h3>
-          <button type="button" class="switch" role="switch" aria-checked="true" id="s1" aria-label="Show jobs moving between regions"></button></div>
-        <p>Flexible AI work (training, batch jobs) runs wherever the power is cleanest that hour.</p>
-        <div class="num"><span id="n1">4.0%</span><small>less carbon on the worst days</small><span class="verdict">Pays</span></div>
-      </li>
-      <li class="layer l2" id="L2">
-        <div class="head"><span class="n">2</span><h3>Model how regions move together</h3>
-          <button type="button" class="switch" role="switch" aria-checked="false" id="s2" aria-label="Show how strongly the regions move together"></button></div>
-        <p id="p2">Lines show how closely each pair of regions rises and falls together.</p>
-        <div class="num"><span id="n2">0.04%</span><small>extra, below the 0.4% that would matter</small><span class="verdict">About zero</span></div>
-      </li>
-      <li class="layer l3" id="L3">
-        <div class="head"><span class="n">3</span><h3>Hedge against a grid emergency</h3>
-          <button type="button" class="switch" role="switch" aria-checked="false" id="s3" aria-label="Show a grid emergency"></button></div>
-        <p>Robust optimisation plans for the forecast going badly wrong. In the test, on one day in ten a region's carbon jumped by the multiple below.</p>
-        <div class="sev">
-          <label for="sevIn"><span>How bad the emergency is</span><b id="sevOut">1.0x</b></label>
-          <input type="range" id="sevIn" min="0" max="5" step="1" value="0" aria-describedby="n3note">
-          <div class="strip" aria-hidden="true"><span class="track"></span><span class="real" id="real"></span><span class="cross" id="cross"></span><span class="you" id="you"></span></div>
-          <div class="strip-keys" aria-hidden="true"><span>1x</span><span>2x</span><span>3x</span><span>4x</span></div>
-        </div>
-        <div class="num"><span id="n3">0.0%</span><small id="n3note">gained by hedging at this spike</small><span class="verdict" id="v3">Not worth it</span></div>
-        <p id="p3"></p>
-      </li>
-    </ol>
-    <p class="foot-note">The towers show real 2025 hourly averages. The moving jobs are a picture of the idea; every percentage is measured by the full scheduler on held-out 2025 data.</p>
-  </aside>
-</section>
+<main id="top">
+  <section class="ch hero" data-ch="hero" data-label="Start">
+    <div class="copy">
+      <p class="byline">Capstone in operations research · IE University · 2026</p>
+      <h1>The price of <em>sophistication</em></h1>
+      <p class="lead">A scheduler can send AI compute to wherever the power is cleanest. How much modelling does that actually need? I tested it on a year of real grid data from eleven regions of North America.</p>
+      <a class="cue" href="#day"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v11M2 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Watch a day on the grid</a>
+      <p class="keys" id="keys">Presenting? <kbd>&larr;</kbd> <kbd>&rarr;</kbd> step through the chapters.</p>
+    </div>
+  </section>
 
-<section class="more">
-  <div class="in">
-    <h2>One layer pays. Two mostly do not.</h2>
-    <p>The question was never whether carbon-aware scheduling works; the industry already does it. It was how
-    sophisticated the model needs to be. Each layer was added one at a time to the same scheduler, with the
-    test rules written down before the 2025 data was opened.</p>
-    <div class="fig"><img src="value_ladder.svg" alt="Moving jobs between regions cuts worst-day emissions by 4.0 to 9.9%. Modelling regional co-movement adds at most 0.23%. Robust optimisation only pays in emergencies about three times worse than the 1.29x to 1.89x seen on real grids." width="1350" height="420" loading="lazy"></div>
-    <ul class="facts">
-      <li><b>Fund the lever that pays</b>Letting flexible AI jobs move between regions is an operating decision: a scheduler and a policy for which jobs may move.</li>
-      <li><b>Skip what does not</b>Joint dependence models and robust optimisation need specialist skills and slower solves, and added almost nothing on real grids.</li>
-      <li><b>Be honest about size</b>At a carbon price alone: about EUR 2k to 6k a year for 5 MW of flexible compute, EUR 49k to 120k for 100 MW.</li>
-    </ul>
-  </div>
-</section>
+  <section class="ch" id="day" data-ch="day" data-label="A day on the grid">
+    <div class="copy">
+      <h2>Every data center runs on a grid that <em>changes by the hour</em></h2>
+      <p>Each beam is a data center. Its height is how much carbon its electricity carries right now, in grams of CO₂ per kWh, from the real 2025 hourly data.</p>
+      <svg class="chart" id="dayChart" viewBox="0 0 440 170" role="img" aria-label="Average carbon intensity by hour of day for each region on this grid"></svg>
+      <p id="dayNote"></p>
+    </div>
+  </section>
+
+  <section class="ch" id="grids" data-ch="grids" data-label="Three grids">
+    <div class="copy">
+      <h2>Three grids, picked to <em>disagree</em></h2>
+      <p>The same scheduler ran on each. Pick one; the map and every number below follow it.</p>
+      <ul class="picker" id="picker"></ul>
+    </div>
+  </section>
+
+  <section class="ch" id="move" data-ch="move" data-label="Layer 1: move work">
+    <div class="copy">
+      <p class="step"><b>Layer 1</b> of 3</p>
+      <h2>Move flexible work to the <em>cleanest power</em></h2>
+      <p>Training runs and batch jobs can wait or travel. Each hour the scheduler sends them to the cleanest region, using each region's typical day.</p>
+      <div class="fig"><span class="big c-clean" id="n1">4.0%</span><span class="what">less carbon on the worst days</span></div>
+      <span class="chip c-clean">Pays</span>
+      <ul class="bars c-clean" id="bars1"></ul>
+    </div>
+  </section>
+
+  <section class="ch" id="together" data-ch="together" data-label="Layer 2: co-movement">
+    <div class="copy">
+      <p class="step"><b>Layer 2</b> of 3</p>
+      <h2>Model how regions <em>rise and fall together</em></h2>
+      <p id="p2">A joint model of how regions co-move should plan better for bad days. The lines show how tightly each pair moves together.</p>
+      <div class="fig"><span class="big c-steel" id="n2">0.04%</span><span class="what">extra, on top of layer 1</span></div>
+      <span class="chip c-steel">About zero</span>
+      <ul class="bars c-steel" id="bars2"></ul>
+      <p class="thr-note">Dashed line: 0.4%, the smallest gain that would justify the model.</p>
+    </div>
+  </section>
+
+  <section class="ch" id="storm" data-ch="storm" data-label="Layer 3: emergencies">
+    <div class="copy">
+      <p class="step"><b>Layer 3</b> of 3</p>
+      <h2>Hedge against a <em>grid emergency</em></h2>
+      <p>Robust optimisation plans for the forecast going badly wrong. In the test, on one day in ten a region's carbon jumped by a multiple. Make it worse:</p>
+      <div class="sev">
+        <label for="sevIn"><span>How bad the emergency is</span><b id="sevOut">1.0x</b></label>
+        <input type="range" id="sevIn" min="0" max="5" step="1" value="0" aria-describedby="p3">
+      </div>
+      <div class="fig"><span class="big c-sodium" id="n3">0.0%</span><span class="what" id="n3what">gained by hedging at this size</span></div>
+      <span class="chip" id="v3">Not worth it</span>
+      <svg class="chart" id="stormChart" viewBox="0 0 440 190" role="img" aria-label="Gain from hedging by emergency size, with the measured range"></svg>
+      <p id="p3" class="small"></p>
+    </div>
+  </section>
+
+  <section class="ch" id="verdict" data-ch="verdict" data-label="The verdict">
+    <div class="copy">
+      <h2>One layer pays. <em>Two mostly do not.</em></h2>
+      <p>Each layer was added on its own to the same scheduler, with the test rules fixed before the 2025 data was opened. <span id="vGrid">Western US</span>, at real grid conditions:</p>
+      <ol class="ladder" id="ladder"></ol>
+      <ul class="takeaways">
+        <li><b>Fund the lever that pays</b>Letting flexible AI jobs move between regions is an operating decision: a scheduler and a policy for which jobs may move.</li>
+        <li><b>Skip what does not</b>Dependence models and robust optimisation need specialist skills and slower solves, and added almost nothing on real grids.</li>
+        <li><b>Be honest about the size</b>At a carbon price alone: about EUR 2k to 6k a year for 5 MW of flexible compute, EUR 49k to 120k for 100 MW.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="ch" id="explore" data-ch="explore" data-label="Explore">
+    <div class="copy">
+      <h2>Now <em>try it yourself</em></h2>
+      <p id="exploreHow">Drag the map to turn it, switch grids and scrub the clock below. Turn the layers on and off.</p>
+      <div class="toggles" id="toggles">
+        <button type="button" data-k="move" aria-pressed="true" style="--tc:var(--sodium)">Moving jobs</button>
+        <button type="button" data-k="links" aria-pressed="false" style="--tc:var(--steel)">Co-movement</button>
+        <button type="button" data-k="storm" aria-pressed="false" style="--tc:var(--dirty)">Emergency at 3x</button>
+      </div>
+      <div class="links">
+        <a class="btn solid" href="explained.html">Read it in plain words</a>
+        <a class="btn" href="https://github.com/ma731/Capstone-in-Operations-Research">Code and thesis</a>
+      </div>
+      <p class="small">The beams show real 2025 hour-of-day averages. The moving jobs are a picture of the idea; every percentage is measured by the full scheduler on held-out 2025 data.</p>
+    </div>
+  </section>
 </main>
+
 <footer><div class="in">Research Capstone in Operations Research, IE School of Science &amp; Technology, 2026. Marco Ortiz Togashi; supervisor Prof. Bissan Ghaddar.
-Carbon data: <a href="https://www.electricitymaps.com">Electricity Maps</a> (academic licence; this page shows only yearly hour-of-day averages, never the hourly series).</div></footer>
+Carbon data: <a href="https://www.electricitymaps.com">Electricity Maps</a> (academic licence; this page shows only yearly hour-of-day averages, never the hourly series). Coastlines drawn by hand, roughly.</div></footer>
 
 <script src="grid_room_data.js"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
@@ -203,330 +350,615 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 const D = window.GRID_ROOM, $ = (id) => document.getElementById(id);
-const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const Q = new URLSearchParams(location.search);
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches || Q.has("static");
 const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-const C_CLEAN = new THREE.Color(css("--clean")), C_MID = new THREE.Color(css("--mid")), C_DIRTY = new THREE.Color(css("--dirty"));
-const LO = 90, HI = 520;                                   // g/kWh range of the colour scale
+const COL = {clean: new THREE.Color(css("--clean")), mid: new THREE.Color(css("--sodium")), dirty: new THREE.Color(css("--dirty")),
+  steel: new THREE.Color(css("--steel")), sodium: new THREE.Color(css("--sodium"))};
+const LO = 90, HI = 520;
 const shade = (ci, out = new THREE.Color()) => {
   const t = Math.min(1, Math.max(0, (ci - LO) / (HI - LO)));
-  return t < .5 ? out.copy(C_CLEAN).lerp(C_MID, t * 2) : out.copy(C_MID).lerp(C_DIRTY, (t - .5) * 2);
+  return t < .5 ? out.copy(COL.clean).lerp(COL.mid, t * 2) : out.copy(COL.mid).lerp(COL.dirty, (t - .5) * 2);
 };
-const SEVS = D.grids[0].emergency.map((e) => e.M);       // 1, 1.5, 2, 2.5, 3, 4
+const hex = (ci) => "#" + shade(ci).getHexString();
+const ALL = Object.keys(D.zones);
+const SHORT = {us_west: "West", taskc: "East", us_hetero: "Diverse"};
+const MID = {us_west: "Western", taskc: "Eastern + Canada", us_hetero: "Diversified"};
 
-let grid = D.grids[0], hour = 13, playing = !still, show = {move: true, comove: false, robust: false}, sevIdx = 0;
+let grid = D.grids[0], hour = 13, playing = !still, sevIdx = 1, chapter = "hero";
+const user = {move: true, links: false, storm: false};     // explore-chapter toggles
 
-// ---------- scene
-const canvas = $("gl"), stage = $("stage");
-let renderer;
-try { renderer = new THREE.WebGLRenderer({canvas, antialias: true}); }
-catch (e) { stage.insertAdjacentHTML("beforeend", '<p class="nogl">This browser could not start 3D. The numbers on the right still work.</p>'); }
+// ---------- renderer
+const canvas = $("gl");
+let renderer = null;
+try { renderer = new THREE.WebGLRenderer({canvas, antialias: true, powerPreference: "high-performance"}); }
+catch (e) { document.body.insertAdjacentHTML("afterbegin", '<p class="nogl">This browser could not start 3D. The story still reads fine.</p>'); }
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(css("--night"));
-scene.fog = new THREE.Fog(scene.background, 60, 140);
-const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 400);
-camera.position.set(0, 38, 46);
+scene.background = new THREE.Color(css("--bg"));
+scene.fog = new THREE.FogExp2(scene.background, .006);
+const camera = new THREE.PerspectiveCamera(28, 1, .1, 600);
+camera.position.set(0, 60, 60);
 const controls = renderer ? new OrbitControls(camera, canvas) : null;
 if (controls) {
-  controls.enableDamping = true; controls.enablePan = false;
-  controls.minDistance = 18; controls.maxDistance = 90; controls.maxPolarAngle = 1.25; controls.minPolarAngle = .35;
+  Object.assign(controls, {enableDamping: true, enablePan: false, enableZoom: false, enabled: false,
+    minPolarAngle: .25, maxPolarAngle: 1.2, rotateSpeed: .6});
 }
-const hemi = new THREE.HemisphereLight(0x9fb3d1, 0x08142a, .9); scene.add(hemi);
-const sun = new THREE.DirectionalLight(0xffe2b0, 1.4); sun.position.set(20, 30, 10); scene.add(sun);
 
-// the table: a dotted floor
-const floorGeo = new THREE.PlaneGeometry(200, 200);
-const floor = new THREE.Mesh(floorGeo, new THREE.MeshStandardMaterial({color: 0x0b1a34, roughness: 1}));
-floor.rotation.x = -Math.PI / 2; scene.add(floor);
+// ---------- projection (lat/lon to the table)
+const LAT0 = 39, LON0 = -96, K = 1.25, CL = Math.cos(LAT0 * Math.PI / 180);
+const proj = (lat, lon) => new THREE.Vector3((lon - LON0) * CL * K, 0, -(lat - LAT0) * K);
+const unproj = (x, z) => [LAT0 - z / K, LON0 + x / (CL * K)];
+
+// rough outline of the lower 48, southern Canada and northern Mexico (lon, lat)
+const LAND = [[-128,53],[-125.5,50.2],[-124.7,48.4],[-124,46.2],[-124.1,43.5],[-124.4,42],[-124.2,40.4],[-123.8,39.5],[-122.5,37.8],[-121.9,36.6],[-120.6,34.6],[-118.5,34],[-117.1,32.6],[-116.4,31.4],[-114.8,31.7],[-113,31.2],[-112.2,29.9],[-110.9,27.9],[-109.4,25.6],[-108,24.2],[-97.8,24.2],[-97.5,25.9],[-97.2,27.8],[-94.8,29.3],[-93.8,29.7],[-91,29.2],[-89.4,29],[-89.6,30.2],[-88,30.4],[-86.5,30.4],[-85,29.7],[-84,30.1],[-82.8,28.2],[-81.8,26.1],[-80.9,25.2],[-80.1,25.8],[-80.6,28.4],[-81.4,30.4],[-81.1,32.1],[-79.9,32.8],[-78.6,33.9],[-76.5,34.7],[-75.5,35.2],[-75.9,36.9],[-75.1,38.3],[-74.9,38.9],[-74,40.5],[-72,41],[-70,41.6],[-70.8,42.6],[-70.2,43.7],[-68,44.4],[-67,44.8],[-66,45.2],[-64.8,45.8],[-64.5,47],[-65,49],[-67,49.3],[-60,50.2],[-57,52],[-56,53]];
+const LAKES = [
+  [[-92.1,46.7],[-89.5,48],[-88,48.8],[-85,47.9],[-84.6,46.5],[-87,46.5],[-90,46.6]],
+  [[-87.8,42],[-87.5,44],[-87,45.8],[-85.5,45.8],[-86.4,44],[-86.3,42.2]],
+  [[-84.5,45.9],[-81.7,45.3],[-81.7,43.3],[-82.5,43],[-83.4,44],[-84,45.5]],
+  [[-83.4,41.7],[-81,42.3],[-78.9,42.9],[-79.8,42.3],[-82.7,41.4]],
+  [[-79.8,43.3],[-76.5,44.1],[-76.2,43.5],[-77.9,43.3]]];
+const inside = (poly, lon, lat) => {
+  let c = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if ((yi > lat) !== (yj > lat) && lon < (xj - xi) * (lat - yi) / (yj - yi) + xi) c = !c;
+  }
+  return c;
+};
+// big cities glow sodium, like the night satellite photos
+const CITIES = [[40.7,-74,1],[34.05,-118.24,1],[41.88,-87.63,.9],[29.76,-95.37,.8],[32.78,-96.8,.8],[33.45,-112.07,.7],[39.95,-75.17,.7],[29.42,-98.49,.5],[32.72,-117.16,.6],[37.77,-122.42,.8],[47.61,-122.33,.7],[39.74,-104.99,.6],[38.9,-77.04,.7],[42.36,-71.06,.7],[33.75,-84.39,.7],[25.76,-80.19,.7],[42.33,-83.05,.6],[44.98,-93.27,.5],[43.65,-79.38,.7],[45.5,-73.57,.6],[38.63,-90.2,.5],[27.95,-82.46,.5],[45.52,-122.68,.5],[36.17,-115.14,.6],[40.76,-111.89,.4],[39.1,-94.58,.4],[35.23,-80.84,.4],[36.16,-86.78,.4],[49.28,-123.12,.5],[25.68,-100.31,.5],[45.42,-75.7,.4],[40.44,-80,.4],[41.5,-81.7,.4],[29.95,-90.07,.4],[30.27,-97.74,.5],[38.58,-121.49,.4],[35.08,-106.65,.3],[39.96,-83,.4],[39.77,-86.16,.4],[35.78,-78.64,.4],[51.05,-114.07,.4],[49.9,-97.14,.3],[28.54,-81.38,.5],[43.04,-87.91,.4],[36.85,-76.29,.4]];
+
+// ---------- point sprites (map dots and job particles share one shader)
+const pointMat = (blend) => new THREE.ShaderMaterial({
+  uniforms: {uPR: {value: 1}, uFade: {value: 1}},
+  vertexShader: `attribute vec3 aColor; attribute float aSize; uniform float uPR; varying vec3 vC;
+    void main(){ vC = aColor; vec4 mv = modelViewMatrix * vec4(position, 1.); gl_PointSize = aSize * uPR * (220. / -mv.z); gl_Position = projectionMatrix * mv; }`,
+  fragmentShader: `varying vec3 vC; uniform float uFade;
+    void main(){ float d = length(gl_PointCoord - .5); float a = smoothstep(.5, .1, d); gl_FragColor = vec4(vC * a * uFade, 1.); }`,
+  transparent: true, depthWrite: false, blending: blend});
+
+const dots = [];
 {
-  const pts = [];
-  for (let x = -90; x <= 90; x += 3) for (let z = -90; z <= 90; z += 3) pts.push(x, .02, z);
-  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
-  scene.add(new THREE.Points(g, new THREE.PointsMaterial({color: 0x22406e, size: .14})));
-}
-
-// the table the grid sits on
-const table = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, .3, 96), new THREE.MeshStandardMaterial({color: 0x10254a, roughness: .9}));
-table.position.y = -.14; scene.add(table);
-const rim = new THREE.Mesh(new THREE.RingGeometry(.995, 1.0, 128), new THREE.MeshBasicMaterial({color: 0xe8a417, transparent: true, opacity: .55, side: THREE.DoubleSide}));
-rim.rotation.x = -Math.PI / 2; rim.position.y = .02; scene.add(rim);
-
-// map projection, centred on the US
-const LAT0 = 39, LON0 = -98, K = 1.25;
-const proj = (lat, lon) => new THREE.Vector3((lon - LON0) * Math.cos(LAT0 * Math.PI / 180) * K, 0, -(lat - LAT0) * K);
-
-// a data center per zone: pad, building, glowing column
-const towers = {}, labelBox = $("labels");
-const H = (ci) => .6 + ci / 42;                              // column height in scene units
-for (const [id, z] of Object.entries(D.zones)) {
-  const p = proj(z.lat, z.lon), g = new THREE.Group(); g.position.copy(p);
-  const pad = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.6, .25, 40), new THREE.MeshStandardMaterial({color: 0x132a50, roughness: .8}));
-  pad.position.y = .12; g.add(pad);
-  const ring = new THREE.Mesh(new THREE.RingGeometry(2.55, 2.75, 48), new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: .35, side: THREE.DoubleSide}));
-  ring.rotation.x = -Math.PI / 2; ring.position.y = .26; g.add(ring);
-  const hall = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.1, 1.4), new THREE.MeshStandardMaterial({color: 0x2d5288, roughness: .55, metalness: .25}));
-  hall.position.set(-.5, .8, .6); g.add(hall);
-  const win = new THREE.Mesh(new THREE.BoxGeometry(2.0, .18, .02), new THREE.MeshBasicMaterial({color: 0xe8a417}));
-  win.position.set(-.5, .9, 1.31); g.add(win);
-  const colMat = new THREE.MeshStandardMaterial({color: 0x4fbf7d, emissive: 0x4fbf7d, emissiveIntensity: .55, roughness: .4, transparent: true, opacity: .92});
-  const col = new THREE.Mesh(new THREE.CylinderGeometry(.75, .75, 1, 32), colMat);
-  col.position.set(.9, .5, -.5); g.add(col);
-  const cap = new THREE.Mesh(new THREE.TorusGeometry(.85, .04, 8, 40), new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: .5}));
-  cap.rotation.x = Math.PI / 2; cap.position.set(.9, 1, -.5); g.add(cap);
-  scene.add(g);
-  const tag = document.createElement("div"); tag.className = "tag"; tag.innerHTML = `${z.name}<i></i>`; labelBox.appendChild(tag);
-  towers[id] = {g, col, colMat, cap, win, ring, tag, base: p.clone(), ci: 0, spike: 1};
-}
-
-// each grid gets its own map: real relative positions, scaled to the table, nudged apart
-function layout() {
-  const pts = grid.zones.map((id) => proj(D.zones[id].lat, D.zones[id].lon));
-  const box = new THREE.Box3().setFromPoints(pts), c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3());
-  const k = 26 / Math.max(sz.x, sz.z, 1);
-  pts.forEach((p) => p.sub(c).multiplyScalar(k).setY(0));
-  for (let it = 0; it < 80; it++)                          // keep at least 10 units between towers
-    for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) {
-      const d = pts[j].clone().sub(pts[i]), L = d.length();
-      if (L < 11) { d.setLength((11 - L) / 2 || .1); pts[i].sub(d); pts[j].add(d); }
+  const S = .42;
+  for (let x = -36; x <= 44; x += S) for (let z = -22; z <= 22; z += S) {
+    const jx = x + (Math.sin(z * 12.9898 + x * 78.233) * 43758.5453 % 1) * .06;
+    const [lat, lon] = unproj(jx, z);
+    if (!inside(LAND, lon, lat) || LAKES.some((p) => inside(p, lon, lat))) continue;
+    const edge = Math.min(1, Math.max(0, (52.5 - lat) / 4)) * Math.min(1, Math.max(0, (lat - 24.5) / 3.5));
+    let city = 0;
+    for (const [la, lo, w] of CITIES) {
+      const p = proj(la, lo), d2 = (p.x - jx) ** 2 + (p.z - z) ** 2;
+      city += w * Math.exp(-d2 / .9);
     }
-  const c2 = new THREE.Box3().setFromPoints(pts).getCenter(new THREE.Vector3()).setY(0);
-  pts.forEach((p) => p.sub(c2));
-  const r = Math.max(...pts.map((p) => p.length())) + 5;
-  table.scale.set(r, 1, r); rim.scale.set(r, r, 1);
-  grid.zones.forEach((id, i) => { towers[id].base.copy(pts[i]); towers[id].g.position.copy(pts[i]); });
+    const r = (Math.sin(x * 91.7 + z * 47.3) * 9631.7) % 1;
+    dots.push({x: jx, z, edge, city: Math.min(1.4, city), n: Math.abs(r)});
+  }
+}
+const N = dots.length;
+const dotGeo = new THREE.BufferGeometry();
+const dPos = new Float32Array(N * 3), dCol = new Float32Array(N * 3), dSize = new Float32Array(N), dBase = new Float32Array(N * 3);
+dots.forEach((d, i) => {
+  dPos.set([d.x, 0, d.z], i * 3);
+  const b = (.13 + .08 * d.n) * d.edge, c = d.city * d.edge;
+  dBase.set([b + .55 * c, 1.12 * b + .36 * c, 1.5 * b + .08 * c], i * 3);   // cool grey land, sodium cities
+  dSize[i] = (1.1 + .5 * d.n + 1.2 * Math.min(1, c)) * (d.edge > .05 ? 1 : 0);
+});
+dCol.set(dBase);
+dotGeo.setAttribute("position", new THREE.BufferAttribute(dPos, 3));
+dotGeo.setAttribute("aColor", new THREE.BufferAttribute(dCol, 3));
+dotGeo.setAttribute("aSize", new THREE.BufferAttribute(dSize, 1));
+const dotMat = pointMat(THREE.AdditiveBlending);
+scene.add(new THREE.Points(dotGeo, dotMat));
+
+// ---------- beams of light, one per data center
+const glowTex = (() => {
+  const c = document.createElement("canvas"); c.width = c.height = 128;
+  const g = c.getContext("2d"), r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(.25, "rgba(255,255,255,.45)"); r.addColorStop(1, "rgba(255,255,255,0)");
+  g.fillStyle = r; g.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+})();
+const beamGeo = new THREE.CylinderGeometry(.26, .26, 1, 28, 1, true); beamGeo.translate(0, .5, 0);
+const coreGeo = new THREE.CylinderGeometry(.06, .06, 1, 8, 1, true); coreGeo.translate(0, .5, 0);
+const beamShader = () => new THREE.ShaderMaterial({
+  uniforms: {uColor: {value: new THREE.Color()}, uAlpha: {value: 1}},
+  vertexShader: `varying vec2 vUv; varying float vRim;
+    void main(){ vUv = uv; vec4 wp = modelMatrix * vec4(position, 1.); vec3 n = normalize(mat3(modelMatrix) * normal);
+      vRim = abs(dot(n, normalize(cameraPosition - wp.xyz))); gl_Position = projectionMatrix * viewMatrix * wp; }`,
+  fragmentShader: `uniform vec3 uColor; uniform float uAlpha; varying vec2 vUv; varying float vRim;
+    void main(){ float f = mix(1., .35, vUv.y) * (.25 + 1.3 * pow(vRim, 2.5)); gl_FragColor = vec4(uColor * f * uAlpha, 1.); }`,
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending});
+const H = (ci) => .3 + ci / 46;
+const towers = {}, labelBox = $("labels");
+for (const [id, z] of Object.entries(D.zones)) {
+  const g = new THREE.Group(); g.position.copy(proj(z.lat, z.lon)); scene.add(g);
+  const beam = new THREE.Mesh(beamGeo, beamShader()), core = new THREE.Mesh(coreGeo, beamShader());
+  const top = new THREE.Sprite(new THREE.SpriteMaterial({map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true}));
+  top.scale.set(1.3, 1.3, 1);
+  const pool = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true}));
+  pool.rotation.x = -Math.PI / 2; pool.position.y = .02; pool.scale.setScalar(4.2);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(.9, 1, 64), new THREE.MeshBasicMaterial({color: COL.clean, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false}));
+  ring.rotation.x = -Math.PI / 2; ring.position.y = .04;
+  g.add(beam, core, top, pool, ring);
+  const tag = document.createElement("div"); tag.className = "tag"; tag.innerHTML = `${z.name}<i></i>`; labelBox.appendChild(tag);
+  towers[id] = {g, beam, core, top, pool, ring, tag, base: g.position.clone(), ci: z.mean, h: 0, vis: 1, spike: 1, w: 0, sx: 0, sy: 0};
 }
 
-// correlation lines (layer 2), rebuilt per grid
-const linkGroup = new THREE.Group(); scene.add(linkGroup);
-function buildLinks() {
-  linkGroup.clear();
+// shock rings for the emergency
+const shocks = [0, 1, 2].map((i) => {
+  const m = new THREE.Mesh(new THREE.RingGeometry(.94, 1, 72), new THREE.MeshBasicMaterial({color: COL.dirty, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false}));
+  m.rotation.x = -Math.PI / 2; m.position.y = .05; m.userData.p = i / 3; scene.add(m); return m;
+});
+
+// ---------- co-movement arcs (layer 2)
+const arcMat = () => new THREE.ShaderMaterial({
+  uniforms: {uColor: {value: COL.steel}, uAlpha: {value: 0}, uT: {value: 0}},
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }`,
+  fragmentShader: `uniform vec3 uColor; uniform float uAlpha; uniform float uT; varying vec2 vUv;
+    void main(){ float s = fract(vUv.x * 3. - uT * .45); float p = smoothstep(0., .08, s) * (1. - smoothstep(.08, .4, s));
+      gl_FragColor = vec4(uColor * uAlpha * (.3 + 1.1 * p), 1.); }`,
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending});
+const arcs = new THREE.Group(); scene.add(arcs);
+let arcAlpha = 0;
+const rtags = [];
+function buildArcs() {
+  arcs.clear(); rtags.splice(0).forEach((t) => t.el.remove());
   for (const pr of grid.pairs) {
-    const a = towers[pr.a].base, b = towers[pr.b].base;
-    const mid = a.clone().add(b).multiplyScalar(.5); mid.y = 1.5 + a.distanceTo(b) * .12;
-    const curve = new THREE.QuadraticBezierCurve3(a.clone().setY(.4), mid, b.clone().setY(.4));
-    const r = Math.max(0, pr.r);
-    const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, .06 + .22 * r, 8, false),
-      new THREE.MeshBasicMaterial({color: 0x9fb3d1, transparent: true, opacity: .15 + .7 * r}));
-    tube.userData = pr; linkGroup.add(tube);
+    const a = towers[pr.a].base, b = towers[pr.b].base, r = Math.max(0, pr.r);
+    const mid = a.clone().add(b).multiplyScalar(.5); mid.y = 1 + a.distanceTo(b) * .28;
+    const curve = new THREE.QuadraticBezierCurve3(a.clone().setY(.2), mid, b.clone().setY(.2));
+    const m = new THREE.Mesh(new THREE.TubeGeometry(curve, 64, .025 + .11 * r, 8, false), arcMat());
+    m.userData.r = r; arcs.add(m);
+    if (grid.pairs.length > 3) continue;
+    const el = document.createElement("div"); el.className = "rtag"; el.textContent = `r ${pr.r.toFixed(2)}`; labelBox.appendChild(el);
+    rtags.push({el, p: curve.getPoint(.5)});
   }
 }
 
-// moving jobs (layer 1)
-const jobs = [], jobGeo = new THREE.BoxGeometry(.42, .42, .42);
-const jobMat = new THREE.MeshBasicMaterial({color: 0xe8a417});
-let spawnClock = 0;
-function spawnJob(from, to) {
-  const m = new THREE.Mesh(jobGeo, jobMat);
-  const a = towers[from].base.clone().setY(1.2), b = towers[to].base.clone().setY(1.2);
-  const mid = a.clone().add(b).multiplyScalar(.5); mid.y = 3 + a.distanceTo(b) * .22;
-  m.userData = {curve: new THREE.QuadraticBezierCurve3(a, mid, b), t: 0, speed: 1 / (1.2 + a.distanceTo(b) * .03)};
-  scene.add(m); jobs.push(m);
+// ---------- moving jobs (layer 1): glowing particles with short trails
+const MAXJ = 90, TRAIL = 7;
+const jGeo = new THREE.BufferGeometry();
+const jPos = new Float32Array(MAXJ * TRAIL * 3), jCol = new Float32Array(MAXJ * TRAIL * 3), jSize = new Float32Array(MAXJ * TRAIL);
+jGeo.setAttribute("position", new THREE.BufferAttribute(jPos, 3));
+jGeo.setAttribute("aColor", new THREE.BufferAttribute(jCol, 3));
+jGeo.setAttribute("aSize", new THREE.BufferAttribute(jSize, 1));
+const jMat = pointMat(THREE.AdditiveBlending);
+const jPts = new THREE.Points(jGeo, jMat); jPts.frustumCulled = false; scene.add(jPts);
+const jobs = [];
+let spawnClock = 0, jobAlpha = 0;
+function spawnJob(from, to, t0 = 0) {
+  const a = towers[from].base.clone().setY(.6), b = towers[to].base.clone().setY(.6);
+  const mid = a.clone().add(b).multiplyScalar(.5); mid.y = 1.5 + a.distanceTo(b) * .42;
+  jobs.push({curve: new THREE.QuadraticBezierCurve3(a, mid, b), t: t0, speed: 1 / (1.1 + a.distanceTo(b) * .05)});
 }
 
-// ---------- data per hour
+// ---------- data
 const localToUtc = (h) => ((h - grid.tz) % 24 + 24) % 24;
-function ciAt(id, localHour) {
+const ciAt = (id, localHour) => {
   const arr = D.zones[id].hourly_utc, u = localToUtc(localHour), i = Math.floor(u), f = u - i;
   return arr[i] * (1 - f) + arr[(i + 1) % 24] * f;
-}
-const cleanest = () => grid.zones.reduce((best, id) => (towers[id].ci < towers[best].ci ? id : best), grid.zones[0]);
-// the emergency always hits the region that is cleanest on average: the one everyone moves work to
-const target = () => grid.zones.reduce((best, id) => (D.zones[id].mean < D.zones[best].mean ? id : best), grid.zones[0]);
+};
+const target = () => grid.zones.reduce((b, id) => (D.zones[id].mean < D.zones[b].mean ? id : b), grid.zones[0]);
+const fmtPct = (v, d = 1, plus = false) => (Math.abs(v) < .5 * 10 ** -d ? (0).toFixed(d) : (plus && v > 0 ? "+" : "") + v.toFixed(d)) + "%";
 
-// ---------- camera framing per grid
-const camGoal = {pos: new THREE.Vector3(), look: new THREE.Vector3()};
-function frame() {
-  const box = new THREE.Box3();
-  for (const id of grid.zones) box.expandByPoint(towers[id].base);
-  const c = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3());
-  // back the camera off until the table rim and the tallest columns all fit on screen
-  const half = table.scale.x, probe = camera.clone(), pts = [];
-  for (let a = 0; a < 16; a++) pts.push(new THREE.Vector3(c.x + Math.cos(a / 8 * Math.PI) * half, 0, c.z + Math.sin(a / 8 * Math.PI) * half));
-  for (const id of grid.zones) pts.push(towers[id].base.clone().setY(H(D.zones[id].mean) + 3));
-  camGoal.look.copy(c).setY(1.5);
-  probe.aspect = stage.clientWidth / Math.max(1, stage.clientHeight); probe.updateProjectionMatrix();
-  for (let d = 10; d < 400; d *= 1.04) {
-    probe.position.set(c.x, d * .72, c.z + d * .69); probe.lookAt(camGoal.look); probe.updateMatrixWorld();
-    if (pts.every((p) => { const q = p.clone().project(probe); return q.z > -1 && q.z < 1 && Math.abs(q.x) < .9 && Math.abs(q.y) < .84; })) {
-      camGoal.pos.copy(probe.position); break;
+// what each chapter shows
+const SHOTS = {
+  hero:     {all: true,  phi: .78, theta: 0,    L: {move: false, links: false, storm: false}},
+  day:      {phi: .92, theta: -.18, L: {move: false, links: false, storm: false}},
+  grids:    {phi: .72, theta: .12,  L: {move: false, links: false, storm: false}},
+  move:     {phi: .98, theta: -.3,  L: {move: true,  links: false, storm: false}},
+  together: {phi: .74, theta: .22,  L: {move: true,  links: true,  storm: false}},
+  storm:    {phi: .96, theta: -.12, L: {move: true, links: false, storm: true}},
+  verdict:  {all: true,  phi: .5, theta: 0,     L: {move: false, links: false, storm: false}},
+  explore:  {phi: .9, theta: .05,   L: user, orbit: true},
+};
+const layers = () => SHOTS[chapter].L;
+const showAll = () => !!SHOTS[chapter].all;
+const stormM = () => chapter === "explore" ? 3 : grid.emergency[sevIdx].M;
+
+// ---------- camera: frame the active zones inside the part of the screen the text leaves free
+const free = {x0: -1, x1: 1, y0: -1, y1: 1};
+const goal = {pos: new THREE.Vector3(0, 60, 60), look: new THREE.Vector3(), base: new THREE.Vector3()};
+let narrow = false;
+function applyView() {
+  const W = innerWidth, Hh = innerHeight;
+  narrow = W <= 820;
+  let fx0, fx1, fy0, fy1;
+  if (narrow) { fx0 = 8; fx1 = W - 8; fy0 = 120; fy1 = Hh * .5; }
+  else { const cw = Math.min(500, W * .4) + Math.max(16, W * .03) + 40; fx0 = cw; fx1 = W - (W > 1100 ? 90 : 24); fy0 = 70; fy1 = Hh - 84; }
+  if (chapter === "hero" && !narrow) { fy1 = Hh * .62; fx0 = W * .3; }
+  if (chapter === "hero" && narrow) { fy1 = Hh * .52; }
+  camera.setViewOffset(W, Hh, W / 2 - (fx0 + fx1) / 2, Hh / 2 - (fy0 + fy1) / 2, W, Hh);
+  Object.assign(free, {x0: fx0 / W * 2 - 1, x1: fx1 / W * 2 - 1, y0: 1 - fy1 / Hh * 2, y1: 1 - fy0 / Hh * 2});
+}
+function fit() {
+  const s = SHOTS[chapter], ids = showAll() ? ALL : grid.zones, pts = [];
+  const tg = target(), M = stormM();
+  for (const id of ids) {
+    const b = towers[id].base, pad = showAll() ? 3 : 2.2;
+    for (const [dx, dz] of [[pad, 0], [-pad, 0], [0, pad], [0, -pad]]) pts.push(b.clone().add(new THREE.Vector3(dx, 0, dz)));
+    const spike = layers().storm && id === tg && !showAll() ? M : 1;
+    pts.push(b.clone().setY(H(spike > 1 ? D.zones[id].mean * spike : Math.max(...D.zones[id].hourly_utc)) + 1));
+  }
+  const box = new THREE.Box3().setFromPoints(pts.map((p) => p.clone().setY(0)));
+  const c = box.getCenter(new THREE.Vector3());
+  goal.look.copy(c).setY(showAll() ? 0 : 1.6);
+  const dir = new THREE.Vector3(Math.sin(s.phi) * Math.sin(s.theta), Math.cos(s.phi), Math.sin(s.phi) * Math.cos(s.theta));
+  const probe = camera.clone();
+  probe.updateProjectionMatrix();
+  const mx = (free.x1 - free.x0) * .04, my = (free.y1 - free.y0) * .04;
+  for (let d = 6; d < 400; d *= 1.025) {
+    probe.position.copy(goal.look).addScaledVector(dir, d); probe.lookAt(goal.look); probe.updateMatrixWorld();
+    if (pts.every((p) => { const q = p.clone().project(probe);
+      return q.z > -1 && q.z < 1 && q.x > free.x0 + mx && q.x < free.x1 - mx && q.y > free.y0 + my && q.y < free.y1 - my; })) {
+      goal.base.copy(probe.position); break;
     }
   }
+  goal.pos.copy(goal.base);
 }
 
-// ---------- panel
-function setGrid(g, first) {
-  grid = g;
-  if (controls) controls.userData = {held: false};
-  [...$("tabs").children].forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.key === g.key)));
-  $("blurb").textContent = g.blurb;
-  $("tz").textContent = g.clock;
-  $("n1").textContent = g.move_pct.toFixed(1) + "%";
-  $("n2").textContent = g.comove_pct.toFixed(2) + "%";
-  $("p2").textContent = `Lines show how closely each pair of regions rises and falls together (average correlation ${g.mean_corr.toFixed(2)}; 1 means in lockstep). The scheduler already sees each region's average day, which carries nearly all of the value.`;
-  for (const [id, t] of Object.entries(towers)) {
-    const on = g.zones.includes(id);
-    t.g.visible = on; t.tag.classList.toggle("dim", !on);
+// ---------- charts
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent?.appendChild(e); return e; };
+let dayMark = null, dayDots = [];
+function drawDay() {
+  const svg = $("dayChart"); svg.textContent = "";
+  const W = 440, Hc = 170, L = 34, R = 120, T = 10, B = 24;
+  const series = grid.zones.map((id) => ({id, v: Array.from({length: 25}, (_, h) => ciAt(id, h % 24))}));
+  const top = Math.ceil(Math.max(...series.flatMap((s) => s.v)) / 100) * 100;
+  const x = (h) => L + h / 24 * (W - L - R), y = (v) => T + (1 - v / top) * (Hc - T - B);
+  for (const v of [0, top / 2, top]) {
+    el("line", {x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: css("--line"), "stroke-width": 1}, svg);
+    el("text", {x: L - 6, y: y(v) + 3.5, "text-anchor": "end"}, svg).textContent = v;
   }
-  jobs.splice(0).forEach((m) => scene.remove(m));
-  layout(); buildLinks(); linkGroup.visible = show.comove;
-  frame();
-  if (first || still) { camera.position.copy(camGoal.pos); controls?.target.copy(camGoal.look); }
-  const pct = (m) => ((m - 1) / 3 * 100).toFixed(1) + "%";
-  $("real").style.left = pct(1); $("real").style.width = `calc(${pct(g.real_severity)} - 0%)`;
-  $("cross").style.left = pct(D.crossover);
-  setSev(sevIdx);
-  tick(0, true);
+  for (const h of [0, 6, 12, 18, 24]) el("text", {x: x(h), y: Hc - 6, "text-anchor": "middle"}, svg).textContent = String(h % 24).padStart(2, "0") + ":00";
+  const ends = [];
+  for (const s of series) {
+    const col = hex(D.zones[s.id].mean);
+    el("path", {d: s.v.map((v, h) => (h ? "L" : "M") + x(h).toFixed(1) + " " + y(v).toFixed(1)).join(""), fill: "none", stroke: col, "stroke-width": 1.8, "stroke-linejoin": "round", opacity: .9}, svg);
+    ends.push({y: y(s.v[24]), name: D.zones[s.id].name, col});
+  }
+  ends.sort((a, b) => a.y - b.y);
+  for (let i = 1; i < ends.length; i++) ends[i].y = Math.max(ends[i].y, ends[i - 1].y + 12);
+  for (const e of ends) { const t = el("text", {x: W - R + 6, y: e.y + 3.5}, svg); t.textContent = e.name; t.style.fill = e.col; }
+  dayMark = el("line", {y1: T, y2: Hc - B, stroke: css("--ink"), "stroke-width": 1, opacity: .5}, svg);
+  dayDots = series.map((s) => ({id: s.id, c: el("circle", {r: 3.5, fill: css("--ink")}, svg), x, y}));
+  // the biggest daily swing on this grid
+  const sw = series.map((s) => ({id: s.id, lo: Math.min(...s.v), hi: Math.max(...s.v), loH: s.v.indexOf(Math.min(...s.v))}))
+    .sort((a, b) => (b.hi - b.lo) - (a.hi - a.lo))[0];
+  const z = D.zones[sw.id];
+  const means = grid.zones.map((id) => D.zones[id].mean), dirtiest = grid.zones[means.indexOf(Math.max(...means))];
+  const sun = sw.loH >= 9 && sw.loH <= 17 ? " when the sun is up" : "";
+  $("dayNote").innerHTML = sw.hi - sw.lo > 100
+    ? `Watch <b>${z.name}</b>: it swings from <b>${Math.round(sw.hi)}</b> to <b>${Math.round(sw.lo)}</b> g over the day, cleanest around ${String(sw.loH).padStart(2, "0")}:00${sun}. That swing, and the gaps between regions, are what a scheduler can use.`
+    : `These regions barely move over the day. The opportunity is place, not timing: <b>${D.zones[target()].name}</b> runs about ${Math.round(Math.max(...means) / Math.min(...means))} times cleaner than ${D.zones[dirtiest].name}, all day.`;
 }
-
+function bars(id, key, scale, digits, thr) {
+  const ul = $(id); ul.textContent = "";
+  for (const g of D.grids) {
+    const li = document.createElement("li"); li.className = g === grid ? "on" : "";
+    li.innerHTML = `<span>${MID[g.key]}</span><span class="tr"><span class="fill"></span>${thr ? `<span class="thr" style="left:${thr / scale * 100}%"></span>` : ""}</span><span class="v">${fmtPct(g[key], digits)}</span>`;
+    li.onclick = () => setGrid(g);
+    ul.appendChild(li);
+    requestAnimationFrame(() => requestAnimationFrame(() => { li.querySelector(".fill").style.width = Math.max(.8, g[key] / scale * 100) + "%"; }));
+  }
+}
+function drawStorm() {
+  const svg = $("stormChart"); svg.textContent = "";
+  const E = grid.emergency, W = 440, Hc = 190, L = 34, R = 14, T = 16, B = 26;
+  const lo = Math.min(-1, ...E.map((e) => e.lo)), hi = Math.max(2, ...E.map((e) => e.hi));
+  const x = (m) => L + (m - 1) / 3 * (W - L - R), y = (v) => T + (hi - v) / (hi - lo) * (Hc - T - B);
+  el("rect", {x: x(1), y: T, width: x(grid.real_severity) - x(1), height: Hc - T - B, fill: css("--steel"), opacity: .14}, svg);
+  el("text", {x: x(1) + 5, y: T + 11}, svg).textContent = "real grids";
+  el("line", {x1: L, x2: W - R, y1: y(0), y2: y(0), stroke: css("--line-hi")}, svg);
+  el("text", {x: L - 6, y: y(0) + 3.5, "text-anchor": "end"}, svg).textContent = "0%";
+  const tv = Math.floor(hi);
+  el("text", {x: L - 6, y: y(tv) + 3.5, "text-anchor": "end"}, svg).textContent = tv + "%";
+  el("line", {x1: x(D.crossover), x2: x(D.crossover), y1: T, y2: Hc - B, stroke: css("--sodium"), "stroke-dasharray": "3 4", opacity: .7}, svg);
+  el("text", {x: x(D.crossover) + 5, y: T + 11}, svg).textContent = "crossover";
+  for (const m of [1, 2, 3, 4]) el("text", {x: x(m), y: Hc - 7, "text-anchor": "middle"}, svg).textContent = m + "x";
+  el("path", {d: E.map((e, i) => (i ? "L" : "M") + x(e.M).toFixed(1) + " " + y(e.gain).toFixed(1)).join(""), fill: "none", stroke: css("--ink-3"), "stroke-width": 1.2}, svg);
+  E.forEach((e, i) => {
+    const on = i === sevIdx, col = e.sig && e.gain >= 1 ? css("--sodium") : css("--ink-2");
+    el("line", {x1: x(e.M), x2: x(e.M), y1: y(e.lo), y2: y(e.hi), stroke: col, "stroke-width": on ? 2.5 : 1.5, opacity: on ? 1 : .55}, svg);
+    el("circle", {cx: x(e.M), cy: y(e.gain), r: on ? 6 : 3.5, fill: on ? col : css("--bg-2"), stroke: col, "stroke-width": 1.5}, svg);
+  });
+}
 function setSev(i) {
   sevIdx = i;
-  const e = grid.emergency[i], M = e.M;
+  const e = grid.emergency[i], worth = e.sig && e.gain >= 1;
   $("sevIn").value = i;
-  $("sevOut").textContent = M.toFixed(1) + "x";
-  $("you").style.left = ((M - 1) / 3 * 100).toFixed(1) + "%";
-  $("n3").textContent = Math.abs(e.gain) < .05 ? "0.0%" : (e.gain > 0 ? "+" : "") + e.gain.toFixed(1) + "%";
-  const worth = e.sig && e.gain >= 1;                    // clearly above zero and above noise
+  $("sevOut").textContent = e.M.toFixed(1) + "x";
+  $("n3").textContent = fmtPct(e.gain, 1, true);
+  $("n3").className = "big " + (worth ? "c-sodium" : "c-steel");
   $("v3").textContent = worth ? "Starts to pay" : "Not worth it";
-  const name = D.zones[target()].name;
-  $("p3").innerHTML = `The worst real emergencies on this grid reached <b>${grid.real_severity.toFixed(2)}x</b> (shaded). `
-    + (worth ? `At ${M}x, hedging starts to earn its keep. Real grids never got this bad.`
-             : M <= grid.real_severity + .2 ? `At real levels, hedging buys nothing measurable and costs a slower, more specialised model.`
-             : `Even at ${M}x, the gain is too small or too uncertain to be worth the extra model.`)
-    + ` (On the map it hits ${name}, where the jobs usually go.)`
-    + ` Measured range: ${e.lo.toFixed(1)}% to ${e.hi.toFixed(1)}%.`;
+  $("v3").className = "chip " + (worth ? "c-sodium" : "c-steel");
+  const real = grid.real_severity;
+  $("p3").innerHTML = `The worst real emergencies on this grid reached <b>${real.toFixed(2)}x</b> (shaded). `
+    + (worth ? `At ${e.M}x hedging starts to earn its keep; real grids never got this bad.`
+       : e.M <= real + .2 ? `At real levels hedging buys nothing you can measure, and costs a slower, specialist model.`
+       : `Even at ${e.M}x the gain is too small or too uncertain to be worth the extra model.`)
+    + ` Measured range ${e.lo.toFixed(1)}% to ${e.hi.toFixed(1)}%. On the map the spike hits ${D.zones[target()].name}, where the work usually goes.`;
+  drawStorm();
+  if (chapter === "storm") fit();
+}
+function drawLadder() {
+  $("vGrid").textContent = grid.name;
+  const real = grid.emergency.reduce((b, e) => (Math.abs(e.M - grid.real_severity) < Math.abs(b.M - grid.real_severity) ? e : b));
+  const rows = [
+    ["Move work between regions", grid.move_pct, "A scheduler and a policy for which jobs may move", "c-clean"],
+    ["Model co-movement", grid.comove_pct, "A joint dependence model and the skills to run it", "c-steel"],
+    ["Hedge emergencies", real.sig ? Math.max(0, real.gain) : null, `Robust optimisation, slower solves${real.sig ? "" : "; gain at " + real.M + "x not distinguishable from zero"}`, "c-sodium"]];
+  $("ladder").innerHTML = rows.map(([t, v, c, k], i) => `<li class="${k}"><span class="n">${i + 1}</span><span class="t">${t}</span><span class="val">${v === null ? "about 0" : fmtPct(v, v < 1 ? 2 : 1)}</span><span class="tr"><span data-w="${Math.max(.6, (v || 0) / 10 * 100)}"></span></span><span class="cost">${c}</span></li>`).join("");
+  requestAnimationFrame(() => requestAnimationFrame(() => $("ladder").querySelectorAll("[data-w]").forEach((s) => { s.style.width = s.dataset.w + "%"; })));
 }
 
+// ---------- count-up for the big numbers
+function countUp(id, to, digits, plus) {
+  const e = $(id);
+  if (still) { e.textContent = fmtPct(to, digits, plus); return; }
+  const t0 = performance.now(), dur = 1100;
+  const step = (now) => { const k = Math.min(1, (now - t0) / dur), v = to * (1 - Math.pow(1 - k, 4));
+    e.textContent = fmtPct(v, digits, plus); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+
+// ---------- grid switching
+const seg = $("seg"), picker = $("picker");
 for (const g of D.grids) {
-  const b = document.createElement("button");
-  b.type = "button"; b.textContent = g.name; b.dataset.key = g.key;
-  b.onclick = () => setGrid(g);
-  $("tabs").appendChild(b);
+  const b = document.createElement("button"); b.type = "button"; b.dataset.key = g.key;
+  b.innerHTML = `<span class="l">${MID[g.key]}</span><span class="s">${SHORT[g.key]}</span>`;
+  b.onclick = () => setGrid(g); seg.appendChild(b);
+  const li = document.createElement("li"), pb = document.createElement("button");
+  pb.type = "button"; pb.dataset.key = g.key;
+  pb.innerHTML = `<span class="dot"></span><span class="nm">${g.name}</span><span class="meta">${g.zones.length} regions · move together r ${g.mean_corr.toFixed(2)}</span><span class="bl">${g.blurb}</span>`;
+  pb.onclick = () => setGrid(g); li.appendChild(pb); picker.appendChild(li);
 }
-const sw = (id, key, layer) => {
-  const el = $(id);
-  el.onclick = () => {
-    show[key] = el.getAttribute("aria-checked") !== "true";
-    el.setAttribute("aria-checked", String(show[key])); $(layer).classList.toggle("on", show[key]);
-    if (key === "comove") linkGroup.visible = show.comove;
-    if (key === "move" && !show.move) jobs.splice(0).forEach((m) => scene.remove(m));
-    tick(0, true);
-  };
-};
-sw("s1", "move", "L1"); sw("s2", "comove", "L2"); sw("s3", "robust", "L3");
-$("sevIn").oninput = (e) => {
-  setSev(+e.target.value);
-  if (!show.robust) $("s3").click();
+function setGrid(g, first) {
+  grid = g;
+  for (const b of [...seg.children, ...picker.querySelectorAll("button")]) b.setAttribute("aria-pressed", String(b.dataset.key === g.key));
+  $("tz").textContent = g.clock;
+  $("p2").textContent = `A joint model of how regions co-move should plan better for bad days. The lines show how tightly each pair moves together (average r ${g.mean_corr.toFixed(2)}). The scheduler already knows each region's typical day, and that carries nearly all of the value.`;
+  jobs.length = 0;
+  buildArcs(); drawDay(); bars("bars1", "move_pct", 10, 1); bars("bars2", "comove_pct", .5, 2, D.materiality_pct);
+  setSev(sevIdx); drawLadder();
+  if (!first) { countUp("n1", g.move_pct, 1); countUp("n2", g.comove_pct, 2, true); }
+  else { $("n1").textContent = fmtPct(g.move_pct, 1); $("n2").textContent = fmtPct(g.comove_pct, 2, true); }
+  fit();
+}
+$("sevIn").oninput = (e) => setSev(+e.target.value);
+$("toggles").onclick = (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  user[b.dataset.k] = b.getAttribute("aria-pressed") !== "true";
+  b.setAttribute("aria-pressed", String(user[b.dataset.k]));
+  fit();
 };
 
-// clock
-const fmt = (h) => `${String(Math.floor(h)).padStart(2, "0")}:${String(Math.floor((h % 1) * 60)).padStart(2, "0")}`;
+// ---------- clock
+const fmtH = (h) => `${String(Math.floor(h)).padStart(2, "0")}:${String(Math.floor((h % 1) * 60)).padStart(2, "0")}`;
 function setPlaying(p) {
   playing = p;
   $("play").setAttribute("aria-label", p ? "Pause the day" : "Play the day");
-  $("pIcon1").style.display = $("pIcon2").style.display = p ? "" : "none";
-  $("pIcon3").style.display = p ? "none" : "";
+  $("pI1").style.display = $("pI2").style.display = p ? "" : "none";
+  $("pI3").style.display = p ? "none" : "";
 }
 $("play").onclick = () => setPlaying(!playing);
-$("hour").oninput = (e) => { hour = +e.target.value; setPlaying(false); tick(0, true); };
+$("hour").oninput = (e) => { hour = +e.target.value; setPlaying(false); };
 setPlaying(playing);
 
+// ---------- chapters
+const chapters = [...document.querySelectorAll(".ch")];
+const rail = $("rail");
+for (const c of chapters) {
+  if (!c.id) c.id = c.dataset.ch;
+  const li = document.createElement("li");
+  li.innerHTML = `<a href="#${c.id}" data-ch="${c.dataset.ch}"><span>${c.dataset.label}</span><i></i></a>`;
+  rail.appendChild(li);
+}
+function setChapter(name) {
+  if (name === chapter) return;
+  chapter = name;
+  rail.querySelectorAll("a").forEach((a) => a.setAttribute("aria-current", String(a.dataset.ch === name)));
+  $("dock").classList.toggle("off", name === "hero");
+  if (controls) controls.enabled = !!SHOTS[name].orbit && !narrow;
+  canvas.style.pointerEvents = controls?.enabled ? "auto" : "none";
+  if (name === "move") countUp("n1", grid.move_pct, 1);
+  if (name === "together") countUp("n2", grid.comove_pct, 2, true);
+  if (name === "storm") countUp("n3", grid.emergency[sevIdx].gain, 1, true);
+  if (name === "verdict") drawLadder();
+  if (name === "move" || name === "together") { bars("bars1", "move_pct", 10, 1); bars("bars2", "comove_pct", .5, 2, D.materiality_pct); }
+  applyView(); fit();
+  if (still) snap();
+}
+const io = new IntersectionObserver((es) => {
+  for (const e of es) if (e.isIntersecting) { e.target.classList.add("seen"); setChapter(e.target.dataset.ch); }
+}, {rootMargin: "-45% 0px -45% 0px"});
+chapters.forEach((c) => io.observe(c));
+// arrow keys step through chapters, handy when presenting
+addEventListener("keydown", (e) => {
+  if (e.target.closest("input,button,a") && e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+  if (e.target.matches("input")) return;
+  const i = chapters.findIndex((c) => c.dataset.ch === chapter);
+  const j = e.key === "ArrowRight" || e.key === "PageDown" ? i + 1 : e.key === "ArrowLeft" || e.key === "PageUp" ? i - 1 : -1;
+  if (j < 0 || j >= chapters.length || j === i) return;
+  e.preventDefault(); chapters[j].scrollIntoView({behavior: still ? "auto" : "smooth"});
+});
+
 // ---------- frame loop
-const tmpC = new THREE.Color(), v = new THREE.Vector3();
-function tick(dt, force) {
-  if (playing) hour = (hour + dt * 1.0) % 24;               // one hour per second
-  $("hour").value = hour.toFixed(2);
-  $("time").textContent = fmt(hour);
+const tmp = new THREE.Color(), v3 = new THREE.Vector3(), WHITE = new THREE.Color(1, 1, 1);
+let grow = still ? 1 : 0, time = 0;
+function snap() { camera.position.copy(goal.pos); controls?.target.copy(goal.look); camera.lookAt(goal.look); }
 
-  const tgt = target(), M = grid.emergency[sevIdx].M;
-  for (const id of grid.zones) {
-    const t = towers[id];
-    let ci = ciAt(id, hour);
-    t.spike = show.robust && id === tgt ? M : 1;
-    ci *= t.spike;
-    t.ci = ci;
+function tick(dt) {
+  time += dt;
+  if (playing) hour = (hour + dt) % 24;                   // one hour per second
+  $("hour").value = hour.toFixed(2); $("time").textContent = fmtH(hour);
+  grow = Math.min(1, grow + dt * .7);
+  const gEase = 1 - Math.pow(1 - grow, 3);
+  const L = layers(), all = showAll(), tg = target(), M = stormM(), act = all ? ALL : grid.zones;
+
+  // carbon now, and the region the work goes to
+  for (const id of ALL) {
+    const t = towers[id], on = act.includes(id);
+    t.spike += ((L.storm && !all && id === tg ? M : 1) - t.spike) * Math.min(1, dt * 3);
+    t.ci = ciAt(id, hour) * t.spike;
+    t.vis += ((on ? 1 : 0) - t.vis) * Math.min(1, dt * 4);
   }
-  const best = cleanest();
-  for (const id of grid.zones) {
-    const t = towers[id], h = H(t.ci);
-    t.col.scale.y = h; t.col.position.y = h / 2 + .25; t.cap.position.y = h + .25;
-    shade(t.ci, tmpC); t.colMat.color.copy(tmpC); t.colMat.emissive.copy(tmpC);
-    t.colMat.emissiveIntensity = t.spike > 1 ? .55 + .35 * (0.5 + 0.5 * Math.sin(performance.now() / 180)) : .5;
-    const busy = show.move && id === best;
-    t.win.material.color.set(busy ? 0xffd27a : 0x6b5a2e);
-    t.ring.material.opacity = id === best ? .8 : .25;
-    t.ring.material.color.copy(id === best ? C_CLEAN : new THREE.Color(0xffffff));
-    t.tag.classList.toggle("best", id === best);
-    t.tag.querySelector("i").textContent = `${Math.round(t.ci)} g/kWh` + (t.spike > 1 ? ` · ${M}x spike` : "");
+  const best = act.reduce((b, id) => (towers[id].ci < towers[b].ci ? id : b), act[0]);
+  for (const id of ALL) {
+    const t = towers[id], h = H(t.ci) * gEase, on = act.includes(id);
+    shade(t.ci, tmp);
+    if (t.spike > 1.05) tmp.lerp(COL.dirty, Math.min(1, (t.spike - 1) / 1.5));
+    const hit = t.spike > 1.05, flick = hit ? .8 + .2 * Math.sin(time * 18) : 1;
+    t.beam.scale.y = t.core.scale.y = Math.max(.01, h);
+    t.beam.material.uniforms.uColor.value.copy(tmp); t.beam.material.uniforms.uAlpha.value = t.vis * .9 * flick;
+    t.core.material.uniforms.uColor.value.copy(tmp).lerp(WHITE, .5); t.core.material.uniforms.uAlpha.value = t.vis * 1.2 * flick;
+    t.top.position.y = h; t.top.material.color.copy(tmp); t.top.material.opacity = t.vis;
+    t.pool.material.color.copy(tmp).multiplyScalar(.55 * t.vis);
+    const isBest = on && !all && id === best;
+    t.w += ((isBest ? 1 : 0) - t.w) * Math.min(1, dt * 4);
+    t.ring.material.opacity = t.w * (.55 + .3 * Math.sin(time * 3));
+    t.ring.scale.setScalar(1.6 + .25 * Math.sin(time * 3));
+    t.tag.classList.toggle("best", isBest); t.tag.classList.toggle("hit", hit); t.tag.classList.toggle("quiet", narrow && !isBest && !hit);
+    t.tag.querySelector("i").textContent = `${Math.round(t.ci)} g/kWh` + (hit ? ` · ${M}x emergency` : isBest ? " · cleanest now" : "");
   }
 
-  // jobs leave the regions dirtier than average for the cleanest one
-  if (show.move && !still && dt > 0) {
+  // map dots near active regions take their colour
+  const zc = act.map((id) => ({t: towers[id], c: shade(towers[id].ci).clone()}));
+  for (let i = 0; i < N; i++) {
+    let r = dBase[i * 3], g = dBase[i * 3 + 1], b = dBase[i * 3 + 2];
+    const x = dPos[i * 3], z = dPos[i * 3 + 2];
+    for (const {t, c} of zc) {
+      const dx = x - t.base.x, dz = z - t.base.z, d2 = dx * dx + dz * dz;
+      if (d2 < 16) { const w = (1 - d2 / 16) ** 2 * .5 * t.vis * gEase; r += c.r * w; g += c.g * w; b += c.b * w; }
+    }
+    dCol[i * 3] = r; dCol[i * 3 + 1] = g; dCol[i * 3 + 2] = b;
+  }
+  dotGeo.attributes.aColor.needsUpdate = true;
+
+  // emergency shock rings
+  for (const s of shocks) {
+    const on = L.storm && !all && towers[tg].spike > 1.2;
+    s.userData.p = (s.userData.p + dt * .45) % 1;
+    s.position.set(towers[tg].base.x, .05, towers[tg].base.z);
+    s.scale.setScalar(.6 + s.userData.p * 6);
+    s.material.opacity = on ? (1 - s.userData.p) * .7 : 0;
+  }
+
+  // co-movement arcs
+  arcAlpha += ((L.links && !all ? 1 : 0) - arcAlpha) * Math.min(1, dt * 3);
+  arcs.children.forEach((m) => { m.material.uniforms.uAlpha.value = arcAlpha * (.25 + .9 * m.userData.r); m.material.uniforms.uT.value = still ? .2 : time; });
+
+  // jobs leave regions dirtier than average for the cleanest one
+  jobAlpha += ((L.move ? 1 : 0) - jobAlpha) * Math.min(1, dt * 3);
+  if (L.move) {
     spawnClock += dt;
-    const avg = grid.zones.reduce((s, id) => s + towers[id].ci, 0) / grid.zones.length;
-    if (spawnClock > .16) {
+    const avg = act.reduce((s, id) => s + towers[id].ci, 0) / act.length;
+    const dirty = act.filter((id) => id !== best && towers[id].ci > avg);
+    if (still && !jobs.length && dirty.length) for (let k = 0; k < 18; k++) spawnJob(dirty[k % dirty.length], best, (k * .37) % 1);
+    if (!still && spawnClock > .09 && dirty.length && jobs.length < MAXJ) {
       spawnClock = 0;
-      const dirty = grid.zones.filter((id) => id !== best && towers[id].ci > avg);
-      if (dirty.length && jobs.length < 60) {
-        const w = dirty.map((id) => towers[id].ci - towers[best].ci), tot = w.reduce((a, b) => a + b, 0);
-        let r = Math.random() * tot, pick = dirty[0];
-        for (let i = 0; i < dirty.length; i++) { r -= w[i]; if (r <= 0) { pick = dirty[i]; break; } }
-        spawnJob(pick, best);
-      }
+      const w = dirty.map((id) => towers[id].ci - towers[best].ci), tot = w.reduce((a, b) => a + b, 0);
+      let r = Math.random() * tot, pick = dirty[0];
+      for (let i = 0; i < dirty.length; i++) { r -= w[i]; if (r <= 0) { pick = dirty[i]; break; } }
+      spawnJob(pick, best);
     }
   }
-  for (let i = jobs.length - 1; i >= 0; i--) {
-    const m = jobs[i], u = m.userData;
-    u.t += dt * u.speed;
-    if (u.t >= 1) { scene.remove(m); jobs.splice(i, 1); continue; }
-    u.curve.getPoint(u.t, m.position); m.rotation.y += dt * 2; m.rotation.x += dt;
-  }
+  for (let i = jobs.length - 1; i >= 0; i--) { if (!still) jobs[i].t += dt * jobs[i].speed; if (jobs[i].t >= 1) jobs.splice(i, 1); }
+  jSize.fill(0);
+  jobs.forEach((j, i) => {
+    for (let k = 0; k < TRAIL; k++) {
+      const tt = Math.max(0, j.t - k * .018), idx = i * TRAIL + k;
+      j.curve.getPoint(tt, v3); jPos.set([v3.x, v3.y, v3.z], idx * 3);
+      const f = (1 - k / TRAIL) * Math.min(1, j.t * 6) * Math.min(1, (1 - j.t) * 8);
+      jCol.set([COL.sodium.r * f, COL.sodium.g * f, COL.sodium.b * f], idx * 3);
+      jSize[idx] = (k ? 2.2 : 3.6) * (1 - k / TRAIL * .6);
+    }
+  });
+  jMat.uniforms.uFade.value = jobAlpha;
+  dotMat.uniforms.uFade.value = Math.min(1, grow * 1.6);
+  jGeo.attributes.position.needsUpdate = jGeo.attributes.aColor.needsUpdate = jGeo.attributes.aSize.needsUpdate = true;
 
-  // the light follows the clock
-  const day = Math.max(0, Math.sin((hour - 6) / 12 * Math.PI));
-  sun.intensity = .35 + 1.3 * day; hemi.intensity = .55 + .5 * day;
-  sun.position.set(Math.cos((hour - 6) / 12 * Math.PI) * 40, 8 + 30 * day, 10);
+  // the day chart's hour marker
+  if (dayMark) {
+    const x = dayDots[0]?.x(hour) ?? 0;
+    dayMark.setAttribute("x1", x); dayMark.setAttribute("x2", x);
+    for (const d of dayDots) { d.c.setAttribute("cx", x); d.c.setAttribute("cy", d.y(ciAt(d.id, hour))); d.c.setAttribute("fill", hex(ciAt(d.id, hour))); }
+  }
 }
 
-function place() {
-  const w = stage.clientWidth, h = stage.clientHeight;
-  for (const id of Object.keys(towers)) {
-    const t = towers[id];
-    if (!t.g.visible) continue;
-    v.copy(t.base); v.y = H(t.ci) + 1.6; v.project(camera);
-    const on = v.z < 1 && v.x > -1.1 && v.x < 1.1 && v.y > -1.1 && v.y < 1.1;
-    t.tag.style.opacity = on ? "" : "0";
-    t.tag.style.transform = `translate(${(v.x * .5 + .5) * w}px, ${(-v.y * .5 + .5) * h}px) translate(-50%,-100%)`;
+// HTML labels follow the beams, nudged apart so they never stack
+function placeLabels() {
+  const W = innerWidth, Hh = innerHeight, all = showAll(), list = [];
+  for (const id of ALL) {
+    const t = towers[id], on = !all && grid.zones.includes(id);
+    if (!on) { t.tag.style.opacity = "0"; continue; }
+    v3.copy(t.base); v3.y = H(t.ci) * Math.min(1, grow) + .5; v3.project(camera);
+    if (v3.z > 1) { t.tag.style.opacity = "0"; continue; }
+    t.tag.style.opacity = String(Math.min(1, t.vis));
+    if (!t.wc || time - t.wt > 1) { t.wc = t.tag.offsetWidth || 120; t.wt = time; }
+    list.push({t, x: (v3.x * .5 + .5) * W + 12, y: (-v3.y * .5 + .5) * Hh - 14, w: t.wc, h: 34});
+  }
+  for (let it = 0; it < 6; it++) for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+    const a = list[i], b = list[j];
+    if (Math.abs(a.x - b.x) < Math.max(a.w, b.w) && Math.abs(a.y - b.y) < a.h) {
+      const push = (a.h - Math.abs(a.y - b.y)) / 2 + 1;
+      if (a.y <= b.y) { a.y -= push; b.y += push; } else { a.y += push; b.y -= push; }
+    }
+  }
+  for (const l of list) {
+    l.t.sx += (l.x - l.t.sx) * .35; l.t.sy += (l.y - l.t.sy) * .35;
+    if (!l.t.sx0) { l.t.sx = l.x; l.t.sy = l.y; l.t.sx0 = 1; }
+    l.t.tag.style.transform = `translate(${l.t.sx.toFixed(1)}px,${l.t.sy.toFixed(1)}px)`;
+  }
+  for (const r of rtags) {
+    v3.copy(r.p); v3.project(camera);
+    r.el.style.opacity = String(arcAlpha * (v3.z < 1 ? 1 : 0));
+    r.el.style.transform = `translate(${((v3.x * .5 + .5) * W - 18).toFixed(1)}px,${((-v3.y * .5 + .5) * Hh - 18).toFixed(1)}px)`;
   }
 }
 
 function resize() {
   if (!renderer) return;
-  const w = stage.clientWidth, h = stage.clientHeight;
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.setSize(w, h, false);
-  camera.aspect = w / h; camera.updateProjectionMatrix();
-  frame();
+  const pr = Math.min(devicePixelRatio, 2);
+  renderer.setPixelRatio(pr); renderer.setSize(innerWidth, innerHeight, false);
+  dotMat.uniforms.uPR.value = jMat.uniforms.uPR.value = pr;
+  camera.aspect = innerWidth / innerHeight;
+  applyView(); camera.updateProjectionMatrix(); fit();
+  $("exploreHow").textContent = narrow ? "Switch grids and play or pause the clock at the top. Turn the layers on and off."
+    : "Drag the map to turn it, switch grids and scrub the clock below. Turn the layers on and off.";
+  if (controls) controls.enabled = !!SHOTS[chapter].orbit && innerWidth > 820;
 }
-new ResizeObserver(resize).observe(stage);
+addEventListener("resize", resize);
 
-let last = performance.now();
+let last = performance.now(), held = false;
+controls?.addEventListener("start", () => { held = true; });
 function loop(now) {
   const dt = Math.min(.1, (now - last) / 1000); last = now;
   tick(dt);
-  if (controls) {
-    if (!controls.userData?.held) {
-      camera.position.lerp(camGoal.pos, 1 - Math.pow(.02, dt));
-      controls.target.lerp(camGoal.look, 1 - Math.pow(.02, dt));
-    }
-    controls.update();
+  // a slow drift on the overview shots, a gentle orbit when exploring on a phone
+  if (!still && (chapter === "hero" || chapter === "verdict" || (chapter === "explore" && narrow))) {
+    const a = chapter === "explore" ? time * .08 : Math.sin(time * .12) * .22;
+    v3.copy(goal.base).sub(goal.look).applyAxisAngle(new THREE.Vector3(0, 1, 0), a); goal.pos.copy(goal.look).add(v3);
+  } else goal.pos.copy(goal.base);
+  if (!(chapter === "explore" && held)) {
+    const k = still ? 1 : 1 - Math.pow(.12, dt);
+    camera.position.lerp(goal.pos, k);
+    if (controls) controls.target.lerp(goal.look, k); else camera.lookAt(goal.look);
   }
+  if (chapter !== "explore") held = false;
+  if (controls) controls.update();
   if (renderer) renderer.render(scene, camera);
-  place();
+  placeLabels();
+  const sh = document.documentElement.scrollHeight - innerHeight;
+  $("prog").style.transform = `scaleX(${sh > 0 ? Math.min(1, scrollY / sh).toFixed(4) : 0})`;
   requestAnimationFrame(loop);
 }
-// after the user drags, leave the camera where they put it until they switch grids
-controls?.addEventListener("start", () => { controls.userData = {held: true}; });
+
 resize();
 setGrid(D.grids[0], true);
+setChapter("day"); setChapter("hero");
+snap();
 requestAnimationFrame(loop);
 window.GRID_READY = true;
 </script>
